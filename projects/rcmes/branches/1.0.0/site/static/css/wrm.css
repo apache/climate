@@ -1,0 +1,177 @@
+@CHARSET "UTF-8";
+/**
+ * color pallete
+ * 
+ * GREEN		ORANGE
+ * 006e4a		a63800
+ * 207f60		bf6030
+ * 00aa72		ff5600
+ * 35d4a0		ff8040
+ * 60d4ae		ffa273
+ *
+ */
+ 
+body {
+	
+}
+
+div#page {
+	position:relative;
+	margin-top:15px;
+ 	background-color:#fff;
+ 	border-top:none;
+}
+
+div.header {
+	background-color:#888;	
+	position:relative;
+	border-top:solid 5px #aacc00;
+	border-bottom:solid 5px #ff8040;
+	padding:45px 0px 10px 0px;
+	margin-bottom:15px;
+	margin-top:45px;
+}
+div.header h1 {
+	color:#fff;
+	padding-left:15px;
+	margin: 5px 0px -1px 0px;
+}
+div.header h2 {
+	letter-spacing:0.33em;
+	color:#fff;
+	border-top:dotted 1px #353;
+	padding-top:3px;
+	font-size:14px;
+	font-weight:bold;
+	padding-left:15px;
+}
+
+div#jpl-title {
+	position:absolute;
+	margin-top:-22px;
+	color:#443700;
+}
+ 
+
+div#mainSection {
+	padding-top:25px;	
+}
+
+div.breadcrumbs {
+	margin-left:285px;	
+}
+
+
+
+
+
+/**********
+ * FOOTER
+**/
+div#site-footer {
+	font-size:90%;
+	text-align:center;
+	color:#444;	
+}
+div#site-footer div.footer-links {
+	color:#888;	
+}
+div#site-footer div.footer-links a {
+	padding:18px;
+	color:#555;
+}
+div#site-footer div.footer-links a.first {
+		
+}
+div#site-footer div.footer-links a.last {
+	
+}
+
+/**********
+ * RSS ITEMS
+**/
+div.prod_item_rss {
+	
+}
+div.prod_item_rss img {
+	float:left;
+	margin-right:18px;	
+	margin-bottom:20px;
+	border:none;
+}
+div.prod_item_rss_meta {
+	float:left;
+}
+
+
+/**********
+ * JPL LINKS
+**/
+#jpl-links {
+	position:absolute;
+	top:-20px;
+	right:-18px;
+}
+#jpl-links li {
+	display:inline;
+}
+#jpl-links li a {
+	padding:5px 5px;
+	font-size:90%;
+	text-transform:uppercase;
+	color:#443700;
+	text-decoration:none;	
+}
+#jpl-links li a:hover {
+	background-color: #aacc00;
+	color:#111
+}
+
+
+/**********
+ * HEADER ELEMENTS
+**/
+h2 {
+	 
+}
+h3 {
+	text-align:left;
+	border-bottom:solid 1px #ff8040;
+	color:#006e4a;
+}
+
+
+/**********
+ * DATABASE STATISTICS
+**/
+div#stats {
+	margin-top:-60px;	
+}
+div.stat {
+	position:relative;
+	text-align:center;
+}
+div.number {
+	font-size:44px;
+	font-weight:bold;
+	position:absolute;
+	top:115px;
+	left:40px;
+	border:solid 0px #ccc;
+	width:125px;
+	padding:5px;
+	text-align:center;	
+	color:#042;
+}
+
+
+/**********
+ * NEWSFEEDS
+**/
+.nf_date {
+	border-bottom:solid 1px #888;	
+}
+.nf_author {
+	font-style:italic;
+	margin-bottom:6px;
+}

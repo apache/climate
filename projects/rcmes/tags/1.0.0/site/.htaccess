@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteBase /site
+
+
+# Rewrite Action Scripts to the scripts directory
+RewriteRule ^(.+)\.do$       ./webapp-base/scripts/_init.php/$1\.php  [NC,L,QSA]
+
+# Rewrite Requests to global assets
+RewriteRule global/(.+)$     ./webapp-base/$1    [NC]
+
+# Send all other non-static requests to the main controller
+RewriteCond %{REQUEST_FILENAME} !^.+\.(css|js|jpg|png|gif|do)$
+RewriteCond %{REQUEST_URI} !/scripts/(.*)$
+RewriteCond %{REQUEST_URI} !/global/(.*)$
+RewriteCond %{REQUEST_URI} !index\.php/.+$
+RewriteRule ^(.+)$ ./index\.php/$1 [L,NC]
