@@ -1,0 +1,117 @@
+From: Andrew Hart <andrew.f.hart@jpl.nasa.gov>
+Date: April 11, 2012 11:45:05 PM PDT
+To: "Mattmann, Chris A (388J)" <chris.a.mattmann@jpl.nasa.gov>
+Subject: Dakar update 2012.4.10
+
+Hey dude!
+
+Dakar is crazy but the meeting itself is relatively sane. The people here are really involved, and there is a lot of good communication happening. Here's a rundown of the folks I've met and interacted with, and the general topics that have been discussed:
+
+CSAG:
+Chris Jack, Anna Greenwood, Kate Sutherland
+
+SEI Oxford:
+Sukaina Bharwani, Ben Smith
+
+This is a meeting of the portals: CSAG, of course, is demonstrating CIP (http://cip.csag.uct.ac.za), SEI Oxford is demonstrating WeAdapt (http://www.weadapt.org) , and a third portal, AfricaAdapt (http://www.africa-adapt.net), which is being run by Moussa Na Abou Mamouda and partners (ENDA, ICPAC, FARA) is also on display. One of the primary goals of the meeting is to identify the ways in which these three portals can leverage each other's strengths and perhaps combine forces where it makes sense to reduce "portal proliferation".
+
+All three of these portals are very different from RCMES, each in its own way. I have attached the raw notes from yesterday's session for your reference, but, from a high level: WeAdapt and AfricaAdapt provide collaborative editing features that closely resemble an advanced version of the collaborative group features of the EDRN public portal. The focus of these portals is the collection and publication of mostly textual research information, with an emphasis on the proper accreditation and semantic linkage. The WeAdapt portal, in particular, takes the semantic relationship seriously: their portal leverages OpenCalais to auto-detect topics within submitted content, and provide users with content of interest based on keywords provided by each user when they sign up. Interestingly (and perhaps not surprisingly) WeAdapt and AfricaAdapt do not have a shared ontology. Mitigating this is one of the potential outcomes of this meeting, however.
+
+The CIP portal is also different from RCMES, though of the three, it is the most closely related. CIP provides statistically downscaled information provided by a large (>1K) "network" of stations spread across Africa and Asia. Given the size of the land masses and the relatively sparse number of stations, and their uneven geographic distribution, CIP is looking to remote sensing data to fill in the gaps. You likely knew this already, since it is a natural integration point between our and their efforts, but this meeting has helped to fill in some gaps for me. The CIP portal places an emphasis on providing contextual information alongside the raw data. In many ways, CIP reminds me a lot of the WEBS network: point towers providing local weather data in context. To the best of my knowledge, however, CIP does not make the raw data available in bulk as RCMED does, but rather in the form of statistical charts, histograms, and graphs on a per-station basis.  One other thing they do not provide yet (and this is one area where RCMES may also provide a "service") is maps: they do not have the map-based plotting capability we offer.
+
+It is also a meeting of the users. Represented around the table are stakeholders from various West African countries, including Niger, Gambia, Senegal, and Kenya. Yesterday was focused on sharing case studies developed by the various stakeholders as a means of providing "use cases" for the type of information that would be most valuable for the portals to provide. The biggest discovery for me so far was that this is by and large a community not closely associated with climate modeling efforts. To give you an idea: There were almost no hands in the air when Chris Jack asked who had heard of CORDEX. However, these people are each extremely involved, and very motivated by, the local and regional study of their own climate and its variability.
+
+I was asked today to provide a very high level introduction to the rationale for RCMES. The challenge here was this is a community with no connection to or real experience with climate models. As a result, the presentation de-emphasized the "bias estimation and model comparison" features and instead promoted the "unified access to data" feature which was very attractive to them. A few things are becoming apparant:
+
+-- The plotting capability we have built can be useful (particularly to this community) even without the bias estimation algorithms, etc. that comprise the rest of the RCMET. In other words, these people just want to see maps of the observations. There's no reason I see that we couldn't provide the plotting capability as a service (in other words: select an obs dataset, parameter, bounding box, and time range, click go, and get a plot). That alone would be tremendously useful to these folks: it still alleviates the burden of discovering, preparing, and aligning each individual data set.
+
+-- There is a tremendous respect in this community for NASA, and they are excited about the opportunity to get their hands on remote sensing data as a supplement to the information they currently rely on. I think that, as we continue collaborating with Chris, et.al. we might consider developing out the plotting capability as a service: it increases opportunities for direct integration with CIP (alongside their statistical diagrams and charts), and it provides access to a broader user community not interested in doing model-to-obs comparisons, but extremely interested in the unified source of observational data we've amassed.
+
+I ended the presentation today with a request for datasets and parameters that would be of interest to the stakeholders in the room. They are primarily interested in land use datasets, as you can imagine, and I'm looking forward to getting their feedback later today and through tomorrow. I'll give you another update after I learn more.
+
+More to come. There's so much going on, I can see why you were jazzed after Trieste!
+
+Hope all's well back home, looking forward to getting back,
+
+-Andrew.
+
+
+
+
+
+
+
+
+On 4/11/12 8:35 AM, Mattmann, Chris A (388J) wrote:
+Or, tell O'Reilly where they can shove it and ignore them :)
+
+So, how is Dakar???!
+
+On Apr 11, 2012, at 3:40 AM, Andrew Hart wrote:
+
+Nuts.
+
+This would have been awesome. I guess we'll have to figure out some way to make our work more high profile so that O'Reilly can't do this again next year :D
+
+-Andrew
+
+On 4/10/12 7:50 PM, O'Reilly Speaker Management wrote:
+Dear Andrew,
+
+Thank you for submitting this proposal to OSCON 2012:
+
+* Improving Access to NASA Remote-Sensing Data for Climate Research through Open Source Software
+
+The response to our Call for Proposals was overwhelming, and we received
+far more than we can possibly accommodate in the program.
+
+We're still working out a few loose ends in the program, but unfortunately
+your proposal was not selected for inclusion. Please understand that we
+can't provide more detail on specific proposals.
+
+As a Thank You for submitting a proposal, we would like to offer
+you a 25% discount for the conference. Just use discount code
+"OS12DSD" when registering athttp://oscon.com/.
+
+Thanks again for your submission, and we hope to see you in Portland
+in July!
+
+Regards,
+
+Edd Dumbill&   Sarah Novotny
+OSCON Program Chairs
+
+-- 
+Andrew F. Hart
+Software Engineer
+Data Management Systems and Technologies Group,
+Jet Propulsion Laboratory, California Institute of Technology
+4800 Oak Grove Drive, MS 171/264
+Pasadena, CA, 91109
+andrew.f.hart@jpl.nasa.gov
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Chris Mattmann, Ph.D.
+Senior Computer Scientist
+NASA Jet Propulsion Laboratory Pasadena, CA 91109 USA
+Office: 171-266B, Mailstop: 171-246
+Email:chris.a.mattmann@nasa.gov
+WWW:http://sunset.usc.edu/~mattmann/
+Phone: +1 (818) 354-8810
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Adjunct Assistant Professor, Computer Science Department
+University of Southern California, Los Angeles, CA 90089 USA
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+-- 
+Andrew F. Hart
+Software Engineer
+Data Management Systems and Technologies Group,
+Jet Propulsion Laboratory, California Institute of Technology
+4800 Oak Grove Drive, MS 171/264
+Pasadena, CA, 91109
+andrew.f.hart@jpl.nasa.gov
+
+ 

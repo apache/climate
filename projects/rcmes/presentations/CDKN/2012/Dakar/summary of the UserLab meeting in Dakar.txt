@@ -1,0 +1,70 @@
+From: Andrew Hart <andrew.f.hart@jpl.nasa.gov>
+Date: May 9, 2012 12:37:26 PM PDT
+To: <rcmes-general@list.jpl.nasa.gov>
+Subject: summary of the UserLab meeting in Dakar
+
+All,
+
+Below you will find a summary of the activities and results from the recent UserLab meeting in Dakar, Senegal. I attended courtesy of Chris Jack and UCT as part of our joint collaboration on the Climate Development Knowledge Network grant. I am happy to answer any questions, or provide additional details on any of the below information:
+
+Who:
+=====================
+This is a meeting of the portals: CSAG is demonstrating CIP (http://cip.csag.uct.ac.za), SEI Oxford is demonstrating WeAdapt (http://www.weadapt.org) , and a third portal, AfricaAdapt (http://www.africa-adapt.net), which is being run by Moussa Na Abou Mamouda and partners (ENDA, ICPAC, FARA) is also on display. One of the primary goals of the meeting is to identify the ways in which these three portals can leverage each other's strengths and perhaps combine forces where it makes sense to reduce "portal proliferation".
+
+These 3 portals are different from RCMES: WeAdapt and AfricaAdapt provide collaborative editing features. The focus of these portals is the collection and publication of mostly textual research information, with an emphasis on the proper accreditation and semantic linkage. The CIP portal is also different from RCMES, though of the three, it is the most closely related. CIP provides statistically downscaled information provided by a large (>1K) "network" of stations spread across Africa and Asia.
+
+High Level Observations:
+=====================
+
+-- The plotting capability we have built can be useful to this community even without the bias estimation algorithms, etc. that comprise the rest of the RCMET. In other words, these people just want to see maps of the observations. There's no reason I see that we couldn't provide the plotting capability as a service (in other words: select an obs dataset, parameter, bounding box, and time range, click go, and get a plot). That alone would be tremendously useful to these folks: it still alleviates the burden of discovering, preparing, and aligning each individual data set.
+
+-- There is a tremendous respect in this community for NASA, and they are excited about the opportunity to get their hands on remote sensing data as a supplement to the information they currently rely on. I think that, as we continue collaborating with Chris, et.al. we might consider developing out the plotting capability as a service: it increases opportunities for direct integration with CIP (alongside their statistical diagrams and charts), and it provides access to a broader user community not necessarily interested in doing model-to-obs comparisons, but extremely interested in the unified source of observational data we've amassed.
+
+
+Datasets Feedback:
+=====================
+
+The feedback from the African stakeholders regarding datasets was excellent. They expressed interest in the following information:
+
+* Winds
+* Land cover
+* Incoming solar
+* Sea level rise
+* Sea surface temperature
+* Topography
+* Soil Moisture
+* Wave action
+* Dust (storms)
+* Aerosols
+
+There's a lot there, some of which (e.g.: land cover) doesn't naturally fit our pointwise data model, but there is a lot of overlap too, I think. It should be interesting trying to map these to existing resources in NASA and maybe NOAA. One thing I think is worth mentioning with this is the following:
+
+RCMES is designed to add value in two ways: 1) by making it dead simple to access multiple obs. datasets via a single uniform interface, and 2) by making it dead simple to do model-to-obs comparisons. For this community, modeling is just not on their radar, so the priority is #1. I think we should continue to emphasize that these two are loosely coupled and folks can get value out of RCMES for either or both, depending on their needs. That might really broaden the user base and opportunities.
+
+
+UCT Partnership:
+=====================
+
+I have been nudging Chris Jack to jump on the OODT mailing lists, and spent about an hour and a half one-on-one with him talking through what he's doing and pointing out some of the ways OODT might be really helpful. My thought is, if we can get them using OODT for (parts of) CIP, there's a huge incentive to keep up the relationship. My angle with him was: ok sure, you can build all this stuff, but do you want to maintain it? Don't you want someone (aka the Apache OODT community) to help out with that for free? That really resonated with him because I think he's feeling the frustration of being the only dev there and not able to do the cool science/vis stuff because the plumbing is consuming so much time.
+
+
+Next Steps
+======================
+
+* Chris Jack is investigating a transition to Leaflet for the CIP interface. I showed him some examples, including SNOW, and he really found it appealing. We might be able to contribute experience here.
+
+* Being able to put RCMES data into a WMS layer would be huge, because CIP could load and overlay RCMES data directly on their map interface. This seems like something Paul could get excited about, since he's now on the team!
+
+* Observational data in the database doesn't change often, so we might be able to obtain a major speedup in plot generation by precomputing and storing monthly means for our data. That way, we might approach "on the fly" plot generation (for obs. dataset visualization). It would be great if we could provide a nice RESTful url to plots. Both the CIP and WeAdapt portal folks said they would be eager clients for this. If we could use the data in RCMES to generat Africa plots showing mean monthly temps from, say, 1980-1990, 1990-2000, and 2000-2010, that would be a sweet complimentary visualization to either an article (in the case of WeAdapt) or station background data (in the case of CIP). [NOTE: Paul has some great ideas about other ways to attack this]
+
+
+
+-- 
+Andrew F. Hart
+Software Engineer
+Data Management Systems and Technologies Group,
+Jet Propulsion Laboratory, California Institute of Technology
+4800 Oak Grove Drive, MS 171/264
+Pasadena, CA, 91109
+andrew.f.hart@jpl.nasa.gov
+
