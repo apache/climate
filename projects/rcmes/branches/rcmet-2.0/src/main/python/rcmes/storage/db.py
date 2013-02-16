@@ -108,14 +108,19 @@ def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, e
         # Strip out unnecessary '\r' from delimiters
         datacsv = re.sub('\r', '', datacsv)
         # Write data to temporary file ready to be read in by csv module (since problems with multi-line strings)
-        myfile = open(cacheFilePath, "w")
-        myfile.write(datacsv)
-        myfile.close()
-        print 'Saved retrieved data to cache file: ' + cacheFilePath
-        
+
+        try:
+            if not os.path.exists(cachedir):
+                os.makedirs(cachedir)
+
+            with open(cacheFilePath, "w") as myfile:
+                myfile.write(datacsv)
+        except Error as e:
+            print "I/O error({0}): {1}".format(e.errno, e.strerror)
+            sys.exit(1)
+            
         # Parse cache file csv data and close file
         myfile = open(cacheFilePath, "r")
-        print 'Reading obs from cache file'
         csv_reader = csv.reader(myfile)
         
         latitudes = []
@@ -131,9 +136,8 @@ def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, e
             # timestamps are strings so we will leave them alone for now
             timestamps.append(row[3])
             values.append(np.float32(row[4]))
-            
-        
-        myfile.close()
+
+        myfile.close()    
         os.remove(cacheFilePath)
         # Make arrays of unique latitudes, longitudes, levels and times
         uniqueLatitudes = np.unique(latitudes)
@@ -174,6 +178,7 @@ def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, e
 
         # Save 'pickles' files (=direct memory dump to file) of data variables
         # for faster retrieval than txt cache files.
+
         f = open(pickleFilePath, 'wb')
         pickle.dump([latitudes, longitudes, uniqueLevels, timesUnique, mdata], f)
         f.close()
