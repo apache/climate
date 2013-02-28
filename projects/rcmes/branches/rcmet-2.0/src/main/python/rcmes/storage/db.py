@@ -11,6 +11,7 @@ import datetime
 import pickle
 
 from classes import RCMED
+from toolkit import process
 
 def reorderXYT(lons, lats, times, values):
     # Re-order values in values array such that when reshaped everywhere is where it should be
@@ -52,7 +53,7 @@ def findUnique(seq, idfun=None):
         result.append(item)
     return result
 
-def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, endTime, cachedir):
+def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, endTime, cachedir, timestep):
     """
     Main function to extract data from DB into numpy masked arrays
     
@@ -109,15 +110,8 @@ def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, e
         datacsv = re.sub('\r', '', datacsv)
         # Write data to temporary file ready to be read in by csv module (since problems with multi-line strings)
 
-        try:
-            if not os.path.exists(cachedir):
-                os.makedirs(cachedir)
-
-            with open(cacheFilePath, "w") as myfile:
-                myfile.write(datacsv)
-        except Error as e:
-            print "I/O error({0}): {1}".format(e.errno, e.strerror)
-            sys.exit(1)
+        with open(cacheFilePath, "w") as myfile:
+            myfile.write(datacsv)
             
         # Parse cache file csv data and close file
         myfile = open(cacheFilePath, "r")
@@ -158,6 +152,7 @@ def extractData(datasetID, paramID, latMin, latMax, lonMin, lonMax, startTime, e
         timeFormat = "%Y-%m-%d %H:%M:%S"
         timesUnique = [datetime.datetime.strptime(t, timeFormat) for t in uniqueTimestamps]
         timesUnique.sort()
+        timesUnique = process.normalizeDatetimes(timesUnique, timestep) 
 
         # Reshape arrays
         latitudes = latitudes.reshape(uniqueTimeCount, uniqueLatitudeCount, uniqueLongitudeCount, uniqueLevelCount)
