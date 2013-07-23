@@ -18,6 +18,8 @@
 '''Unit tests for the Evaluation.py module'''
 
 import unittest
+import numpy as np
+import datetime as dt
 from dataset import Dataset
 from evaluation import Evaluation
 
@@ -29,6 +31,21 @@ class TestEvaluation(unittest.TestCase):
         self.assertEquals(self.eval.ref_dataset, None)
         self.assertEquals(self.eval.target_datasets, [])
         self.assertEquals(self.eval.metrics, [])
+
+    def test_add_ref_dataset(self):
+        # Create an example dataset to add
+        lat = np.array([10, 12, 14, 16, 18])
+        lon = np.array([100, 102, 104, 106, 108])
+        time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        value = flat_array.reshape(12, 5, 5)
+        variable = 'prec'
+        test_dataset = Dataset(lat, lon, time, 
+                                    value, variable)
+
+        self.eval.add_ref_dataset(test_dataset)
+
+        self.assertEqual(self.eval.ref_dataset.variable, 'prec')
 
 if __name__  == '__main__':
     unittest.main()
