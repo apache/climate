@@ -36,9 +36,9 @@ class Dataset:
         :param times: One dimensional numpy array of unique python datetime 
             objects.
         :type times: numpy array
-        :param value: Three dimensional numpy array of parameter values of the 
-            form [timesLength, latsLength, lonsLength]. 
-        :type value: numpy array
+        :param values: Three dimensional numpy array of parameter values with 
+            shape [timesLength, latsLength, lonsLength]. 
+        :type values: numpy array
         :param variable: Name of the value variable.
         :type variable: string
         '''
