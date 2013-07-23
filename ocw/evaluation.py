@@ -62,7 +62,7 @@ class Evaluation:
         :param target_dataset: The target Dataset to add to the Evaluation.
         :type target_dataset: Dataset
         '''
-        self.target_datasets += target_dataset
+        self.target_datasets.append(target_dataset)
 
     def add_datasets(self, target_datasets):
         '''Add multiple Datasets to the Evaluation.
