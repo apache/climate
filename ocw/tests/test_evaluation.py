@@ -27,39 +27,6 @@ class TestEvaluation(unittest.TestCase):
     def setUp(self):
         self.eval = Evaluation()
 
-    def test_init(self):
-        self.assertEquals(self.eval.ref_dataset, None)
-        self.assertEquals(self.eval.target_datasets, [])
-        self.assertEquals(self.eval.metrics, [])
-
-    def test_add_ref_dataset(self):
-        # Create an example dataset to add
-        lat = np.array([10, 12, 14, 16, 18])
-        lon = np.array([100, 102, 104, 106, 108])
-        time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
-        flat_array = np.array(range(300))
-        value = flat_array.reshape(12, 5, 5)
-        variable = 'prec'
-        test_dataset = Dataset(lat, lon, time, value, variable)
-
-        self.eval.add_ref_dataset(test_dataset)
-
-        self.assertEqual(self.eval.ref_dataset.variable, 'prec')
-
-    def test_add_dataset(self):
-        lat = np.array([10, 12, 14, 16, 18])
-        lon = np.array([100, 102, 104, 106, 108])
-        time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
-        flat_array = np.array(range(300))
-        value = flat_array.reshape(12, 5, 5)
-        variable = 'prec'
-        test_dataset = Dataset(lat, lon, time, value, variable)
-
-        self.eval.add_dataset(test_dataset)
-
-        self.assertEqual(self.eval.target_datasets[0].variable, 'prec')
-
-    def test_add_datasets(self):
         lat = np.array([10, 12, 14, 16, 18])
         lon = np.array([100, 102, 104, 106, 108])
         time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
@@ -70,6 +37,22 @@ class TestEvaluation(unittest.TestCase):
         test_dataset = Dataset(lat, lon, time, value, variable)
         another_test_dataset = Dataset(lat, lon, time, value, other_var)
 
+    def test_init(self):
+        self.assertEquals(self.eval.ref_dataset, None)
+        self.assertEquals(self.eval.target_datasets, [])
+        self.assertEquals(self.eval.metrics, [])
+
+    def test_add_ref_dataset(self):
+        self.eval.add_ref_dataset(test_dataset)
+
+        self.assertEqual(self.eval.ref_dataset.variable, variable)
+
+    def test_add_dataset(self):
+        self.eval.add_dataset(test_dataset)
+
+        self.assertEqual(self.eval.target_datasets[0].variable, variable)
+
+    def test_add_datasets(self):
         self.eval.add_datasets([test_dataset, another_test_dataset])
 
         self.assertEqual(len(self.eval.target_datasets), 2)
