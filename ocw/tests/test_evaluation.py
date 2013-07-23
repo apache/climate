@@ -32,10 +32,11 @@ class TestEvaluation(unittest.TestCase):
         time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
         flat_array = np.array(range(300))
         value = flat_array.reshape(12, 5, 5)
-        variable = 'prec'
-        other_var = 'temp'
-        test_dataset = Dataset(lat, lon, time, value, variable)
-        another_test_dataset = Dataset(lat, lon, time, value, other_var)
+        self.variable = 'prec'
+        self.other_var = 'temp'
+        self.test_dataset = Dataset(lat, lon, time, value, self.variable)
+        self.another_test_dataset = Dataset(lat, lon, time, value, 
+                self.other_var)
 
     def test_init(self):
         self.assertEquals(self.eval.ref_dataset, None)
@@ -43,21 +44,24 @@ class TestEvaluation(unittest.TestCase):
         self.assertEquals(self.eval.metrics, [])
 
     def test_add_ref_dataset(self):
-        self.eval.add_ref_dataset(test_dataset)
+        self.eval.add_ref_dataset(self.test_dataset)
 
-        self.assertEqual(self.eval.ref_dataset.variable, variable)
+        self.assertEqual(self.eval.ref_dataset.variable, self.variable)
 
     def test_add_dataset(self):
-        self.eval.add_dataset(test_dataset)
+        self.eval.add_dataset(self.test_dataset)
 
-        self.assertEqual(self.eval.target_datasets[0].variable, variable)
+        self.assertEqual(self.eval.target_datasets[0].variable, 
+                self.variable)
 
     def test_add_datasets(self):
-        self.eval.add_datasets([test_dataset, another_test_dataset])
+        self.eval.add_datasets([self.test_dataset, self.another_test_dataset])
 
         self.assertEqual(len(self.eval.target_datasets), 2)
-        self.assertEqual(self.eval.target_datasets[0].variable, variable)
-        self.assertEqual(self.eval.target_datasets[1].variable, other_var)
+        self.assertEqual(self.eval.target_datasets[0].variable, 
+                self.variable)
+        self.assertEqual(self.eval.target_datasets[1].variable, 
+                self.other_var)
 
     def test_add_metric(self):
         test_func = lambda x: x + 1
@@ -72,8 +76,6 @@ class TestEvaluation(unittest.TestCase):
 
         self.assertEqual(self.eval.metrics[0](2), 3)
         self.assertEqual(self.eval.metrics[1](2), 10)
-        
-
 
 if __name__  == '__main__':
     unittest.main()
