@@ -18,6 +18,17 @@
 '''Unit tests for the Evaluation.py module'''
 
 import unittest
+from dataset import Dataset
+from evaluation import Evaluation
 
 class TestEvaluation(unittest.TestCase):
-    pass
+    def setUp(self):
+        self.eval = Evaluation()
+
+    def test_init(self):
+        self.assertEquals(self.eval.ref_dataset, None)
+        self.assertEquals(self.eval.target_datasets, [])
+        self.assertEquals(self.eval.metrics, [])
+
+if __name__  == '__main__':
+    unittest.main()
