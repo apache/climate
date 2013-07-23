@@ -82,6 +82,15 @@ class TestEvaluation(unittest.TestCase):
 
         self.assertEqual(self.eval.metrics[0](2), 3)
 
+    def test_add_metrics(self):
+        test_func = lambda x: x + 1
+        another_test_func = lambda x: x * 5
+        self.eval.add_metrics([test_func, another_test_func])
+
+        self.assertEqual(self.eval.metrics[0](2), 3)
+        self.assertEqual(self.eval.metrics[1](2), 10)
+        
+
 
 if __name__  == '__main__':
     unittest.main()
