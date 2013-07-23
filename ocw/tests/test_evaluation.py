@@ -40,8 +40,7 @@ class TestEvaluation(unittest.TestCase):
         flat_array = np.array(range(300))
         value = flat_array.reshape(12, 5, 5)
         variable = 'prec'
-        test_dataset = Dataset(lat, lon, time, 
-                                    value, variable)
+        test_dataset = Dataset(lat, lon, time, value, variable)
 
         self.eval.add_ref_dataset(test_dataset)
 
@@ -54,12 +53,35 @@ class TestEvaluation(unittest.TestCase):
         flat_array = np.array(range(300))
         value = flat_array.reshape(12, 5, 5)
         variable = 'prec'
-        test_dataset = Dataset(lat, lon, time, 
-                                    value, variable)
+        test_dataset = Dataset(lat, lon, time, value, variable)
 
         self.eval.add_dataset(test_dataset)
 
         self.assertEqual(self.eval.target_datasets[0].variable, 'prec')
+
+    def test_add_datasets(self):
+        lat = np.array([10, 12, 14, 16, 18])
+        lon = np.array([100, 102, 104, 106, 108])
+        time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        value = flat_array.reshape(12, 5, 5)
+        variable = 'prec'
+        other_var = 'temp'
+        test_dataset = Dataset(lat, lon, time, value, variable)
+        another_test_dataset = Dataset(lat, lon, time, value, other_var)
+
+        self.eval.add_datasets([test_dataset, another_test_dataset])
+
+        self.assertEqual(len(self.eval.target_datasets), 2)
+        self.assertEqual(self.eval.target_datasets[0].variable, variable)
+        self.assertEqual(self.eval.target_datasets[1].variable, other_var)
+
+    def test_add_metric(self):
+        test_func = lambda x: x + 1
+        self.eval.add_metric(test_func)
+
+        self.assertEqual(self.eval.metrics[0](2), 3)
+
 
 if __name__  == '__main__':
     unittest.main()
