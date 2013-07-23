@@ -85,7 +85,7 @@ class Evaluation:
         :param metric: The metric function to add to the Evaluation.
         :type metric: function
         '''
-        self.metrics += metric
+        self.metrics.append(metric)
 
     def add_metrics(self, metrics):
         '''Add mutliple metrics to the Evaluation.
