@@ -16,7 +16,9 @@
 #
 
 import unittest
+import datetime
 from ocw import dataset_processor as dp
+from ocw import dataset as ds
 import numpy as np
 import numpy.ma as ma
 
@@ -56,6 +58,31 @@ class TestRcmesSpatialRegrid(unittest.TestCase):
 
         regridded_values = dp._rcmes_spatial_regrid(spatial_values, lats, lons, lats2, lons2)
         self.assertEqual(regridded_values.shape, lats2.shape)
+
+class TestSpatialRegrid(unittest.TestCase):
+    
+    def setUp(self):
+        self.lats = np.array(range(-89, 90, 2))
+        self.lons = np.array(range(-179, 180, 2))
+        # Ten Years of monthly data
+        self.times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
+        self.values = np.ones([len(self.times), len(self.lats), len(self.lons)])
+        self.input_dataset = ds.Dataset(self.lats, self.lons, self.times, self.values, variable="test variable name")
+        self.new_lons = np.array(range(-179, 180, 5))
+        self.new_lats = np.array(range(-89, 90, 4))
+    # Custome Assertions to handle Numpy Arrays
+    def assert1DArraysEqual(self, array1, array2):
+        self.assertSequenceEqual(tuple(array1), tuple(array2))
+
+    def test_returned_lats(self):
+        regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
+        self.assert1DArraysEqual(regridded_dataset.lats, self.new_lats)
+    def test_returned_lons(self):
+        regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
+        self.assert1DArraysEqual(regridded_dataset.lons, self.new_lons)
+
+
+
 
 
 if __name__ == '__main__':
