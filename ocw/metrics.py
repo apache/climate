@@ -40,7 +40,7 @@ class Metric():
     def run(self, datasets):
         '''Run the metric for some given dataset(s)
 
-        :param datasets: - The dataset(s) to be used in the current metric \
+        :param datasets: The dataset(s) to be used in the current metric \
                 run. If this is a "unary" metric then datasets[0] contains \
                 the dataset to be used in the current run. If the metric is \
                 binary, then datasets[0] contains the reference dataset and \
