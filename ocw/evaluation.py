@@ -33,15 +33,23 @@ class Evaluation:
 
     In order for an Evaluation to be valid at least one Dataset must be added
     as the reference Dataset, one Dataset must be added as a target Dataset, 
-    and one metric function must be added.
+    and one metric function must be added.  
     '''
 
     def __init__(self):
-        '''Default Evaluation constructor.
-        '''
+        '''Default Evaluation constructor.'''
+        #: The reference dataset.
         self.ref_dataset = None
+        #: The target dataset(s) which should each be compared with 
+        #: the reference
+        #: dataset when the evaluation is run.
         self.target_datasets = []
+        #: The list of "binary" metrics (A metric which takes two Datasets) 
+        #: that the Evaluation should use.
         self.metrics = []
+        #: The list of "unary" metrics (A metric which takes one Dataset) that
+        #: the Evaluation should use.
+        self.unary_metrics = []
 
     def add_ref_dataset(self, ref_dataset):
         '''Add reference Dataset to the Evaluation.
