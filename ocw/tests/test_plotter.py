@@ -18,6 +18,32 @@
 '''Unit tests for the plotter.py module'''
 
 import unittest
+import os
+import datetime
+import metrics
+import numpy as np
+from dataset import Dataset
+from evaluation import Evaluation
+from plotter import Plotter
 
 class TestPlotter(unittest.TestCase):
-    pass
+    def setUp(self):
+        pass
+        
+    def test_init(self):
+        pass
+
+    def test_assign_plot_data_contour_map(self):
+        pass
+    
+    def test_assign_plot_data_time_series(self):
+        pass
+    
+    def test_assign_plot_data_taylor_diagram(self):
+        pass
+        
+    def test_assign_plot_data_portrait_diagram(self):
+        pass
+
+if __name__  == '__main__':
+    unittest.main()
