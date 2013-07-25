@@ -29,56 +29,60 @@ function($rootScope, $scope, selectedDatasetInformation, regionSelectParams) {
  			$rootScope.rectangleGroup.clearLayers();
  		}
 
-		// Don't process if we don't have any datasets added!!
-		if ($scope.datasets.length == 0)
+		// Don't process if we don't have any datasets added or if the map doesn't exist!!
+		if ($scope.datasets.length == 0 || !("map" in $rootScope))
 			return;
  		
- 		if ("map" in $rootScope) {
- 			// Create Group to add all rectangles to map
- 			$rootScope.rectangleGroup = L.layerGroup();
- 			
- 			// Loop through datasets and add rectangles to Group 
-			var i = -1;
- 			angular.forEach($scope.datasets, function(dataset) {
-				// Keep track of dataset count for displaying colors
-				i++;
+		// Create a group that we'll draw overlays to
+		$rootScope.rectangleGroup = L.layerGroup();
+		// Add rectangle Group to map
+		$rootScope.rectangleGroup.addTo($rootScope.map);
 
-				// If the user disabled the overlay then get out of here!
-				if (!dataset.shouldDisplay)
-					return;
+		// Calculate the overlap region and set the map to show the new overlap
+		var latMin = -90,
+			latMax = 90,
+			lonMin = -180,
+			lonMax = 180;
 
- 				// Get bounds from dataset 
- 				var maplatlon = dataset.latlonVals;
- 				var bounds = [[maplatlon.latMax, maplatlon.lonMin], [maplatlon.latMin, maplatlon.lonMax]];
+		// Get the valid lat/lon range in the selected datasets.
+		for (var i = 0; i < selectedDatasetInformation.getDatasetCount(); i++) {
+			var curDataset = $scope.datasets[i];
 
- 				var polygon = L.rectangle(bounds,{
-					stroke: false,
-					fillColor: $rootScope.fillColors[i],
- 				    fillOpacity: 0.3
- 				});
+			latMin = (curDataset['latlonVals']['latMin'] > latMin) ? curDataset['latlonVals']['latMin'] : latMin;
+			latMax = (curDataset['latlonVals']['latMax'] < latMax) ? curDataset['latlonVals']['latMax'] : latMax;
+			lonMin = (curDataset['latlonVals']['lonMin'] > lonMin) ? curDataset['latlonVals']['lonMin'] : lonMin;
+			lonMax = (curDataset['latlonVals']['lonMax'] < lonMax) ? curDataset['latlonVals']['lonMax'] : lonMax;
+		}
 
- 				// Add layer to Group
- 				$rootScope.rectangleGroup.addLayer(polygon);
- 			});
+		var overlapBounds = [[latMax, lonMin], [latMin, lonMax]];
+		$rootScope.map.fitBounds(overlapBounds, {padding: [0, 0]});
 
-			// Draw user selected region
-			if ($scope.regionParams.areValid) {
+		// Draw border around overlap region
+		var overlapBorder = L.rectangle(overlapBounds, {
+			color: '#000000',
+			opacity: 1.0,
+			fill: false,
+			weight: 2,
+			dashArray: "10 10",
+		});
 
-				var bounds = [[$scope.regionParams.latMax, $scope.regionParams.lonMin],
-							  [$scope.regionParams.latMin, $scope.regionParams.lonMax]];
+		$rootScope.rectangleGroup.addLayer(overlapBorder);
 
-				var polygon = L.rectangle(bounds, {
-					color: '#000000',
-					opacity: 1.0,
-					fill: false,
-				});
+		// Draw user selected region
+		if ($scope.regionParams.areValid) {
 
-				$rootScope.rectangleGroup.addLayer(polygon);
-			}
+			var bounds = [[$scope.regionParams.latMax, $scope.regionParams.lonMin],
+						  [$scope.regionParams.latMin, $scope.regionParams.lonMax]];
 
- 			// Add rectangle Group to map
- 			$rootScope.rectangleGroup.addTo($rootScope.map);
- 		}
+			var polygon = L.rectangle(bounds, {
+				color: '#000000',
+				opacity: .3,
+				stroke: false,
+				fill: true,
+			});
+
+			$rootScope.rectangleGroup.addLayer(polygon);
+		}
 	};
 
 	$scope.$on('redrawOverlays', function(event, parameters) {
