@@ -26,7 +26,7 @@ import logging
 class Dataset:
     '''Container for a dataset's attributes and data.'''
 
-    def __init__(self, lats, lons, times, values, variable=None):
+    def __init__(self, lats, lons, times, values, variable=None, name=""):
         '''Default Dataset constructor
 
         :param lats: One dimensional numpy array of unique latitude values.
@@ -41,12 +41,15 @@ class Dataset:
         :type values: numpy array
         :param variable: Name of the value variable.
         :type variable: string
+        :param name: An optional string name for the Dataset.
+        :type variable: string
         '''
         self.lats = lats
         self.lons = lons
         self.times = times
         self.values = values
         self.variable = variable
+        self.name = name
 
     def spatial_boundaries(self):
         '''Calculate the spatial boundaries.
