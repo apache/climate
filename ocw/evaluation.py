@@ -21,6 +21,7 @@ Classes:
 '''
 
 import logging
+from metrics import Metric
 
 class Evaluation:
     '''Container for running an evaluation
@@ -84,8 +85,22 @@ class Evaluation:
 
         :param metric: The metric function to add to the Evaluation.
         :type metric: function
+
+        :raises ValueError: If the metric to add isn't a class that inherits \
+                from metrics.Metric.
         '''
-        self.metrics.append(metric)
+        if not isinstance(metric, Metric):
+            error = (
+                "Cannot add a metric that doesn't inherit from Metric. "
+                "Please consult the documentation for additional help."
+            )
+            logging.error(error)
+            raise TypeError(error)
+
+        if metric.isUnary:
+            self.unary_metrics.append(metric)
+        else:
+            self.metrics.append(metric)
 
     def add_metrics(self, metrics):
         '''Add mutliple metrics to the Evaluation.
@@ -95,8 +110,13 @@ class Evaluation:
 
         :param metrics: The list of metric functions to add to the Evaluation.
         :type metrics: List of functions
+
+        :raises ValueError: If a metric to add isn't a class that inherits \
+                from metrics.Metric.
         '''
-        self.metrics += metrics
+        for metric in metrics:
+            self.add_metric(metric)
+
 
     def run(self):
         '''Run the evaluation.'''
