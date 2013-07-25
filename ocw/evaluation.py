@@ -146,7 +146,7 @@ class Evaluation:
         #     The results of third target dataset
         #   ]
         # ]
-        if shouldRunRegularMetrics():
+        if should_run_regular_metrics():
             self.results = []
             for target in self.target_datasets:
                 self.results.append([])
@@ -154,7 +154,7 @@ class Evaluation:
                     run_result = [metric.run(self.ref_dataset, taget)]
                     self.results[-1].append(run_result)
 
-        if shouldRunUnaryMetrics():
+        if should_run_unary_metrics():
             self.unary_results = []
 
             for metric in self.unary_metrics:
@@ -170,9 +170,22 @@ class Evaluation:
     def _evaluation_is_valid(self):
         '''Check if the evaluation is well-formed.
         
-        A valid evaluation will have:
-            * Exactly one reference Dataset
-            * One or more target Datasets
-            * One or more metrics
+        * If there are no metrics or no datasets it's invalid.
+        * If there is a unary metric there must be a reference dataset or at
+            least one target dataset.
+        * If there is a regular metric there must be a reference dataset and
+            at least one target dataset.
         '''
-        pass
+        run_reg = should_run_regular_metrics()
+        run_unary = should_run_unary_metrics()
+        reg_valid = self.ref_dataset != None and len(self.target_datasets) > 0
+        unary_valid = self.ref_dataset != None or len(self.target_datasets) > 0
+
+        if run_reg and run_unary:
+            return reg_valid and unary_valid
+        elif run_reg:
+            return reg_valid
+        elif run_unary:
+            return unary_valid
+        else:
+            return false
