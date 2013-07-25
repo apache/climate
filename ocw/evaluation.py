@@ -133,24 +133,39 @@ class Evaluation:
             logging.warning(error)
             return
 
-        # All pairs of (ref_dataset, target_dataset) must be run with
-        # each available metric.
-        for target in self.target_datasets:
-            for metric in self.metrics:
-                # Should we pass the calling of the metric off to another 
-                # function? This might make dataset access cleaner instead
-                # of doing it inline.
-                #result += _apply_metric(metric, self.ref_dataset, target)
-                #self.results += result
+        # Results are saved as a list of lists of the form
+        # [
+        #   [ // The results for the first metric
+        #     The results of first target dataset,
+        #     The results of second target dataset,
+        #     The results of third target dataset
+        #   ]
+        #   [ // The results for the second metric
+        #     The results of first target dataset,
+        #     The results of second target dataset,
+        #     The results of third target dataset
+        #   ]
+        # ]
+        if shouldRunRegularMetrics():
+            self.results = []
+            for target in self.target_datasets:
+                self.results.append([])
+                for metric in self.metrics:
+                    run_result = [metric.run(self.ref_dataset, taget)]
+                    self.results[-1].append(run_result)
 
-                # Should a metric expect to take Dataset objects or should
-                # it expect to take data (aka numpy) arrays?
-                #self.results += metric(self.ref_dataset, target)
+        if shouldRunUnaryMetrics():
+            self.unary_results = []
 
-                # If it expects the actual data
-                #self.results += metric(self.ref_dataset.value,
-                #                       target.value)
-                pass
+            for metric in self.unary_metrics:
+                self.unary_results.append([])
+                # Unary metrics should be run over the reference Dataset also
+                if self.ref_dataset:
+                    self.unary_results[-1].append(metric.run(ref_dataset))
+
+                for target in self.target_datasets:
+                    self.unary_results[-1].append(metric.run(target))
+
 
     def _evaluation_is_valid(self):
         '''Check if the evaluation is well-formed.
