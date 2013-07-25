@@ -43,6 +43,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertEquals(self.eval.ref_dataset, None)
         self.assertEquals(self.eval.target_datasets, [])
         self.assertEquals(self.eval.metrics, [])
+        self.assertEquals(self.eval.unary_metrics, [])
 
     def test_add_ref_dataset(self):
         self.eval.add_ref_dataset(self.test_dataset)
