@@ -50,6 +50,7 @@ class Metric():
         :trype: List
         '''
 
+
 class Bias(Metric):
     '''Calculate the bias between a reference and target dataset.'''
 
@@ -68,3 +69,29 @@ class Bias(Metric):
         :rtype: List
         '''
         return [datasets[0].values - datasets[1].values]
+
+
+class TemporalStdDev(Metric):
+    '''Calculate the standard deviation over the time.'''
+
+    def __init__(self):
+        '''Default constructor.
+
+        .. note::
+           Overrides Metric.__init__()
+        '''
+        self.isUnary = True
+
+    def run(self, datasets):
+        '''Calculate the temporal std. dev. for a datasets.
+
+        .. note::
+           Overrides Metric.run()
+
+        :param datasets: The datasets on which to calculate the temporal \
+                std. dev. in datasets[0].
+        :type datasets: Tuple
+        :returns: A list containing the temporal std. dev.
+        :rtype: List
+        '''
+        return datasets[0].values.std(axi=0, ddof=1)
