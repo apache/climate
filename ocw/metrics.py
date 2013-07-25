@@ -67,4 +67,4 @@ class Bias(Metric):
                 dataset and the target dataset.
         :rtype: List
         '''
-        return [datasets[0] - datasets[1]]
+        return [datasets[0].values - datasets[1].values]
