@@ -49,3 +49,22 @@ class Metric():
         :returns: A list containing the results of running the metric.
         :trype: List
         '''
+
+class Bias(Metric):
+    '''Calculate the bias between a reference and target dataset.'''
+
+    def run(self, datasets):
+        '''Calculate the bias between a reference and target dataset.
+
+        .. note::
+           Overrides Metric.run()
+
+        :param datasets: The datasets to use in the current run. The \
+                reference dataset is given in datasets[0] and the target \
+                dataset is given in datasets[1].
+        :type datasets: Tuple
+        :returns: A list containing the difference between the reference \
+                dataset and the target dataset.
+        :rtype: List
+        '''
+        return [datasets[0] - datasets[1]]
