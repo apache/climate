@@ -50,6 +50,14 @@ class Evaluation:
         #: The list of "unary" metrics (A metric which takes one Dataset) that
         #: the Evaluation should use.
         self.unary_metrics = []
+        #: A containing the results of running regular metric evaluations. 
+        #: The shape of results is ``(num_metrics, num_target_datasets)``
+        self.results = []
+        #: A list containing the results of running the unary metric 
+        #: evaluations. The shape of unary_results is list is 
+        #: ``(num_metrics, num_targets)`` where ``num_targets = 
+        #: num_target_ds + (1 if ref_dataset != None else 0``
+        self.unary_results = []
 
     def add_ref_dataset(self, ref_dataset):
         '''Add reference Dataset to the Evaluation.
@@ -133,19 +141,6 @@ class Evaluation:
             logging.warning(error)
             return
 
-        # Results are saved as a list of lists of the form
-        # [
-        #   [ // The results for the first metric
-        #     The results of first target dataset,
-        #     The results of second target dataset,
-        #     The results of third target dataset
-        #   ]
-        #   [ // The results for the second metric
-        #     The results of first target dataset,
-        #     The results of second target dataset,
-        #     The results of third target dataset
-        #   ]
-        # ]
         if _should_run_regular_metrics():
             self.results = []
             for target in self.target_datasets:
