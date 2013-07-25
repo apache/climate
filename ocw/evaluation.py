@@ -146,7 +146,7 @@ class Evaluation:
         #     The results of third target dataset
         #   ]
         # ]
-        if should_run_regular_metrics():
+        if _should_run_regular_metrics():
             self.results = []
             for target in self.target_datasets:
                 self.results.append([])
@@ -154,7 +154,7 @@ class Evaluation:
                     run_result = [metric.run(self.ref_dataset, taget)]
                     self.results[-1].append(run_result)
 
-        if should_run_unary_metrics():
+        if _should_run_unary_metrics():
             self.unary_results = []
 
             for metric in self.unary_metrics:
@@ -176,8 +176,8 @@ class Evaluation:
         * If there is a regular metric there must be a reference dataset and
             at least one target dataset.
         '''
-        run_reg = should_run_regular_metrics()
-        run_unary = should_run_unary_metrics()
+        run_reg = _should_run_regular_metrics()
+        run_unary = _should_run_unary_metrics()
         reg_valid = self.ref_dataset != None and len(self.target_datasets) > 0
         unary_valid = self.ref_dataset != None or len(self.target_datasets) > 0
 
@@ -189,3 +189,9 @@ class Evaluation:
             return unary_valid
         else:
             return false
+
+    def _should_run_regular_metrics():
+        return len(self.metrics) > 0
+
+    def _should_run_unary_metrics():
+        return len(self.unary_metrics) > 0
