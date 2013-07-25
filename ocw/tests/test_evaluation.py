@@ -22,6 +22,7 @@ import numpy as np
 import datetime as dt
 from dataset import Dataset
 from evaluation import Evaluation
+from metrics import Bias, TemporalStdDev
 
 class TestEvaluation(unittest.TestCase):
     def setUp(self):
@@ -64,18 +65,14 @@ class TestEvaluation(unittest.TestCase):
                 self.other_var)
 
     def test_add_metric(self):
-        test_func = lambda x: x + 1
-        self.eval.add_metric(test_func)
-
-        self.assertEqual(self.eval.metrics[0](2), 3)
+        self.assertEqual(len(self.eval.metrics), 0)
+        self.eval.add_metric(Bias())
+        self.assertEqual(len(self.eval.metrics), 1)
 
     def test_add_metrics(self):
-        test_func = lambda x: x + 1
-        another_test_func = lambda x: x * 5
-        self.eval.add_metrics([test_func, another_test_func])
-
-        self.assertEqual(self.eval.metrics[0](2), 3)
-        self.assertEqual(self.eval.metrics[1](2), 10)
+        self.assertEqual(len(self.eval.metrics), 0)
+        self.eval.add_metrics([Bias(), Bias()])
+        self.assertEqual(len(self.eval.metrics), 2)
 
 if __name__  == '__main__':
     unittest.main()
