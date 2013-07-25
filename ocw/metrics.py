@@ -54,6 +54,14 @@ class Metric():
 class Bias(Metric):
     '''Calculate the bias between a reference and target dataset.'''
 
+    def __init__(self):
+        '''Default constructor.
+
+        .. note::
+           Overrides Metric.__init__()
+        '''
+        self.isUnary = False
+
     def run(self, datasets):
         '''Calculate the bias between a reference and target dataset.
 
