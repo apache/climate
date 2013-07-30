@@ -27,14 +27,24 @@ from dataset import Dataset
 class Evaluation:
     '''Container for running an evaluation
 
-    An *evaluation* is the comparison of one or more datasets against 
-    some reference dataset. Metrics are added to an Evaluation and all are 
-    run with the base dataset and each of the target datasets in turn.  The 
-    results of running the evaluation are stored for future use.
+    An *Evaluation* is the running of one or more metrics on one or more 
+    target datasets and a (possibly optional) reference dataset. Evaluation
+    can handle two types of metrics, ``unary`` and ``binary``. The validity
+    of an Evaluation is dependent upon the number and type of metrics as well
+    as the number of datasets.
 
-    In order for an Evaluation to be valid at least one Dataset must be added
-    as the reference Dataset, one Dataset must be added as a target Dataset, 
-    and one metric function must be added.  
+    A ``unary`` metric is a metric that runs over a single dataset. If you add
+    a ``unary`` metric to the Evaluation you are only required to add a 
+    reference dataset or a target dataset. If there are multiple datasets
+    in the evaluation then the ``unary`` metric is run over all of them.
+
+    A ``binary`` metric is a metric that runs over a reference dataset and
+    target dataset. If you add a ``binary`` metric you are required to add a
+    reference dataset and at least one target dataset. The ``binary`` metrics
+    are run over ever (reference dataset, target dataset) pair in the
+    Evaluation.
+
+    An Evaluation must have at least one metric to be valid. 
     '''
 
     def __init__(self, reference, targets, metrics, subregions=None):
