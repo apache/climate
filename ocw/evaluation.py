@@ -178,12 +178,10 @@ class Evaluation:
             return
 
         if _should_run_regular_metrics():
-            self.results = []
-            for target in self.target_datasets:
-                self.results.append([])
-                for metric in self.metrics:
-                    run_result = [metric.run(self.ref_dataset, taget)]
-                    self.results[-1].append(run_result)
+            if self.subregions:
+                self.results = _run_subregion_evaluation()
+            else:
+                self.results = _run_no_subregion_evaluation()
 
         if _should_run_unary_metrics():
             self.unary_results = []
@@ -226,3 +224,28 @@ class Evaluation:
 
     def _should_run_unary_metrics():
         return len(self.unary_metrics) > 0
+
+    def _run_subregion_evaluation():
+        results = []
+        for target in self.target_datasets:
+            results.append([])
+            for metric in self.metrics:
+                results[-1].append([])
+                for subregion in self.subregions:
+                    # Subset the reference and target dataset with the 
+                    # subregion information.
+                    new_ref, new_tar = DSP.subset(subregion,
+                                                  [self.ref_dataset, target])
+                    run_result = [metric.run(new_ref, new_tar)]
+                    results[-1][-1].append(run_result)
+        return results
+
+    def _run_no_subregion_evaluation():
+        results = []
+        for target in self.target_datasets:
+            results.append([])
+            for metric in self.metrics:
+                run_result = [metric.run(self.ref_dataset, target)]
+                results[-1].append(run_result)
+        return results
+
