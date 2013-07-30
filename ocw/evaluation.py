@@ -124,16 +124,12 @@ class Evaluation:
     def add_metric(self, metric):
         '''Add a metric to the Evaluation.
 
-        A metric is a function of the form:
-            f(ref_dataset, target_dataset)
+        A metric is an instance of a class which inherits from metrics.Metric.
 
-        It performs some operation on the reference and target dataset
-        and returns the resulting data.
+        :param metric: The metric instance to add to the Evaluation.
+        :type metric: Metric
 
-        :param metric: The metric function to add to the Evaluation.
-        :type metric: function
-
-        :raises ValueError: If the metric to add isn't a class that inherits \
+        :raises ValueError: If the metric to add isn't a class that inherits
                 from metrics.Metric.
         '''
         if not isinstance(metric, Metric):
@@ -150,15 +146,14 @@ class Evaluation:
             self.metrics.append(metric)
 
     def add_metrics(self, metrics):
-        '''Add mutliple metrics to the Evaluation.
+        '''Add multiple metrics to the Evaluation.
 
-        A metric is a function of the form:
-            f(ref_dataset, target_dataset)
+        A metric is an instance of a class which inherits from metrics.Metric.
 
-        :param metrics: The list of metric functions to add to the Evaluation.
-        :type metrics: List of functions
+        :param metrics: The list of metric instances to add to the Evaluation.
+        :type metrics: List of Metrics
 
-        :raises ValueError: If a metric to add isn't a class that inherits \
+        :raises ValueError: If a metric to add isn't a class that inherits
                 from metrics.Metric.
         '''
         for metric in metrics:
