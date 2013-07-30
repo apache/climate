@@ -36,20 +36,46 @@ class Evaluation:
     and one metric function must be added.  
     '''
 
-    def __init__(self):
-        '''Default Evaluation constructor.'''
+    def __init__(self, reference, targets, metrics, subregions=None):
+        '''Default Evaluation constructor.
+
+        :param reference: The reference Dataset for the evaluation.
+        :type reference: Dataset
+        :param targets: A list of one or more target datasets for the 
+                evaluation.
+        :type targets: List of Datasets
+        :param metrics: A list of one or more Metric instances to run 
+                in the evaluation.
+        :type metrics: List of Metrics
+        :param subregions: (Optional) Subregion information to use in the
+                evaluation. A subregion is specified by a bounds of the form
+                [latMin, lonMin, latMax, lonMax].
+        :type subregions: List of bounds 
+
+        :raises: ValueError 
+        '''
         #: The reference dataset.
-        self.ref_dataset = None
+        self.ref_dataset = reference
         #: The target dataset(s) which should each be compared with 
         #: the reference
         #: dataset when the evaluation is run.
-        self.target_datasets = []
+        self.target_datasets = targets
+
         #: The list of "binary" metrics (A metric which takes two Datasets) 
         #: that the Evaluation should use.
         self.metrics = []
         #: The list of "unary" metrics (A metric which takes one Dataset) that
         #: the Evaluation should use.
         self.unary_metrics = []
+
+        # Metrics need to be added to specific lists depending on whether they
+        # are "binary" or "unary" metrics.
+        self.add_metrics(metrics)
+
+        #: An optional list of subregion bounds to use when running the
+        #: evaluation. 
+        self.subregions = subregions
+
         #: A containing the results of running regular metric evaluations. 
         #: The shape of results is ``(num_metrics, num_target_datasets)``
         self.results = []
