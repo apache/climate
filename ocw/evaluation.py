@@ -23,6 +23,7 @@ Classes:
 import logging
 from metrics import Metric
 from dataset import Dataset
+import dataset_processor as DSP
 
 class Evaluation:
     '''Container for running an evaluation
