@@ -26,7 +26,7 @@ from metrics import Metric
 class Evaluation:
     '''Container for running an evaluation
 
-    An *evaluation* is the comparison of one or model datasets against 
+    An *evaluation* is the comparison of one or more datasets against 
     some reference dataset. Metrics are added to an Evaluation and all are 
     run with the base dataset and each of the target datasets in turn.  The 
     results of running the evaluation are stored for future use.
