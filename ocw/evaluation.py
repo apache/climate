@@ -22,6 +22,7 @@ Classes:
 
 import logging
 from metrics import Metric
+from dataset import Dataset
 
 class Evaluation:
     '''Container for running an evaluation
@@ -57,9 +58,9 @@ class Evaluation:
         #: The reference dataset.
         self.ref_dataset = reference
         #: The target dataset(s) which should each be compared with 
-        #: the reference
-        #: dataset when the evaluation is run.
-        self.target_datasets = targets
+        #: the reference dataset when the evaluation is run.
+        self.target_datasets = []
+        self.add_datasets(targets)
 
         #: The list of "binary" metrics (A metric which takes two Datasets) 
         #: that the Evaluation should use.
@@ -93,7 +94,17 @@ class Evaluation:
 
         :param target_dataset: The target Dataset to add to the Evaluation.
         :type target_dataset: Dataset
+
+        :raises ValueError: If a dataset to add isn't an instance of Dataset.
         '''
+        if not isinstance(target_dataset, Dataset):
+            error = (
+                "Cannot add a dataset that isn't an instance of Dataset. "
+                "Please consult the documentation for additional help."
+            )
+            logging.error(error)
+            raise TypeError(error)
+
         self.target_datasets.append(target_dataset)
 
     def add_datasets(self, target_datasets):
@@ -102,8 +113,11 @@ class Evaluation:
         :param target_datasets: The list of datasets that should be added to 
             the Evaluation.
         :type target_datasets: List of Dataset objects
+
+        :raises ValueError: If a dataset to add isn't an instance of Dataset.
         '''
-        self.target_datasets += target_datasets
+        for target in target_datasets:
+            self.add_dataset(target)
 
     def add_metric(self, metric):
         '''Add a metric to the Evaluation.
