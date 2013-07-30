@@ -59,17 +59,6 @@ class Evaluation:
         #: num_target_ds + (1 if ref_dataset != None else 0``
         self.unary_results = []
 
-    def add_ref_dataset(self, ref_dataset):
-        '''Add reference Dataset to the Evaluation.
-
-        The reference dataset is the base on which all other datasets are 
-        compared.
-
-        :param ref_dataset: The reference dataset to add to the Evaluation.
-        :type ref_dataset: Dataset
-        '''
-        self.ref_dataset = ref_dataset
-
     def add_dataset(self, target_dataset):
         '''Add a Dataset to the Evaluation.
 
