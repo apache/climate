@@ -43,7 +43,7 @@ class TestRcmesSpatialRegrid(unittest.TestCase):
         lat_range = ma.array(range(-89, 90, 2))
         lon_range = ma.array(range(-179, 180, 2))
         
-        lats, lons = np.meshgrid(lat_range, lon_range)
+        lons, lats = np.meshgrid(lon_range, lat_range)
         # Convert these to masked arrays
         lats = ma.array(lats)
         lons = ma.array(lons)
@@ -51,13 +51,14 @@ class TestRcmesSpatialRegrid(unittest.TestCase):
         lat2_range = np.array(range(-89, 90, 4))
         lon2_range = np.array(range(-179, 180, 4))
         
-        lats2, lons2 = np.meshgrid(lat2_range, lon2_range)
+        lons2, lats2 = np.meshgrid(lon2_range, lat2_range)
         # Convert to masked arrays
         lats2 = ma.array(lats2)
         lons2 = ma.array(lons2)
 
         regridded_values = dp._rcmes_spatial_regrid(spatial_values, lats, lons, lats2, lons2)
         self.assertEqual(regridded_values.shape, lats2.shape)
+        self.assertEqual(regridded_values.shape, lons2.shape)
 
 class TestSpatialRegrid(unittest.TestCase):
     
@@ -68,18 +69,23 @@ class TestSpatialRegrid(unittest.TestCase):
         self.times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
         self.values = np.ones([len(self.times), len(self.lats), len(self.lons)])
         self.input_dataset = ds.Dataset(self.lats, self.lons, self.times, self.values, variable="test variable name")
-        self.new_lons = np.array(range(-179, 180, 5))
         self.new_lats = np.array(range(-89, 90, 4))
-    # Custome Assertions to handle Numpy Arrays
+        self.new_lons = np.array(range(-179, 180, 4))
+        self.regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
+    # Custom Assertions to handle Numpy Arrays
     def assert1DArraysEqual(self, array1, array2):
         self.assertSequenceEqual(tuple(array1), tuple(array2))
 
     def test_returned_lats(self):
-        regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
-        self.assert1DArraysEqual(regridded_dataset.lats, self.new_lats)
+        self.assert1DArraysEqual(self.regridded_dataset.lats, self.new_lats)
+
     def test_returned_lons(self):
-        regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
-        self.assert1DArraysEqual(regridded_dataset.lons, self.new_lons)
+        self.assert1DArraysEqual(self.regridded_dataset.lons, self.new_lons)
+
+    def test_shape_of_values(self):
+        regridded_data_shape = self.regridded_dataset.values.shape
+        expected_data_shape = (len(self.times), len(self.new_lats), len(self.new_lons))
+        self.assertSequenceEqual(regridded_data_shape, expected_data_shape)
 
 
 
