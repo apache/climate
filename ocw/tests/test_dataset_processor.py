@@ -22,12 +22,21 @@ from ocw import dataset as ds
 import numpy as np
 import numpy.ma as ma
 
+class CustomAssertions:
+    # Custom Assertions to handle Numpy Arrays
+    def assert1DArraysEqual(self, array1, array2):
+        self.assertSequenceEqual(tuple(array1), tuple(array2))
 
-class TestTemporalRebin(unittest.TestCase):
+class TestTemporalRebin(unittest.TestCase, CustomAssertions):
     
     def setUp(self):
-        self.input_dataset = ten_year_monthly_dataset()
-        pass
+        self.ten_year_monthly_dataset = ten_year_monthly_dataset()
+        self.ten_year_annual_times = np.array([datetime.datetime(year, 1, 1) for year in range(2000, 2010)])
+    
+    def test_monthly_to_annual_rebin(self):
+        annual_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=365))
+        self.assert1DArraysEqual(annual_dataset.times, self.ten_year_annual_times)
+        
         
     
     def test__congrid_neighbor(self):
@@ -61,16 +70,14 @@ class TestRcmesSpatialRegrid(unittest.TestCase):
         self.assertEqual(regridded_values.shape, lats2.shape)
         self.assertEqual(regridded_values.shape, lons2.shape)
 
-class TestSpatialRegrid(unittest.TestCase):
+class TestSpatialRegrid(unittest.TestCase, CustomAssertions):
     
     def setUp(self):
         self.input_dataset = ten_year_monthly_dataset()
         self.new_lats = np.array(range(-89, 90, 4))
         self.new_lons = np.array(range(-179, 180, 4))
         self.regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
-    # Custom Assertions to handle Numpy Arrays
-    def assert1DArraysEqual(self, array1, array2):
-        self.assertSequenceEqual(tuple(array1), tuple(array2))
+
 
     def test_returned_lats(self):
         self.assert1DArraysEqual(self.regridded_dataset.lats, self.new_lats)
