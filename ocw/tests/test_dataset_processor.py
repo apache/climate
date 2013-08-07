@@ -26,6 +26,7 @@ import numpy.ma as ma
 class TestTemporalRebin(unittest.TestCase):
     
     def setUp(self):
+        self.input_dataset = ten_year_monthly_dataset()
         pass
         
     
@@ -63,12 +64,7 @@ class TestRcmesSpatialRegrid(unittest.TestCase):
 class TestSpatialRegrid(unittest.TestCase):
     
     def setUp(self):
-        self.lats = np.array(range(-89, 90, 2))
-        self.lons = np.array(range(-179, 180, 2))
-        # Ten Years of monthly data
-        self.times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
-        self.values = np.ones([len(self.times), len(self.lats), len(self.lons)])
-        self.input_dataset = ds.Dataset(self.lats, self.lons, self.times, self.values, variable="test variable name")
+        self.input_dataset = ten_year_monthly_dataset()
         self.new_lats = np.array(range(-89, 90, 4))
         self.new_lons = np.array(range(-179, 180, 4))
         self.regridded_dataset = dp.spatial_regrid(self.input_dataset, self.new_lats, self.new_lons)
@@ -84,10 +80,17 @@ class TestSpatialRegrid(unittest.TestCase):
 
     def test_shape_of_values(self):
         regridded_data_shape = self.regridded_dataset.values.shape
-        expected_data_shape = (len(self.times), len(self.new_lats), len(self.new_lons))
+        expected_data_shape = (len(self.input_dataset.times), len(self.new_lats), len(self.new_lons))
         self.assertSequenceEqual(regridded_data_shape, expected_data_shape)
 
-
+def ten_year_monthly_dataset():
+        lats = np.array(range(-89, 90, 2))
+        lons = np.array(range(-179, 180, 2))
+        # Ten Years of monthly data
+        times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
+        values = np.ones([len(times), len(lats), len(lons)])
+        input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name")
+        return input_dataset
 
 
 
