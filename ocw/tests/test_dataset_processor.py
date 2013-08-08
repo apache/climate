@@ -32,16 +32,40 @@ class TestTemporalRebin(unittest.TestCase, CustomAssertions):
     def setUp(self):
         self.ten_year_monthly_dataset = ten_year_monthly_dataset()
         self.ten_year_annual_times = np.array([datetime.datetime(year, 1, 1) for year in range(2000, 2010)])
+        self.two_years_daily_dataset = two_year_daily_dataset()
     
     def test_monthly_to_annual_rebin(self):
         annual_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=365))
         self.assert1DArraysEqual(annual_dataset.times, self.ten_year_annual_times)
-        
+    
+    def test_monthly_to_full_rebin(self):
+        full_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=3650))
+        full_times = [datetime.datetime(2004, 12, 16)]
+        self.assertEqual(full_dataset.times, full_times)
+    
+    def test_daily_to_monthly_rebin(self):
+        """This test takes a really long time to run.  TODO: Figure out where the performance drag is"""
+        monthly_dataset = dp.temporal_rebin(self.two_years_daily_dataset, datetime.timedelta(days=31))
+        bins = list(set([datetime.datetime(time_reading.year, time_reading.month, 1) for time_reading in self.two_years_daily_dataset.times]))
+        bins = np.array(bins)
+        bins.sort()
+        self.assert1DArraysEqual(monthly_dataset.times, bins)
+    
+    def test_daily_to_annual_rebin(self):
+        annual_dataset = dp.temporal_rebin(self.two_years_daily_dataset, datetime.timedelta(days=366))
+        bins = list(set([datetime.datetime(time_reading.year, 1, 1) for time_reading in self.two_years_daily_dataset.times]))
+        bins = np.array(bins)
+        bins.sort()
+        self.assert1DArraysEqual(annual_dataset.times, bins)
         
     
-    def test__congrid_neighbor(self):
-        pass
-    
+    def test_non_rebin(self):
+        """This will take a monthly dataset and ask for a monthly rebin of 28 days.  The resulting
+        dataset should have the same time values"""
+        monthly_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=28))
+        good_times = self.ten_year_monthly_dataset.times
+        self.assert1DArraysEqual(monthly_dataset.times, good_times)
+
 
 
 class TestRcmesSpatialRegrid(unittest.TestCase):
@@ -91,13 +115,21 @@ class TestSpatialRegrid(unittest.TestCase, CustomAssertions):
         self.assertSequenceEqual(regridded_data_shape, expected_data_shape)
 
 def ten_year_monthly_dataset():
-        lats = np.array(range(-89, 90, 2))
-        lons = np.array(range(-179, 180, 2))
-        # Ten Years of monthly data
-        times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
-        values = np.ones([len(times), len(lats), len(lons)])
-        input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name")
-        return input_dataset
+    lats = np.array(range(-89, 90, 2))
+    lons = np.array(range(-179, 180, 2))
+    # Ten Years of monthly data
+    times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
+    values = np.ones([len(times), len(lats), len(lons)])
+    input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name")
+    return input_dataset
+
+def two_year_daily_dataset():
+    lats = np.array(range(-89, 90, 2))
+    lons = np.array(range(-179, 180, 2))
+    times = np.array([datetime.datetime(2001, 1, 1) + datetime.timedelta(days=d) for d in range(730)])
+    values = np.ones([len(times), len(lats), len(lons)])
+    dataset = ds.Dataset(lats, lons, times, values, variable='random data')
+    return dataset    
 
 
 
