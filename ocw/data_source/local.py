@@ -25,11 +25,9 @@ import calendar
 import string
 
 
-def get_time_base(time_step, time_format, since_index):
+def get_time_base(time_format, since_index):
     '''Calculate time base from time data.
 
-    :param time_step: NetCDF time base
-    :type netcdf: String
     :param time_format: Unit of time in netCDF
     :type time_format: String
     :param since_index: Index of word since in time unit
@@ -106,7 +104,7 @@ def calculate_time(netcdf, time_raw_values, time_variable_name):
     time_values = []
 
     time_step, time_format, since_index = get_time_step(netcdf, time_variable_name)
-    time_base = get_time_base(time_step, time_format, since_index)
+    time_base = get_time_base(time_format, since_index)
     time_step = time_step.lower()
 
     if 'min' in time_step:
