@@ -84,9 +84,15 @@ class TestEvaluation(unittest.TestCase):
                 self.other_var)
 
     def test_add_metric(self):
+        # Add a "binary" metric
         self.assertEqual(len(self.eval.metrics), 0)
         self.eval.add_metric(Bias())
         self.assertEqual(len(self.eval.metrics), 1)
+
+        # Add a "unary" metric
+        self.assertEqual(len(self.eval.unary_metrics), 0)
+        self.eval.add_metric(TemporalStdDev())
+        self.assertEqual(len(self.eval.unary_metrics), 1)
 
     def test_add_metrics(self):
         self.assertEqual(len(self.eval.metrics), 0)
