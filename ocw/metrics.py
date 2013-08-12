@@ -34,7 +34,7 @@ class Metric():
                 By default a metric is expected to take two datasets.
         :type unary: Bool
         '''
-        self.isUnary = unary
+        self.is_unary = unary
 
     @abstractmethod
     def run(self, datasets):
@@ -60,7 +60,7 @@ class Bias(Metric):
         .. note::
            Overrides Metric.__init__()
         '''
-        self.isUnary = False
+        self.is_unary = False
 
     def run(self, datasets):
         '''Calculate the bias between a reference and target dataset.
@@ -88,7 +88,7 @@ class TemporalStdDev(Metric):
         .. note::
            Overrides Metric.__init__()
         '''
-        self.isUnary = True
+        self.is_unary = True
 
     def run(self, datasets):
         '''Calculate the temporal std. dev. for a datasets.

@@ -151,7 +151,7 @@ class Evaluation:
             logging.error(error)
             raise TypeError(error)
 
-        if metric.isUnary:
+        if metric.is_unary:
             self.unary_metrics.append(metric)
         else:
             self.metrics.append(metric)
