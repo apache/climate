@@ -45,6 +45,24 @@ class TestEvaluation(unittest.TestCase):
         self.assertEquals(self.eval.metrics, [])
         self.assertEquals(self.eval.unary_metrics, [])
 
+    def test_full_init(self):
+        self.eval = Evaluation(
+                        self.test_dataset,           
+                        [self.test_dataset, self.another_test_dataset], 
+                        [Bias(), Bias(), TemporalStdDev()])                    
+
+        self.assertEqual(self.eval.ref_dataset.variable, self.variable)
+
+        # Make sure the two target datasets were added properly
+        self.assertEqual(self.eval.target_datasets[0].variable, self.variable)
+        self.assertEqual(self.eval.target_datasets[1].variable, self.other_var)
+
+        # Make sure the three metrics were added properly
+        # The two Bias metrics are "binary" metrics
+        self.assertEqual(len(self.eval.metrics), 2)
+        # TemporalStdDev is a "unary" metric and should be stored as such
+        self.assertEqual(len(self.eval.unary_metrics), 1)
+
     def test_add_ref_dataset(self):
         self.eval = Evaluation(self.test_dataset, [], [])
 
