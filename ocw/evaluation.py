@@ -185,17 +185,7 @@ class Evaluation:
                 self.results = _run_no_subregion_evaluation()
 
         if _should_run_unary_metrics():
-            self.unary_results = []
-
-            for metric in self.unary_metrics:
-                self.unary_results.append([])
-                # Unary metrics should be run over the reference Dataset also
-                if self.ref_dataset:
-                    self.unary_results[-1].append(metric.run(ref_dataset))
-
-                for target in self.target_datasets:
-                    self.unary_results[-1].append(metric.run(target))
-
+            self.unary_results = _run_unary_metric_evaluation()
 
     def _evaluation_is_valid(self):
         '''Check if the evaluation is well-formed.
@@ -250,3 +240,13 @@ class Evaluation:
                 results[-1].append(run_result)
         return results
 
+    def _run_unary_metric_evaluation():
+        unary_results = []
+        for metric in self.unary_metrics:
+            unary_results.append([])
+            # Unary metrics should be run over the reference Dataset also
+            if self.ref_dataset:
+                unary_results[-1].append(metric.run(ref_dataset))
+
+            for target in self.target_datasets:
+                unary_results[-1].append(metric.run(target))
