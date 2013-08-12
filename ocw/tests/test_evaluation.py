@@ -20,13 +20,13 @@
 import unittest
 import numpy as np
 import datetime as dt
-from dataset import Dataset
-from evaluation import Evaluation
-from metrics import Bias, TemporalStdDev
+from ocw.dataset import Dataset
+from ocw.evaluation import Evaluation
+from ocw.metrics import Bias, TemporalStdDev
 
 class TestEvaluation(unittest.TestCase):
     def setUp(self):
-        self.eval = Evaluation()
+        self.eval = Evaluation(None, [], [])
 
         lat = np.array([10, 12, 14, 16, 18])
         lon = np.array([100, 102, 104, 106, 108])
@@ -46,7 +46,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertEquals(self.eval.unary_metrics, [])
 
     def test_add_ref_dataset(self):
-        self.eval.add_ref_dataset(self.test_dataset)
+        self.eval = Evaluation(self.test_dataset, [], [])
 
         self.assertEqual(self.eval.ref_dataset.variable, self.variable)
 
