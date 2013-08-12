@@ -112,23 +112,23 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_lats(self):
         '''To test load_file function for latitudes'''
-        self.assertItemsEqual(load_file('/Users/Mboustani/Documents/python/program/ocw2/temporaryNetcdf.nc', None).lats, self.latitudes)
+        self.assertItemsEqual(load_file(self.file_path, None).lats, self.latitudes)
 
 
     def test_function_load_file_lons(self):
         '''To test load_file function for longitudes'''
-        self.assertItemsEqual(load_file('/Users/Mboustani/Documents/python/program/ocw2/temporaryNetcdf.nc', None).lons, self.longitudes)
+        self.assertItemsEqual(load_file(self.file_path, None).lons, self.longitudes)
 
 
     def test_function_load_file_times(self):
         '''To test load_file function for times'''
         newTimes = datetime(2001,01,01), datetime(2001,02,01), datetime(2001,03,01)
-        self.assertItemsEqual(load_file('/Users/Mboustani/Documents/python/program/ocw2/temporaryNetcdf.nc', None).times, newTimes)
+        self.assertItemsEqual(load_file(self.file_path, None).times, newTimes)
 
 
     def test_function_load_file_values(self):
         '''To test load_file function for values'''
-        self.assertTrue(numpy.allclose(load_file('/Users/Mboustani/Documents/python/program/ocw2/temporaryNetcdf.nc', None).values, self.values))
+        self.assertTrue(numpy.allclose(load_file(self.file_path, None).values, self.values))
 
 
 if __name__ == '__main__':
