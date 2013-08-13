@@ -27,6 +27,36 @@ class CustomAssertions:
     def assert1DArraysEqual(self, array1, array2):
         self.assertSequenceEqual(tuple(array1), tuple(array2))
 
+class TestEnsemble(unittest.TestCase, CustomAssertions):
+    
+    def test_unequal_dataset_shapes(self):
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        self.two_year_dataset = two_year_daily_dataset()
+        with self.assertRaises(ValueError):
+            self.ensemble_dataset = dp.ensemble([self.ten_year_dataset, self.two_year_dataset])
+    
+    def test_ensemble_logic(self):
+        self.datasets = []
+        self.datasets.append(build_ten_cube_dataset(1))
+        self.datasets.append(build_ten_cube_dataset(2))
+        self.three = build_ten_cube_dataset(3)
+        self.datasets.append(self.three)
+        self.datasets.append(build_ten_cube_dataset(4))
+        self.datasets.append(build_ten_cube_dataset(5))
+        self.ensemble = dp.ensemble(self.datasets)
+        self.ensemble_flat = self.ensemble.values.flatten()
+        self.three_flat = self.three.values.flatten()
+        self.assert1DArraysEqual(self.ensemble_flat, self.three_flat)
+    
+    def test_ensemble_name(self):
+        self.ensemble_dataset_name = "Dataset Ensemble"
+        self.datasets = []
+        self.datasets.append(build_ten_cube_dataset(1))
+        self.datasets.append(build_ten_cube_dataset(2))
+        self.ensemble = dp.ensemble(self.datasets)
+        self.assertEquals(self.ensemble.name, self.ensemble_dataset_name)
+        
+
 class TestTemporalRebin(unittest.TestCase, CustomAssertions):
     
     def setUp(self):
@@ -65,7 +95,6 @@ class TestTemporalRebin(unittest.TestCase, CustomAssertions):
         monthly_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=28))
         good_times = self.ten_year_monthly_dataset.times
         self.assert1DArraysEqual(monthly_dataset.times, good_times)
-
 
 
 class TestRcmesSpatialRegrid(unittest.TestCase):
@@ -131,6 +160,15 @@ def two_year_daily_dataset():
     dataset = ds.Dataset(lats, lons, times, values, variable='random data')
     return dataset    
 
+def build_ten_cube_dataset(value):
+    lats = np.array(range(-89, 90, 18))
+    lons = np.array(range(-179, 180, 36))
+    times = np.array([datetime.datetime(year, 1, 1) for year in range(2000, 2010)])
+    values = np.ones([len(times), len(lats), len(lons)])
+    values = values * value
+    dataset = ds.Dataset(lats, lons, times, values)
+    return dataset
+    
 
 
 if __name__ == '__main__':
