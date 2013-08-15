@@ -22,6 +22,9 @@ from ocw import dataset as ds
 import numpy as np
 import numpy.ma as ma
 
+import logging
+logging.basicConfig(level=logging.CRITICAL)
+
 class CustomAssertions:
     # Custom Assertions to handle Numpy Arrays
     def assert1DArraysEqual(self, array1, array2):
@@ -160,6 +163,26 @@ class TestSubset(unittest.TestCase):
         self.assertEqual(subset.lons.shape[0], 162)
         self.assertEqual(subset.times.shape[0], 37)
         self.assertEqual(subset.values.shape, (37, 82, 162))
+
+    def test_subset_with_bad_subregion(self):
+        target_dataset = ten_year_monthly_dataset()
+
+        subregion = {
+            'latMin': -91,
+            'latMax': 81,
+            'lonMin': -161,
+            'lonMax': 161,
+            'start': datetime.datetime(2001, 1, 1),
+            'end': datetime.datetime(2004, 1, 1)
+        }
+
+        try: 
+            subset = dp.subset(subregion, target_dataset)
+            raise self.failureException()
+        except ValueError:
+            # We expect a value error to be raised since latMin is out of bounds
+            pass
+
 
 def ten_year_monthly_dataset():
     lats = np.array(range(-89, 90, 2))
