@@ -176,12 +176,7 @@ class TestSubset(unittest.TestCase):
             'end': datetime.datetime(2004, 1, 1)
         }
 
-        try: 
-            subset = dp.subset(subregion, target_dataset)
-            raise self.failureException()
-        except ValueError:
-            # We expect a value error to be raised since latMin is out of bounds
-            pass
+        _test_bad_subregion_object(subregion, target_dataset)
 
 
 def ten_year_monthly_dataset():
@@ -210,7 +205,16 @@ def build_ten_cube_dataset(value):
     dataset = ds.Dataset(lats, lons, times, values)
     return dataset
     
-
+def _test_bad_subregion_object(subregion, target_dataset):
+        try: 
+            subset = dp.subset(subregion, target_dataset)
+            # The subregion should be invalid so we shouldn't get here. If we
+            # do then our code is failing!!!
+            raise self.failureException()
+        except ValueError:
+            # We expect a ValueError since the subregion object is invalid in
+            # some way. Getting  that error means our test is successful!
+            pass
 
 if __name__ == '__main__':
     unittest.main()
