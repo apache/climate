@@ -83,6 +83,7 @@ class TestBounds(unittest.TestCase):
                             dt.datetime(2000, 1, 1), # Start time
                             dt.datetime(2002, 1, 1)) # End time
 
+    # Lat Min
     def test_out_of_bounds_lat_min(self):
         with self.assertRaises(ValueError):
             self.bounds.lat_min = -91
@@ -93,6 +94,18 @@ class TestBounds(unittest.TestCase):
     def test_inverted_min_max_lat(self):
         with self.assertRaises(ValueError):
             self.bounds.lat_min = 81
+
+    # Lat Max
+    def test_out_of_bounds_lat_max(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lat_max = -91
+
+        with self.assertRaises(ValueError):
+            self.bounds.lat_max = 91
+
+    def test_inverted_max_max_lat(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lat_max = -81
 
 if __name__ == '__main__':
     unittest.main()
