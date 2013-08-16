@@ -79,7 +79,7 @@ class TestEvaluation(unittest.TestCase):
     def test_invalid_subregion_bound(self):
         bound = "This is not a bounds object"
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             self.eval.subregions = [bound]
 
     def test_add_ref_dataset(self):
