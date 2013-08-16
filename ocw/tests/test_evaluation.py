@@ -63,6 +63,10 @@ class TestEvaluation(unittest.TestCase):
         # TemporalStdDev is a "unary" metric and should be stored as such
         self.assertEqual(len(self.eval.unary_metrics), 1)
 
+    def test_invalid_ref_dataset(self):
+        with self.assertRaises(TypeError):
+            self.eval.ref_dataset = "This isn't a Dataset object"
+
     def test_valid_subregion(self):
         bound = Bounds(
                 -10, 10, 
