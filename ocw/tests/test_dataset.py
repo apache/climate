@@ -131,5 +131,15 @@ class TestBounds(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bounds.lon_max = 181
 
+    # Temporal tests
+    def test_inverted_start_end_times(self):
+        with self.assertRaises(ValueError):
+            self.bounds.start = dt.datetime(2003, 1, 1)
+
+    # Start tests
+    def test_invalid_start(self):
+        with self.assertRaises(ValueError):
+            self.bounds.start = "This is not a date time object"
+
 if __name__ == '__main__':
     unittest.main()
