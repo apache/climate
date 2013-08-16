@@ -208,3 +208,14 @@ class Bounds(object):
             raise ValueError("Attempted to set lon_min to invalid value.")
 
         self._lon_min = value
+
+    @property
+    def lon_max(self):
+        return self._lon_max
+
+    @lon_max.setter
+    def lon_max(self, value):
+        if not (-180 <= value <= 180 and value > self._lon_min):
+            raise ValueError("Attempted to set lon_max to invalid value.")
+
+        self._lon_max = value
