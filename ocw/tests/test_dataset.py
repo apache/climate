@@ -119,6 +119,17 @@ class TestBounds(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bounds.lon_min = 161
 
+    # Lon Max
+    def test_out_of_bounds_lon_max(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lon_max = -181
+
+        with self.assertRaises(ValueError):
+            self.bounds.lon_max = 181
+
+    def test_inverted_max_max_lon(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lon_max = -161
 
 if __name__ == '__main__':
     unittest.main()
