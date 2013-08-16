@@ -144,4 +144,33 @@ class Bounds:
     * Longitude values must be in the range [-180, 180]
     * Temporal bounds must a valid datetime object
     '''
-    pass
+
+    def __init__(self, lat_min, lat_max, lon_min, lon_max, start, end):
+        '''Default Bounds constructor
+
+        :param lat_min: The minimum latitude bound.
+        :type lat_min: float
+        
+        :param lat_max: The maximum latitude bound.
+        :type lat_max: float
+
+        :param lon_min: The minimum longitude bound.
+        :type lon_min: float
+        
+        :param lon_max: The maximum longitude bound.
+        :type lon_max: float
+
+        :param start: The starting datetime bound.
+        :type start: datetime
+
+        :param end: The ending datetime bound.
+        :type end: datetime
+
+        :raises: ValueError
+        '''
+        self._lat_min = lat_min
+        self._lat_max = lat_max
+        self._lon_min = lon_min
+        self._lon_max = lon_max
+        self._start = start
+        self._end = end
