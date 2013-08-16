@@ -18,7 +18,7 @@
 '''Unit tests for the Dataset.py module'''
 
 import unittest
-from dataset import Dataset
+from ocw.dataset import Dataset, Bounds
 import numpy as np
 import datetime as dt
 
@@ -76,6 +76,23 @@ class TestDatasetFunctions(unittest.TestCase):
     def test_temporal_resolution(self):
         self.assertEqual(self.test_dataset.temporal_resolution(), 'monthly')
 
+class TestBounds(unittest.TestCase):
+    def setUp(self):
+        self.bounds = Bounds(-80, 80,                # Lats
+                            -160, 160,               # Lons
+                            dt.datetime(2000, 1, 1), # Start time
+                            dt.datetime(2002, 1, 1)) # End time
+
+    def test_out_of_bounds_lat_min(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lat_min = -91
+
+        with self.assertRaises(ValueError):
+            self.bounds.lat_min = 91
+
+    def test_inverted_min_max_lat(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lat_min = 81
 
 if __name__ == '__main__':
     unittest.main()

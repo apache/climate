@@ -178,7 +178,6 @@ class Bounds(object):
 
     @property
     def lat_min(self):
-        print self._lat_min
         return self._lat_min
 
     @lat_min.setter
