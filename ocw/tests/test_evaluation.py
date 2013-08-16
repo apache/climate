@@ -20,7 +20,7 @@
 import unittest
 import numpy as np
 import datetime as dt
-from ocw.dataset import Dataset
+from ocw.dataset import Dataset, Bounds
 from ocw.evaluation import Evaluation
 from ocw.metrics import Bias, TemporalStdDev
 
@@ -62,6 +62,21 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(len(self.eval.metrics), 2)
         # TemporalStdDev is a "unary" metric and should be stored as such
         self.assertEqual(len(self.eval.unary_metrics), 1)
+
+    def test_valid_subregion(self):
+        bound = Bounds(
+                -10, 10, 
+                -20, 20, 
+                dt.datetime(2000, 1, 1), dt.datetime(2001, 1, 1))
+
+        self.eval.subregions = [bound, bound]
+        self.assertEquals(len(self.eval.subregions), 2)
+
+    def test_invalid_subregion_bound(self):
+        bound = "This is not a bounds object"
+
+        with self.assertRaises(ValueError):
+            self.eval.subregions = [bound]
 
     def test_add_ref_dataset(self):
         self.eval = Evaluation(self.test_dataset, [], [])
