@@ -24,6 +24,7 @@ Classes:
 
 import numpy
 import logging
+import datetime as dt
 
 class Dataset:
     '''Container for a dataset's attributes and data.'''
@@ -219,3 +220,14 @@ class Bounds(object):
             raise ValueError("Attempted to set lon_max to invalid value.")
 
         self._lon_max = value
+
+    @property
+    def start(self):
+        return self._start
+
+    @start.setter
+    def start(self, value):
+        if not (type(value) is dt.datetime and value < self._end):
+            raise ValueError("Attempted to set start to invalid value")
+
+        self._start = value
