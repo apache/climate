@@ -18,6 +18,8 @@
 '''
 Classes:
     Dataset - Container for a dataset's attributes and data.
+    Bounds - Container for holding spatial and temporal bounds information
+                for operations on a Dataset.
 '''
 
 import numpy
@@ -127,3 +129,19 @@ class Dataset:
             raise ValueError(error)
 
         return time_resolution
+
+
+class Bounds:
+    '''Container for holding spatial and temporal bounds information.
+
+    Certain operations require valid bounding information to be present for
+    correct functioning. Bounds guarantees that a function receives well 
+    formed information without the need to do the validation manually.
+
+    Spatial and temporal bounds must follow the following guidelines.
+
+    * Latitude values must be in the range [-90, 90]
+    * Longitude values must be in the range [-180, 180]
+    * Temporal bounds must a valid datetime object
+    '''
+    pass
