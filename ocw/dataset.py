@@ -131,7 +131,7 @@ class Dataset:
         return time_resolution
 
 
-class Bounds:
+class Bounds(object):
     '''Container for holding spatial and temporal bounds information.
 
     Certain operations require valid bounding information to be present for
@@ -142,6 +142,7 @@ class Bounds:
 
     * Latitude values must be in the range [-90, 90]
     * Longitude values must be in the range [-180, 180]
+    * Lat/Lon Min values must be less than the corresponding Lat/Lon Max values.
     * Temporal bounds must a valid datetime object
     '''
 
@@ -174,3 +175,15 @@ class Bounds:
         self._lon_max = lon_max
         self._start = start
         self._end = end
+
+    @property
+    def lat_min(self):
+        print self._lat_min
+        return self._lat_min
+
+    @lat_min.setter
+    def lat_min(self, value):
+        if not (-90 <= value <= 90 and value < self._lat_max):
+            raise ValueError("Attempted to set lat_min to invalid value.")
+
+        self._lat_min = value
