@@ -136,10 +136,18 @@ class TestBounds(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bounds.start = dt.datetime(2003, 1, 1)
 
+        with self.assertRaises(ValueError):
+            self.bounds.end = dt.datetime(1999, 1, 1)
+
     # Start tests
     def test_invalid_start(self):
         with self.assertRaises(ValueError):
             self.bounds.start = "This is not a date time object"
+
+    # End tests
+    def test_invalid_end(self):
+        with self.assertRaises(ValueError):
+            self.bounds.end = "This is not a date time object"
 
 if __name__ == '__main__':
     unittest.main()
