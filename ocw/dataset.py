@@ -231,3 +231,14 @@ class Bounds(object):
             raise ValueError("Attempted to set start to invalid value")
 
         self._start = value
+
+    @property
+    def end(self):
+        return self._end
+
+    @end.setter
+    def end(self, value):
+        if not (type(value) is dt.datetime and value > self._start):
+            raise ValueError("Attempted to set end to invalid value")
+
+        self._end = value
