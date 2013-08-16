@@ -83,6 +83,14 @@ class TestBounds(unittest.TestCase):
                             dt.datetime(2000, 1, 1), # Start time
                             dt.datetime(2002, 1, 1)) # End time
 
+    # Latitude tests
+    def test_inverted_min_max_lat(self):
+        with self.assertRaises(ValueError):
+            self.bounds.lat_min = 81
+
+        with self.assertRaises(ValueError):
+            self.bounds.lat_max = -81
+
     # Lat Min
     def test_out_of_bounds_lat_min(self):
         with self.assertRaises(ValueError):
@@ -90,10 +98,6 @@ class TestBounds(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.bounds.lat_min = 91
-
-    def test_inverted_min_max_lat(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lat_min = 81
 
     # Lat Max
     def test_out_of_bounds_lat_max(self):
@@ -103,9 +107,13 @@ class TestBounds(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bounds.lat_max = 91
 
-    def test_inverted_max_max_lat(self):
+    # Longitude tests
+    def test_inverted_max_max_lon(self):
         with self.assertRaises(ValueError):
-            self.bounds.lat_max = -81
+            self.bounds.lon_min = 161
+
+        with self.assertRaises(ValueError):
+            self.bounds.lon_max = -161
 
     # Lon Min
     def test_out_of_bounds_lon_min(self):
@@ -115,10 +123,6 @@ class TestBounds(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bounds.lon_min = 181
 
-    def test_inverted_max_max_lon(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lon_min = 161
-
     # Lon Max
     def test_out_of_bounds_lon_max(self):
         with self.assertRaises(ValueError):
@@ -126,10 +130,6 @@ class TestBounds(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.bounds.lon_max = 181
-
-    def test_inverted_max_max_lon(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lon_max = -161
 
 if __name__ == '__main__':
     unittest.main()
