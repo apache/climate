@@ -27,7 +27,9 @@ App.Services.service('evaluationSettings', function() {
 			'options': ['daily', 'monthly', 'yearly'],
 			'selected': 'monthly',
 		},
+		/* TODO: Consider renaming this to reflect reference dataset selection */
 		'spatialSelect': '',
+		'subregionFile': ''
 	};
 
 	return {
