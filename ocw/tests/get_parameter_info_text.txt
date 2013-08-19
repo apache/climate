@@ -1,1 +1,0 @@
-{"database":"wrm_airs_SurfAirTemp_A","timestep":"daily","realm":"atmos","instrument":"airs","start_date":"2002-08-31","end_date":"2010-09-01","nx":null,"ny":null,"lon_res":null,"lat_res":null,"units":"units"}
