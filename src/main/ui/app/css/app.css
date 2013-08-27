@@ -1,0 +1,27 @@
+/* app css stylesheet */
+
+#map 
+{
+    height: 670px;
+    width: 80%;
+    margin-left: 10%;
+	margin-bottom: 20px;
+}
+
+#rcmetHeader
+{
+	margin-left: 10%;
+}
+
+.small-alert 
+{
+	font-size: 12px;
+	color: green;
+	margin-top: 4px;
+	margin-left: 10px;
+}
+
+ul 
+{
+	list-style-type: none;
+}

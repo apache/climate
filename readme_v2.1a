@@ -1,0 +1,111 @@
+5/28/2013
+Updates to /nas/share3-wf/jinwonki/rcmet/rcmet2.1/src/main/python/rcmes/storage/db.py by Cam has been implemented.
+7/06/2013
+Updated to version 2.1 with the feature to read reference data from users' own data files.
+This code has been tested with daily precipitation data (both model and reference) for the NARCCAP domain
+NOTE: * This version still have problem in regridding daily data into monthly - most likely due to the memory management problem.
+          Will be fixed in the next modification for generalized handling of both reference and model datasets.
+
+-----------    Summary of code modification    ----------------
+
+Log for the creation of rcmet2.1 from rcmet version latest on 5/28/2013
+
+(001) Modification: Implement an option to read reference data from users' local disk.
+  * Add entries into the configuration file (e.g.,resources/cordexAF.cfg):
+        obsSource, obsInputFile, obsFileName, obsLonVar, obsLatVar, obsTimeVar, obsDltaTime
+
+  * Modify 'rcmet.runUsingConfig' to read extra config parameters 'obsSource' (source indicator), 'obsInputfile'
+        (user-provided reference data file name), 'obsVarName' (the name of obs variable in the obs data file), 
+        'obsFileName' (data file identifier), 'obsTimeVar' (name of the time variable in the obs data file),
+        'obsLonVar' and 'obsLatVar' (the names indicating longitude and latititude variables in the obs data file), and
+        'obsDltaTime' (time step increment of the observed data). All these fields are read in from meta data if the reference
+        data are read from RCMED.
+        - create additional parameters & lists to be passed into do_data_prep.prep_data: obsSource,obsList,obsTimestep
+        - create obsDatasetList according to the specified reference data source
+        - pass 'obsSource' into misc.userDefinedStartEndTimes(obsSource,obsDatasetList,models)
+        - pass additional arguments into do_data_prep.prep_data \
+            (jobProperties,obsSource,obsDatasetList,obsList,obsVarName,obsLonName,obsLatName,obsTimeName,obsTimestep,gridBox,models)
+          note: arguments "obsSource, obsList, obsVarName, obsLonName, obsLatName, obsTimeName, obsTimestep" may be passed via "jobProperties"
+
+  * Modify 'utils.misc.py'
+        - add 'import toolkit.process'
+        - modify 'userDefinedStartEndTimes' so that the observational inputs from RCMED and user's own files can be handled separately.
+
+  * Modify 'do_data_prep'
+        - Additional arguments from the calling routine (see the modification to 'rcmet.runUsingConfig' above)
+        - 'obsSource' is used throughout 'do_data_prep' to indicate the source of reference data. Follow this index to identify
+          the features specific to the source of reference data (RCMED or users' own file(s))
+        - All user-provided ref data must be netCDF files. This is hardwired before the loop in which the ref data files are read & regridded.
+        - User-provided data files are read in using the same routine that is used to read model data files.
+        - Extraction of the reference data for the user-specified is done in the same way as for the model data.
+        - BUG! In the current code, 'mdlList' is updated to store model ensemble (ENS-MDL). This is WRONG. Update 'mdlName' instead of 'mdlList'
+
+  * Modify 'metrics.metrics_plots'
+        - If 'maskLonMin' or 'maskLonMax' exceeds 180, subtract 360 to be consistent with defauls longitude order (from -180 to 180)
+
+(002) Combined handling of the reference and model data in metrics calculations
+  * Modify 'rcmet.runUsingConfig' to combine the reference and model data
+        - Cosmetic: 'obsList' in the line to receive the names of the reference datasets in the 'do_data_prep.prep_data' string has been replaced with
+                    'obsName' for a better consistency with 'mdlName' in the same string that are used to store the names of the model datasets
+        - import numpy and numpy.ma
+        - Pack the data in the order: All reference data sets + Ref ensemble (if any) + all model datasets + model ensemble (if any)
+        - New vars introduced for handling the combined variable:
+          ^ numDatasets = numOBS + numMDL is the tot no. of datasets of the combined ref and mdl data including the ref and mdl ens, if exist.
+          ^ dataName = obsName + mdlName contains the names of all reference and model datasets
+          ^ allData = obsData[for 0:numOBS] + mdlData[for numOBS:numDatasets]
+        -  Modify the line to call 'metrics.metrics_plots' to pass the combined variable and related parameters:
+          ^ OLD: metrics.metrics_plots(modelVarName,numOBS,numMDL,nT,ngrdY,ngrdX,Times,lons,lats,obsData,mdlData,obsList,mdlName,workdir,subRegions,fileOutputOption)
+            NEW: metrics.metrics_plots(modelVarName,numOBS,numMDL,nT,ngrdY,ngrdX,Times,lons,lats,allData,dataName,workdir,subRegions,fileOutputOption)
+
+  * Modify metrics.py
+        - Note that the changes to handle multiple data evaluation makes all metrics to be either 3-d or 4-d (monthly) fields. Modify
+               'elif metricDat.ndim == 2' with 'elif metricDat.ndim == 3' and 'elif metricDat.ndim == 4'
+        - import additional libraries
+          ^ import matplotlib
+          ^ import matplotlib.dates
+          ^ import matplotlib.pyplot as plt
+          ^ from matplotlib.font_manager import FontProperties
+          ^ from utils.Taylor import TaylorDiagram
+        - Modify the argument list for 'calling metrics_plots' to be consistent with the changes in 'rcmet.runUsingConfig'
+        - Modify the line to call 'files.writeNCfile' --> 'files.writeNCfile1'.
+        - Modify the (mp.004) Select the model/obs data for evaluation.
+          Also use modified 'misc.select_data_combined' in the place of 'misc.select_data'
+        - Modify the calculation of obs and model time series & climatology to accommodate the evaluation of multiple model datasets (mp.005)
+        - Modify calc_pat_cor in such as way that the correlation can be calculated for both 1d vs 1d, 2d vs 2d and 3d vs 3d cases
+        - Modify calc_spatial_pat_cor to ensure that std dev and corrln are calculated over the same set of unmasked (i.e., good) data
+          (a) first find masks for both variables
+          (b) re-define the input data in such a way that the data at the location of the masked values in either var are masked.
+        - Make sure to use masked array whenever calculations are performed over the domain
+        - 2-d contour plotting
+          todo: the current multi-frame plot routine (drawCntrMap) must be replaced with a matlab-based routine (remove Ngl dependence)
+        - x-y plot routine has been updated
+          can select axis options between 'log' and 'linear'
+        - Procedure to calculate & plot portrait diagrams for the anaual cycle of multiple obs and/or multiple models in multiple subregions.
+
+  * Bug fix:
+        - calc_clim_mo in metrics.py
+            replace 'mm = months[t]' with 'mm = months[t] - 1' (otherwise mm=12 is out of bound)
+        - calc_spatial_anom_cor
+            replace the string 'd1 = ((oD - mo)*(oD - mo)).sum()' --> 'd2 = ((oD - mo)*(oD - mo)).sum()'
+
+  * Modify storage/files.py
+        - Create 'files.writeNCfile1' in'storage/files.py' with the argument list consistent with the combined datasets handling.
+        - Create 'files.loadDataIntoNetCDF1' for handling the unified datasets.
+
+  * Modify misc.select_metrics
+        - Add an option to draw a Taylor diagram
+
+  * Modify utils/misc.py
+        - Add a new routine 'reshapeMonthlyData' introduced by Alex Goodman
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++  7/11/2013:                                                                                         +
++  This version modifies the release version rcmet2.1 with features specific for the cordex-sa study  +
++  Need to implement the changes in the hydro version                                                 +
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Add options to enter any combinations of data for evaluation
+      - modify metrics.py in the data selection block [e.g., refID = int(misc.select_data_combined(numDatasets, Times, dataList, 'ref'))]
+      - modify misc.select_data_combined
+  * New inpterpolation scheme "scipy.interpolate.griddata" replaces old "process.do_regrid".
+      - Inputs (x and y coordinates, data values) can be either regular grid on irregular grid.
+        Must specify masked values as "np.nan" to properly handle missing data.
