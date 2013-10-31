@@ -1,0 +1,45 @@
+0a1,16
+> #
+> #  Licensed to the Apache Software Foundation (ASF) under one or more
+> #  contributor license agreements.  See the NOTICE file distributed with
+> #  this work for additional information regarding copyright ownership.
+> #  The ASF licenses this file to You under the Apache License, Version 2.0
+> #  (the "License"); you may not use this file except in compliance with
+> #  the License.  You may obtain a copy of the License at
+> #
+> #      http://www.apache.org/licenses/LICENSE-2.0
+> #
+> #  Unless required by applicable law or agreed to in writing, software
+> #  distributed under the License is distributed on an "AS IS" BASIS,
+> #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> #  See the License for the specific language governing permissions and
+> #  limitations under the License.
+> #
+115c131
+<     netcdf =  netCDF4.Dataset(netCD_fileName,'w')
+---
+>     netcdf =  netCDF4.Dataset(netCD_fileName,mode='w')
+165c181
+<     values = netcdf.variables['value'][:]
+---
+>     values = ma.array(netcdf.variables['value'][:])
+281a298
+>     temp_path = cachedir
+283c300
+<         path = os.path.join(cachedir, n)
+---
+>         path = os.path.join(temp_path, n)
+284a302
+>             temp_path = path
+287a306
+>             temp_path = path
+310c329
+<     print 'Starting retrieval data (this may take several minutes) ...... ' 
+---
+>     
+312c331
+<     for date in date_list:
+---
+>     for i, date in enumerate(date_list):
+321a341
+>             print "%s of %s Database Download(s) Complete" % (i, len(date_list))  
