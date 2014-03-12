@@ -1,0 +1,394 @@
+Apache Open Climate Workbench Change Log
+============================================
+
+
+
+Release Notes - Apache Open Climate Workbench - Version 0.3-incubating
+
+** Sub-task
+    * [CLIMATE-190] - test_local.py
+    * [CLIMATE-227] - OCW rcmed.py code
+    * [CLIMATE-228] - test_rcmed.py
+    * [CLIMATE-235] - Migrate Temporal Binning Functionality to dataset_processor module
+    * [CLIMATE-236] - Add Dataset Ensemble Support to the ocw.dataset_processor module
+    * [CLIMATE-237] - Add Subset Generation function to dataset_processor module
+    * [CLIMATE-263] - Create local netCDF to local netCDF Evaluation Example using OCW Core API
+    * [CLIMATE-264] - Local NetCDF File to RCMED Evaluation (temporal and spatial regridding of data)
+    * [CLIMATE-266] - local.py and associated tests import code one level below the ocw folder
+    * [CLIMATE-268] - local.py returns a Dataset Object with a 4-D Array for the Dataset.values
+    * [CLIMATE-280] - Add OnBlur directive tests
+    * [CLIMATE-281] - Evaluation Class methods need 'self' added to them
+    * [CLIMATE-285] - Create UnaryMetric base class
+    * [CLIMATE-286] - Create BinaryMetric base class
+    * [CLIMATE-287] - Remove Metric Base Class
+    * [CLIMATE-289] - Update Bias to use BinaryMetric
+    * [CLIMATE-290] - Update TemporalStdDev to use UnaryMetric
+    * [CLIMATE-291] - Update Metric handling in Evaluation
+    * [CLIMATE-294] - Move existing normalization code over from RCMES toolkit
+    * [CLIMATE-307] - Update OCW example runs to pull NC files from external source
+
+** Bug
+    * [CLIMATE-19] - Easy-RCMET fails on on copying py modules
+    * [CLIMATE-225] - Add subplot functionality to draw_taylor_diagram
+    * [CLIMATE-233] - Update UI to allow user to select file for subregions
+    * [CLIMATE-240] - PredictiveFileBrowserInput doesn't update ng-model when user selects autocomplete option
+    * [CLIMATE-250] - Variable Name error means 'ENS-MODEL' is not a choice within the rcmet/cli code
+    * [CLIMATE-251] - Fix dataset selector pop up
+    * [CLIMATE-252] - Redirect user to correct result page
+    * [CLIMATE-253] - Easy_OCW tells the user to source an incorrect file
+    * [CLIMATE-254] - Add Subregion Object to OCW
+    * [CLIMATE-260] - decode_model_times chokes if time representation contains .0 after seconds
+    * [CLIMATE-267] - Dataset doesn't validate input parameters on init
+    * [CLIMATE-269] - Evaluation improperly imports other ocw package modules
+    * [CLIMATE-272] - Local Cache in RCMES doesn't work properly
+    * [CLIMATE-273] - test_local uses invalid import for data_source.local
+    * [CLIMATE-275] - Timeline is not working with the new UI routing
+    * [CLIMATE-277] - service '/static/evalResults/' should take a path 
+    * [CLIMATE-278] - clean up UI 
+    * [CLIMATE-283] - data_source.rcmed module doesn't properly mask data from the database
+    * [CLIMATE-292] - Subregion Evaluation encloses results in an extra list
+    * [CLIMATE-293] - Dataset processor needs to handle normalizing Dataset time values
+    * [CLIMATE-299] - test_rcmed breaks if run outside of the tests directory
+    * [CLIMATE-308] - test_local depends on NetCDF file in examples folder
+
+** Improvement
+    * [CLIMATE-12] - Update map drawing routine to draw dataset's actual bounds
+    * [CLIMATE-31] - New RCMES Command line interface 
+    * [CLIMATE-113] - Improve unit test coverage
+    * [CLIMATE-149] - Update unit tests for directives
+    * [CLIMATE-152] - New UI layout
+    * [CLIMATE-214] - Add evaluation.py to OCW
+    * [CLIMATE-238] - Allow users to set strings for colormaps in plotting functions
+    * [CLIMATE-245] - Service to return list of images 
+    * [CLIMATE-247] - Make the AngularJS UI easily skinnable
+    * [CLIMATE-255] - Use Bounds object in dataset_processor.subset
+    * [CLIMATE-256] - Use Bounds object in Evaluation
+    * [CLIMATE-257] - Add Property for Evaluation.ref_dataset
+    * [CLIMATE-258] - Improve Evaluation documentation
+    * [CLIMATE-274] - Make the exception that the Dataset class throws more descriptive
+    * [CLIMATE-276] - Refactor the dataset_processor.py code to no depend on toolkit.process
+    * [CLIMATE-279] - rcmed.py returns a Dataset Object with a 4-D Array for the Dataset.values 
+    * [CLIMATE-282] - Merge changes from CLIMATE-259 (RefactorPlots branch) into trunk
+    * [CLIMATE-284] - Create separate Base Classes for metric.py
+    * [CLIMATE-288] - Use parameter_id instead of logname to select observation in knmi_to_cru31_full_bias.py
+    * [CLIMATE-295] - Change loggers so they don't use the root logger
+    * [CLIMATE-296] - Log exception raises in dataset module
+    * [CLIMATE-297] - test_local breaks if run outside of the tests directory
+    * [CLIMATE-300] - Setup packaging
+    * [CLIMATE-306] - Remove large OCW example NetCDF files
+
+** New Feature
+    * [CLIMATE-215] - Create new Plotter class for OCW refactoring
+    * [CLIMATE-224] - Update the OCW UI with the AngularUI UI-Router
+    * [CLIMATE-242] - Update run_rcmes_processing to support history
+    * [CLIMATE-243] - Add capability to return a list of evaluation directories 
+    * [CLIMATE-244] - Service to return list of images
+    * [CLIMATE-249] - Add results/history page
+
+** Task
+    * [CLIMATE-20] - Easy-RCMET install requests JPL username / password for software dist
+    * [CLIMATE-136] - Remove RCMET references from Easy-RCMET
+    * [CLIMATE-213] - Create the dataset_processor.py module within the ocw folder
+    * [CLIMATE-217] - Add metrics.py for OCW refactoring
+    * [CLIMATE-218] - Update metric handling in Evaluation to coincide with new Metric definition
+    * [CLIMATE-219] - Add name attribute to Dataset
+    * [CLIMATE-239] - Remove Plotter class from plotter.py
+    * [CLIMATE-301] - Fix licenses in obs4MIPs code
+    * [CLIMATE-302] - Move obs4MIPs copyright headers
+    * [CLIMATE-303] - Integrate obs4MIPs into OCW
+    * [CLIMATE-304] - Add obs4MIPs JIRA component
+    * [CLIMATE-305] - Update obs4MIPs setup.py with OCW related information
+** Test
+    * [CLIMATE-220] - implement unit tests for plotter.py
+
+
+
+Release Notes - Apache Open Climate Workbench - Version 0.2-incubating
+
+** Sub-task
+    * [CLIMATE-139] - OCW dataset.py code
+    * [CLIMATE-142] - OCW local.py code
+    * [CLIMATE-185] - test_dataset.py
+
+** Bug
+    * [CLIMATE-140] - creating new "ocw"  directory in trunk
+    * [CLIMATE-189] - PreviewMap directive assigns incorrect color to maps
+    * [CLIMATE-191] - getResultDirInfo returns improper options
+    * [CLIMATE-199] - Globe image import breaks on deploy
+    * [CLIMATE-200] - Result.html needs to include angular-ui
+    * [CLIMATE-201] - LeafletMap overlays aren't duplicated when the user scrolls the map
+    * [CLIMATE-202] - Leaflet overlays aren't duplicated when user scrolls PreviewMaps
+    * [CLIMATE-204] - Remove overlay display in the World Map
+    * [CLIMATE-221] - checkLatLon in files.py doesn't work if lons are in the domain (180, 360)
+    * [CLIMATE-226] - radmax parameter in __init__ is broken in utils.taylor.TaylorDiagram
+    * [CLIMATE-229] - Formatting issue for monthly time series plots
+    * [CLIMATE-232] - evaluation does not redirect to correct path
+
+** Improvement
+    * [CLIMATE-182] - Remove gray-ing of buttons in modal headers/footers
+    * [CLIMATE-183] - Remove scrolling capability from timeline
+    * [CLIMATE-184] - Add directive for adding thumbnail maps to dataset
+    * [CLIMATE-187] - Add thumbnail map to dataset display
+    * [CLIMATE-188] - Draw overlap border and user selected region on map
+    * [CLIMATE-193] - Don't display dataset preview map when dataset is global
+    * [CLIMATE-194] - Uncompiled Angular templating code is briefly present when page loads
+    * [CLIMATE-195] - Timeline doesn't redraw when the window is resized
+    * [CLIMATE-196] - "Powered by Leaflet" attribute on main map overlaps jQuery datepicker
+    * [CLIMATE-197] - Add Angular-UI
+    * [CLIMATE-198] - Add tooltips to UI buttons
+    * [CLIMATE-205] - Improve user selected region display
+    * [CLIMATE-206] - Add tooltip to dataset remove button
+    * [CLIMATE-207] - Add background to settings modal
+    * [CLIMATE-208] - Remove overlay color box from Dataset Display
+    * [CLIMATE-209] - Set all PreviewMap overlays to the same color
+    * [CLIMATE-210] - Move dataset re-grid option to Settings modal
+    * [CLIMATE-211] - Clean up dataset display
+    * [CLIMATE-222] - Update PredictiveFileBrowserInput.js to handle more then one case
+    * [CLIMATE-223] - Update result.html to follow index.html style
+    * [CLIMATE-234] - Make plotting functions consisted with new API documentation
+
+** New Feature
+    * [CLIMATE-128] - Adding Taylor Diagram support to plots
+    * [CLIMATE-192] - creating new 'tests' directory under /trunk/ocw 
+    * [CLIMATE-216] - Add new plotting functions to repository
+    * [CLIMATE-231] - Add ability for plotter to process generic plotting functions
+
+
+Release Notes - Apache Open Climate Workbench - Version 0.1-incubating
+
+** Sub-task
+    * [CLIMATE-11] - Move region-select parameters to a service
+    * [CLIMATE-35] - Update dataset additions to include new display attribute
+    * [CLIMATE-36] - Add checkbox to dataset display panels for toggling display attribute state
+    * [CLIMATE-37] - Update map drawing routine to make drawing dataset overlays optional
+    * [CLIMATE-40] - Add new re-gridding field when adding a dataset using the selectedDatasetInformation service
+    * [CLIMATE-41] - Add re-gridding logic to the DatasetDisplayCtrl
+    * [CLIMATE-42] - Add sliders for selecting lat/lon degree steps
+    * [CLIMATE-46] - Add temporal re-grid to evaluation settings modal
+    * [CLIMATE-48] - Update runEvaluation to use temporal re-grid option
+    * [CLIMATE-57] - Add service for sharing evaluation settings
+    * [CLIMATE-59] - Add modal for evaluation settings
+    * [CLIMATE-60] - Add and wire-in SettingsCtrl
+    * [CLIMATE-61] - Use new evaluation settings in runEvaluation
+    * [CLIMATE-62] - Add checkbox for selecting re-grid options
+    * [CLIMATE-63] - Add jQuery UI
+    * [CLIMATE-65] - Add temporal regridding options to evaluationSettings service
+    * [CLIMATE-69] - Add AngularUI date directive support
+    * [CLIMATE-70] - Add new start and end datepickers
+    * [CLIMATE-76] - Add parameter checks when user adjusts values in ParameterSelectCtrl
+    * [CLIMATE-78] - WorldMapCtrl should allow for overlay redraw to be triggered via an event
+    * [CLIMATE-80] - Trigger redraw of map overlays when user is finished typing.
+    * [CLIMATE-81] - Don't watch region parameter changes to trigger map redraws
+    * [CLIMATE-83] - Change ParameterSelectCtrl layout
+    * [CLIMATE-84] - Hide UI control buttons instead of disabling them
+    * [CLIMATE-85] - Evaluation button doesn't display properly when running an evaluation
+    * [CLIMATE-94] - Move services in app.js to services.js
+    * [CLIMATE-95] - Split up controllers.js
+    * [CLIMATE-96] - Split up directives.js
+    * [CLIMATE-98] - Remove filters.js
+    * [CLIMATE-99] - Split up services.js
+    * [CLIMATE-102] - Move services over to separate module
+    * [CLIMATE-103] - Move directives over to a separate module
+    * [CLIMATE-104] - Move controllers over to new module
+    * [CLIMATE-109] - Get rid of useless boilerplate files
+    * [CLIMATE-115] - Remove controllersSpec.js
+    * [CLIMATE-116] - Add tests for ParameterSelectCtrl
+    * [CLIMATE-120] - Make run/rcmes endpoint JSONP compatible
+    * [CLIMATE-121] - Add tests for SettingsCtrl
+    * [CLIMATE-122] - Add tests for DatasetDisplayCtrl
+    * [CLIMATE-123] - Add tests for RcmedSelectionCtrl
+    * [CLIMATE-130] - Add tests for ObservationSelectCtrl
+    * [CLIMATE-131] - Add tests for WorldMapCtrl
+    * [CLIMATE-133] - Remove unneeded timeline files
+    * [CLIMATE-134] - Move timeline css file into appropriate lib folder
+    * [CLIMATE-145] - Remove serviceSpec.js
+    * [CLIMATE-146] - Add tests for EvaluationSettings service
+    * [CLIMATE-147] - Add tests for RegionSelectParams service
+    * [CLIMATE-148] - Add tests for SelectedDatasetInformation
+    * [CLIMATE-150] - Remove directivesSpec.js
+    * [CLIMATE-151] - Update BootstrapModal directive tests
+    * [CLIMATE-154] - Remove filtersSpec.js
+    * [CLIMATE-172] - Display evaluation results in a separate view
+    * [CLIMATE-173] - Add service to return list of figures in work directory
+
+** Bug
+    * [CLIMATE-1] - Replace longName with longname to match the new JPL Webservice
+    * [CLIMATE-5] - misc.py tried to import SubRegion when rcmet.py already has
+    * [CLIMATE-14] - directory_helpers.py should prevent users from accessing arbitrary directories
+    * [CLIMATE-18] - Easy-RCMET installs incorrect binary versions
+    * [CLIMATE-21] - RCMES UI is unable to communicate with backend properly when directory access is limited
+    * [CLIMATE-25] - bootstrap-modal keyboard escape doesn't work when an element isn't in focus
+    * [CLIMATE-51] - Add style guide and information for new users
+    * [CLIMATE-52] - Disable Parameter input boxes when the user hasn't selected a valid number of datasets
+    * [CLIMATE-53] - db.extractData function should not change dir
+    * [CLIMATE-58] - bootstrapModalOpen directive doesn't handle attributes correctly
+    * [CLIMATE-64] - User is unable to uncheck regrid box
+    * [CLIMATE-71] - Adding model dataset doesn't handle time values correctly
+    * [CLIMATE-77] - User selected region is redrawn as the user types
+    * [CLIMATE-79] - regionParameter changes cause a race condition when drawing map overlays
+    * [CLIMATE-82] - checkParameters doesn't properly handle value comparisons
+    * [CLIMATE-86] - Website - Update the Wiki link under Documentation 
+    * [CLIMATE-87] - Easy-RCMET pulls repo from JPL instead of ASF
+    * [CLIMATE-106] - requests module not installed by easy_rcmet
+    * [CLIMATE-110] - Pull the 'raw_input' functions out of the metrics.calcPdf function
+    * [CLIMATE-111] - Switch tests over to Karma
+    * [CLIMATE-112] - Unit tests no longer work
+    * [CLIMATE-118] - Update ParameterSelectCtrl datasets $watch to prevent call to undefined variable
+    * [CLIMATE-126] - deprecated function is used in process.py
+    * [CLIMATE-135] - zlib not installed to /usr/local
+    * [CLIMATE-138] - calc_bias is undefined in metrics
+    * [CLIMATE-141] - matplotlib is not imported in plots
+    * [CLIMATE-158] - Basemap.cm is imported incorrectly in do_rcmes_processing_sub.py
+    * [CLIMATE-159] - do_rcmes_procressing_sub breaks when graphing
+    * [CLIMATE-167] - NetCDF4 change breaks list_vars service
+    * [CLIMATE-168] - Refactored Functions in metrics.py return a different number of variables
+    * [CLIMATE-169] - critical bugs in metrics.py and plots.py
+    * [CLIMATE-170] - VM image does not work on AMD CPU based PC
+    * [CLIMATE-175] - WorldMapCtrlTest is broken after addition of zooming map
+    * [CLIMATE-177] - Update misc.select_metrics function to prevent user selection of incomplete metrics
+    * [CLIMATE-181] - Timeline options don't work
+    * [CLIMATE-186] - RCMES cannot handle NCEP reanalysis and GCM data 
+
+** Documentation
+    * [CLIMATE-157] - Replace PYTHON_PATH with PYTHONPATH in Easy-RCMET docs
+
+** Improvement
+    * [CLIMATE-9] - Move rootScope datasets object over to a service
+    * [CLIMATE-10] - Move map-specific code to WorldMapCtrl
+    * [CLIMATE-13] - Parameter selection in selectObservation.html needs to use proper databinding.
+    * [CLIMATE-15] - Show upload confirmation when user submits local file to UI.
+    * [CLIMATE-16] - Provide feedback when a dataset is submitted by the user
+    * [CLIMATE-17] - Update bootstrap-modal directive to allow for animated open/closing
+    * [CLIMATE-23] - bootstrap-modal and bootstrap-modal-open need refactored
+    * [CLIMATE-24] - Mouse scroll needs to be disabled on the UI map
+    * [CLIMATE-26] - Display the number of datasets currently queued for evaluation when the user is selecting datasets.
+    * [CLIMATE-27] - Filter out invalid variable options in selectObservation
+    * [CLIMATE-28] - Adjust how variable selection drop down boxes are displayed to the user depending on number of options
+    * [CLIMATE-29] - Provide reasonable default options for drop downs to user when pulling datasets from RCMED
+    * [CLIMATE-32] - Factor out host component of URLs for backend calls 
+    * [CLIMATE-55] - Updating any modules using PyNgl and PyNio
+    * [CLIMATE-66] - Clean up ParameterSelectCtrl
+    * [CLIMATE-68] - Switch Start and End field over to jQuery UI DatePicker
+    * [CLIMATE-72] - Adjust input parameter boxes display properties
+    * [CLIMATE-73] - Remove Update button from ParameterSelectCtrl
+    * [CLIMATE-74] - Add on-blur directive
+    * [CLIMATE-75] - Parameter select input boxes need to reject invalid input
+    * [CLIMATE-88] - Performance improvements for metrics.py
+    * [CLIMATE-92] - Overhaul to plots.py
+    * [CLIMATE-93] - Split up UI files for a more manageable code base
+    * [CLIMATE-97] - Rename Leaflet Map directive
+    * [CLIMATE-100] - Clean up JavaScript folder and imports
+    * [CLIMATE-101] - Define controllers, directives, and services under separate modules
+    * [CLIMATE-105] - Remove RCMES references in UI code
+    * [CLIMATE-107] - All source files need ASF licence text
+    * [CLIMATE-114] - Update unit tests for controllers
+    * [CLIMATE-117] - updates to regridding
+    * [CLIMATE-119] - Make ParameterSelectCtrl runEvaluation use Angular HTTP instead of jQuery
+    * [CLIMATE-124] - Define RcmedSelectionCtrl.getObservations on scope instead of locally
+    * [CLIMATE-125] - Define RcmedSelectionCtrl.getObservationTimeRange on scope
+    * [CLIMATE-132] - Move JavaScript libs into appropriate folder
+    * [CLIMATE-144] - Update unit tests for services
+    * [CLIMATE-153] - Add filter for converting ISO dates to US dates
+    * [CLIMATE-174] - Map should zoom to the overlap region of selected datasets
+    * [CLIMATE-176] - Fix WorldMapCtrl indentation
+    * [CLIMATE-178] - Fix TimelineCtrl indentation
+    * [CLIMATE-180] - Timeline changes for new UI design
+    * [CLIMATE-203] - Deprecate read_lolaT_from_file() in files.py
+    * [CLIMATE-222] - Update PredictiveFileBrowserInput.js to handle more then one case
+	* [CLIMATE-223] - Update results.html to follow index.html style 
+
+** New Feature
+    * [CLIMATE-33] - Add modal for metric selection
+    * [CLIMATE-34] - Add ability to toggle dataset overlays
+    * [CLIMATE-45] - Add ability for user to select temporal re-gridding options
+    * [CLIMATE-67] - Add functionality to ingest locally stored hourly infrared temperature satellite data
+    * [CLIMATE-89] - Implement a timeline widget 
+
+** Task
+    * [CLIMATE-3] - Purge Unnecessary JPL Internal Development Files/Folders
+    * [CLIMATE-4] - Push latest code changes from JPL svn to Apache
+    * [CLIMATE-6] - Add the Interactive Mode back into rcmet.py
+    * [CLIMATE-108] - Clean up UI CSS files
+    * [CLIMATE-129] - Create a KEYS files for GPG Code Signatures in trunk
+    * [CLIMATE-155] - Update FontAwesome
+
+
+Regional Climate Model Evaluation System
+JIRA located here: https://oodt.jpl.nasa.gov/jira/browse/RCMES
+
+
+Release Notes - RCMES Project - Version 1.1.0 - 08/09/2012
+
+** The project has been renamed from Water Resource Management to Regional Climate Model Evaluation System
+
+
+** Bug
+    * [RCMES-59] - Drop Down Menu Lists are Broken @ http://rcmes.jpl.nasa.gov/
+	* [RCMES-58] - set group ownership to 'daemon' for rcmes puny content
+ 	* [RCMES-46] - wrm_merra_slp - Database is being written to extremely slowly
+ 	* [RCMES-10] - Fix the MySQL/PHP Timeout for Database Query Web Service
+ 	* [RCMES-8] - AIRSL3NetCDF extractor should not extract 'data points' for parameter definitions
+ 	* [RCMES-7] - Granule Segments coming into the Catalog are being counted as new Granules
+ 	* [RCMES-6] - Update the Query API page to include datasetId
+ 	* [RCMES-4] - Catalog needs to insert the variable name into shortName instead of longName (parameter TABLE)
+ 	* [RCMES-3] - Granule Segments coming into the Catalog are being counted as new Datasets
+ 	* [RCMES-1] - ISO timestamp support in WRM means we need to change the TYPE of all time columns to VARCHAR20
+
+
+** Improvement
+    * [RCMES-42] - Rebrand SVN home for RCMES away from WRM
+    * [RCMES-38] - Deploy RCMED under new URL
+    * [RCMES-37] - Get PAR for RCMES
+    * [RCMES-34] - Move mailing lists from wrm-general, wrm-dev, wrm-commits to rcmes-general, rcmes-dev and rcmes-commits
+    * [RCMES-32] - Deploy RCMES main portal
+    * [RCMES-31] - Drop un-used Tables from WRM_PROD database
+ 
+ 
+ ** New Feature
+    * [RCMES-13] - Create a met extractor for AIRS NetCDF files
+    * [RCMES-12] - Python Query API for controlled access to the WRM infrastructure via Python scripts
+
+
+** Task
+ 	* [RCMES-49] - 17 more Databases Needed for the RCMED
+ 	* [RCMES-48] - Create 10 more Databases
+ 	* [RCMES-44] - Create A set of Databases for the MERRA dataset
+ 	* [RCMES-28] - Schema and supporting doc. checked into SVN
+ 	* [RCMES-26] - File Manager Policy checked into SVN
+ 	* [RCMES-24] - Each Parameter needs a TIMESTEP Metadata Key with a single value from a restricted list.
+ 	* [RCMES-20] - Update - Python GRIB Extractor to read all variables in a file
+ 	* [RCMES-18] - Enable GRIB Extractor to take in Command Line Arguments
+ 	* [RCMES-17] - Set up basic website that provides information about the contents of the WRM databse
+ 	* [RCMES-16] - Develop metadata extractor for sample data
+
+
+WRM Regional Climate Model Evaluation Database
+JIRA located here:  http://oodt.jpl.nasa.gov/jira/browse/WRM
+
+
+Release Notes - Water Resource Management Infrastructure - Version 1.0.0 - 09/24/2010
+
+
+** Bug
+    * [WRM-9] - AIRSL3NetCDF extractor should not extract 'data points' for parameter definitions
+    * [WRM-13] - Granule Segments coming into the Catalog are being counted as new Granules
+    * [WRM-14] - Granule Segments coming into the Catalog are being counted as new Datasets
+    * [WRM-15] - ISO timestamp support in WRM means we need to change the TYPE of all time columns to VARCHAR20
+    * [WRM-16] - Catalog needs to insert the variable name into shortName instead of longName (parameter TABLE)
+
+
+** New Feature
+    * [WRM-8] - Create a met extractor for AIRS NetCDF files
+    * [WRM-10] - Python Query API for controlled access to the WRM infrastructure via Python scripts
+
+** Task
+    * [WRM-1] - File Manager Policy checked into SVN
+    * [WRM-2] - Schema and supporting doc. checked into SVN
+    * [WRM-3] - Develop metadata extractor for sample data
+    * [WRM-4] - Develop a config script for running the ExternMetExtractor
+    * [WRM-5] - Create JIRA Components to represent the different aspects of the WRM project
+    * [WRM-6] - Create a development structure in SVN that reflects all aspects of project effort
+    * [WRM-7] - Create a deployment process that makes it easy to quickly build a working production environment
+    * [WRM-12] - Enable GRIB Extractor to take in Command Line Arguments
+    * [WRM-17] - Set up basic website that provides information about the contents of the WRM databse
+
