@@ -38,9 +38,9 @@ def list_latlon(file_path):
     :returns: Dictionary containing lat/lon information if successful, otherwise
         failure information is returned.
 
-    * Example successful JSON return *
+    **Example successful JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             'success': true,
@@ -52,9 +52,9 @@ def list_latlon(file_path):
             'lon_max': The maximum longitude value
         }
 
-    * Example failure JSON return *
+    **Example failure JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             'success': false,
@@ -130,9 +130,9 @@ def list_time(file_path):
     :returns: Dictionary containing time information if successful, otherwise
         failure information is returned.
 
-    * Example successful JSON return *
+    **Example successful JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             "success": true,
@@ -141,9 +141,9 @@ def list_time(file_path):
             "end_time": "2008-01-27 00:00:00"
         }
 
-    * Example failure JSON return *
+    **Example failure JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             "success": false
@@ -192,18 +192,18 @@ def list_vars(file_path):
     :returns: Dictionary containing variable information if succesful, otherwise
         failure information is returned.
 
-    * Example successful JSON return *
+    **Example successful JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             "success": true,
             "variables": List of variable names in the file
         }
 
-    * Example failure JSON return *
+    **Example failure JSON return**
 
-    .. sourcecode: javascript
+    .. sourcecode:: javascript
 
         {
             "success": false
