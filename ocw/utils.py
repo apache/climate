@@ -164,18 +164,19 @@ def parse_base_time_string(time_format):
 def normalize_lat_lon_values(lats, lons, values):
     ''' Normalize lat/lon values
 
-    Ensure that lat/lon values are withing [-180, 180)/[-90, 90) as well
-    as monotonically increasing. If they aren't they are adjusted accordingly.
+    Ensure that lat/lon values are within [-180, 180)/[-90, 90) as well
+    as sorted. If the values are off the grid they are shifted into the
+    expected range.
 
-    :param lats: A 1D numpy array of lat values.
+    :param lats: A 1D numpy array of sorted lat values.
     :type lats: Numpy Array
-    :param lons: A 1D numpy array of lon values.
+    :param lons: A 1D numpy array of sorted lon values.
     :type lons: Numpy Array
     :param values: A 3D array of data values.
 
     :returns: A tuple of the form (adjust_lats, adjusted_lons, adjusted_values)
 
-    :raises ValueError: If the lat or lon values are not monotonically increasing.
+    :raises ValueError: If the lat/lon values are not sorted.
     '''
     # Avoid unnecessary shifting if all lons are higher than 180
     if lons.min() > 180:
@@ -190,11 +191,11 @@ def normalize_lat_lon_values(lats, lons, values):
 
     # If the lat values are unsorted then raise an exception
     if not lats_reversed and lats_decreasing.any():
-        raise ValueError('Latitudes must be monotonically increasing.')
+        raise ValueError('Latitudes must be sorted.')
 
     # Perform same checks now for lons
     if not lons_reversed and lons_decreasing.any():
-        raise ValueError('Longitudes must be monotonically increasing.')
+        raise ValueError('Longitudes must be sorted.')
 
     # Also check if lons go from [0, 360), and convert to [-180, 180)
     # if necessary
