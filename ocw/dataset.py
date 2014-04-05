@@ -26,6 +26,8 @@ import numpy
 import logging
 import datetime as dt
 
+import ocw.utils as utils
+
 from mpl_toolkits.basemap import shiftgrid
 
 logger = logging.getLogger(__name__)
@@ -54,6 +56,7 @@ class Dataset:
         :raises: ValueError
         '''
         self._validate_inputs(lats, lons, times, values)
+        lats, lons, values = utils.normalize_lat_lon_values(lats, lons, values)
 
         self.lats = lats
         self.lons = lons
@@ -61,16 +64,6 @@ class Dataset:
         self.values = values
         self.variable = variable
         self.name = name
-
-        # We want our lon. values to be [-180, 180). If they're out of this
-        # grid then we need to shift them so they're not! Check the Basemap
-        # docs for additional information.
-        # http://matplotlib.org/basemap/api/basemap_api.html
-        if self.lons.max() > 180:
-            self.values, self.lons = shiftgrid(180,
-                                               self.values,
-                                               self.lons,
-                                               start=False)
 
     def spatial_boundaries(self):
         '''Calculate the spatial boundaries.
