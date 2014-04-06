@@ -129,33 +129,31 @@ def get_parameters_bounds():
 
     .. sourcecode:: javascript
         {
-          "data": {
-            "38": {
-              "start_date": "1901-01-15",
-              "end_date": "2009-12-15",
-              "lat_max": 89.75,
-              "lat_min": -89.75,
-              "lon_max": 179.75,
-              "lon_min": -179.75
-            },
-            "39": {
-              "start_date": "1901-01-15",
-              "end_date": "2009-12-15",
-              "lat_max": 89.75,
-              "lat_min": -89.75,
-              "lon_max": 179.75,
-              "lon_min": -179.75
-            }
+          "38": {
+            "start_date": "1901-01-15",
+            "end_date": "2009-12-15",
+            "lat_max": 89.75,
+            "lat_min": -89.75,
+            "lon_max": 179.75,
+            "lon_min": -179.75
+          },
+          "39": {
+            "start_date": "1901-01-15",
+            "end_date": "2009-12-15",
+            "lat_max": 89.75,
+            "lat_min": -89.75,
+            "lon_max": 179.75,
+            "lon_min": -179.75
           }
         }
 
     '''
-    parameter_bounds = { "data": {}}
+    parameter_bounds = {}
     raw_parameters = rcmed.get_parameters_metadata()
     for parameter in raw_parameters:
         if parameter['bounding_box'] != None:
             param_id, bounds_data = extract_bounds(parameter)
-            parameter_bounds['data'][param_id] = bounds_data
+            parameter_bounds[param_id] = bounds_data
 
 
     return parameter_bounds
