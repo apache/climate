@@ -26,7 +26,7 @@ def main():
     allCETRMMList =[]
     subprocess.call('export DISPLAY=:0.0', shell=True)
 
-    mainDirStr= "/Users/kimwhitehall/Documents/HU/research/thesis/presentation/caseStudies/BFStudy"
+    mainDirStr= "/Users/kimwhitehall/Documents/HU/research/thesis/presentation/caseStudies/BFStudy1"
     #mainDirStr= "/home/whitehal/mccsearch/caseStudy2"
     #directories for the original data
     #TRMMdirName ="/home/whitehal/summer2006TRMM"
@@ -55,15 +55,12 @@ def main():
     mergImgs, timeList = mccSearch.readMergData(CEoriDirName)
     print ("-"*80)
 
-    print 'in main', len(mergImgs)
-    print 'timeList', timeList
-    print 'TRMMdirName ', TRMMdirName
     print "\n -------------- TESTING findCloudElements ----------"
     CEGraph = mccSearch.findCloudElements(mergImgs,timeList,TRMMdirName)
     #if the TRMMdirName isnt entered for what ever reason
     # CEGraph = mccSearch.findCloudElements(mergImgs,timeList)
-    # allCETRMMList=mccSearch.findPrecipRate(TRMMdirName)
-    # sys.exit()
+    # allCETRMMList=mccSearch.findPrecipRate(TRMMdirName,timeList)
+    #sys.exit()
     print ("-"*80)
     print "number of nodes in CEGraph is: ", CEGraph.number_of_nodes()
     print ("-"*80)    
@@ -95,11 +92,11 @@ def main():
     print ("-"*80)
     #print "MCCTimes is: ", MCCTimes
     #mccSearch.plotAccTRMM(MCCList)
-    mccSearch.displayPrecip(MCCList)
-    mccSearch.plotAccuInTimeRange('2009-09-01_00:00:00', '2009-09-01_23:00:00')
-    mccSearch.displaySize(MCCList)
-    mccSearch.displayPrecip(MCCList)
-    mccSearch.plotHistograms(MCCList)
+    # mccSearch.displayPrecip(MCCList)
+    # mccSearch.plotAccuInTimeRange('2009-09-01_00:00:00', '2009-09-01_23:00:00')
+    # mccSearch.displaySize(MCCList)
+    # mccSearch.displayPrecip(MCCList)
+    # mccSearch.plotHistogram(MCCList)
     print "creating the MCC userfile ", mccSearch.createTextFile(MCCList,1)
     print "creating the MCS userfile ", mccSearch.createTextFile(MCSList,2)
 
