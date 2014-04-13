@@ -1,8 +1,6 @@
 '''
 # All the functions for the MCC search algorithm
 # Following RCMES dataformat in format (t,lat,lon), value
-# Kim Whitehall 
-# Mimumum MCS is 3 hours
 '''
 
 import datetime
@@ -42,38 +40,34 @@ import process
 # --------------------- User defined variables ---------------------
 #FYI the lat lon values are not necessarily inclusive of the points given. These are the limits
 #the first point closest the the value (for the min) from the MERG data is used, etc.
-LATMIN = '5.0' #'12.0' #'-40' #'12.0'  #'10.0' #'-40.0' #'-5.0' 		#min latitude; -ve values in the SH e.g. 5S = -5
-LATMAX = '19.0' #'17.0' #'-20.0' #'17.0' #'20.0' #'30.0'			#max latitude; -ve values in the SH e.g. 5S = -5 20.0
-LONMIN = '-9.0' #'-8.0' #'10.0' #'-8.0' #'-5.0' #'10.0' #'-40.0'		#min longitude; -ve values in the WH e.g. 59.8W = -59.8 -30
-LONMAX = '5.0' #'8.0' #'40.0' #'8.0' #'40.0' #'5.0'			#min longitude; -ve values in the WH e.g. 59.8W = -59.8  30
+LATMIN = '5.0' #min latitude; -ve values in the SH e.g. 5S = -5
+LATMAX = '19.0' #max latitude; -ve values in the SH e.g. 5S = -5 20.0
+LONMIN = '-6.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8 -30
+LONMAX = '3.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8  30
 XRES = 4.0				#x direction spatial resolution in km
 YRES = 4.0				#y direction spatial resolution in km
 TRES = 1 				#temporal resolution in hrs
-T_BB_MAX = 243 #241   		#warmest temp to allow (-30C to -55C according to Morel and Sensi 2002)
-T_BB_MIN = 218 #221		    #cooler temp for the center of the system
-STRUCTURING_ELEMENT = [[0,1,0],[1,1,1],[0,1,0]] #the matrix for determining the pattern for the contiguous boxes and must
-    											#have same rank of the matrix it is being compared against 
-CONVECTIVE_FRACTION = 0.90 #the min temp/max temp that would be expected in a CE.. this is highly conservative (only a 10K difference)
-MIN_MCS_DURATION = 3    #minimum time for a MCS to exist
-MIN_CE_SPEED = 45.0 	#the slowest speed a CE can move btwn F for the resolved data in kmhr^-1.here is hrly, therefore val 
-MAX_CE_SPEED = 70.0 	#the fastest speed a CE can move btwn F for the resolved data in kmhr^-1.
 LAT_DISTANCE = 111.0 	#the avg distance in km for 1deg lat for the region being considered 
 LON_DISTANCE = 111.0    #the avg distance in km for 1deg lon for the region being considered
-DIRECTION = 45.0 		#general direction of the wind flow in degrees
+STRUCTURING_ELEMENT = [[0,1,0],[1,1,1],[0,1,0]] #the matrix for determining the pattern for the contiguous boxes and must
+    											#have same rank of the matrix it is being compared against 
+#criteria for determining cloud elements and edges
+T_BB_MAX = 243  #warmest temp to allow (-30C to -55C according to Morel and Sensi 2002)
+T_BB_MIN = 218  #cooler temp for the center of the system
+CONVECTIVE_FRACTION = 0.90 #the min temp/max temp that would be expected in a CE.. this is highly conservative (only a 10K difference)
+MIN_MCS_DURATION = 3    #minimum time for a MCS to exist
 AREA_MIN = 2400.0		#minimum area for CE criteria in km^2 according to Vila et al. (2008) is 2400
-MIN_OVERLAP= 10000.00      #km^2  from Williams and Houze 1987, indir ref in Arnaud et al 1992
+MIN_OVERLAP= 10000.00   #km^2  from Williams and Houze 1987, indir ref in Arnaud et al 1992
 
-#---Assuming using the MCC function, these will have to be changed  
+#---the MCC criteria
 ECCENTRICITY_THRESHOLD_MAX = 1.0  #tending to 1 is a circle e.g. hurricane, 
-ECCENTRICITY_THRESHOLD_MIN = 0.70 #0.65  #tending to 0 is a linear e.g. squall line
-OUTER_CLOUD_SHIELD_AREA = 80000.0 #100000.0 #km^2
-INNER_CLOUD_SHIELD_AREA = 30000.0 #50000.0 #km^2
+ECCENTRICITY_THRESHOLD_MIN = 0.50 #tending to 0 is a linear e.g. squall line
+OUTER_CLOUD_SHIELD_AREA = 80000.0 #km^2
+INNER_CLOUD_SHIELD_AREA = 30000.0 #km^2
 OUTER_CLOUD_SHIELD_TEMPERATURE = 233 #in K
 INNER_CLOUD_SHIELD_TEMPERATURE = 213 #in K
-MINIMUM_DURATION = 6 #min number of frames the MCC must exist for (assuming hrly frames, African MCCs is 6hrs)
-MAXIMUM_DURATION = 100 #max number of framce the MCC can last for (assuming hrly frames, African MCCs last at most 15hrs)
-
-#MAINDIRECTORY = "/Users/kimwhitehall/Documents/HU/research/mccsearch/caseStudy1"
+MINIMUM_DURATION = 6 #min number of frames the MCC must exist for (assuming hrly frames, MCCs is 6hrs)
+MAXIMUM_DURATION = 24#max number of framce the MCC can last for 
 #------------------- End user defined Variables -------------------
 edgeWeight = [1,2,3] #weights for the graph edges
 #graph object fo the CEs meeting the criteria
@@ -94,15 +88,13 @@ def readMergData(dirname):
 	Output::
 	    A 3D masked array (t,lat,lon) with only the variables which meet the minimum temperature 
 	    criteria for each frame
-	    **remove below**
-	    A dictionary of all the MERG data from the files in the directory given.
-	    The dictionary contains, a string representing the time (a datetime string), a 
-	    tuple (lat,lon,value) representing only the data that meets the temperature requirements
-	    i.e. T_BB_MAX
 
 	Assumptions::
 	    The MERG data has been converted to NETCDF using LATS4D
 	    The data has the same lat/lon format
+
+	TODO:: figure out how to use netCDF4 to do the clipping tmp = netCDF4.Dataset(filelist[0])
+
 	'''
 
 	global LAT
@@ -136,8 +128,7 @@ def readMergData(dirname):
 	else:
 		# Open the first file in the list to read in lats, lons and generate the  grid for comparison
 		tmp = Nio.open_file(filelist[0], format='nc')
-		#TODO: figure out how to use netCDF4 to do the clipping tmp = netCDF4.Dataset(filelist[0])
-
+		
 		#clip the lat/lon grid according to user input
 		#http://www.pyngl.ucar.edu/NioExtendedSelection.shtml
 		latsraw = tmp.variables[mergLatVarName][mergLatVarName+"|"+LATMIN+":"+LATMAX].astype('f2')
@@ -149,14 +140,11 @@ def readMergData(dirname):
 		latsraw =[]
 		lonsraw = []
 		nygrd = len(LAT[:, 0]); nxgrd = len(LON[0, :])
-		#print 'Lats and lons read in for first file in filelist',nygrd,nxgrd
 		tmp.close
 	
 	for files in filelist:
 		try:
 			thisFile = Nio.open_file(files, format='nc') 
-			#TODO: thisFile = netCDF4.Dataset(files)
-
 			#clip the dataset according to user lat,lon coordinates
 			#mask the data and fill with zeros for later 
 			tempRaw = thisFile.variables[mergVarName][mergLatVarName+"|"+LATMIN+":"+LATMAX \
@@ -176,8 +164,6 @@ def readMergData(dirname):
 			#extend instead of append because getModelTimes returns a list already and we don't 
 			#want a list of list
 			timelist.extend(time2store)
-			#to get the actual masked data only
-			#http://docs.scipy.org/doc/numpy/reference/maskedarray.generic.html#accessing-only-the-valid-entries
 			mergImgs.extend(tempMaskedValue) 
 			thisFile.close
 			thisFile = None
@@ -195,21 +181,20 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	    Determines the contiguous boxes for a given time of the satellite images i.e. each frame
         using scipy ndimage package
 	
-	Input::
-	    3 variables
-		sat_img: masked numpy array in (time,lat,lon),T_bb representing the satellite data. This is masked based on the
+	Input::	
+		mergImgs: masked numpy array in (time,lat,lon),T_bb representing the satellite data. This is masked based on the
 		maximum acceptable temperature, T_BB_MAX
 		timelist: a list of python datatimes
 		TRMMdirName (optional): string representing the path where to find the TRMM datafiles
 		
 	Output::
-	    1 variable
-		cloudEements: list of dictionary of cloudElements which have met the temperature, area and shape requirements
-		The dictionary is 
+	    CLOUD_ELEMENT_GRAPH: a Networkx directed graph where each node contains the information in cloudElementDict
+	    The nodes are determined according to the area of contiguous squares. The nodes are linked through weighted edges.
+
 		cloudElementDict = {'uniqueID': unique tag for this CE, 
 							'cloudElementTime': time of the CE,
 							'cloudElementLatLon': (lat,lon,value) of MERG data of CE, 
-							'cloudElementCenter':tuple of floating-point (lat,lon) representing the CE's center 
+							'cloudElementCenter':list of floating-point [lat,lon] representing the CE's center 
 							'cloudElementArea':floating-point representing the area of the CE, 
 							'cloudElementEccentricity': floating-point representing the shape of the CE, 
 							'cloudElementTmax':integer representing the maximum Tb in CE, 
@@ -248,7 +233,6 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	precip =[]
 	TRMMCloudElementLatLons =[]
 
-	#edgeWeight = [1,2]
 	minCELatLimit = 0.0
 	minCELonLimit = 0.0
 	maxCELatLimit = 0.0
@@ -258,12 +242,9 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	
 	#openfile for storing ALL cloudElement information 
 	cloudElementsFile = open((MAINDIRECTORY+'/textFiles/cloudElements.txt'),'wb')
-
-
 	#openfile for storing cloudElement information meeting user criteria i.e. MCCs in this case
 	cloudElementsUserFile = open((MAINDIRECTORY+'/textFiles/cloudElementsUserFile.txt'),'w')
-	#cloudElementsTextFile = open('/Users/kimwhitehall/Documents/HU/research/mccsearch/cloudElementsTextFile.txt','w')
-
+	
 	#NB in the TRMM files the info is hours since the time thus 00Z file has in 01, 02 and 03 times
 	for t in xrange(mergImgs.shape[0]):
 		#-------------------------------------------------
@@ -299,9 +280,8 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	   		numOfBoxes = np.count_nonzero(cloudElement)
 	   		cloudElementArea = numOfBoxes*XRES*YRES
 
-	   		#If the area is greater than the area required, then start considering as CE
-	   		#TODO: if the area is smaller than the suggested area, check if it meets a convective fraction requirement
-	   		#if it does, still consider as CE
+	   		#If the area is greater than the area required, or if the area is smaller than the suggested area, check if it meets a convective fraction requirement
+	   		#consider as CE
 
 	   		if cloudElementArea >= AREA_MIN or (cloudElementArea < AREA_MIN and ((ndimage.minimum(cloudElement, labels=labels))/float((ndimage.maximum(cloudElement, labels=labels)))) < CONVECTIVE_FRACTION ):
 
@@ -514,7 +494,7 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 						thisCElen = len(cloudElementLatLons)
 						percentageOverlap, areaOverlap = cloudElementOverlap(cloudElementLatLons, cloudElementDict['cloudElementLatLon'])
 						
-						#change weights to integers because the built in shortest path chokes on floating pts
+						#change weights to integers because the built in shortest path chokes on floating pts according to Networkx doc
 						#according to Goyens et al, two CEs are considered related if there is atleast 95% overlap between them for consecutive imgs a max of 2 hrs apart
 						if percentageOverlap >= 0.95: 
 							CLOUD_ELEMENT_GRAPH.add_edge(cloudElementDict['uniqueID'], CEuniqueID, weight=edgeWeight[0])
@@ -598,18 +578,19 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	print ("*"*80)
 
 	#hierachial graph output
-	#graphTitle = "Cloud Elements observed over Niamey, Niger 11 Sep 2006 00Z - 12 Sep 2006 12Z"
-	graphTitle = "Cloud Elements observed over Burkina Faso 31 Aug 2009 00Z - 01 Sep 2008 23Z" # Niamey, Niger"
+	graphTitle = "Cloud Elements observed over somewhere from 0000Z to 0000Z" 
 	drawGraph(CLOUD_ELEMENT_GRAPH, graphTitle, edgeWeight)
 
 	return CLOUD_ELEMENT_GRAPH	
 #******************************************************************
-def findPrecipRate(TRMMdirName):
-	'''
-	TODO: needs fixing 
-	Purpose:: Determines the precipitation rates for MCSs found if TRMMdirName was not entered in findCloudElements this can be used
+def findPrecipRate(TRMMdirName, timelist):
+	''' 
+	Purpose:: 
+		Determines the precipitation rates for MCSs found if TRMMdirName was not entered in findCloudElements this can be used
 
-	Input:: TRMMdirName: a string representing the directory for the original TRMM netCDF files
+	Input:: 
+		TRMMdirName: a string representing the directory for the original TRMM netCDF files
+		timelist: a list of python datatimes
 
     Output:: a list of dictionary of the TRMM data 
     	NB: also creates netCDF with TRMM data for each CE (for post processing) index
@@ -631,137 +612,141 @@ def findPrecipRate(TRMMdirName):
 	files.sort(key=lambda x: os.path.getmtime(x))
 	
 	for afile in files:
-		#try:
-		print "in for ", afile
 		fullFname = os.path.splitext(afile)[0]
 		noFrameExtension = (fullFname.replace("_","")).split('F')[0]
 		CEuniqueID = 'F' +(fullFname.replace("_","")).split('F')[1]
 		fileDateTimeChar = (noFrameExtension.replace(":","")).split('s')[1]
 		fileDateTime = fileDateTimeChar.replace("-","")
 		fileDate = fileDateTime[:-6]
-		fileHr=fileDateTime[-6:-4]
+		fileHr1=fileDateTime[-6:-4]
 
 		cloudElementData = Dataset(afile,'r', format='NETCDF4')
-		brightnesstemp = cloudElementData.variables['brightnesstemp'][:]
+		brightnesstemp1 = cloudElementData.variables['brightnesstemp'][:,:,:] 
 		latsrawCloudElements = cloudElementData.variables['latitude'][:]
 		lonsrawCloudElements = cloudElementData.variables['longitude'][:]
+		
+		brightnesstemp = np.squeeze(brightnesstemp1, axis=0)
+		
+		if int(fileHr1) % temporalRes == 0:
+			fileHr = fileHr1
+		else:
+			fileHr = (int(fileHr1)/temporalRes) * temporalRes
+		
+		if fileHr < 10:
+			fileHr = '0'+str(fileHr)
+		else:
+			str(fileHr)
+
+		TRMMfileName = TRMMdirName+"/3B42."+ str(fileDate) + "."+str(fileHr)+".7A.nc"
+		TRMMData = Dataset(TRMMfileName,'r', format='NETCDF4')
+		precipRate = TRMMData.variables['pcp'][:,:,:]
+		latsrawTRMMData = TRMMData.variables['latitude'][:]
+		lonsrawTRMMData = TRMMData.variables['longitude'][:]
+		lonsrawTRMMData[lonsrawTRMMData > 180] = lonsrawTRMMData[lonsrawTRMMData>180] - 360.
+		LONTRMM, LATTRMM = np.meshgrid(lonsrawTRMMData, latsrawTRMMData)
+
+		#nygrdTRMM = len(LATTRMM[:,0]); nxgrd = len(LONTRMM[0,:])
+		nygrd = len(LAT[:, 0]); nxgrd = len(LON[0, :])
+
+		precipRateMasked = ma.masked_array(precipRate, mask=(precipRate < 0.0))
+		#---------regrid the TRMM data to the MERG dataset ----------------------------------
+		#regrid using the do_regrid stuff from the Apache OCW 
+		regriddedTRMM = ma.zeros((0, nygrd, nxgrd))
+		regriddedTRMM = process.do_regrid(precipRateMasked[0,:,:], LATTRMM,  LONTRMM, LAT, LON, order=1, mdi= -999999999)
+		#----------------------------------------------------------------------------------
+
+		# #get the lat/lon info from
+		latCEStart = LAT[0][0]
+		latCEEnd = LAT[-1][0]
+		lonCEStart = LON[0][0]
+		lonCEEnd = LON[0][-1]
+
+		#get the lat/lon info for TRMM data (different resolution)
+		latStartT = find_nearest(latsrawTRMMData, latCEStart)
+		latEndT = find_nearest(latsrawTRMMData, latCEEnd)
+		lonStartT = find_nearest(lonsrawTRMMData, lonCEStart)
+		lonEndT = find_nearest(lonsrawTRMMData, lonCEEnd)
+		latStartIndex = np.where(latsrawTRMMData == latStartT)
+		latEndIndex = np.where(latsrawTRMMData == latEndT)
+		lonStartIndex = np.where(lonsrawTRMMData == lonStartT)
+		lonEndIndex = np.where(lonsrawTRMMData == lonEndT)
+
+		#get the relevant TRMM info 
+		CEprecipRate = precipRate[:,(latStartIndex[0][0]-1):latEndIndex[0][0],(lonStartIndex[0][0]-1):lonEndIndex[0][0]]
+		TRMMData.close()
 			
 		
-		if int(fileHr) % 3 == 0:
-			TRMMfileName = TRMMdirName+'/3B42.'+ fileDate + "."+fileHr+".7A.nc"
-			#print "TRMMfileName is ", TRMMfileName
-			TRMMData = Dataset(TRMMfileName,'r', format='NETCDF4')
-			precipRate = TRMMData.variables['pcp'][:,:,:]
-			latsrawTRMMData = TRMMData.variables['latitude'][:]
-			lonsrawTRMMData = TRMMData.variables['longitude'][:]
-			lonsrawTRMMData[lonsrawTRMMData > 180] = lonsrawTRMMData[lonsrawTRMMData>180] - 360.
-			LONTRMM, LATTRMM = np.meshgrid(lonsrawTRMMData, latsrawTRMMData)
+		# ------ NETCDF File stuff ------------------------------------
+		thisFileName = MAINDIRECTORY+'/TRMMnetcdfCEs/'+ fileDateTime + CEuniqueID +'.nc'
+		currNetCDFTRMMData = Dataset(thisFileName, 'w', format='NETCDF4')
+		currNetCDFTRMMData.description = 'Cloud Element '+CEuniqueID + ' rainfall data'
+		currNetCDFTRMMData.calendar = 'standard'
+		currNetCDFTRMMData.conventions = 'COARDS'
+		# dimensions
+		currNetCDFTRMMData.createDimension('time', None)
+		currNetCDFTRMMData.createDimension('lat', len(LAT[:,0]))
+		currNetCDFTRMMData.createDimension('lon', len(LON[0,:]))
+		# variables
+		TRMMprecip = ('time','lat', 'lon',)
+		times = currNetCDFTRMMData.createVariable('time', 'f8', ('time',))
+		times.units = 'hours since '+ fileDateTime[:-6] 
+		latitude = currNetCDFTRMMData.createVariable('latitude', 'f8', ('lat',))
+		longitude = currNetCDFTRMMData.createVariable('longitude', 'f8', ('lon',))
+		rainFallacc = currNetCDFTRMMData.createVariable('precipitation_Accumulation', 'f8',TRMMprecip )
+		rainFallacc.units = 'mm'
 
-			#nygrdTRMM = len(LATTRMM[:,0]); nxgrd = len(LONTRMM[0,:])
-			nygrd = len(LAT[:, 0]); nxgrd = len(LON[0, :])
+		longitude[:] = LON[0,:]
+		longitude.units = "degrees_east" 
+		longitude.long_name = "Longitude" 
 
-			precipRateMasked = ma.masked_array(precipRate, mask=(precipRate < 0.0))
-			#---------regrid the TRMM data to the MERG dataset ----------------------------------
-			#regrid using the do_regrid stuff from the Apache OCW 
-			regriddedTRMM = ma.zeros((0, nygrd, nxgrd))
-			regriddedTRMM = process.do_regrid(precipRateMasked[0,:,:], LATTRMM,  LONTRMM, LAT, LON, order=1, mdi= -999999999)
-			#----------------------------------------------------------------------------------
+		latitude[:] =  LAT[:,0]
+		latitude.units = "degrees_north"
+		latitude.long_name ="Latitude"
 
-			# #get the lat/lon info from cloudElement
-			latCEStart = LAT[0][0]
-			latCEEnd = LAT[-1][0]
-			lonCEStart = LON[0][0]
-			lonCEEnd = LON[0][-1]
+		finalCETRMMvalues = ma.zeros((brightnesstemp1.shape))
+		#-----------End most of NETCDF file stuff ------------------------------------	
+		for index,value in np.ndenumerate(brightnesstemp):
+			lat_index, lon_index = index
+			currTimeValue = 0
+			if value > 0:
 
-			#get the lat/lon info for TRMM data (different resolution)
-			latStartT = find_nearest(latsrawTRMMData, latCEStart)
-			latEndT = find_nearest(latsrawTRMMData, latCEEnd)
-			lonStartT = find_nearest(lonsrawTRMMData, lonCEStart)
-			lonEndT = find_nearest(lonsrawTRMMData, lonCEEnd)
-			latStartIndex = np.where(latsrawTRMMData == latStartT)
-			latEndIndex = np.where(latsrawTRMMData == latEndT)
-			lonStartIndex = np.where(lonsrawTRMMData == lonStartT)
-			lonEndIndex = np.where(lonsrawTRMMData == lonEndT)
-
-			#get the relevant TRMM info 
-			CEprecipRate = precipRate[:,(latStartIndex[0][0]-1):latEndIndex[0][0],(lonStartIndex[0][0]-1):lonEndIndex[0][0]]
-			TRMMData.close()
+				finalCETRMMvalues[0,lat_index,lon_index] = regriddedTRMM[int(np.where(LAT[:,0]==LAT[lat_index,0])[0]), int(np.where(LON[0,:]==LON[0,lon_index])[0])]
 				
 
-			
-			# ------ NETCDF File stuff ------------------------------------
-			thisFileName = MAINDIRECTORY+'/TRMMnetcdfCEs/'+ fileDateTime + CEuniqueID +'.nc'
-			# print "thisFileName ", thisFileName
-			# sys.exit()
-			currNetCDFData = Dataset(thisFileName, 'w', format='NETCDF4')
-			currNetCDFData.description = 'Cloud Element '+CEuniqueID + ' rainfall data'
-			currNetCDFData.calendar = 'standard'
-			currNetCDFData.conventions = 'COARDS'
-			# dimensions
-			currNetCDFData.createDimension('time', None)
-			currNetCDFData.createDimension('lat', CEprecipRate.shape[1])
-			currNetCDFData.createDimension('lon', CEprecipRate.shape[2])
-			# variables
-			TRMMprecip = ('time','lat', 'lon',)
-			times = currNetCDFTRMMData.createVariable('time', 'f8', ('time',))
-			times.units = 'hours since '+ str(timelist[t])[:-6]
-			latitude = currNetCDFTRMMData.createVariable('latitude', 'f8', ('lat',))
-			longitude = currNetCDFTRMMData.createVariable('longitude', 'f8', ('lon',))
-			rainFallacc = currNetCDFTRMMData.createVariable('precipitation_Accumulation', 'f8',TRMMprecip )
-			rainFallacc.units = 'mm'
+		rainFallacc[:] = finalCETRMMvalues
+		currNetCDFTRMMData.close()
 
-			longitude[:] = LON[0,:]
-			longitude.units = "degrees_east" 
-			longitude.long_name = "Longitude" 
+		for index, value in np.ndenumerate(finalCETRMMvalues):
+			precipTotal += value 
 
-			latitude[:] =  LAT[:,0]
-			latitude.units = "degrees_north"
-			latitude.long_name ="Latitude"
+		TRMMnumOfBoxes = np.count_nonzero(finalCETRMMvalues)
+		TRMMArea = TRMMnumOfBoxes*XRES*YRES	
 
-			finalCETRMMvalues = ma.zeros((brightnesstemp.shape))
-			#-----------End most of NETCDF file stuff ------------------------------------	
-			#finalCETRMMvalues = ma.zeros((CEprecipRate.shape))
-			for index,value in np.ndenumerate(brightnesstemp):
-				#print "index, value ", index, value
-				time_index, lat_index, lon_index = index
-				currTimeValue = 0
-				if value > 0:
-					finalCETRMMvalues[0,int(np.where(LAT[:,0]==brightnesstemp[time_index,lat_index])[0]),int(np.where(LON[0,:]==brightnesstemp[time_index,lon_index])[0])] = regriddedTRMM[int(np.where(LAT[:,0]==brightnesstemp[time_index,lat_index])[0]),int(np.where(LON[0,:]==brightnesstemp[time_index,lon_index])[0])]
-						
+		try:
+			minCEprecipRate = np.min(finalCETRMMvalues[np.nonzero(finalCETRMMvalues)])
+		except:
+			minCEprecipRate = 0.0
 
-					# #print "lat_index and value ", lat_index, latsrawCloudElements[lat_index]
-					# currLatvalue = find_nearest(latsrawTRMMData, latsrawCloudElements[lat_index])
-					# currLonValue = find_nearest(lonsrawTRMMData ,lonsrawCloudElements[lon_index])
-					# currLatIndex = np.where(latsrawTRMMData==currLatvalue)[0][0]-latStartIndex[0][0]
-					# currLonIndex = np.where(lonsrawTRMMData==currLonValue)[0][0]- lonStartIndex[0][0]
-					# #print "currLatIndex , currLonIndex ", currLatIndex , currLonIndex
-					# finalCETRMMvalues[time_index,currLatIndex , currLonIndex] = value * TRES*1.0 #because the rainfall TRMM is mm/hr
-					# # if currLatvalue != prevLatValue and currLonValue != prevLonValue:
-					# # 	precipTotal = value*temporalRes*1.0
-					# # prevLatValue = currLatvalue
-					# # prevLonValue = currLonValue
+		try:
+			maxCEprecipRate = np.max(finalCETRMMvalues[np.nonzero(finalCETRMMvalues)])
+		except:
+			maxCEprecipRate = 0.0
 
-			TRMMnumOfBoxes = np.count_nonzero(finalCETRMMvalues)
-			TRMMArea = TRMMnumOfBoxes*XRES*YRES		
-			rainFallacc[:] = finalCETRMMvalues
-			currNetCDFData.close()
-			for index, value in np.ndenumerate(finalCETRMMvalues):
-					#print "index, value ", index, value
-					precipTotal += value 
+		#add info to CLOUDELEMENTSGRAPH
+		#TODO try block
+		for eachdict in CLOUD_ELEMENT_GRAPH.nodes(CEuniqueID):
+			if eachdict[1]['uniqueID'] == CEuniqueID:
+				if not 'cloudElementPrecipTotal' in eachdict[1].keys():
+					eachdict[1]['cloudElementPrecipTotal'] = precipTotal
+				if not 'cloudElementLatLonTRMM' in eachdict[1].keys():
+					eachdict[1]['cloudElementLatLonTRMM'] = finalCETRMMvalues
+				if not 'TRMMArea' in eachdict[1].keys():
+					eachdict[1]['TRMMArea'] = TRMMArea
+				if not 'CETRMMmin' in eachdict[1].keys():
+					eachdict[1]['CETRMMmin'] = minCEprecipRate
+				if not 'CETRMMmax' in eachdict[1].keys():
+					eachdict[1]['CETRMMmax'] = maxCEprecipRate
 
-			# #add info to the dictionary and to the list
-			# TRMMdataDict = {'uniqueID': CEuniqueID, 'cloudElementTime': (fullFname.replace("_"," ").split('F')[0]).split('s')[1],'cloudElementLatLon': finalCETRMMvalues, 'cloudElementPrecipTotal':precipTotal}
-			# allCEnodesTRMMdata.append(TRMMdataDict)
-			# print "precipTotal is ", precipTotal
-			#add info to CLOUDELEMENTSGRAPH
-			for eachdict in CLOUD_ELEMENT_GRAPH.nodes(CEuniqueID):
-				if eachdict[1]['uniqueID'] == CEuniqueID:
-					if not 'cloudElementPrecipTotal' in eachdict[1].keys():
-						eachdict[1]['cloudElementPrecipTotal'] = precipTotal
-					if not 'cloudElementLatLonTRMM' in eachdict[1].keys():
-						eachdict[1]['cloudElementLatLonTRMM'] = finalCETRMMvalues
-					if not 'TRMMArea' in eachdict[1].keys():
-						eachdict[1]['TRMMArea'] = TRMMArea
 		#clean up
 		precipTotal = 0.0
 		latsrawTRMMData =[]
@@ -777,13 +762,16 @@ def findPrecipRate(TRMMdirName):
 #******************************************************************	
 def findCloudClusters(CEGraph):
 	'''
-	Purpose:: Determines the cloud clusters properties from the subgraphs in 
+	Purpose:: 
+		Determines the cloud clusters properties from the subgraphs in 
 	    the graph i.e. prunes the graph according to the minimum depth
 
-	Input:: CEGraph: 1 graph -  a directed graph of the CEs with weighted edges
-			    according the area overlap between nodes (CEs) of consectuive frames
+	Input:: 
+		CEGraph: a Networkx directed graph of the CEs with weighted edges
+		according the area overlap between nodes (CEs) of consectuive frames
     
-    Output:: PRUNED_GRAPH: 1 graph - a directed graph of with CCs/ MCSs
+    Output:: 
+    	PRUNED_GRAPH: a Networkx directed graph of with CCs/ MCSs
 
 	'''
 
@@ -825,8 +813,7 @@ def findCloudClusters(CEGraph):
 	print "number of edges are: ", PRUNED_GRAPH.number_of_edges()
 	print ("*"*80)		
 					
-	#graphTitle = "Cloud Clusters observed over Niamey, Niger 11 Sep 2006 00Z - 12 Sep 2006 12Z"
-	graphTitle = "Cloud Clusters observed over  Burkina Faso 31 Aug 2009 00Z - 01 Sep 2008 23Z"
+	graphTitle = "Cloud Clusters observed over somewhere during sometime"
 	drawGraph(PRUNED_GRAPH, graphTitle, edgeWeight)
 	cloudClustersFile.close
 	
@@ -834,13 +821,17 @@ def findCloudClusters(CEGraph):
 #******************************************************************
 def findMCC (prunedGraph):
 	'''
-	Purpose:: Determines if subtree is a MCC according to Laurent et al 1998 criteria
+	Purpose:: 
+		Determines if subtree is a MCC according to Laurent et al 1998 criteria
 
-	Input:: prunedGraph: a Networkx Graph representing the CCs 
+	Input:: 
+		prunedGraph: a Networkx Graph representing the CCs 
 
-    Output:: finalMCCList: a list of list of tuples representing a MCC
+    Output:: 
+    	finalMCCList: a list of list of tuples representing a MCC
              
-    Assumptions: frames are ordered and are equally distributed in time e.g. hrly satellite images
+    Assumptions: 
+    	frames are ordered and are equally distributed in time e.g. hrly satellite images
  
 	'''
 	MCCList = []
@@ -997,18 +988,22 @@ def findMCC (prunedGraph):
 #******************************************************************
 def traverseTree(subGraph,node, queue, checkedNodes=None):
 	'''
-	Purpose:: To traverse a tree using a modified depth-first iterative deepening (DFID) search algorithm 
+	Purpose:: 
+		To traverse a tree using a modified depth-first iterative deepening (DFID) search algorithm 
 
-	Input:: subGraph: a Networkx DiGraph representing a CC
+	Input:: 
+		subGraph: a Networkx DiGraph representing a CC
 			lengthOfsubGraph: an integer representing the length of the subgraph
 			node: a string representing the node currently being checked
 			queue: a list of strings representing a list of nodes in a stack functionality 
 					i.e. First-In-FirstOut (FIFO) for sorting the information from each visited node
 			checkedNodes: a list of strings representing the list of the nodes in the traversal
     
-    Output:: checkedNodes: a list of strings representing the list of the nodes in the traversal
+    Output:: 
+    	checkedNodes: a list of strings representing the list of the nodes in the traversal
 
-    Assumptions: frames are ordered and are equally distributed in time e.g. hrly satellite images
+    Assumptions: 
+    	frames are ordered and are equally distributed in time e.g. hrly satellite images
  
 	'''
 	if len(checkedNodes) == len(subGraph):
@@ -1026,7 +1021,7 @@ def traverseTree(subGraph,node, queue, checkedNodes=None):
 			for child in downOneLevel:
 				if child not in checkedNodes and child not in queue:
 					queue.insert(0,child)
-					#downCheckFlag = True
+		
 			queue.insert(0,parent)	
 
 	for child in downOneLevel:
@@ -1036,10 +1031,8 @@ def traverseTree(subGraph,node, queue, checkedNodes=None):
 			else:
 				queue.append(child)		
 	
-	#print "^^^^^stack ", stack
 	for eachNode in queue:
 		if eachNode not in checkedNodes:
-			#print "if eachNode ", checkedNodes, eachNode, stack
 			checkedNodes.append(eachNode)
 			return traverseTree(subGraph, eachNode, queue, checkedNodes)
 	
@@ -1047,14 +1040,17 @@ def traverseTree(subGraph,node, queue, checkedNodes=None):
 #******************************************************************
 def checkedNodesMCC (prunedGraph, nodeList):
 	'''
-	Purpose :: Determine if this path is (or is part of) a MCC and provides 
-	           preliminary information regarding the stages of the feature
+	Purpose :: 
+		Determine if this path is (or is part of) a MCC and provides 
+	    preliminary information regarding the stages of the feature
 
-	Input:: prunedGraph: a Networkx Graph representing all the cloud clusters 
-			nodeList: list of strings (CE ID) from the traversal
+	Input:: 
+		prunedGraph: a Networkx Graph representing all the cloud clusters 
+		nodeList: list of strings (CE ID) from the traversal
 		
-	Output:: potentialMCCList: list of dictionaries representing all possible MCC within the path
-			 dictionary = {"possMCCList":[(node,'I')], "fullMCSMCC":[(node,'I')], "CounterCriteriaA": CounterCriteriaA, "durationAandB": durationAandB}
+	Output:: 
+		potentialMCCList: list of dictionaries representing all possible MCC within the path
+			dictionary = {"possMCCList":[(node,'I')], "fullMCSMCC":[(node,'I')], "CounterCriteriaA": CounterCriteriaA, "durationAandB": durationAandB}
 	'''
 	
 	CounterCriteriaAFlag = False
@@ -1063,14 +1059,13 @@ def checkedNodesMCC (prunedGraph, nodeList):
 	MATURITYFLAG = False
 	DECAYFLAG = False
 	thisdict = {} #will have the same items as the cloudElementDict 
-	cloudElementArea = 0.0
+	cloudElementAreaB = 0.0
+	cloudElementAreaA = 0.0
 	epsilon = 0.0
 	frameNum =0
 	oldNode =''
 	potentialMCCList =[]
 	durationAandB = 0
-	CounterCriteriaA = 0
-	CountercriteriaB = 0
 
 	#check for if the list contains only one string/node
 	if type(nodeList) is str:
@@ -1085,41 +1080,62 @@ def checkedNodesMCC (prunedGraph, nodeList):
 		existingFrameFlag = False
 
 		if thisdict['cloudElementArea'] >= OUTER_CLOUD_SHIELD_AREA:
-			#print "OUTER_CLOUD_SHIELD_AREA met by: ", node, INITIATIONFLAG, MATURITYFLAG, DECAYFLAG
 			CounterCriteriaAFlag = True
 			INITIATIONFLAG = True
 			MATURITYFLAG = False
-			#check if criteriaB is meet
-			cloudElementArea,criteriaB = checkCriteriaB(thisdict['cloudElementLatLon'])
 
-			#if Criteria A and B have been met, then the MCC is initiated, i.e. store node as potentialMCC
-	   		if cloudElementArea >= INNER_CLOUD_SHIELD_AREA:
-	   			#print "INNER_CLOUD_SHIELD_AREA met by: ", node, INITIATIONFLAG, MATURITYFLAG, DECAYFLAG
-	   			CounterCriteriaBFlag = True
-	   			#append this information on to the dictionary
-	   			addInfothisDict(node, cloudElementArea, criteriaB)
-	   			INITIATIONFLAG = False
-	   			MATURITYFLAG = True
-	   			stage = 'M'
-	   			potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag) 			
-   			else:
-   				#criteria B failed
-   				CounterCriteriaBFlag = False
-   				if INITIATIONFLAG == True:
-   					stage = 'I'   					
-   					potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+			#check if criteriaA is met
+			cloudElementAreaA, criteriaA = checkCriteria(thisdict['cloudElementLatLon'], OUTER_CLOUD_SHIELD_TEMPERATURE)
+			#TODO: calcuate the eccentricity at this point and read over????or create a new field in the dict
+			
+			if cloudElementAreaA >= OUTER_CLOUD_SHIELD_AREA:
+				#check if criteriaB is met
+				cloudElementAreaB,criteriaB = checkCriteria(thisdict['cloudElementLatLon'], INNER_CLOUD_SHIELD_TEMPERATURE)
+				
+				#if Criteria A and B have been met, then the MCC is initiated, i.e. store node as potentialMCC
+		   		if cloudElementAreaB >= INNER_CLOUD_SHIELD_AREA:
+		   			#TODO: add another field to the dictionary for the OUTER_AREA_SHIELD area
+		   			CounterCriteriaBFlag = True
+		   			#append this information on to the dictionary
+		   			addInfothisDict(node, cloudElementAreaB, criteriaB)
+		   			INITIATIONFLAG = False
+		   			MATURITYFLAG = True
+		   			stage = 'M'
+		   			potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag) 			
+	   			else:
+	   				#criteria B failed
+	   				CounterCriteriaBFlag = False
+	   				if INITIATIONFLAG == True:
+	   					stage = 'I'   					
+	   					potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
 
-   				elif (INITIATIONFLAG == False and MATURITYFLAG == True) or DECAYFLAG==True:
-   					DECAYFLAG = True
-   					MATURITYFLAG = False
-   					stage = 'D'
-   					potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+	   				elif (INITIATIONFLAG == False and MATURITYFLAG == True) or DECAYFLAG==True:
+	   					DECAYFLAG = True
+	   					MATURITYFLAG = False
+	   					stage = 'D'
+	   					potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+	   		else:
+	   			#criteria A failed
+	   			CounterCriteriaAFlag = False
+	   			CounterCriteriaBFlag = False
+	   			#add as a CE before or after the main feature
+				if INITIATIONFLAG == True or (INITIATIONFLAG == False and MATURITYFLAG == True):
+					stage ="I"
+					potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+	   			elif (INITIATIONFLAG == False and MATURITYFLAG == False) or DECAYFLAG == True:
+	   				stage = "D"
+	   				DECAYFLAG = True
+	   				potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+	   			elif (INITIATIONFLAG == False and MATURITYFLAG == False and DECAYFLAG == False):
+	   				stage ="I"
+	   				potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
+
+
    		else:
    			#criteria A failed
    			CounterCriteriaAFlag = False
    			CounterCriteriaBFlag = False
-   			#print "!!OUTER_CLOUD_SHIELD_AREA NOT met by: ", node, INITIATIONFLAG, MATURITYFLAG, DECAYFLAG
-			#add as a CE before or after the main feature
+   			#add as a CE before or after the main feature
 			if INITIATIONFLAG == True or (INITIATIONFLAG == False and MATURITYFLAG == True):
 				stage ="I"
 				potentialMCCList = updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag)
@@ -1135,16 +1151,19 @@ def checkedNodesMCC (prunedGraph, nodeList):
 #******************************************************************
 def updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag, CounterCriteriaBFlag):
 	'''
-	Purpose :: Utility function to determine if a path is (or is part of) a MCC and provides 
+	Purpose:: 
+		Utility function to determine if a path is (or is part of) a MCC and provides 
 	           preliminary information regarding the stages of the feature
 
-	Input:: prunedGraph: a Networkx Graph representing all the cloud clusters
-			potentialMCCList: a list of dictionaries representing the possible MCCs within a path
-			node: a string representing the cloud element currently being assessed
-			CounterCriteriaAFlag: a boolean value indicating whether the node meets the MCC criteria A according to Laurent et al
-			CounterCriteriaBFlag: a boolean value indicating whether the node meets the MCC criteria B according to Laurent et al
+	Input:: 
+		prunedGraph: a Networkx Graph representing all the cloud clusters
+		potentialMCCList: a list of dictionaries representing the possible MCCs within a path
+		node: a string representing the cloud element currently being assessed
+		CounterCriteriaAFlag: a boolean value indicating whether the node meets the MCC criteria A according to Laurent et al
+		CounterCriteriaBFlag: a boolean value indicating whether the node meets the MCC criteria B according to Laurent et al
 	
-	Output:: potentialMCCList: list of dictionaries representing all possible MCC within the path
+	Output:: 
+		potentialMCCList: list of dictionaries representing all possible MCC within the path
 			 dictionary = {"possMCCList":[(node,'I')], "fullMCSMCC":[(node,'I')], "CounterCriteriaA": CounterCriteriaA, "durationAandB": durationAandB}
 
 	'''
@@ -1173,7 +1192,7 @@ def updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag
 		
 		if predecessorsFlag == True:	
 
-			for eachNode in potentialMCCList[index]["possMCCList"]:# MCCDict["possMCCList"]:
+			for eachNode in potentialMCCList[index]["possMCCList"]:
 				if int((eachNode[0].split('CE')[0]).split('F')[1]) == frameNum :
 					existingFrameFlag = True
 					
@@ -1218,7 +1237,7 @@ def updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag
 			successorsFlag, index = isThereALink(prunedGraph, 2,node,potentialMCCList,2)
 			
 			if successorsFlag == True:
-				for eachNode in potentialMCCList[index]["possMCCList"]: #MCCDict["possMCCList"]:
+				for eachNode in potentialMCCList[index]["possMCCList"]: 
 					if int((eachNode[0].split('CE')[0]).split('F')[1]) == frameNum:
 						existingFrameFlag = True
 						
@@ -1310,16 +1329,19 @@ def updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag
 #******************************************************************
 def isThereALink(prunedGraph, upOrDown,node,potentialMCCList,whichList):
 	'''
-	Purpose: Utility script for updateMCCList mostly because there is no Pythonic way to break out of nested loops
+	Purpose:: 
+		Utility script for updateMCCList mostly because there is no Pythonic way to break out of nested loops
 	
-	Input:: prunedGraph:a Networkx Graph representing all the cloud clusters
-			upOrDown: an integer representing 1- to do predecesor check and 2 - to do successor checkedNodesMCC
-			node: a string representing the cloud element currently being assessed
-			potentialMCCList: a list of dictionaries representing the possible MCCs within a path
-			whichList: an integer representing which list ot check in the dictionary; 1- possMCCList, 2- fullMCSMCC
+	Input:: 
+		prunedGraph:a Networkx Graph representing all the cloud clusters
+		upOrDown: an integer representing 1- to do predecesor check and 2 - to do successor checkedNodesMCC
+		node: a string representing the cloud element currently being assessed
+		potentialMCCList: a list of dictionaries representing the possible MCCs within a path
+		whichList: an integer representing which list ot check in the dictionary; 1- possMCCList, 2- fullMCSMCC
 			
-	Output:: thisFlag: a boolean representing whether the list passed has in the parent or child of the node
-			 index: an integer representing the location in the potentialMCCList where thisFlag occurs
+	Output:: 
+		thisFlag: a boolean representing whether the list passed has in the parent or child of the node
+		index: an integer representing the location in the potentialMCCList where thisFlag occurs
 
 	'''
 	thisFlag = False
@@ -1337,7 +1359,7 @@ def isThereALink(prunedGraph, upOrDown,node,potentialMCCList,whichList):
 			index = -1
 			for MCCDict in potentialMCCList:
 				index += 1
-				if aNode in list(x[0] for x in MCCDict[checkList]): #[0]:
+				if aNode in list(x[0] for x in MCCDict[checkList]): 
 					thisFlag = True
 					#get out of looping so as to avoid the flag being written over when another node in the predecesor list is checked
 					return thisFlag, index
@@ -1350,7 +1372,7 @@ def isThereALink(prunedGraph, upOrDown,node,potentialMCCList,whichList):
 			for MCCDict in potentialMCCList:
 				index += 1
 				
-				if aNode in list(x[0] for x in MCCDict[checkList]): #[0]:
+				if aNode in list(x[0] for x in MCCDict[checkList]): 
 					thisFlag = True
 					return thisFlag, index
 
@@ -1358,12 +1380,16 @@ def isThereALink(prunedGraph, upOrDown,node,potentialMCCList,whichList):
 #******************************************************************
 def maxExtentAndEccentricity(eachList):
 	'''
-	Purpose:: perform the final check for MCC based on maximum extent and eccentricity criteria
+	Purpose:: 
+		Perform the final check for MCC based on maximum extent and eccentricity criteria
 
-	Input:: eachList: a list of strings  representing the node of the possible MCCs within a path
+	Input:: 
+		eachList: a list of strings  representing the node of the possible MCCs within a path
 
-	Output:: maxShieldNode: a string representing the node with the maximum maxShieldNode
-	         definiteMCCFlag: a boolean indicating that the MCC has met all requirements
+	Output:: 
+		maxShieldNode: a string representing the node with the maximum maxShieldNode
+	    definiteMCCFlag: a boolean indicating that the MCC has met all requirements
+
 	'''
 	maxShieldNode =''
 	maxShieldArea = 0.0
@@ -1385,13 +1411,16 @@ def maxExtentAndEccentricity(eachList):
 #******************************************************************
 def findMaxDepthAndMinPath (thisPathDistanceAndLength):
 	'''
-	Purpose:: To determine the maximum depth and min path for the headnode
+	Purpose:: 
+		To determine the maximum depth and min path for the headnode
 
-	Input:: tuple of dictionaries representing the shortest distance and paths for a node in the tree as returned by nx.single_source_dijkstra
-			thisPathDistanceAndLength({distance}, {path})
+	Input:: 
+		tuple of dictionaries representing the shortest distance and paths for a node in the tree as returned by nx.single_source_dijkstra
+		thisPathDistanceAndLength({distance}, {path})
 			{distance} = nodeAsString, valueAsInt, {path} = nodeAsString, pathAsList
 
-	Output:: tuple of the max pathLength and min pathDistance as a tuple (like what was input)
+	Output:: 
+		tuple of the max pathLength and min pathDistance as a tuple (like what was input)
 			minDistanceAndMaxPath = ({distance},{path}) 
 	'''
 	maxPathLength = 0
@@ -1416,30 +1445,37 @@ def findMaxDepthAndMinPath (thisPathDistanceAndLength):
 			if pathLength == maxPathLength :
 				if pathDistance <= minPath:
 					minPath = pathLength
-					#store details if absolute minPath and deepest... so need to search this stored info in tuple myTup = {dict1, dict2}
+					#store details if absolute minPath and deepest
 					minDistanceAndMaxPath = (pathDistance, path)
 	return minDistanceAndMaxPath
 #******************************************************************
 def thisDict (thisNode):
 	'''
-	Purpose:: return dictionary from graph if node exist in tree
+	Purpose:: 
+		Return dictionary from graph if node exist in tree
 
-	Input:: String - thisNode
+	Input:: 
+		thisNode: a string representing the CE to get the information for
 
-	Output :: Dictionary - eachdict[1] associated with thisNode from the Graph
+	Output :: 
+		eachdict[1]: a dictionary representing the info associated with thisNode from the graph
 
 	'''
 	for eachdict in CLOUD_ELEMENT_GRAPH.nodes(thisNode):
 		if eachdict[1]['uniqueID'] == thisNode:
 			return eachdict[1]
 #******************************************************************
-def checkCriteriaB (thisCloudElementLatLon):
+def checkCriteria (thisCloudElementLatLon, aTemperature):
 	'''
-	Purpose:: Determine if criteria B is met for a CEGraph
+	Purpose:: 
+		Determine if criteria B is met for a CEGraph
 
-	Input:: 2d array of (lat,lon) variable from the node dictionary being currently considered
+	Input:: 
+		thisCloudElementLatLon: 2D array of (lat,lon) variable from the node dictionary being currently considered
+		aTemperature:a integer representing the temperature maximum for masking
 
-	Output :: float - cloudElementArea, masked array of values meeting the criteria - criteriaB
+	Output :: 
+		cloudElementArea: a floating-point number representing the area in the array that meet the criteria - criteriaB
 
 	'''
 	cloudElementCriteriaBLatLon=[]
@@ -1453,25 +1489,20 @@ def checkCriteriaB (thisCloudElementLatLon):
 	minLon = min(x[1]for x in thisCloudElementLatLon)
 	maxLon = max(x[1]for x in thisCloudElementLatLon)
 
-	#print "minLat, maxLat, minLon, maxLon ", minLat, maxLat, minLon, maxLon
 	minLatIndex = np.argmax(LAT[:,0] == minLat)
 	maxLatIndex = np.argmax(LAT[:,0]== maxLat)
 	minLonIndex = np.argmax(LON[0,:] == minLon)
 	maxLonIndex = np.argmax(LON[0,:] == maxLon)
-
-	#print "minLatIndex, maxLatIndex, minLonIndex, maxLonIndex ", minLatIndex, maxLatIndex, minLonIndex, maxLonIndex
 
 	criteriaBframe = ma.zeros(((abs(maxLatIndex - minLatIndex)+1), (abs(maxLonIndex - minLonIndex)+1)))
 	
 	for x in thisCloudElementLatLon:
 		#to store the values of the subset in the new array, remove the minLatIndex and minLonindex from the
 		#index given in the original array to get the indices for the new array
-		#criteriaBframe[(np.argmax(LAT[:,0] == x[0])),(np.argmax(LON[0,:] == x[1]))] = x[2]
 		criteriaBframe[(np.argmax(LAT[:,0] == x[0]) - minLatIndex),(np.argmax(LON[0,:] == x[1]) - minLonIndex)] = x[2]
 
-	#print criteriaBframe
-	#keep only those values < TBB_MAX
-	tempMask = ma.masked_array(criteriaBframe, mask=(criteriaBframe >= INNER_CLOUD_SHIELD_TEMPERATURE), fill_value = 0)
+	#keep only those values < aTemperature
+	tempMask = ma.masked_array(criteriaBframe, mask=(criteriaBframe >= aTemperature), fill_value = 0)
 	
 	#get the actual values that the mask returned
 	criteriaB = ma.zeros((criteriaBframe.shape)).astype('int16')
@@ -1493,10 +1524,6 @@ def checkCriteriaB (thisCloudElementLatLon):
 	   		cloudElementArea = 0.0
 	   		return cloudElementArea, cloudElementCriteriaBLatLon
 	   
-	   	print "after loc", loc
-	   	print "************************"
-	   	#print "criteriaB ", criteriaB.shape
-	   	print criteriaB
 	   	try:
 	   		cloudElementCriteriaB = ma.zeros((criteriaB.shape))
 	   		cloudElementCriteriaB =criteriaB[loc] 
@@ -1513,7 +1540,7 @@ def checkCriteriaB (thisCloudElementLatLon):
    				cloudElementCriteriaBLatLon.append(lat_lon_tuple)
 
 		cloudElementArea = np.count_nonzero(cloudElementCriteriaB)*XRES*YRES
-		#do some
+		#do some cleaning up
 		tempMask =[]
 		criteriaB =[]
 		cloudElementCriteriaB=[]
@@ -1522,11 +1549,13 @@ def checkCriteriaB (thisCloudElementLatLon):
 #******************************************************************
 def hasMergesOrSplits (nodeList):
 	'''
-	Purpose:: Determine if nodes within a path defined from shortest_path splittingNodeDict
-	Input:: nodeList - list of nodes from a path
-	Output:: two list_vars_in_file
-			 splitList list of all the nodes in the path that split
-			 mergeList list of all the nodes in the path that merged
+	Purpose:: 
+		Determine if nodes within a path defined from shortest_path splittingNodeDict
+	Input:: 
+		nodeList: list of strings representing the nodes from a path
+	Output:: 
+		splitList: a list of strings representing all the nodes in the path that split
+		mergeList: a list of strings representing all the nodes in the path that merged
 	'''
 	mergeList=[]
 	splitList=[]
@@ -1546,13 +1575,16 @@ def hasMergesOrSplits (nodeList):
 #******************************************************************
 def allAncestors(path, aNode):
 	'''
-	Purpose:: Utility script to provide the path leading up to a nodeList
+	Purpose:: 
+		Utility script to provide the path leading up to a nodeList
 
-	Input:: list of strings - path: the nodes in the path 
-	        string - aNode: a string representing a node to be checked for parents
+	Input:: 
+		path: a list of strings representing the nodes in the path 
+	    aNode: a string representing a node to be checked for parents
 
-	Output:: list of strings - path: the list of the nodes connected to aNode through its parents
-			 integer - numOfChildren: the number of parents of the node passed
+	Output:: 
+		path: a list of strings representing the list of the nodes connected to aNode through its parents
+		numOfChildren: an integer representing the number of parents of the node passed
 	'''
 
 	numOfParents = PRUNED_GRAPH.in_degree(aNode)
@@ -1569,13 +1601,16 @@ def allAncestors(path, aNode):
 #******************************************************************
 def allDescendants(path, aNode):
 	'''
-	Purpose:: Utility script to provide the path leading up to a nodeList
+	Purpose:: 
+		Utility script to provide the path leading up to a nodeList
 
-	Input:: list of strings - path: the nodes in the path 
-	        string - aNode: a string representing a node to be checked for children
+	Input:: 
+		path: a list of strings representing the nodes in the path 
+	    aNode: a string representing a node to be checked for children
 
-	Output:: list of strings - path: the list of the nodes connected to aNode through its children
-			 integer - numOfChildren: the number of children of the node passed
+	Output:: 
+		path: a list of strings representing the list of the nodes connected to aNode through its children
+		numOfChildren: an integer representing the number of children of the node passed
 	'''
 
 	numOfChildren = PRUNED_GRAPH.out_degree(aNode)
@@ -1594,13 +1629,15 @@ def allDescendants(path, aNode):
 #******************************************************************
 def addInfothisDict (thisNode, cloudElementArea,criteriaB):
 	'''
-	Purpose:: update original dictionary node with information
+	Purpose:: 
+		Update original dictionary node with information
 
-	Input:: String - thisNode
-			float - cloudElementArea, 
-			masked array of floats meeting the criteria - criteriaB
+	Input:: 
+		thisNode: a string representing the unique ID of a node
+		cloudElementArea: a floating-point number representing the area of the cloud element
+		criteriaB: a masked array of floating-point numbers representing the lat,lons meeting the criteria  
 
-	Output :: 
+	Output:: None 
 
 	'''
 	for eachdict in CLOUD_ELEMENT_GRAPH.nodes(thisNode):
@@ -1613,8 +1650,9 @@ def addNodeBehaviorIdentifier (thisNode, nodeBehaviorIdentifier):
 	'''
 	Purpose:: add an identifier to the node dictionary to indicate splitting, merging or neither node
 
-	Input:: String - thisNode
-	        String - nodeBehaviorIdentifier = S- split, M- merge, B- both split and merge, N- neither split or merge 
+	Input:: 
+		thisNode: a string representing the unique ID of a node
+	    nodeBehaviorIdentifier: a string representing the behavior S- split, M- merge, B- both split and merge, N- neither split or merge 
 
 	Output :: None
 
@@ -1627,11 +1665,12 @@ def addNodeBehaviorIdentifier (thisNode, nodeBehaviorIdentifier):
 #******************************************************************
 def addNodeMCSIdentifier (thisNode, nodeMCSIdentifier):
 	'''
-	Purpose:: add an identifier to the node dictionary to indicate splitting, merging or neither node
+	Purpose:: 
+		Add an identifier to the node dictionary to indicate splitting, merging or neither node
 
-	Input:: String - thisNode
-			String - nodeMCSIdentifier = 'I' for Initiation, 'M' for Maturity, 'D' for Decay
-	       
+	Input:: 
+		thisNode: a string representing the unique ID of a node
+		nodeMCSIdentifier: a string representing the stage of the MCS lifecyle  'I' for Initiation, 'M' for Maturity, 'D' for Decay
 
 	Output :: None
 
@@ -1644,11 +1683,12 @@ def addNodeMCSIdentifier (thisNode, nodeMCSIdentifier):
 #******************************************************************
 def updateNodeMCSIdentifier (thisNode, nodeMCSIdentifier):
 	'''
-	Purpose:: update an identifier to the node dictionary to indicate splitting, merging or neither node
+	Purpose:: 
+		Update an identifier to the node dictionary to indicate splitting, merging or neither node
 
-	Input:: String - thisNode
-			String - nodeMCSIdentifier = 'I' for Initiation, 'M' for Maturity, 'D' for Decay
-	       
+	Input:: 
+		thisNode: thisNode: a string representing the unique ID of a node
+		nodeMCSIdentifier: a string representing the stage of the MCS lifecyle  'I' for Initiation, 'M' for Maturity, 'D' for Decay  
 
 	Output :: None
 
@@ -1667,12 +1707,10 @@ def eccentricity (cloudElementLatLon):
 	    values tending to 0 are more linear
 	
 	Input::
-	    1 variable
-		cloudElementLatLon: 3D array in (time,lat,lon),T_bb contiguous squares 
+		cloudElementLatLon: 2D array in (lat,lon) representing T_bb contiguous squares 
 		
 	Output::
-	    1 variable
-		epsilon: a float representing the eccentricity of the matrix passed
+		epsilon: a floating-point representing the eccentricity of the matrix passed
 	
 	'''
 	
@@ -1698,14 +1736,12 @@ def cloudElementOverlap (currentCELatLons, previousCELatLons):
 	    Determines the percentage overlap between two list of lat-lons passed
 
 	Input::
-	    2 sorted list of tuples
-	    currentCELatLons - the list of tuples for the current CE
-	    previousCELatLons - the list of tuples for the other CE being considered
+	    currentCELatLons: a list of tuples for the current CE
+	    previousCELatLons: a list of tuples for the other CE being considered
 
 	Output::
-	    2 variables 
-	    percentageOverlap - a float representing the number of overlapping lat_lon tuples
-	    areaOverlap - a floating-point number representing the area overlapping
+	    percentageOverlap: a floating-point representing the number of overlapping lat_lon tuples
+	    areaOverlap: a floating-point number representing the area overlapping
 
 	'''
 
@@ -1732,13 +1768,15 @@ def cloudElementOverlap (currentCELatLons, previousCELatLons):
 #******************************************************************
 def findCESpeed(node, MCSList):
 	'''
-	Purpose:: to determine the speed of the CEs
-			  uses vector displacement delta_lat/delta_lon (y/x)
+	Purpose:: 
+		To determine the speed of the CEs uses vector displacement delta_lat/delta_lon (y/x)
 
-	Input:: node: a string representing the CE
-			MCSList: a list of strings representing the feature
+	Input:: 
+		node: a string representing the CE
+		MCSList: a list of strings representing the feature
 
 	Output::
+		CEspeed: a floating-point number representing the speed of the CE 
 
 	'''
 
@@ -1750,42 +1788,23 @@ def findCESpeed(node, MCSList):
 
 	theList = CLOUD_ELEMENT_GRAPH.successors(node)
 	nodeLatLon=thisDict(node)['cloudElementCenter']
-	#print "nodeLatLon ", nodeLatLon
-
-
+	
 	for aNode in theList:
 		if aNode in MCSList:
 			#if aNode is part of the MCSList then determine distance
 			aNodeLatLon = thisDict(aNode)['cloudElementCenter']
-			#print "aNodeLatLon ", aNodeLatLon
 			#calculate CE speed
 			#checking the lats
 			nodeLatLon[0] += 90.0
 			aNodeLatLon[0] += 90.0
-			delta_lat = (nodeLatLon[0] - aNodeLatLon[0]) #convert to m
-			#delta_lat = (nodeLatLon[0] - aNodeLatLon[0])*LAT_DISTANCE*1000 #convert to m
-			#recall -ve ans --> northward tracking, -ve ans --> southwart tracking
-
-			#checking lons lonsraw[lonsraw > 180] = lonsraw[lonsraw > 180] - 360.  # convert to -180,180 if necessary
-			#recall +ve ans --> westward tracking, -ve ans --> eastward tracking
-			# if nodeLatLon[1] < 0.0:
-			# 	nodeLatLon[1] += 360.0
-			# if aNodeLatLon[1] <= 0.0:
-			# 	delta_lon = aNodeLatLon[1] + 360.0
-			#0E --> 360 and E lons > west lons 
+			delta_lat = (nodeLatLon[0] - aNodeLatLon[0]) 
 			nodeLatLon[1] += 360.0
 			aNodeLatLon[1] += 360.0
-			delta_lon = (nodeLatLon[1] - aNodeLatLon[1]) #convert to m
-			#delta_lon = (nodeLatLon[1] - aNodeLatLon[1])*LON_DISTANCE*1000 #convert to m
-			
-			#print "delta_lat, delta_lon ", delta_lat, delta_lon
-
-			#theSpeed = abs(((delta_lat*LAT_DISTANCE*1000)/(delta_lon*LON_DISTANCE*1000))/(TRES*3600)) #convert to s --> m/s
+			delta_lon = (nodeLatLon[1] - aNodeLatLon[1]) 
 			theSpeed = abs((((delta_lat/delta_lon)*LAT_DISTANCE*1000)/(TRES*3600))) #convert to s --> m/s
 			
 			CEspeed.append(theSpeed)
-			#print "aNode CE speed is ", aNode, (((delta_lat/delta_lon)*LAT_DISTANCE*1000)/(TRES*3600)), theSpeed
-
+			
 	if not CEspeed:
 		return 0.0
 	else:
@@ -1802,13 +1821,11 @@ def maenumerate(mArray):
 	    Taken from: http://stackoverflow.com/questions/8620798/numpy-ndenumerate-for-masked-arrays
 	
 	Input::
-	    1 variable
-		mArray - the masked array returned from the ma.array() command
+		mArray: the masked array returned from the ma.array() command
 		
 		
 	Output::
-	    1 variable
-		maskedValues - 3D (t,lat,lon), value of only masked values
+		maskedValues: 3D (t,lat,lon), value of only masked values
 	
 	'''
 
@@ -1820,9 +1837,11 @@ def maenumerate(mArray):
 #******************************************************************
 def createMainDirectory(mainDirStr):
 	'''
-	Purpose:: to create the main directory for storing information and
-			  the subdirectories for storing information
-	Input:: mainDir: a directory for where all information generated from
+	Purpose:: 
+		To create the main directory for storing information and
+		the subdirectories for storing information
+	Input:: 
+		mainDir: a directory for where all information generated from
 			the program are to be stored
 	Output:: None
 
@@ -2001,7 +2020,6 @@ def postProcessingNetCDF(dataset, dirName = None):
 	#Just incase the X11 server is giving problems
 	subprocess.call('export DISPLAY=:0.0', shell=True)
 
-	print "coreDir is ", str(coreDir)
 	prevFrameNum = 0
 
 	if dataset == 1:
@@ -2183,16 +2201,20 @@ def postProcessingNetCDF(dataset, dirName = None):
 #******************************************************************	
 def drawGraph (thisGraph, graphTitle, edgeWeight=None):
 	'''
-	Purpose:: Utility function to draw graph in the hierachial format
+	Purpose:: 
+		Utility function to draw graph in the hierachial format
 
-	Input:: a Networkx graph
-			a string representing the graph title
-			a list of integers representing the edge weights in the graph
+	Input:: 
+		thisGraph: a Networkx directed graph 
+		graphTitle: a string representing the graph title
+		edgeWeight: (optional) a list of integers representing the edge weights in the graph
+	
 	Output:: None
+
 	'''
 	
 	imgFilename = MAINDIRECTORY+'/images/'+ graphTitle+".gif"
-	fig=plt.figure(facecolor='white', figsize=(16,12)) #figsize=(10,8))#figsize=(16,12))
+	fig=plt.figure(facecolor='white', figsize=(16,12)) 
 	
 	edge95 = [(u,v) for (u,v,d) in thisGraph.edges(data=True) if d['weight'] == edgeWeight[0]]
 	edge90 = [(u,v) for (u,v,d) in thisGraph.edges(data=True) if d['weight'] == edgeWeight[1]]
@@ -2201,41 +2223,28 @@ def drawGraph (thisGraph, graphTitle, edgeWeight=None):
 	nx.write_dot(thisGraph, 'test.dot')
 	plt.title(graphTitle)
 	pos = nx.graphviz_layout(thisGraph, prog='dot')
-	#nx.draw(thisGraph, pos, with_labels=True, arrows=True)
 	#draw graph in parts
 	#nodes
 	nx.draw_networkx_nodes(thisGraph, pos, with_labels=True, arrows=False)
 	#edges
-	nx.draw_networkx_edges(thisGraph, pos, edgelist=edge95, alpha=0.5, arrows=False) #with_labels=True, arrows=True)
+	nx.draw_networkx_edges(thisGraph, pos, edgelist=edge95, alpha=0.5, arrows=False) 
 	nx.draw_networkx_edges(thisGraph, pos, edgelist=edge90,  edge_color='b', style='dashed', arrows=False)
 	nx.draw_networkx_edges(thisGraph, pos, edgelist=edegeOverlap, edge_color='y', style='dashed', arrows=False)
 	#labels
-	nx.draw_networkx_labels(thisGraph,pos, arrows=False) #,font_size=20,font_family='sans-serif')
+	nx.draw_networkx_labels(thisGraph,pos, arrows=False)
 	plt.axis('off')
 	plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
 	#do some clean up...and ensuring that we are in the right dir
 	os.chdir((MAINDIRECTORY+'/'))
 	subprocess.call('rm test.dot', shell=True)
-	#plt.show()
-#******************************************************************
-def convert_timedelta(duration):
-	'''
-	Taken from http://stackoverflow.com/questions/14190045/how-to-convert-datetime-timedelta-to-minutes-hours-in-python
-
-	'''
-
-	days, seconds = duration.days, duration.seconds
-	hours = days * 24 + seconds // 3600
-	minutes = (seconds % 3600) // 60
-	seconds = (seconds % 60)
-	return hours, minutes, seconds
 #******************************************************************
 def tempMaskedImages(imgFilename):
 	'''
-	Purpose:: To generate temperature-masked images for a first pass verification
+	Purpose:: 
+		To generate temperature-masked images for a first pass verification
 
 	Input::
-	    filename for the gif file
+	    imgFilename: filename for the gif file
 		
 	Output::
 	    None - Gif images for each file of T_bb less than 250K are generated in folder called mergImgs
@@ -2258,61 +2267,47 @@ def tempMaskedImages(imgFilename):
 	subprocess.call('echo "''\'set clevs 190 200 210 220 230 240 250''\'" >> tempMaskedImages.gs', shell=True)
 	subprocess.call('echo "''\'d ch4+75''\'" >> tempMaskedImages.gs', shell=True)
 	subprocess.call('echo "''\'draw title Masked Temp @ '+imgFilename +'\'" >> tempMaskedImages.gs', shell=True)
-	#printimCmd = 'printim '+imgFilename +' x1000 y800'
 	subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800''\'" >> tempMaskedImages.gs', shell=True)
 	subprocess.call('echo "''\'quit''\'" >> tempMaskedImages.gs', shell=True)
 	gradscmd = 'grads -blc ' + '\'run tempMaskedImages.gs''\'' 
 	subprocess.call(gradscmd, shell=True)
 	return
 #******************************************************************
-#******************************************************************
 # 
 #             METRICS FUNCTIONS FOR MERG.PY
+# TODO: rewrite these metrics so that they use the data from the 
+#	file instead of the graph as this reduce mem resources needed
+#	
 #
-#------------------------------------------------------------------
-#1)Need to know the starttime and end time
-#  - determine most common, least common and avg initiation time
-#  - determine duration
-#  
-#2)Need criteria B area and temperature 
-#  - determine max, min and avg area and T	
-#  - visualization opportunity to show all the criteriaB for time
-#	 on a map	
-#
-#3)Need temperature and area data
-#  - calculate the max, min and average temp
-#
-#4)Need lat/lon and T for all MCC
-#  - visualization of all MCCs during the time
-#  - calculate speed of the system
-# ****** Comparing with other datasets ******
-#5)Need lat/lon and times for all MCCs
-#  - use to locate same positions in dataset2 (e.g. TRMM) to 
-#    determine precip
 #******************************************************************
 def numberOfFeatures(finalMCCList):
 	'''
-	Purpose:: To count the number of MCCs found for the period
+	Purpose:: 
+		To count the number of MCCs found for the period
 
-	Input:: a list of list of strings - finalMCCList: a list of list of nodes representing a MCC
+	Input:: 
+		finalMCCList: a list of list of strings representing a list of list of nodes representing a MCC
 	
-	Output::an integer representing the number of MCCs found
-
-	Assumptions::
+	Output::
+		an integer representing the number of MCCs found
 
 	'''
 	return len(finalMCCList)
 #******************************************************************
 def temporalAndAreaInfoMetric(finalMCCList):
 	'''
-	Purpose:: To provide information regarding the temporal properties of the MCCs found
+	Purpose:: 
+		To provide information regarding the temporal properties of the MCCs found
 
-	Input:: List of dictionaries - finalMCCList: a list of dictionaries of nodes representing a MCC
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
 	
-	Output:: list of dictionaries - allMCCtimes {MCCtimes, starttime, endtime, duration, area): a list of dictionaries
-			  of MCC temporal details for each MCC in the period considered
+	Output:: 
+		allMCCtimes: a list of dictionaries {MCCtimes, starttime, endtime, duration, area} representing a list of dictionaries
+			of MCC temporal details for each MCC in the period considered
 
-	Assumptions:: the final time hour --> the event lasted throughout that hr, therefore +1 to endtime
+	Assumptions:: 
+		the final time hour --> the event lasted throughout that hr, therefore +1 to endtime
 	'''
 	#TODO: in real data edit this to use datetime
 	#starttime =0
@@ -2323,19 +2318,15 @@ def temporalAndAreaInfoMetric(finalMCCList):
 	MCSArea =[]
 	
 	if finalMCCList:
-		#print "len finalMCCList is: ", len(finalMCCList)
 		for eachMCC in finalMCCList:
-			#print "eachMCC count in temporalInfoMetric is ", len(eachMCC)
 			#get the info from the node
 			for eachNode in eachMCC:
-				#print "eachNode in temporalInfoMetric is ", eachNode['uniqueID'], eachNode['cloudElementTime']
 				MCCtimes.append(thisDict(eachNode)['cloudElementTime'])
 				MCSArea.append(thisDict(eachNode)['cloudElementArea'])
 			
 			#sort and remove duplicates 
 			MCCtimes=list(set(MCCtimes))
 			MCCtimes.sort()
-			#print "MCCtimes are: ", MCCtimes
 			tdelta = MCCtimes[1] - MCCtimes[0]
 			starttime = MCCtimes[0]
 			endtime = MCCtimes[-1]
@@ -2346,19 +2337,22 @@ def temporalAndAreaInfoMetric(finalMCCList):
 			MCSArea=[]
 	else:
 		allMCCtimes =[]
-		tdelta = 0 # 00:00:00
+		tdelta = 0 
 
 	return allMCCtimes, tdelta
 #******************************************************************
 def longestDuration(allMCCtimes):
 	'''
-	Purpose:: To determine the longest MCC for the period
+	Purpose:: 
+		To determine the longest MCC for the period
 
-	Input:: list of dictionaries - allMCCtimes {MCCtimes, starttime, endtime, duration): a list of dictionaries
-			  of MCC temporal details for each MCC in the period considered
+	Input:: 
+		allMCCtimes: a list of dictionaries {MCCtimes, starttime, endtime, duration, area} representing a list of dictionaries
+			of MCC temporal details for each MCC in the period considered
 
-	Output::an integer - lenMCC: representing the duration of the longest MCC found
-	        a list of strings - longestMCC: representing the nodes of longest MCC
+	Output::
+		an integer - lenMCC: representing the duration of the longest MCC found
+	       a list of strings - longestMCC: representing the nodes of longest MCC
 
 	Assumptions:: 
 
@@ -2421,11 +2415,15 @@ def averageDuration(allMCCtimes):
 #******************************************************************
 def averageTime (allTimes):
 	'''
-	Purpose:: To determine the average time in a list of datetimes 
-			  e.g. of use is finding avg starttime, 
-	Input:: allTimes: a list of datetimes representing all of a given event e.g. start time
+	Purpose:: 
+		To determine the average time in a list of datetimes 
+		e.g. of use is finding avg starttime, 
+	Input:: 
+		allTimes: a list of datetimes representing all of a given event e.g. start time
 
-	Output:: a float representing the average of the times given
+	Output:: 
+		a floating-point number representing the average of the times given
+
 	'''
 	avgTime = 0
 
@@ -2466,11 +2464,14 @@ def averageFeatureSize(finalMCCList):
 #******************************************************************
 def commonFeatureSize(finalMCCList): 
 	'''
-	Purpose:: To determine the common (mode) MCC size for the period
+	Purpose:: 
+		To determine the common (mode) MCC size for the period
 
-	Input:: a list of list of strings - finalMCCList: a list of list of nodes representing a MCC
+	Input:: 
+		finalMCCList: a list of list of strings representing the list of nodes representing a MCC
 	
-	Output::a floating-point representing the average area of a MCC in the period
+	Output::
+		a floating-point representing the average area of a MCC in the period
 	        
 	Assumptions:: 
 
@@ -2491,19 +2492,16 @@ def commonFeatureSize(finalMCCList):
 	hist, bin_edges = np.histogram(thisMCCAvg)
 	return hist,bin_edges
 #******************************************************************
-def commonFeatureDuration (finalMCCList):
-	'''
-	'''
-#******************************************************************
 def displaySize(finalMCCList): 
 	'''
-	Purpose:: To create a figure showing the area verse time for each MCS
+	Purpose:: 
+		To create a figure showing the area verse time for each MCS
 
-	Input:: a list of list of strings - finalMCCList: a list of list of nodes representing a MCC
+	Input:: 
+		finalMCCList: a list of list of strings representing the list of nodes representing a MCC
 	
-	Output:: None
-	        
-	Assumptions:: 
+	Output:: 
+		None
 
 	'''
 	timeList =[]
@@ -2517,9 +2515,7 @@ def displaySize(finalMCCList):
 	#in the graph and calculate the area
 
 	if finalMCCList:
-		#print "len finalMCCList is: ", len(finalMCCList)
 		for eachMCC in finalMCCList:
-			#print "eachMCC count in temporalInfoMetric is ", len(eachMCC)
 			#get the info from the node
 			for node in eachMCC:
 				eachNode=thisDict(node)
@@ -2542,18 +2538,15 @@ def displaySize(finalMCCList):
 
 			#plot info
 			plt.close('all')
-			#title = 'Area verses time for MCS'+ str(count)
-			title = 'Area distribution of the MCC over Burkina Faso'
+			title = 'Area distribution of the MCC over somewhere'
 			fig=plt.figure(facecolor='white', figsize=(18,10)) #figsize=(10,8))#figsize=(16,12))
 			fig,ax = plt.subplots(1, facecolor='white', figsize=(10,10))
 			
 			#the data
 			for node in eachMCC: #for eachNode in eachMCC:
 				eachNode=thisDict(node)
-				#ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'ro')
 				if eachNode['cloudElementArea'] < 80000 : #2400.00:
 					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'bo', markersize=10)
-					#eachNode['cloudElementArea'] >= 2400.00 and eachNode['cloudElementArea'] < 10000.00:
 				elif eachNode['cloudElementArea'] >= 80000.00 and eachNode['cloudElementArea'] < 160000.00:
 					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'yo',markersize=20)
 				else:
@@ -2569,7 +2562,6 @@ def displaySize(finalMCCList):
 			fig.autofmt_xdate()
 			
 			plt.subplots_adjust(bottom=0.2)
-			#plt.show()
 			
 			imgFilename = MAINDIRECTORY+'/images/'+ str(count)+'MCS.gif'
 			plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
@@ -2581,11 +2573,14 @@ def displaySize(finalMCCList):
 #******************************************************************
 def precipTotals(finalMCCList):
 	'''
-	Purpose:: Precipitation totals associated with a cloud element
+	Purpose:: 
+		Precipitation totals associated with a cloud element
 
-	Input:: List of dictionaries - finalMCCList: a list of dictionaries of nodes representing a MCC
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
 
-	Output:: precipTotal - to total amount of precipitation associated 
+	Output:: 
+		precipTotal: a floating-point number representing the total amount of precipitation associated 
 			with the feature
 	'''
 	precipTotal = 0.0
@@ -2604,11 +2599,7 @@ def precipTotals(finalMCCList):
 				if count == 1:
 					prevHr = int(str(eachNode['cloudElementTime']).replace(" ", "")[-8:-6])
 				
-				#print "prevHr ", prevHr
 				currHr =int(str(eachNode['cloudElementTime']).replace(" ", "")[-8:-6])
-				#print "currHr ", currHr
-				print "time ",eachNode['cloudElementTime'], prevHr, currHr
-				print "eachNode[cloudElementPrecipTotal]  ", eachNode['cloudElementPrecipTotal'] 
 				if prevHr == currHr:
 					CEprecip += eachNode['cloudElementPrecipTotal'] 
 				else:
@@ -2622,8 +2613,7 @@ def precipTotals(finalMCCList):
 				prevHr = currHr
 
 			MCSPrecip.append(('0',precipTotal))
-			print "MCSPrecip ", MCSPrecip
-
+			
 			allMCSPrecip.append(MCSPrecip)
 			precipTotal =0.0
 			CEprecip = 0.0
@@ -2637,10 +2627,14 @@ def precipTotals(finalMCCList):
 def precipMaxMin(finalMCCList):
 	'''
 	TODO: this doesnt work the np.min/max function seems to be not working with the nonzero option..possibly a problem upstream with cloudElementLatLonTRMM
-	Purpose:: Precipitation maximum and min rates associated with each CE in MCS
-	Input:: List of dictionaries - finalMCCList: a list of dictionaries of nodes representing a MCC
+	Purpose:: 
+		Precipitation maximum and min rates associated with each CE in MCS
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
 
-	Output:: a list tuples indicating max and min rate for each CE identified
+	Output::
+		MCSPrecip: a list indicating max and min rate for each CE identified
+
 	'''
 	maxCEprecip = 0.0
 	minCEprecip =0.0
@@ -2660,30 +2654,17 @@ def precipMaxMin(finalMCCList):
 				print "maxCEprecip ", np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(eachNode['cloudElementLatLonTRMM'])])
 				sys.exit()
 				maxCEprecip = np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(eachNode['cloudElementLatLonTRMM'])])
-				#np.max((eachNode['cloudElementLatLonTRMM'])[np.nonzero((eachNode['cloudElementLatLonTRMM']))])
 				minCEprecip = np.min(eachNode['cloudElementLatLonTRMM'][np.nonzero(eachNode['cloudElementLatLonTRMM'])])
-				#np.min((eachNode['cloudElementLatLonTRMM'])[np.nonzero((eachNode['cloudElementLatLonTRMM']))])
 				MCSPrecip.append((eachNode['uniqueID'],minCEprecip, maxCEprecip))
-			# for node in finalMCCList:
-			# 	eachNode=thisDict(node) 
-			# 	#find min and max precip
-			# 	minCEprecip = min((eachNode['cloudElementLatLonTRMM'])[2])
-			# 	maxCEprecip = max((eachNode['cloudElementLatLonTRMM'])[2])
-			# 	MCSPrecip.append((eachNode['uniqueID'],minCEprecip, maxCEprecip))
-
+			
 		else:
 			for eachMCC in finalMCCList:
 				#get the info from the node
 				for node in eachMCC: 
 					eachNode=thisDict(node)
 					#find min and max precip
-					# minCEprecip = min((eachNode['cloudElementLatLonTRMM'])[2])
-					# maxCEprecip = max((eachNode['cloudElementLatLonTRMM'])[2])
-					# np.min(finalCETRMMvalues[np.nonzero(finalCETRMMvalues)])
 					maxCEprecip =  np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(eachNode['cloudElementLatLonTRMM'])])
-					#np.max((eachNode['cloudElementLatLonTRMM'])[np.nonzero((eachNode['cloudElementLatLonTRMM']))])
 					minCEprecip =  np.min(eachNode['cloudElementLatLonTRMM'][np.nonzero(eachNode['cloudElementLatLonTRMM'])])
-					#np.min((eachNode['cloudElementLatLonTRMM'])[np.nonzero((eachNode['cloudElementLatLonTRMM']))])
 					MCSPrecip.append((eachNode['uniqueID'],minCEprecip, maxCEprecip))
 				allMCSPrecip.append(MCSPrecip)
 				MCSPrecip =[]
@@ -2692,13 +2673,13 @@ def precipMaxMin(finalMCCList):
 #******************************************************************
 def displayPrecip(finalMCCList): 
 	'''
-	Purpose:: To create a figure showing the precip rate verse time for each MCS
+	Purpose:: 
+		To create a figure showing the precip rate verse time for each MCS
 
-	Input:: a list of list of strings - finalMCCList: a list of list of nodes representing a MCC
-	
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
+
 	Output:: None
-	        
-	Assumptions:: 
 
 	'''
 	timeList =[]
@@ -2728,7 +2709,6 @@ def displayPrecip(finalMCCList):
 	#in the graph and calculate the area
 
 	if finalMCCList:
-		#print "len finalMCCList is: ", len(finalMCCList)
 		for eachMCC in finalMCCList:
 			#get the info from the node
 			for node in eachMCC:
@@ -2736,10 +2716,8 @@ def displayPrecip(finalMCCList):
 				if firstTime == True:
 					xStart = eachNode['cloudElementCenter'][1]#lon
 					yStart = eachNode['cloudElementCenter'][0]#lat
-				#print "eachNode in temporalInfoMetric is ", eachNode['uniqueID'], eachNode['cloudElementTime']
 				timeList.append(eachNode['cloudElementTime'])
 				percentagePrecipitating.append((eachNode['TRMMArea']/eachNode['cloudElementArea'])*100.0)
-				#areaCenter.append((eachNode['cloudElementCenter'][1]-xStart, eachNode['cloudElementCenter'][0]-yStart))
 				CEArea.append(eachNode['cloudElementArea'])
 				nodes.append(eachNode['uniqueID'])
 				x.append(eachNode['cloudElementCenter'][1])#-xStart)
@@ -2757,13 +2735,11 @@ def displayPrecip(finalMCCList):
 			#plot info
 			plt.close('all')
 
-			#title = 'Area verses time for MCS'+ str(count)
 			title = 'Precipitation distribution of the MCS '
-			#fig=plt.figure(facecolor='white', figsize=(10,10)) #figsize=(10,8))#figsize=(16,12))
 			fig,ax = plt.subplots(1, facecolor='white', figsize=(20,7))
 
 			cmap = cm.jet
-			ax.scatter(x, y, s=partialArea,  c= colorBarTime, edgecolors='none', marker='o', cmap =cmap) #,vmin=colorBarTime[0],vmax=colorBarTime[-1]) 
+			ax.scatter(x, y, s=partialArea,  c= colorBarTime, edgecolors='none', marker='o', cmap =cmap)  
 			colorBarTime=[]
 			colorBarTime =list(set(timeList))
 			colorBarTime.sort()
@@ -2799,11 +2775,14 @@ def displayPrecip(finalMCCList):
 #******************************************************************
 def plotPrecipHistograms(finalMCCList):
 	'''
-	Purpose:: to create plots (histograms) of the each TRMMnetcdfCEs files
+	Purpose:: 
+		To create plots (histograms) of the each TRMMnetcdfCEs files
 
-	Input:: finalMCCList: the list of strings representing the list of MCCs
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
 
-	Output:: plots
+	Output:: 
+		plots
 	'''
 	num_bins = 5
 	precip =[]
@@ -2857,11 +2836,9 @@ def plotPrecipHistograms(finalMCCList):
 	    				imgFilename = MAINDIRECTORY+'/images/'+str(thisTime)+eachNode['uniqueID']+'TRMMMCS.gif'
 	    				
 	    				plt.savefig(imgFilename, transparent=True)
-	    				#plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
 	    				precip =[]
 	    				
 	    			# ------ NETCDF File get info ------------------------------------
-					#thisFileName = '/Users/kimwhitehall/Documents/HU/research/mccsearch/TRMMnetcdf/TRMM' + str(thisTime).replace(" ", "_") + eachNode['uniqueID'] +'.nc'
 					thisFileName = MAINDIRECTORY+'/TRMMnetcdfCEs/TRMM' + str(thisTime).replace(" ", "_") + eachNode['uniqueID'] +'.nc'
 					TRMMData = Dataset(thisFileName,'r', format='NETCDF4')
 					precipRate = TRMMData.variables['precipitation_Accumulation'][:,:,:]
@@ -2872,12 +2849,10 @@ def plotPrecipHistograms(finalMCCList):
 					
 					totalPrecip = np.add(totalPrecip, precipRate)
 					# ------ End NETCDF File ------------------------------------
-					#if str(thisTime) == lastTime:
 					for index, value in np.ndenumerate(CEprecipRate): 
 						if value != 0.0:
 							precip.append(value)
 
-					#print "*******eachNode ", eachNode['uniqueID']
 					lastTime = str(thisTime)
 					firstTime = False
 				else:
@@ -2887,13 +2862,16 @@ def plotPrecipHistograms(finalMCCList):
 #******************************************************************
 def plotHistogram(aList, aTitle, aLabel):
 	'''
-	Purpose:: to create plots (histograms) of the data entered in aList
+	Purpose:: 
+		To create plots (histograms) of the data entered in aList
 
-	Input:: aList: the list of floating points representing values for e.g. averageArea, averageDuration, etc.
-	        aTitle: a string representing the title and the name of the plot e.g. "Average area [km^2]"
-	        aLabel: a string representing the x axis info i.e. the data that is being passed and the units e.g. "Area km^2"
+	Input:: 
+		aList: the list of floating points representing values for e.g. averageArea, averageDuration, etc.
+	    aTitle: a string representing the title and the name of the plot e.g. "Average area [km^2]"
+	    aLabel: a string representing the x axis info i.e. the data that is being passed and the units e.g. "Area km^2"
 
-	Output:: plots (gif files)
+	Output:: 
+		plots (gif files)
 	'''
 	num_bins = 10
 	precip =[]
@@ -2921,32 +2899,32 @@ def plotHistogram(aList, aTitle, aLabel):
 		plt.xlim(min(binsdg), max(binsdg))
 		ax.set_xticks(binsdg)#, rotation=45)
 		ax.set_xlabel(aLabel, fontsize=12)
-		#ax.set_ylabel('Frequency', fontsize=12)
 		ax.set_title(aTitle)
 
 		plt.xticks(rotation =45)
 		# Set the formatter
-		#plt.gca().yaxis.set_major_formatter(formatter)
 		plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
 		plt.subplots_adjust(bottom=0.2)
 
 		imgFilename = MAINDIRECTORY+'/images/'+aTitle.replace(" ","_")+'.gif'
-		#plt.savefig(imgFilename, transparent=True)
 		plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
 				
 	return 
 #******************************************************************
 def plotAccTRMM (finalMCCList):
 	'''
-	Purpose:: (1) generate a file with the accumulated precipiation for the MCS
-			 (2) generate the appropriate image
-			TODO: NB: as the domain changes, will need to change XDEF and YDEF by hand to accomodate the new domain
-			 TODO: look into getting the info from the NETCDF file
+	Purpose:: 
+		(1) generate a file with the accumulated precipiation for the MCS
+		(2) generate the appropriate image
+		TODO: NB: as the domain changes, will need to change XDEF and YDEF by hand to accomodate the new domain
+		TODO: look into getting the info from the NETCDF file
 
-	Input:: finalMCCList: a list of strings representing the nodes that make a MCC (or MCS)
-		    
-	Output:: a netcdf file containing the accumulated precip 
-			 a gif (generated in Grads)
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
+  
+	Output:: 
+		a netcdf file containing the accumulated precip 
+		a gif (generated in Grads)
 	'''
 	os.chdir((MAINDIRECTORY+'/TRMMnetcdfCEs'))
 	fname =''
@@ -3023,7 +3001,6 @@ def plotAccTRMM (finalMCCList):
 		subprocess.call('rm acc.ctl', shell=True)
 		subprocess.call('touch acc.ctl', shell=True)
 		replaceExpDset = 'echo DSET ' + accuTRMMFile +' >> acc.ctl'
-		# replaceExpTdef = 'echo TDEF 99999 LINEAR 00Z 00000000 30mn' +' >> acc.ctl'
 		subprocess.call(replaceExpDset, shell=True)  
 		subprocess.call('echo "OPTIONS yrev little_endian template" >> acc.ctl', shell=True)
 		subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
@@ -3039,13 +3016,10 @@ def plotAccTRMM (finalMCCList):
         subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
 
         #generate GrADS script
-        #print "thisNode ", thisNode
-        #imgFilename = MAINDIRECTORY+'/images/MCSaccu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.gif'
         subprocess.call('rm accuTRMM1.gs', shell=True)
         subprocess.call('touch accuTRMM1.gs', shell=True)
         subprocess.call('echo "''\'reinit''\'" >> accuTRMM1.gs', shell=True)
         subprocess.call('echo "''\'open acc.ctl ''\'" >> accuTRMM1.gs', shell=True)
-        #subprocess.call('echo "''\'open '+accuTRMMFile+ '\'" >> accuTRMM1.gs', shell=True)
         subprocess.call('echo "''\'set grads off''\'" >> accuTRMM1.gs', shell=True)
         subprocess.call('echo "''\'set mpdset hires''\'" >> accuTRMM1.gs', shell=True)
         subprocess.call('echo "''\'set gxout shaded''\'" >> accuTRMM1.gs', shell=True)
@@ -3066,13 +3040,16 @@ def plotAccTRMM (finalMCCList):
 #******************************************************************
 def plotAccuInTimeRange(starttime, endtime):
 	'''
-	Purpose:: create accumulated precip plot within a time range given using all CEs
+	Purpose:: 
+		Create accumulated precip plot within a time range given using all CEs
 
-	Input:: starttime: a string representing the time to start the accumulations format yyyy-mm-dd_hh:mm:ss
-			endtime: a string representing the time to end the accumulations format yyyy-mm-dd_hh:mm:ss
+	Input:: 
+		starttime: a string representing the time to start the accumulations format yyyy-mm-dd_hh:mm:ss
+		endtime: a string representing the time to end the accumulations format yyyy-mm-dd_hh:mm:ss
 
-	Output:: a netcdf file containing the accumulated precip for specified times
-			 a gif (generated in Grads)
+	Output:: 
+		a netcdf file containing the accumulated precip for specified times
+		a gif (generated in Grads)
 
 	TODO: pass of pick up from the NETCDF file the  lat, lon and resolution for generating the ctl file
 	'''
@@ -3081,7 +3058,6 @@ def plotAccuInTimeRange(starttime, endtime):
 	#Just incase the X11 server is giving problems
 	subprocess.call('export DISPLAY=:0.0', shell=True)
 
-	#fname =''
 	imgFilename = ''
 	firstPartName = ''
 	firstTime = True
@@ -3089,7 +3065,6 @@ def plotAccuInTimeRange(starttime, endtime):
 	fileList = []
 	sTime = datetime.strptime(starttime.replace("_"," "),'%Y-%m-%d %H:%M:%S')
 	eTime = datetime.strptime(endtime.replace("_"," "),'%Y-%m-%d %H:%M:%S')
-	#tdelta = datetime.timedelta(0, 3600)
 	thisTime = sTime
 
 	while thisTime <= eTime:
@@ -3115,7 +3090,8 @@ def plotAccuInTimeRange(starttime, endtime):
 		thisTime +=timedelta(hours=TRES)
 
 	#create new netCDF file
-	accuTRMMFile = MAINDIRECTORY+'TRMMnetcdfCEs/accu'+starttime+'-'+endtime+'.nc'
+	accuTRMMFile = MAINDIRECTORY+'/TRMMnetcdfCEs/accu'+starttime+'-'+endtime+'.nc'
+	print "accuTRMMFile ", accuTRMMFile
 	#write the file
 	accuTRMMData = Dataset(accuTRMMFile, 'w', format='NETCDF4')
 	accuTRMMData.description =  'Accumulated precipitation data'
@@ -3157,8 +3133,8 @@ def plotAccuInTimeRange(starttime, endtime):
 	subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
 	subprocess.call('echo "UNDEF  0" >> acc.ctl', shell=True)
 	subprocess.call('echo "TITLE  TRMM MCS accumulated precipitation" >> acc.ctl', shell=True)
-	subprocess.call('echo "XDEF 413 LINEAR  -9.984375 0.036378335 " >> acc.ctl', shell=True)
-	subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
+	subprocess.call('echo "XDEF 384 LINEAR  -8.96875 0.036378335 " >> acc.ctl', shell=True)
+	subprocess.call('echo "YDEF 384 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
 	subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
 	subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
 	subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
@@ -3190,22 +3166,22 @@ def plotAccuInTimeRange(starttime, endtime):
 #******************************************************************
 def createTextFile(finalMCCList, identifier):
 	'''
-	Purpose:: Create a text file with information about the MCS
-			  This function is expected to be especially of use regarding 
-			  long term record checks
+	Purpose:: 
+		Create a text file with information about the MCS
+		This function is expected to be especially of use regarding long term record checks
 
-	Input:: finalMCCList: list of list of strings representing list of MCSs nodes list
-			identifier: an integer representing the type of list that has been entered...this is for creating file purposes
+	Input:: 
+		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
+		identifier: an integer representing the type of list that has been entered...this is for creating file purposes
 			1 - MCCList; 2- MCSList
 
 	Output:: 
-		     a user readable text file with all information about each MCS
-		     a user readable text file with the summary of the MCS
+		a user readable text file with all information about each MCS
+		a user readable text file with the summary of the MCS
 
 	Assumptions:: 
 	'''
 
-	#allTimes =[]
 	durations=0.0
 	startTimes =[]
 	endTimes=[]
@@ -3213,7 +3189,6 @@ def createTextFile(finalMCCList, identifier):
 	speedCounter = 0
 	maxArea =0.0
 	amax = 0.0
-	#avgMaxArea = 0.0
 	avgMaxArea =[]
 	maxAreaCounter =0.0
 	maxAreaTime=''
@@ -3238,7 +3213,6 @@ def createTextFile(finalMCCList, identifier):
 	bigPtotal = 0.0
 	bigPtotalCounter = 0
 	allPropagationSpeeds =[]
-	#averageAreas = 0.0
 	averageAreas =[]
 	areaAvg = 0.0
 	avgPrecipTotal = 0.0
@@ -3249,6 +3223,7 @@ def createTextFile(finalMCCList, identifier):
 	avgMinMCSPrecipRateCounter = 0
 	minMax =[]
 	avgPrecipArea = []
+	location =[]
 	avgPrecipAreaPercent = 0.0
 	precipArea = 0.0
 	precipAreaPercent = 0.0
@@ -3266,9 +3241,6 @@ def createTextFile(finalMCCList, identifier):
 		MCSUserFile = open((MAINDIRECTORY+'/textFiles/MCSsUserFile.txt'),'wb')
 		MCSSummaryFile = open((MAINDIRECTORY+'/textFiles/MCSSummary.txt'),'wb')
 
-	
-	#MCCsFile = open((MAINDIRECTORY+'/textFiles/MCCsFile.txt'),'wb')
-	
 	for eachPath in finalMCCList:
 		eachPath.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0], nodeID.split('CE')[1]))
 
@@ -3284,16 +3256,13 @@ def createTextFile(finalMCCList, identifier):
 		endTimes.append(endTime)
 
 		#get the precip info
-		#MCSPrecip = precipMaxMin(eachPath)
-
+		
 		for eachNode in eachPath:
 
 			thisNode = thisDict(eachNode)
 
 			#set first time min "fake" values
 			if firstTime == True:
-				# minCEprecipRate = MCSPrecip[0][1]
-				# avgMinMCSPrecipRate = MCSPrecip[0][1]
 				minCEprecipRate = thisNode['CETRMMmin']
 				avgMinMCSPrecipRate += thisNode['CETRMMmin']
 				firstTime = False
@@ -3306,27 +3275,19 @@ def createTextFile(finalMCCList, identifier):
 			#Amax: find max area
 			if thisNode['cloudElementArea'] > maxArea:
 				maxArea = thisNode['cloudElementArea']
-				# avgMaxArea += maxArea
-				# maxAreaCounter += 1
 				maxAreaTime = str(thisNode['cloudElementTime'])
 				eccentricity = thisNode['cloudElementEccentricity']
-
+				location = thisNode['cloudElementCenter']
+				
 				#determine the time the feature matures
 				if matureFlag == True:
 					timeMCSMatures = str(thisNode['cloudElementTime'])
 					matureFlag = False
 
-			#find min and max precip rate
-			# minMax = list(value_tuple for node,value_tuple in enumerate(MCSPrecip) if value_tuple[0] == eachNode)
-			# if minMax[0][1] < minCEprecipRate:
-			# 	minCEprecipRate = minMax[0][1]
-			# 	print "minCEprecipRate ", minCEprecipRate
-			# if minMax[0][2] > maxCEprecipRate:
-			# 	maxCEprecipRate = minMax[0][2]
-			# 	print "maxCEprecipRate ", maxCEprecipRate
+			#find min and max precip rate 
 			if thisNode['CETRMMmin'] < minCEprecipRate:
 				minCEprecipRate = thisNode['CETRMMmin']
-				#print "minCEprecipRate ", minCEprecipRate
+		
 			if thisNode['CETRMMmax'] > maxCEprecipRate:
 				maxCEprecipRate = thisNode['CETRMMmax']
 				
@@ -3337,15 +3298,6 @@ def createTextFile(finalMCCList, identifier):
 				averageArea += thisNode['cloudElementArea']
 				averageAreaCounter += 1
 				durationOfMatureMCC +=1
-				#precip total avg for only the mature stage
-				# avgMaxPrecipRate += minMax[0][2]
-				# avgMaxPrecipRateCounter += 1
-				# avgMinPrecipRate += minMax[0][1]
-				# avgMinPrecipRateCounter += 1
-				# avgMaxMCSPrecipRate += minMax[0][2]
-				# avgMaxMCSPrecipRateCounter += 1
-				# avgMinMCSPrecipRate += minMax[0][1]
-				# avgMinMCSPrecipRateCounter += 1
 				avgMaxPrecipRate += thisNode['CETRMMmax']
 				avgMaxPrecipRateCounter += 1
 				avgMinPrecipRate += thisNode['CETRMMmin']
@@ -3377,38 +3329,32 @@ def createTextFile(finalMCCList, identifier):
 		#A: calculate the average Area of the (mature) MCS
 		if averageAreaCounter > 0: # and averageAreaCounter > 0:
 			averageArea/= averageAreaCounter
-			#averageAreas += averageArea
 			averageAreas.append(averageArea)
 
 		#v: MCS speed 
 		if MCSspeedCounter > 0: # and MCSspeed > 0.0:
 			MCSspeed /= MCSspeedCounter
-			#print "MCSspeed ", MCSspeed, "MCSspeedCounter ", MCSspeedCounter
-
+			
 		#smallP_max: calculate the average max precip rate (mm/h)
 		if avgMaxMCSPrecipRateCounter > 0 : #and avgMaxPrecipRate > 0.0:
 			avgMaxMCSPrecipRate /= avgMaxMCSPrecipRateCounter
-			#print "avgMaxMCSPrecipRate ", avgMaxMCSPrecipRate, "avgMaxMCSPrecipRateCounter ", avgMaxMCSPrecipRateCounter
-
+			
 		#smallP_min: calculate the average min precip rate (mm/h)
 		if avgMinMCSPrecipRateCounter > 0 : #and avgMinPrecipRate > 0.0:
 			avgMinMCSPrecipRate /= avgMinMCSPrecipRateCounter
-			#print "avgMinMCSPrecipRate ", avgMinMCSPrecipRate, "avgMinMCSPrecipRateCounter ", avgMinMCSPrecipRateCounter
-
+			
 		#smallP_avg: calculate the average precipitation (mm hr-1)
 		if MCSPrecipTotal > 0.0: # and avgMCSPrecipTotalCounter> 0:
 			avgMCSPrecipTotal = MCSPrecipTotal/avgMCSPrecipTotalCounter
 			avgPrecipTotal += avgMCSPrecipTotal
 			avgPrecipTotalCounter += 1
-			#print "avgPrecipTotal ", avgPrecipTotal, "avgPrecipTotalCounter ", avgPrecipTotalCounter
-
+			
 		#smallP_total = MCSPrecipTotal
 		#precip over the MCS lifetime prep for bigP_total
 		if MCSPrecipTotal > 0.0: 
 			bigPtotal += MCSPrecipTotal
 			bigPtotalCounter += 1
-			#print "MCSPrecipTotal ", MCSPrecipTotal, " bigPtotal ", bigPtotal
-
+			
 		if maxArea > 0.0:
 			avgMaxArea.append(maxArea)
 			maxAreaCounter += 1
@@ -3429,6 +3375,7 @@ def createTextFile(finalMCCList, identifier):
 		MCSUserFile.write("\nMax area is: %.4f km^2 " %(maxArea))
 		MCSUserFile.write("\nMax area time is: %s " %(maxAreaTime))
 		MCSUserFile.write("\nEccentricity at max area is: %.4f " %(eccentricity))
+		MCSUserFile.write("\nCenter (lat,lon) at max area is: %.2f\t%.2f" %(location[0], location[1]))
 		MCSUserFile.write("\nPropagation speed is %.4f " %(MCSspeed))
 		MCSUserFile.write("\nMCS minimum preicip rate is %.4f mmh^-1" %(minCEprecipRate))
 		MCSUserFile.write("\nMCS maximum preicip rate is %.4f mmh^-1" %(maxCEprecipRate))
@@ -3448,7 +3395,6 @@ def createTextFile(finalMCCList, identifier):
 
 		#reset vars for next MCS in list
 		aaveragePropagationSpeed = 0.0
-		#avgMaxArea = 0.0
 		averageArea = 0.0
 		averageAreaCounter = 0
 		durationOfMatureMCC = 0
@@ -3469,6 +3415,9 @@ def createTextFile(finalMCCList, identifier):
 		maxAreaTime=''
 		eccentricity = 0.0
 		timeMCSMatures=''
+		maxCEprecipRate = 0.0
+		minCEprecipRate = 0.0
+		location =[]
 
 	#LD: average duration
 	if len(finalMCCList) > 1:
@@ -3476,19 +3425,17 @@ def createTextFile(finalMCCList, identifier):
 		durations /= 3600.0 #convert to hours
 	
 		#A: average area
-		#averageAreas /= len(finalMCCList)
-
 		areaAvg = sum(averageAreas)/ len(finalMCCList)
 	#create histogram plot here
-	# if len(averageAreas) > 1:
-	# 	plotHistogram(averageAreas, "Average Area [km^2]", "Area [km^2]")
+	if len(averageAreas) > 1:
+		plotHistogram(averageAreas, "Average Area [km^2]", "Area [km^2]")
 
 	#Amax: average maximum area
 	if maxAreaCounter > 0.0: #and avgMaxArea > 0.0 : 
 		amax = sum(avgMaxArea)/ maxAreaCounter
 		#create histogram plot here
-		# if len(avgMaxArea) > 1:
-		# 	plotHistogram(avgMaxArea, "Maximum Area [km^2]", "Area [km^2]")
+		if len(avgMaxArea) > 1:
+			plotHistogram(avgMaxArea, "Maximum Area [km^2]", "Area [km^2]")
 
 	#v_avg: calculate the average propagation speed 
 	if speedCounter > 0 :  # and averagePropagationSpeed > 0.0
@@ -3517,31 +3464,23 @@ def createTextFile(finalMCCList, identifier):
 	#average precipitation area
 	if len(avgPrecipArea) > 0:
 		precipAreaAvg = sum(avgPrecipArea)/len(avgPrecipArea)
-		# if len(avgPrecipArea) > 1:
-		# 	plotHistogram(avgPrecipArea, "Average Rainfall Area [km^2]", "Area [km^2]")
+		if len(avgPrecipArea) > 1:
+			plotHistogram(avgPrecipArea, "Average Rainfall Area [km^2]", "Area [km^2]")
 		
 
-	#print "allPropagationSpeeds ",allPropagationSpeeds
-	#print "averageTime(startTime) ", str(averageTime(startTimes))
 	sTime = str(averageTime(startTimes))
 	eTime = str(averageTime(endTimes))
 	if len (allPropagationSpeeds) > 1:
 		maxSpeed = max(allPropagationSpeeds)
 		minSpeed = min(allPropagationSpeeds)
-	else:
-		maxSpeed = allPropagationSpeeds[0]
-		minSpeed = allPropagationSpeeds[0]
-
-
+	
 	#write stuff to the summary file
 	MCSSummaryFile.write("\nNumber of features is %d " %(len(finalMCCList)))
 	MCSSummaryFile.write("\nAverage duration is %.4f hrs " %(durations))
 	MCSSummaryFile.write("\nAverage startTime is %s " %(sTime[-8:]))
 	MCSSummaryFile.write("\nAverage endTime is %s " %(eTime[-8:]))
-	#MCSSummaryFile.write("\nAverage size is %.4f km^2 " %(averageAreas))
 	MCSSummaryFile.write("\nAverage size is %.4f km^2 " %(areaAvg))
 	MCSSummaryFile.write("\nAverage precipitation area is %.4f km^2 " %(precipAreaAvg))
-	#MCSSummaryFile.write("\nAverage maximum size is %.4f km^2 " %(avgMaxArea))
 	MCSSummaryFile.write("\nAverage maximum size is %.4f km^2 " %(amax))
 	MCSSummaryFile.write("\nAverage propagation speed is %.4f ms^-1" %(averagePropagationSpeed))
 	MCSSummaryFile.write("\nMaximum propagation speed is %.4f ms^-1 " %(maxSpeed))
@@ -3556,18 +3495,21 @@ def createTextFile(finalMCCList, identifier):
 	MCSUserFile.close
 	MCSSummaryFile.close
 	return
-
 #******************************************************************
 #			PLOTTING UTIL SCRIPTS
 #******************************************************************
 def to_percent(y,position):
 	'''
+	Purpose:: 
+		Utility script for generating the y-axis for plots
 	'''
 	return (str(100*y)+'%')
 #******************************************************************
 def colorbar_index(ncolors, nlabels, cmap):
 	'''
-	Taken from http://stackoverflow.com/questions/18704353/correcting-matplotlib-colorbar-ticks
+	Purpose:: 
+		Utility script for crating a colorbar
+		Taken from http://stackoverflow.com/questions/18704353/correcting-matplotlib-colorbar-ticks
 	'''
 	cmap = cmap_discretize(cmap, ncolors)
 	mappable = cm.ScalarMappable(cmap=cmap)
@@ -3604,735 +3546,6 @@ def cmap_discretize(cmap, N):
                        for i in xrange(N+1) ]
     # Return colormap object.
     return mcolors.LinearSegmentedColormap(cmap.name + "_%d"%N, cdict, 1024)
-#******************************************************************
-#			Deprecated over time
-#******************************************************************
-def isComplexTree(splitList, mergeList, mergeSplitList):
-	'''
-	Purpose:: Determine if a complex tree (with split and merge nodes) exist
-
-	Input:: list of strings - splitList: list of all the nodes in the path that split
-	        list of strings - mergeList: list of all the nodes in the path that merged
-	        list of strings - mergeSplitList: list of split and merged nodes in the tree
-
-	Output:: tuple (boolean, string) - complexTree: tuple with flag for if complexTree
-										and string for the node
-
-	Assumptions:: all passed lists are sorted
-
-	'''
-
-	counter = 0
-	complexTreeFlag=False
-	complexTreeNode=[]
-
-	for thisNode in mergeList:
-		# print "thisNode[0] ", thisNode[0]
-		# print "mergeSplitList[counter] ", mergeSplitList[counter]
-		# print "counter ", counter
-		if mergeSplitList[counter] == thisNode[0]:
-			counter +=1
-			#complexTreeFlag=True
-			complexMergeTree=thisNode[0]
-		else:
-			if counter > 1:
-				complexTreeFlag=True
-				break
-	return (complexTreeFlag,complexTreeNode)	
-#******************************************************************
-def cloudElementSpeed (cloudElementCenterLat, cloudElementCenterLon):
-	'''
-	Purpose::
-	    Determines the possible position of CE in the next frame
-	    It assumes that it only moves towards the W, but may move N or S
-	    Note that as this is called for a check of the CE with the prev F, 
-	    it is a backward in space check (this calclation affects the lon only)
-	`
-	Input::
-	    2 variables
-		cloudElementCenterLat - float of the lat representing the CE center_of_mass
-		cloudElementCenterLon - float of the lon representing the CE center_of_mass
-
-	Output::
-	    4 variables
-	    minCElat - float of the lat representing the min  lat CE center_of_mass
-	    minCElon - float of the lon representing the CE center_of_mass
-	    maxCElat - float of the lat representing the max lat CE center_of_mass
-	    maxCElon - float of the lon representing the max lon CE center_of_mass
-
-	Assumptions::
-	    The CE moves with the general flow (DIRECTION) as defined by the user. Of course, for smaller CEs this is not true,
-	    hence limiting the usefulness of MCSs searches. But for climate applications, this is an ok limitation
-	'''
-
-	#if the lat is +ve substract u-component as we are considering backward trajectory
-	if cloudElementCenterLat >= 0.0 :
-		maxCElat = cloudElementCenterLat + (-1*MIN_CE_SPEED * math.sin(DIRECTION *math.pi/180.0)) /LAT_DISTANCE
-		minCElat = cloudElementCenterLat + (-1*MAX_CE_SPEED * math.sin(DIRECTION *math.pi/180.0)) /LAT_DISTANCE
-	else:
-		maxCElat = cloudElementCenterLat - (-1*MIN_CE_SPEED * math.sin(DIRECTION *math.pi/180.0)) /LAT_DISTANCE
-		minCElat = cloudElementCenterLat - (-1*MAX_CE_SPEED * math.sin(DIRECTION *math.pi/180.0)) /LAT_DISTANCE
-
-	#if the lon is +ve substract the v-component as we are considering backward trajectory
-	if cloudElementCenterLon >= 0.0:
-		maxCElon = cloudElementCenterLon + (-1*MIN_CE_SPEED * math.cos(DIRECTION *math.pi/180.0)) /LON_DISTANCE
-		minCElon = cloudElementCenterLon + (-1*MAX_CE_SPEED * math.cos(DIRECTION *math.pi/180.0)) /LON_DISTANCE
-	else:
-		maxCElon = cloudElementCenterLon - (-1*MIN_CE_SPEED * math.cos(DIRECTION *math.pi/180.0)) /LON_DISTANCE
-		minCElon = cloudElementCenterLon - (-1*MAX_CE_SPEED * math.cos(DIRECTION *math.pi/180.0)) /LON_DISTANCE
-
-
-	#print cloudElementCenterLat, cloudElementCenterLon
-	#print "forecasted are" , minCElat, minCElon, maxCElat, maxCElon
-
-	return minCElat, minCElon, maxCElat, maxCElon
-#******************************************************************
-def findMCS (prunedGraph):
-	'''
-	Purpose:: Determines if subtree is a MCC according to Laurent et al 1998 criteria
-
-	Input:: a Networkx Graph - prunedGraph
-
-    Output:: a list of dicts - finalMCCList: a list of list of nodes representing a MCC
-   
-    Assumptions: frames are ordered and are equally distributed in time e.g. hrly satellite images
- 
-	'''
-	pathDictList =[]
-	allMCSLists =[]
-	allMCSListsTemp=[]
-	
-	MCSsFile = open((MAINDIRECTORY+'/textFiles/MCSsFile.txt'),'wb')
-
-	#connected_components is not available for DiGraph, so generate graph as undirected 
-	unDirGraph = PRUNED_GRAPH.to_undirected()
-	subGraphNodes = nx.connected_components(unDirGraph)
-
-	#for each path in the subgraphs determined
-	for path in subGraphNodes:
-		#order the values in the path according to the length of each string, the frame number, then the CE number
-		path.sort(key=lambda nodeID:(len(nodeID.split('CE')[0]), nodeID.split('CE')[0], nodeID.split('CE')[1]))
-
-		for node in path:
-			pathDictList.append(thisDict(node))
-
-		#create list of lists
-		allMCSLists.append(list(pathDictList))
-		allMCSListsTemp.append(path)
-		pathDictList =[]
-
-	for eachPath in allMCSListsTemp:
-			eachPath.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0], nodeID.split('CE')[1]))
-			MCSsFile.write("\n MCS is: %s " %eachPath)
-	
-	MCSsFile.close
-	
-	return allMCSLists 
-#******************************************************************	
-def removeListFromPath (aList,mainList,mergeSplitList):
-	'''
-	Purpose:: Utility script to remove a list of nodes from the path
-	Input:: 3 lists
-			aList - list of values to be deleted
-			mainList - list for values to be deleted from
-			mergeSplitList - list of nodes that are merged or split
-	Output:: the edited list 
-	'''
-
-	for node in aList:
-		try:
-			#if the node is not  apart of the merge split list, then remove it...
-			#this makes sure that merged/split nodes and paths aren't orphaned
-			if not node in mergeSplitList:
-				mainList.remove(node)
-		except:
-			print "node removed already"
-
-	mainList.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-	
-	return mainList
-#******************************************************************
-def generate_raw_values(sat_img):
-    for index, value in np.ndenumerate(sat_img):
-        print index, value
-#******************************************************************
-def generate_values(sat_img):
-    for index, value in np.ndenumerate(sat_img):
-        # Cast the 3 values in the index tuple to be used next
-        time_index, lat_index, lon_index = index
-        value_tuple =  (times[time_index], lat[lat_index], lon[lon_index], value)
-        print value_tuple
-#******************************************************************
-def generateFinalList (thisList, fileName):
-	'''
-	    Purpose:: Utility function to provide final MCS or MCC list
-
-		Input:: thisList - a list of list of strings or list of tuples (string, string)
-		        NB: this list is global variable
-				fileName - a string representing the fileName of where to store the info
-
-		Output:: finalList - a list of dictionaries 
-	'''
-	finalListTemp =[]
-	finalList =[]
-	dictList =[]
-	eachPathTemp=[]
-	eachPathDict={}
-
-	thisList.sort
-	#print "thisList ", thisList
-
-	#remove duplicates
-	finalListTemp = map(list,set(map(tuple,thisList)))
-
-	#print "finalListTemp ", finalListTemp
-
-	#generate list of dictionaries 
-	for eachPath in finalListTemp:
-		#print "eachPath ", eachPath[0], type(eachPath[0])
-
-		if type(eachPath[0]) is tuple:
-			eachPathTemp = list(x[0] for x in eachPath)
-			print "eachPathTemp in generateFinalList ", eachPathTemp
-			eachPathDict = dict(eachPath)
-			#eachPath.sort(key=lambda nodeID:(len(nodeID[0].split('C')[0]), nodeID[0].split('C')[0]))
-		else:
-			eachPathTemp = eachPath
-		
-		eachPathTemp.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-
-		fileName.write("\n MCC is: %s " %eachPathTemp)
-		#print "eachPath is: ", eachPathTemp 
-		for eachNode in eachPathTemp:
-
-			#print "eachNode in eachPath is: ", eachNode, eachPath
-			if type(eachPath[0]) is tuple:
-				#print "eachPathDict[eachNode] is ", eachPathDict[eachNode]
-				addNodeMCSIdentifier(thisDict,eachPathDict[eachNode])
-			#get node info and store in dictionary
-			dictList.append(thisDict(eachNode))
-
-		#create list of lists
-		finalList.append(list(dictList))
-		dictList=[]	
-
-	return finalList
-#******************************************************************
-def simplestPathMCC (nodeList, CounterCriteriaA,CounterCriteriaB,potentialMCCList2):
-	'''
-	Purpose :: to determine if this path is a MCC
-
-	Input:: list of nodes - nodeList: the nodes in the simple path 
-			2 integers - CounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						 CounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			list of nodes - potentialMCCList2: list of nodes representing a possible MCC
-			
-	Output:: list of nodes - potentialMCCList2: list of nodes representing a possible MCC
-			 2 integers - CounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						 CounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			list of nodes - checkedNodes: the nodes that have been visted whilst running this function
-
-	Assumptions:: this list of paths has no merged or split nodes
-	'''
-	global MCCFLAG1 #= False #min requirements met for MCC
-	MCCFLAG1 = False
-	global MCCFLAG2 #= False #max requirements met for MCC
-	MCCFLAG2 = False
-	INITIATIONFLAG = True
-	MATURITYFLAG = False
-	DECAYFLAG = False
-	
-	thisdict = {} #will have the same items as the cloudElementDict = {'uniqueID', 'cloudElementLatLon', 'cloudElementCenter', 'cloudElementArea'}
-	cloudElementArea = 0.0
-	epsilon = 0.0
-	MCCCritB = False
-	appendedFlag = False
-	appendedFlag1 = False
-	maximumExtent = 0.0
-	maximumExtentNode =''
-	maximumExtentCriteria=[]
-	oldNode=''
-	checkedNodes=[]
-	eachPathTemp=[]
-	eachPathTemp1=[]
-	overlap =[]
-	potentialListTemp =[]
-	#global definiteMCSMCCList
-
-	print "in simplestPathMCC ---- "
-	print "entering CounterCriteriaA, CounterCriteriaB ", CounterCriteriaA, CounterCriteriaB, potentialMCCList2
-
-	if type(nodeList) is str:
-		oldNode=nodeList
-		nodeList =[]
-		nodeList.append(oldNode)
-
-	for node in nodeList:
-		addNodeBehaviorIdentifier(node,'N')
-		thisdict = thisDict(node)
-		if thisdict['cloudElementArea'] >= OUTER_CLOUD_SHIELD_AREA:
-			print "OUTER_CLOUD_SHIELD_AREA met by: ", node
-			#if a CE for the same frame is not stored in the current MCC, then increment the counter
-			# if not filter(lambda thisnode: thisnode.split('CE')[0] in node, potentialMCCList2):			
-			# 	CounterCriteriaA += 1
-			CounterCriteriaA += 1
-		
-			cloudElementArea,criteriaB = checkCriteriaB(thisdict['cloudElementLatLon'])
-			
-			#if Criteria A and B have been met, then the MCC is initiated, i.e. store node as potentialMCC
-	   		if cloudElementArea >= INNER_CLOUD_SHIELD_AREA:
-	   			# if not filter(lambda thisnode: thisnode.split('CE')[0] in node, potentialMCCList2):
-	   			# 	CounterCriteriaB += 1
-	   			CounterCriteriaB += 1
-	   			potentialMCCList2.append(node)
-	   			MCCFLAG1 = True
-	   			#append this information on to the dictionary
-	   			addInfothisDict(node, cloudElementArea, criteriaB)
-	   			#updating MCSMCC list
-	   			INITIATIONFLAG = False
-	   			MATURITYFLAG = True
-	   			"****adding node to potentialList, 'M'"
-	   			potentialList.append((node,'M'))
-	   			#potentialMCSMCCList.append((node,'M'))
-				print "INNER_CLOUD_SHIELD_AREA met by: ", node
-	   			print "potentialMCCList2 in INNER_CLOUD_SHIELD_AREA is: ", potentialMCCList2		
-	   		else:
-	   			CounterCriteriaB = 0
-	   			CounterCriteriaA = 0
-	   			potentialMCCList2=[]
-	   			MCCFLAG1 = False
-	   			MCCFLAG2 = False
-
-	   			if INITIATIONFLAG == True:
-	   				potentialList.append((node,'I'))
-	   				"****adding node to potentialList, 'I'"
-	   				#potentialMCSMCCList.append((node,'I'))
-	   			elif INITIATIONFLAG == False and MATURITYFLAG == True:
-	   				potentialList.append((node,'D'))
-	   				"****adding node to potentialList, 'D'"
-	   				#potentialMCSMCCList.append((node,'D'))
-	   				DECAYFLAG = True
-	   			
-	   			print "no longer criteriaB", potentialMCCList2
-
-	   		#duration check of MCC
-	   		if CounterCriteriaB >= MINIMUM_DURATION and CounterCriteriaB <= MAXIMUM_DURATION:
-	   			MCCCritB = True
-	   		
-	   		if (CounterCriteriaA >= MINIMUM_DURATION and MCCCritB == True) and (CounterCriteriaA <= MAXIMUM_DURATION):
-	   			MCCFLAG2 = True
-	   			print "duration criteria met"
-	   			if thisdict['cloudElementArea'] >= maximumExtent:
-	   				maximumExtentNode = node
-	   				maximumExtent = thisdict['cloudElementArea']
-	   				maximumExtentCriteria = criteriaB
-
-	   			
-	   			#populate definite MCC, note that potentialMCCList2 is updated with the new node already...
-	   			if definiteMCC:
-		   			currnode = [filter(lambda thisNode: not thisNode in potentialMCCList2, sublist) for sublist in definiteMCC]
-		   			if currnode:
-		   				for thisnode in currnode:
-		   					#if the information has not been appended or added as yet, then try to add it
-			   				if appendedFlag == False:			   					
-				   				if thisnode and list(set(thisnode).difference(set(potentialMCCList2))) == node: 
-				   					#print "in thisnode and list(set...) ", list(set(potentialMCCList2) - set(thisnode))[0]#definiteMCC[currnode.index(thisnode)]
-				   					definiteMCC[currnode.index(thisnode)] = potentialMCCList2
-				   					appendedFlag = True
-				   					#print "definiteMCC in thisnode in currnode : ", definiteMCC
-				   				#i.e. the list doesnt exist
-				   				elif thisnode: # not (thisnode and list(set(thisnode).difference(set(potentialMCCList2)))) == False:
-				   					#print "in else only thisnode exist"
-				   					definiteMCC.append(potentialMCCList2)
-				   					appendedFlag = True  						
-			   		else:
-			   			definiteMCC.append(potentialMCCList2)
-			   			#print "definiteMCC in no currnode : ", definiteMCC
-			   	else:
-			   			definiteMCC.append(potentialMCCList2)
-			   			#print "definiteMCC in no definiteMCC : ", definiteMCC
-
-			checkedNodes.append(node)
-			
-		else:
-			print "OUTER_CLOUD_SHIELD_AREA NOT met by: ", node
-			checkedNodes.append(node)
-			CounterCriteriaA = 0
-			CounterCriteriaB = 0
-			potentialMCCList2 = []   
-			MCCFLAG2 = False
-			MCCFLAG1 = False
-			if INITIATIONFLAG == True:
-				#print "****adding node to potentialList, 'I'"
-				potentialList.append((node,'I'))
-   				#potentialMCSMCCList.append((node,'I'))
-   			elif INITIATIONFLAG==False and MATURITYFLAG == False:
-   				#print "****adding node to potentialList, 'D'"
-   				potentialList.append((node,'D'))
-   				#potentialMCSMCCList.append((node,'D'))
-   				DECAYFLAG = True
-
-		#if potentialList and potentialMCCList2 overlap then update definiteMCSMCCList	
-		potentialListTemp = list(y[0] for y in potentialList)
-		#if there ia overlap between the potential MCS and the potential MCC
-		if list(set(potentialListTemp) & set(potentialMCCList2)) and len(list(set(potentialListTemp) & set(potentialMCCList2))) >= MINIMUM_DURATION:
-			
-			if definiteMCSMCCList:
-				#reset the temporary list of just the nodes
-				eachPathTemp =[]
-
-				for eachPath in definiteMCSMCCList:
-					eachPathTemp.append(list(x[0] for x in eachPath))
-					
-				currnode = [filter(lambda thisNode: not thisNode in potentialListTemp, sublist) for sublist in eachPathTemp]
-				
-	   			if currnode:
-	   				for thisnode in currnode:
-	   					#if the information has not been appended or added as yet, then try to add it
-		   				if appendedFlag1 == False: 
-			   				if thisnode and list(set(thisnode).difference(set(potentialListTemp))) == node: 
-			   					definiteMCSMCCList[currnode.index(thisnode)] = potentialList
-			   					appendedFlag1 = True
-			   				#i.e. the list doesnt exist
-			   				elif thisnode: 
-			   					definiteMCSMCCList.append(potentialList)
-			   					appendedFlag1 = True   										 
-			else:
-				
-				definiteMCSMCCList.append(potentialList)
-				
-	
-	print "exiting simplestMCC CounterCriteriaA, CounterCriteriaB ", CounterCriteriaA, CounterCriteriaB
-	print "MCCFLAG2 is: ", MCCFLAG2
-	print "definiteMCC is: ", definiteMCC
-	print "definiteMCSMCCList is: ", definiteMCSMCCList
-	print "$$$ checkedNodes are ", checkedNodes
-	print "---leaving simplestPathMCC() ----"
-
-	return potentialMCCList2, CounterCriteriaA, CounterCriteriaB, checkedNodes
-#******************************************************************
-def simplestSplitPathMCC (path,CounterCriteriaA, CounterCriteriaB, currSplitNode, currMergedPart):
-	'''
-	Purpose: to determine if the MCC criteria was met in a subgraph that has splitting nodes
-
-	Input:: list of nodes - path: the nodes in the path 
-			2 integers - CounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						 CounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			string - currSplitNode: node that has more than one child
-			list of strings - currMergedPart: list of nodes representing a possible MCC 
-   
-	Output:: 2 integers - CounterCriteriaAMergedPart: # of consecutive nodes where criteriaA has been met
-						  CounterCriteriaBMergedPart: # of consecutive nodes where criteriaB has been met
-			list of nodes - currMCC: list of nodes representing a possible MCC
-			list of nodes - removeNodes: the nodes that have been visted whilst running this function
-
-	Assumptions: the path has only splitting nodes
-	'''
-	shorterpath =[]
-	splitMCC = False
-	checkedNodes=[]
-	removeNodes=[]
-	maxCounterCriteriaA = 0
-	maxCounterCriteriaB = 0
-
-	#check if any of the paths after the split node are MCCs
-	descend = PRUNED_GRAPH.successors(currSplitNode)
-	print "descend is: ", descend, currSplitNode
-	
-	for node in descend:
-		firstNode =[]
-		shorterpath = []
-		MCCSplitPart = True
-		CounterCriteriaAMergedPart = 0
-		CounterCriteriaBMergedPart = 0
-
-		if not currSplitNode in currMergedPart:
-			currMCC=[]
-			CounterCriteriaA=0
-			CounterCriteriaB =0
-		else:
-			currMCC = currMergedPart
-
-		firstNode.append(node)
-		shorterpath, numOfChildren = allDescendants(firstNode, node)
-		if numOfChildren >1:
-			print "in numOfChildren if"
-			currSplitNode = shorterpath[-1]
-			print "currSplitNode is: ", currSplitNode
-			thisMCCMergedPart, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart,checkedNodes = simplestPathMCC(shorterpath, CounterCriteriaA, CounterCriteriaB, currMCC)
-			print "recursive call in splitMCC"
-			CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath,_ = simplestSplitPathMCC(shorterpath, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, currSplitNode, thisMCCMergedPart)
-		else:
-			print "in else for numOfChildren in simplestSplitPathMCC"
-			MCCMergedPart, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart,checkedNodes = simplestPathMCC(shorterpath, CounterCriteriaA, CounterCriteriaB, currMCC)
-		
-		# if CounterCriteriaAMergedPart > maxCounterCriteriaA:
-		# 	maxCounterCriteriaA = CounterCriteriaAMergedPart
-
-		# if CounterCriteriaBMergedPart > maxCounterCriteriaB:
-		# 	maxCounterCriteriaB = CounterCriteriaBMergedPart
-
-		removeNodes.extend(checkedNodes)
-	return CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, currMCC, removeNodes 
-#******************************************************************
-def simplestMergedPathMCC (path,CounterCriteriaA, CounterCriteriaB, mergeNode, currMergedPart):
-	'''
-	Purpose: to determine if the MCC criteria was met in a subgraph that has merging nodes
-
-	Input:: list of nodes - path: the nodes in the path 
-			2 integers - CounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						 CounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			string - mergeNode: node that has more than one child
-			list of strings - currMergedPart: list of nodes representing a possible MCC 
-    
-	Output:: 2 integers - maxCounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						  maxCounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			list of nodes - currMCC: list of nodes representing a possible MCC
-			list of nodes - removeNodes: the nodes that have been visted whilst running this function
-
-	Assumptions: the path has only merging nodes
-	'''
-	shorterpath =[]
-	currMCC =[]
-	mergedMCC = False
-	checkedNodes=[]
-	removeNodes =[]
-	mergeList=[]
-	maxCounterCriteriaA = 0
-	maxCounterCriteriaB = 0
-
-	ascend = PRUNED_GRAPH.predecessors(mergeNode)
-	print "ascend is: ", ascend, mergeNode, type(mergeNode)
-	print "currMergedPart is: ", currMergedPart
-
-	#TODO: remove the extra variable name currMCC is it needed?
-
-	for node in ascend:
-		#reset firstNode and path
-		firstNode =[]
-		shorterpath =[]
-		MCCSplitPart = False
-		CounterCriteriaASplitPart = 0
-		CounterCriteriaBSplitPart = 0
-		#if the node has already been accounted for in the possible MCC, this will happen for the 
-		#worse case scenario, then don't check it again. if node not in traversal
-		if node in currMergedPart:
-			continue
-
-		if not mergeNode  in currMergedPart:
-			currMCC = []
-			CounterCriteriaA = 0
-			CounterCriteriaB = 0
-		else:
-			currMCC = currMergedPart
-
-		print "currMCC in simplestMergedPathMCC for node in ascend is ", currMCC
-		print "currMergedPart is: ", currMergedPart
-		print "node is: ", node
-		firstNode.append(node) 
-		shorterpath, numOfParents = allAncestors(firstNode, node) 
-		
-		if numOfParents > 1:
-			currMergedNode = shorterpath[-1]
-			#find MCC possiblity of merged part alone
-			thisMCCMergedPart,CounterCriteriaAMergedPart, CounterCriteriaBMergedPart,checkedNodes = simplestPathMCC(shorterpath,CounterCriteriaA,CounterCriteriaB, currMCC)
-			path = removeListFromPath(checkedNodes,path,mergeList)
-			
-			#print " recursive call!! firstNode, and currMergedNode are: ",firstNode , currMergedNode
-			CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath,_ = simplestMergedPathMCC (shorterpath, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, currMergedNode,thisMCCMergedPart) 
-		else:
-			print "***^^^CoutnercriteriaA and CountercriteriaB are", CounterCriteriaA, CounterCriteriaB, shorterpath, currMCC
-			#find for just that path...NB, it is checking backwards, thus we can add in the merged part
-			MCCSplitPart, CounterCriteriaASplitPart, CounterCriteriaBSplitPart,checkedNodes = simplestPathMCC(shorterpath,CounterCriteriaA,CounterCriteriaB, currMCC)
-			
-		if CounterCriteriaASplitPart > maxCounterCriteriaA:
-			maxCounterCriteriaA = CounterCriteriaASplitPart
-
-		if CounterCriteriaBSplitPart > maxCounterCriteriaB:
-			maxCounterCriteriaB = CounterCriteriaBSplitPart
-
-		removeNodes.extend(checkedNodes)
-	return maxCounterCriteriaA, maxCounterCriteriaB, currMCC, removeNodes
-#******************************************************************
-def splitMergedPathMCC (path,CounterCriteriaA, CounterCriteriaB, mergeSplitList, complexTree):
-	'''
-	Purpose: to determine if the MCC criteria was met in a subgraph that has splitting and merging nodes
-
-	Input:: list of strings - path: the nodes in the path 
-			2 integers - CounterCriteriaA: # of consecutive nodes where criteriaA has been met
-						 CounterCriteriaB: # of consecutive nodes where criteriaB has been met
-			list of strings - mergeSplitList: list of nodes representing the split and merged nodes in the subgraph
-			tuple (boolean, string) - complexTree: tuple representing if complexTree 
-	Output:: NONE
-
-	Assumptions: passed list are ordered
-	'''
-	shorterpath =[]
-	currMCC =[]
-	mergedMCC = False
-	traversal ={}
-	possibleMCC =[]
-	potentialMCCList1 =[]
-	MCCMergedPart =[]
-	tempPath =[]
-	mergeOrSplitInMCC =[]
-	temp =''
-	
-	complexTreeFlag = complexTree [0]
-	complexTreeNode = complexTree[1]
-
-	tempPath = path
-	count = 0
-	#complex merging tree scenario
-	if complexTreeFlag==True:
-		print "!!! complexMergeTree !!!"
-		if mergeSplitList:
-			mergeSplitList.remove(complexTreeNode)
-			print "removed merged node ", complexTreeNode," from mergeSplitList ", mergeSplitList
-		MCCMergedPart,CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, checkedNodes = simplestPathMCC(complexTreeNode,CounterCriteriaA,CounterCriteriaB, potentialMCCList1)
-		if node in MCCMergedPart:
-			mergeOrSplitInMCC.append(complexTreeNode)
-			print "added node to mergeOrSplitInMCC"
-		print "checkedNodes are ", checkedNodes
-		path = removeListFromPath(checkedNodes,path, mergeSplitList)	
-		print "running simplestMergedPathMCC ", CounterCriteriaAMergedPart, CounterCriteriaBMergedPart
-		CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath, removeNodes = simplestMergedPathMCC (path, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, currMergedNode, MCCMergedPart)
-		#remove shorterpath from path
-		path = removeListFromPath(removeNodes,path,mergeSplitList)	
-		tempPath = path
-					
-
-	while tempPath:
-		#path.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-		count = 0
-		for node in path:
-			print "in node for loop for path", node, "count is ", count
-			print "tempPath is ", tempPath, type(tempPath)
-			print "tempPath[0] is ", tempPath[count]	
-			if type(tempPath) is str:
-				temp = tempPath
-				tempPath=[]
-				tempPath.append(temp)
-				temp = ''
-
-			if node == tempPath[count]:		
-				#check if it meets the criteria
-				mergedCount = PRUNED_GRAPH.in_degree(node)
-				splitCount = PRUNED_GRAPH.out_degree(node)
-
-				print "mergedCount and splitCount are: ", mergedCount, splitCount
-
-				shorterpath.append(node)
-				count += 1
-				
-				if splitCount > 1 and mergedCount <= 1: #i.e. node is split only
-					if mergeSplitList:
-						if node == mergeSplitList[0]:
-							print "first is a split", node, mergeSplitList[0]
-							beforeSplitNodeIndex = 0
-							shorterpath =[]
-							shorterpath,_ = allAncestors(node,node) #path[beforeSplitNodeIndex:path.index(node)+1]
-						
-						mergeSplitList.remove(node)
-						print "removed split node ", node," from mergeSplitList ", mergeSplitList
-			
-					#find MCC possiblity of merged part before the split
-					print " in worse SCENARIO with split and simpleMCCPath call with ", shorterpath, CounterCriteriaA, CounterCriteriaB
-					if type(shorterpath) is str:
-						temp = shorterpath
-						shorterpath =[]
-						shorterpath.append(temp)
-						temp =''
-
-					shorterpath.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-					MCCMergedPart,CounterCriteriaAMergedPart, CounterCriteriaBMergedPart,checkedNodes = simplestPathMCC(shorterpath,CounterCriteriaA,CounterCriteriaB, potentialMCCList1)
-					print "checkedNodes are ", checkedNodes
-					#remove path from list
-					path = removeListFromPath(checkedNodes,path,mergeSplitList)
-					tempPath = removeListFromPath(checkedNodes,path,mergeSplitList)	
-					splitNode = node
-					print "running simplestSplitPathMCC ", CounterCriteriaAMergedPart, CounterCriteriaBMergedPart
-
-					CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath, removeNodes = simplestSplitPathMCC (path, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, splitNode, MCCMergedPart)
-					#remove shorterpath from path
-					path = removeListFromPath(removeNodes,path, mergeSplitList)
-					tempPath = removeListFromPath(checkedNodes,path, mergeSplitList)
-						
-					shorterpath=[]
-					CounterCriteriaA = CounterCriteriaASplitPart
-					CounterCriteriaB = CounterCriteriaBSplitPart
-					count = 0
-
-				elif (mergedCount > 1 and splitCount <= 1) or (mergedCount > 1 and splitCount >1): #node can be merged and split
-					#remove node from the mergesplit list
-					#try:
-					print " in worse SCENARIO with merge and simpleMCCPath call with ", shorterpath, CounterCriteriaA, CounterCriteriaB
-					
-					if mergeSplitList:
-						mergeSplitList.remove(node)
-						print "removed merged node ", node," from mergeSplitList ", mergeSplitList
-					#except:
-					#find MCC possiblity of merged part alone, add on the next node
-					#dirty fix to check that the running counter is indeed valid
-					# if not node in potentialMCCList1:
-					# 	CounterCriteriaA = 0 
-					# 	CounterCriteriaB = 0
-					shorterpath.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-					MCCMergedPart,CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, checkedNodes = simplestPathMCC(node,CounterCriteriaA,CounterCriteriaB, potentialMCCList1)
-					if node in MCCMergedPart:
-						mergeOrSplitInMCC.append(node)
-						print "added node to mergeOrSplitInMCC"
-
-					print "checkedNodes are ", checkedNodes
-					path = removeListFromPath(checkedNodes,path, mergeSplitList)	
-					tempPath = removeListFromPath(checkedNodes,path,mergeSplitList)
-					
-					currMergedNode = node
-					print "running simplestMergedPathMCC ", CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, mergeOrSplitInMCC
-					#dirty fix to check that the running counter is indeed valid
-					if mergeOrSplitInMCC:
-						print "mergeOrSplitInMCC is ", mergeOrSplitInMCC
-						if not mergeOrSplitInMCC[-1] in MCCMergedPart:
-							CounterCriteriaAMergedPart = 0 
-							CounterCriteriaBMergedPart = 0
-					
-					print "running simplestMergedPathMCC ", CounterCriteriaAMergedPart, CounterCriteriaBMergedPart
-
-					CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath, removeNodes = simplestMergedPathMCC (path, CounterCriteriaAMergedPart, CounterCriteriaBMergedPart, currMergedNode, MCCMergedPart)
-					#remove shorterpath from path
-					path = removeListFromPath(removeNodes,path,mergeSplitList)	
-					tempPath = removeListFromPath(checkedNodes,path,mergeSplitList)
-
-					shorterpath =[]
-					CounterCriteriaA = CounterCriteriaASplitPart
-					CounterCriteriaB = CounterCriteriaBSplitPart
-					count = 0
-
-					if splitCount > 1:
-						splitNode = node
-						print "in split after merge ", CounterCriteriaA, CounterCriteriaB
-						CounterCriteriaASplitPart, CounterCriteriaBSplitPart, shorterpath, removeNodes = simplestSplitPathMCC (path, CounterCriteriaA, CounterCriteriaB, splitNode, MCCMergedPart)
-						#remove shorterpath from path
-						path = removeListFromPath(removeNodes,path,mergeSplitList)
-						tempPath = removeListFromPath(checkedNodes,path,mergeSplitList)
-							
-						shorterpath=[]
-						CounterCriteriaA = CounterCriteriaASplitPart
-						CounterCriteriaB = CounterCriteriaBSplitPart
-				else:
-					print "^^^^^^^^^^^ in neither split of merged only"
-					MCCMergedPart,CounterCriteriaAMergedPart, CounterCriteriaBMergedPart,checkedNodes = simplestPathMCC(shorterpath,CounterCriteriaA,CounterCriteriaB, potentialMCCList1)
-					tempPath = removeListFromPath(checkedNodes, path, mergeSplitList)
-
-			else:
-				# the node != tempPath[count]
-				continue
-
-			path.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0]))
-
-		print "next node in for path", tempPath
-
-	return 
 #******************************************************************
 
 
