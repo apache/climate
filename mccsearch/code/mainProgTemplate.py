@@ -27,9 +27,9 @@ def main():
     mainDirStr= "/directory/to/where/to/store/outputs"
     TRMMdirName = "/directory/to/the/TRMM/netCDF/files" 
     CEoriDirName = "/directory/to/the/MERG/netCDF/files"
-   
+
     #for first time working with the raw MERG zipped files 
-    # mccSearch.preprocessingMERG("/directory/to/where/the/raw/MERG/files/are")
+    # mccSearch.preprocessingMERG("/Users/kimwhitehall/Documents/HU/research/DATA")
     # ---------------------------------------------------------------------------------
 
 
@@ -88,7 +88,7 @@ def main():
     
     #some plots that work
     # mccSearch.plotAccTRMM(MCCList)
-    mccSearch.displayPrecip(MCCList)
+    # mccSearch.displayPrecip(MCCList)
     # mccSearch.plotAccuInTimeRange('2009-09-01_00:00:00', '2009-09-01_09:00:00')
     # mccSearch.displaySize(MCCList)
     # mccSearch.displayPrecip(MCCList)

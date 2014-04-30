@@ -42,8 +42,8 @@ import process
 #the first point closest the the value (for the min) from the MERG data is used, etc.
 LATMIN = '5.0' #min latitude; -ve values in the SH e.g. 5S = -5
 LATMAX = '19.0' #max latitude; -ve values in the SH e.g. 5S = -5 20.0
-LONMIN = '-6.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8 -30
-LONMAX = '3.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8  30
+LONMIN = '-5.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8 -30
+LONMAX = '9.0' #min longitude; -ve values in the WH e.g. 59.8W = -59.8  30
 XRES = 4.0				#x direction spatial resolution in km
 YRES = 4.0				#y direction spatial resolution in km
 TRES = 1 				#temporal resolution in hrs
@@ -545,7 +545,6 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 			nodeExist = False
 			cloudElementCenter=[]
 			cloudElement = []
-			cloudElementCenter = []
 			cloudElementLat=[]
 			cloudElementLon =[]
 			cloudElementLatLons =[]
@@ -986,7 +985,7 @@ def findMCC (prunedGraph):
 		
 	return definiteMCC, definiteMCS
 #******************************************************************
-def traverseTree(subGraph,node, queue, checkedNodes=None):
+def traverseTree(subGraph,node, stack, checkedNodes=None):
 	'''
 	Purpose:: 
 		To traverse a tree using a modified depth-first iterative deepening (DFID) search algorithm 
@@ -995,8 +994,8 @@ def traverseTree(subGraph,node, queue, checkedNodes=None):
 		subGraph: a Networkx DiGraph representing a CC
 			lengthOfsubGraph: an integer representing the length of the subgraph
 			node: a string representing the node currently being checked
-			queue: a list of strings representing a list of nodes in a stack functionality 
-					i.e. First-In-FirstOut (FIFO) for sorting the information from each visited node
+			stack: a list of strings representing a list of nodes in a stack functionality 
+					i.e. Last-In-First-Out (LIFO) for sorting the information from each visited node
 			checkedNodes: a list of strings representing the list of the nodes in the traversal
     
     Output:: 
@@ -1010,31 +1009,31 @@ def traverseTree(subGraph,node, queue, checkedNodes=None):
 		return checkedNodes
 
 	if not checkedNodes:
-		queue =[]
+		stack =[]
 		checkedNodes.append(node)
 		
 	#check one level infront first...if something does exisit, stick it at the front of the stack
 	upOneLevel = subGraph.predecessors(node)
 	downOneLevel = subGraph.successors(node)
 	for parent in upOneLevel:
-		if parent not in checkedNodes and parent not in queue:
+		if parent not in checkedNodes and parent not in stack:
 			for child in downOneLevel:
-				if child not in checkedNodes and child not in queue:
-					queue.insert(0,child)
+				if child not in checkedNodes and child not in stack:
+					stack.insert(0,child)
 		
-			queue.insert(0,parent)	
+			stack.insert(0,parent)	
 
 	for child in downOneLevel:
-		if child not in checkedNodes and child not in queue:
+		if child not in checkedNodes and child not in stack:
 			if len(subGraph.predecessors(child)) > 1 or node in checkedNodes:
-				queue.insert(0,child)
+				stack.insert(0,child)
 			else:
-				queue.append(child)		
+				stack.append(child)		
 	
-	for eachNode in queue:
+	for eachNode in stack:
 		if eachNode not in checkedNodes:
 			checkedNodes.append(eachNode)
-			return traverseTree(subGraph, eachNode, queue, checkedNodes)
+			return traverseTree(subGraph, eachNode, stack, checkedNodes)
 	
 	return checkedNodes 
 #******************************************************************
@@ -1788,6 +1787,7 @@ def findCESpeed(node, MCSList):
 
 	theList = CLOUD_ELEMENT_GRAPH.successors(node)
 	nodeLatLon=thisDict(node)['cloudElementCenter']
+
 	
 	for aNode in theList:
 		if aNode in MCSList:
@@ -1795,15 +1795,25 @@ def findCESpeed(node, MCSList):
 			aNodeLatLon = thisDict(aNode)['cloudElementCenter']
 			#calculate CE speed
 			#checking the lats
-			nodeLatLon[0] += 90.0
-			aNodeLatLon[0] += 90.0
-			delta_lat = (nodeLatLon[0] - aNodeLatLon[0]) 
-			nodeLatLon[1] += 360.0
-			aNodeLatLon[1] += 360.0
-			delta_lon = (nodeLatLon[1] - aNodeLatLon[1]) 
-			theSpeed = abs((((delta_lat/delta_lon)*LAT_DISTANCE*1000)/(TRES*3600))) #convert to s --> m/s
+			# nodeLatLon[0] += 90.0
+			# aNodeLatLon[0] += 90.0
+			# delta_lat = (nodeLatLon[0] - aNodeLatLon[0]) 
+			delta_lat = ((thisDict(node)['cloudElementCenter'][0] +90.0) - (thisDict(aNode)['cloudElementCenter'][0]+90.0))
+			# nodeLatLon[1] += 360.0
+			# aNodeLatLon[1] += 360.0
+			# delta_lon = (nodeLatLon[1] - aNodeLatLon[1]) 
+			delta_lon = ((thisDict(node)['cloudElementCenter'][1]+360.0) - (thisDict(aNode)['cloudElementCenter'][1]+360.0))
+			
+			try:
+				theSpeed = abs((((delta_lat/delta_lon)*LAT_DISTANCE*1000)/(TRES*3600))) #convert to s --> m/s
+			except:
+				theSpeed = 0.0
 			
 			CEspeed.append(theSpeed)
+
+			# print "~~~ ", thisDict(aNode)['uniqueID']
+			# print "*** ", nodeLatLon, thisDict(node)['cloudElementCenter']
+			# print "*** ", aNodeLatLon, thisDict(aNode)['cloudElementCenter']
 			
 	if not CEspeed:
 		return 0.0
@@ -1866,6 +1876,155 @@ def createMainDirectory(mainDirStr):
 
 	return 
 #******************************************************************
+def checkForFiles(startTime, endTime, thisDir, fileType):
+	'''
+	Purpose:: To ensure all the files between the starttime and endTime
+			  exist in the directory supplied
+
+	Input:: 
+			startTime: a string yyyymmmddhh representing the starttime 
+			endTime: a string yyyymmmddhh representing the endTime
+			thisDir: a string representing the directory path where to 
+				look for the file
+			fileType: an integer representing the type of file in the directory
+				1 - MERG original files, 2 - TRMM original files
+
+	Output:: 
+			status: a boolean representing whether all files exists
+
+	'''
+	startFilename = ''
+	endFilename =''
+	currFilename = ''
+	status = False
+	startyr = int(startTime[:4])
+	startmm = int(startTime[4:6])
+	startdd = int(startTime[6:8])
+	starthr = int(startTime[-2:])
+	endyr = int(endTime[:4])
+	endmm = int(endTime[4:6])
+	enddd = int(endTime[6:8])
+	endhh = int(endTime[-2:])
+	curryr = startyr
+	currmm = startmm
+	currdd = startdd
+	currhr = starthr
+	currmmStr = ''
+	currddStr = ''
+	currhrStr = ''
+	endmmStr = ''
+	endddStr =''
+	endhhStr = ''
+
+	#check that the startTime is before the endTime
+	if fileType == 1:
+		#print "fileType is 1"
+		startFilename = "merg_"+startTime+"_4km-pixel.nc"
+		endFilename = thisDir+"/merg_"+endTime+"_4km-pixel.nc"
+
+	if fileType == 2:
+		#TODO:: determine closest time for TRMM files for end 
+		#http://disc.sci.gsfc.nasa.gov/additional/faq/precipitation_faq.shtml#convert
+		#How do I extract time information from the TRMM 3B42 file name? section
+		# startFilename = "3B42."+startTime[:8]+"."+currhr+".7A.nc"
+		# endFilename = "3B42."+endTime[:8]+"."+endTime[-2:]+".7A.nc"
+		if starthr%3 == 2:
+			currhr += 1	
+		elif starthr%3 ==1:
+			currhr -= 1
+		else:
+			currhr = starthr
+
+		curryr, currmmStr, currddStr, currhrStr,_,_,_ = findTime(curryr, currmm, currdd, currhr)
+
+		startFilename = "3B42."+str(curryr)+currmmStr+currddStr+"."+currhrStr+".7A.nc"	
+		if endhh%3 == 2:
+			endhh += 1
+		elif endhh%3 ==1:
+			endhh -= 1
+
+		endyr, endmmStr, endddStr, endhhStr, _, _, _ = findTime(endyr, endmm, enddd, endhh)
+
+		endFilename = thisDir+"/3B42."+str(endyr)+endmmStr+endddStr+"."+endhhStr+".7A.nc"
+
+	#check for files between startTime and endTime
+	currFilename = thisDir+"/"+startFilename
+
+	while currFilename is not endFilename:
+		if not os.path.isfile(currFilename):
+			print "file is missing! Filename: ", currFilename
+			status = False
+			return status
+	
+		status = True
+		if currFilename == endFilename:
+			break
+
+		#generate new currFilename
+		if fileType == 1:
+			currhr +=1
+		elif fileType ==2:
+			currhr += 3
+
+		curryr, currmmStr, currddStr, currhrStr, currmm, currdd, currhr = findTime(curryr, currmm, currdd, currhr)
+
+		if fileType == 1:
+			currFilename = thisDir+"/"+"merg_"+str(curryr)+currmmStr+currddStr+currhrStr+"_4km-pixel.nc"
+		if fileType == 2:
+			currFilename = thisDir+"/"+"3B42."+str(curryr)+currmmStr+currddStr+"."+currhrStr+".7A.nc"
+
+	return status
+#******************************************************************
+def findTime(curryr, currmm, currdd, currhr):
+	'''
+	Purpose:: To determine the new yr, mm, dd, hr
+
+	Input:: curryr, an integer representing the year
+			currmm, an integer representing the month
+			currdd, an integer representing the day
+			currhr, an integer representing the hour
+
+	Output::curryr, an integer representing the year
+			currmm, an integer representing the month
+			currdd, an integer representing the day
+			currhr, an integer representing the hour
+	'''
+	if currhr > 23:
+		currhr = 0
+		currdd += 1
+		if currdd > 30 and (currmm == 4 or currmm == 6 or currmm == 9 or currmm == 11):
+			currmm +=1
+		elif currdd > 31 and (currmm == 1 or currmm ==3 or currmm == 5 or currmm == 7 or currmm == 8 or currmm == 10):
+			currmm +=1
+			currdd = 1
+		elif currdd > 31 and currmm == 12:
+			currmm = 1
+			currdd = 1
+			curryr += 1
+		elif currdd > 28 and currmm == 2 and (curryr%4)!=0:
+			currmm = 3
+			currdd = 1
+		elif (curryr%4)==0 and currmm == 2 and currdd>29:
+			currmm = 3
+			currdd = 1
+
+	if currmm < 10:
+		currmmStr="0"+str(currmm)
+	else:
+		currmmStr = str(currmm)
+
+	if currdd < 10:
+		currddStr = "0"+str(currdd)
+	else:
+		currddStr = str(currdd)
+
+	if currhr < 10:
+		currhrStr = "0"+str(currhr)
+	else:
+		currhrStr = str(currhr)
+
+	return curryr, currmmStr, currddStr, currhrStr, currmm, currdd, currhr
+#******************************************************************	
 def find_nearest(thisArray,value):
 	'''
 	Purpose :: to determine the value within an array closes to 
@@ -2007,8 +2166,7 @@ def postProcessingNetCDF(dataset, dirName = None):
 	   2 User can write files in location where script is being called	
 	'''	
 	
-	coreDir = os.path.dirname(MAINDIRECTORY)
-	#coreDir = os.path.dirname(os.path.abspath(__file__))
+	coreDir = os.path.dirname(os.path.abspath(__file__))
 	ImgFilename = ''
 	frameList=[]
 	fileList =[]
@@ -2024,35 +2182,29 @@ def postProcessingNetCDF(dataset, dirName = None):
 
 	if dataset == 1:
 		var = 'ch4'
-		dirName = MAINDIRECTORY+'/MERGnetcdfCEs'
 		ctlTitle = 'TITLE MCC search Output Grid: Time  lat lon'
 		ctlLine = 'brightnesstemp=\>ch4     1  t,y,x    brightnesstemperature'
-		origsFile = coreDir+"/GrADSscripts/cs1.gs"
-		gsFile = coreDir+"/GrADSscripts/cs2.gs"
-		sologsFile = coreDir+"/GrADSscripts/mergeCE.gs"
+		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
+		gsFile = coreDir+"/../GrADSscripts/cs2.gs"
+		sologsFile = coreDir+"/../GrADSscripts/mergeCE.gs"
 		lineNum = 50
 	
 	elif dataset ==2:
 		var = 'precipAcc'
-		dirName = MAINDIRECTORY+'/TRMMnetcdfCEs'
 		ctlTitle ='TITLE  TRMM MCS accumulated precipitation search Output Grid: Time  lat lon '
 		ctlLine = 'precipitation_Accumulation=\>precipAcc     1  t,y,x    precipAccu'
-		origsFile = coreDir+"/GrADSscripts/cs3.gs"
-		gsFile = coreDir+"/GrADSscripts/cs4.gs"
-		sologsFile = coreDir+"/GrADSscripts/TRMMCE.gs"
+		origsFile = coreDir+"/../GrADSscripts/cs3.gs"
+		gsFile = coreDir+"/../GrADSscripts/cs4.gs"
+		sologsFile = coreDir+"/../GrADSscripts/TRMMCE.gs"
 		lineNum = 10
 
 	elif dataset ==3:
 		var = 'ch4'
 		ctlTitle = 'TITLE MERG DATA'
 		ctlLine = 'ch4=\>ch4     1  t,y,x    brightnesstemperature'
-		if dirName is None:
-			print "Enter directory for original files"
-			return
-		else:
-			origsFile = coreDir+"/GrADSscripts/cs1.gs"
-			sologsFile = coreDir+"/GrADSscripts/infrared.gs"
-			lineNum = 54			
+		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
+		sologsFile = coreDir+"/../GrADSscripts/infrared.gs"
+		lineNum = 54			
 
 	#sort files
 	os.chdir((dirName+'/'))
@@ -2066,8 +2218,13 @@ def postProcessingNetCDF(dataset, dirName = None):
 	for eachfile in files:
 		fullFname = os.path.splitext(eachfile)[0]
 		fnameNoExtension = fullFname.split('.nc')[0]
+		
+		if dataset == 2 and fnameNoExtension[:4] != "TRMM":
+			continue
+
 		if dataset == 1 or dataset == 2:
 			frameNum = int((fnameNoExtension.split('CE')[0]).split('00F')[1])
+		
 		#create the ctlFile
 		ctlFile1 = dirName+'/ctlFiles/'+fnameNoExtension + '.ctl'
 		#the ctl file
@@ -2083,9 +2240,20 @@ def postProcessingNetCDF(dataset, dirName = None):
 		subprocess.call(lineToWrite, shell=True)
 		lineToWrite = 'echo '+ctlTitle+' >> '+ctlFile1
 		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo XDEF 413 LINEAR  -9.984375 0.036378335 >> '+ctlFile1
+		fname = dirName+'/'+fnameNoExtension+'.nc'
+		if os.path.isfile(fname):	
+			#open NetCDF file add info to the accu 
+			print "opening file ", fname
+			fileData = Dataset(fname,'r',format='NETCDF4')
+			lats = fileData.variables['latitude'][:]
+			lons = fileData.variables['longitude'][:]
+			LONDATA, LATDATA = np.meshgrid(lons,lats)
+			nygrd = len(LATDATA[:,0]) 
+			nxgrd = len(LONDATA[0,:])
+			fileData.close()
+		lineToWrite = 'echo XDEF '+ str(nxgrd) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrd) +' >> ' +ctlFile1
 		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo YDEF 412 LINEAR 5.03515625 0.036378335  >> '+ctlFile1
+		lineToWrite = 'echo YDEF '+ str(nygrd)+' LINEAR  ' + str(min(lats)) + ' ' + str((max(lats)-min(lats))/nygrd) +' >> '+ctlFile1
 		subprocess.call(lineToWrite, shell=True)
 		lineToWrite = 'echo ZDEF   01 LEVELS 1 >> '+ctlFile1
 		subprocess.call(lineToWrite, shell=True)
@@ -2171,10 +2339,6 @@ def postProcessingNetCDF(dataset, dirName = None):
 				GrADSscript.writelines(lines1)
 				GrADSscript.close()
 				
-				# if frameNum == 44:
-				# 	sys.exit()
-				
-
 				#run the script
 				runGrads = 'run '+ gsFile
 				gradscmd = 'grads -blc ' + '\'' +runGrads + '\''+'\n'
@@ -2492,85 +2656,6 @@ def commonFeatureSize(finalMCCList):
 	hist, bin_edges = np.histogram(thisMCCAvg)
 	return hist,bin_edges
 #******************************************************************
-def displaySize(finalMCCList): 
-	'''
-	Purpose:: 
-		To create a figure showing the area verse time for each MCS
-
-	Input:: 
-		finalMCCList: a list of list of strings representing the list of nodes representing a MCC
-	
-	Output:: 
-		None
-
-	'''
-	timeList =[]
-	count=1
-	imgFilename=''
-	minArea=10000.0
-	maxArea=0.0
-	eachNode={}
-
-	#for each node in the list, get the area information from the dictionary
-	#in the graph and calculate the area
-
-	if finalMCCList:
-		for eachMCC in finalMCCList:
-			#get the info from the node
-			for node in eachMCC:
-				eachNode=thisDict(node)
-				timeList.append(eachNode['cloudElementTime'])
-
-				if eachNode['cloudElementArea'] < minArea:
-					minArea = eachNode['cloudElementArea']
-				if eachNode['cloudElementArea'] > maxArea:
-					maxArea = eachNode['cloudElementArea']
-
-				
-			#sort and remove duplicates 
-			timeList=list(set(timeList))
-			timeList.sort()
-			tdelta = timeList[1] - timeList[0]
-			starttime = timeList[0]-tdelta
-			endtime = timeList[-1]+tdelta
-			timeList.insert(0, starttime)
-			timeList.append(endtime)
-
-			#plot info
-			plt.close('all')
-			title = 'Area distribution of the MCC over somewhere'
-			fig=plt.figure(facecolor='white', figsize=(18,10)) #figsize=(10,8))#figsize=(16,12))
-			fig,ax = plt.subplots(1, facecolor='white', figsize=(10,10))
-			
-			#the data
-			for node in eachMCC: #for eachNode in eachMCC:
-				eachNode=thisDict(node)
-				if eachNode['cloudElementArea'] < 80000 : #2400.00:
-					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'bo', markersize=10)
-				elif eachNode['cloudElementArea'] >= 80000.00 and eachNode['cloudElementArea'] < 160000.00:
-					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'yo',markersize=20)
-				else:
-					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'ro',markersize=30)
-				
-			#axes and labels
-			maxArea += 1000.00
-			ax.set_xlim(starttime,endtime)
-			ax.set_ylim(minArea,maxArea)
-			ax.set_ylabel('Area in km^2', fontsize=12)
-			ax.set_title(title)
-			ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d%H:%M:%S')
-			fig.autofmt_xdate()
-			
-			plt.subplots_adjust(bottom=0.2)
-			
-			imgFilename = MAINDIRECTORY+'/images/'+ str(count)+'MCS.gif'
-			plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
-			
-			#if time in not already in the time list, append it
-			timeList=[]
-			count += 1
-	return 
-#******************************************************************
 def precipTotals(finalMCCList):
 	'''
 	Purpose:: 
@@ -2671,6 +2756,89 @@ def precipMaxMin(finalMCCList):
 	 
 	return MCSPrecip
 #******************************************************************
+#
+#							PLOTS
+#
+#******************************************************************
+def displaySize(finalMCCList): 
+	'''
+	Purpose:: 
+		To create a figure showing the area verse time for each MCS
+
+	Input:: 
+		finalMCCList: a list of list of strings representing the list of nodes representing a MCC
+	
+	Output:: 
+		None
+
+	'''
+	timeList =[]
+	count=1
+	imgFilename=''
+	minArea=10000.0
+	maxArea=0.0
+	eachNode={}
+
+	#for each node in the list, get the area information from the dictionary
+	#in the graph and calculate the area
+
+	if finalMCCList:
+		for eachMCC in finalMCCList:
+			#get the info from the node
+			for node in eachMCC:
+				eachNode=thisDict(node)
+				timeList.append(eachNode['cloudElementTime'])
+
+				if eachNode['cloudElementArea'] < minArea:
+					minArea = eachNode['cloudElementArea']
+				if eachNode['cloudElementArea'] > maxArea:
+					maxArea = eachNode['cloudElementArea']
+
+				
+			#sort and remove duplicates 
+			timeList=list(set(timeList))
+			timeList.sort()
+			tdelta = timeList[1] - timeList[0]
+			starttime = timeList[0]-tdelta
+			endtime = timeList[-1]+tdelta
+			timeList.insert(0, starttime)
+			timeList.append(endtime)
+
+			#plot info
+			plt.close('all')
+			title = 'Area distribution of the MCC over somewhere'
+			fig=plt.figure(facecolor='white', figsize=(18,10)) #figsize=(10,8))#figsize=(16,12))
+			fig,ax = plt.subplots(1, facecolor='white', figsize=(10,10))
+			
+			#the data
+			for node in eachMCC: #for eachNode in eachMCC:
+				eachNode=thisDict(node)
+				if eachNode['cloudElementArea'] < 80000 : #2400.00:
+					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'bo', markersize=10)
+				elif eachNode['cloudElementArea'] >= 80000.00 and eachNode['cloudElementArea'] < 160000.00:
+					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'yo',markersize=20)
+				else:
+					ax.plot(eachNode['cloudElementTime'], eachNode['cloudElementArea'],'ro',markersize=30)
+				
+			#axes and labels
+			maxArea += 1000.00
+			ax.set_xlim(starttime,endtime)
+			ax.set_ylim(minArea,maxArea)
+			ax.set_ylabel('Area in km^2', fontsize=12)
+			ax.set_title(title)
+			ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d%H:%M:%S')
+			fig.autofmt_xdate()
+			
+			plt.subplots_adjust(bottom=0.2)
+			
+			imgFilename = MAINDIRECTORY+'/images/'+ str(count)+'MCS.gif'
+			plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
+			
+			#if time in not already in the time list, append it
+			timeList=[]
+			count += 1
+	return 
+#******************************************************************
 def displayPrecip(finalMCCList): 
 	'''
 	Purpose:: 
@@ -2720,6 +2888,7 @@ def displayPrecip(finalMCCList):
 				percentagePrecipitating.append((eachNode['TRMMArea']/eachNode['cloudElementArea'])*100.0)
 				CEArea.append(eachNode['cloudElementArea'])
 				nodes.append(eachNode['uniqueID'])
+				# print eachNode['uniqueID'], eachNode['cloudElementCenter'][1], eachNode['cloudElementCenter'][0]
 				x.append(eachNode['cloudElementCenter'][1])#-xStart)
 				y.append(eachNode['cloudElementCenter'][0])#-yStart)
 				
@@ -2731,6 +2900,9 @@ def displayPrecip(finalMCCList):
 			
 			totalSize = sum(CEArea)
 			partialArea = [(a/totalSize)*30000 for a in CEArea]
+
+			# print "x ", x
+			# print "y ", y
 			
 			#plot info
 			plt.close('all')
@@ -2931,6 +3103,7 @@ def plotAccTRMM (finalMCCList):
 	imgFilename = ''
 	firstPartName = ''
 	firstTime = True
+	replaceExpXDef = ''
 	
 	#Just incase the X11 server is giving problems
 	subprocess.call('export DISPLAY=:0.0', shell=True)
@@ -2944,7 +3117,7 @@ def plotAccTRMM (finalMCCList):
 			
 			if os.path.isfile(fname):	
 				#open NetCDF file add info to the accu 
-				print "opening TRMM file ", fname
+				#print "opening TRMM file ", fname
 				TRMMCEData = Dataset(fname,'r',format='NETCDF4')
 				precipRate = TRMMCEData.variables['precipitation_Accumulation'][:]
 				lats = TRMMCEData.variables['latitude'][:]
@@ -2997,6 +3170,7 @@ def plotAccTRMM (finalMCCList):
 		accuTRMMData.close()
 
 		#generate the image with GrADS
+		#print "ny,nx ", nygrdTRMM, nxgrdTRMM, min(lats), max(lats)
 		#the ctl file
 		subprocess.call('rm acc.ctl', shell=True)
 		subprocess.call('touch acc.ctl', shell=True)
@@ -3006,8 +3180,12 @@ def plotAccTRMM (finalMCCList):
 		subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
 		subprocess.call('echo "UNDEF  0" >> acc.ctl', shell=True)
 		subprocess.call('echo "TITLE  TRMM MCS accumulated precipitation" >> acc.ctl', shell=True)
-		subprocess.call('echo "XDEF 413 LINEAR  -9.984375 0.036378335 " >> acc.ctl', shell=True)
-        subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
+		replaceExpXDef = 'echo XDEF '+ str(nxgrdTRMM) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrdTRMM) +' >> acc.ctl'
+		subprocess.call(replaceExpXDef, shell=True)
+		#subprocess.call('echo "XDEF 413 LINEAR  -9.984375 0.036378335 " >> acc.ctl', shell=True)
+        #subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
+        replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
+        subprocess.call(replaceExpYDef, shell=True)
         subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
         subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
         #subprocess.call(replaceExpTdef, shell=True)
@@ -3031,6 +3209,7 @@ def plotAccTRMM (finalMCCList):
         subprocess.call('echo "''\'quit''\'" >> accuTRMM1.gs', shell=True)
         gradscmd = 'grads -blc ' + '\'run accuTRMM1.gs''\''
         subprocess.call(gradscmd, shell=True)
+        sys.exit()
 
         #clean up
         subprocess.call('rm accuTRMM1.gs', shell=True)
@@ -3133,8 +3312,12 @@ def plotAccuInTimeRange(starttime, endtime):
 	subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
 	subprocess.call('echo "UNDEF  0" >> acc.ctl', shell=True)
 	subprocess.call('echo "TITLE  TRMM MCS accumulated precipitation" >> acc.ctl', shell=True)
-	subprocess.call('echo "XDEF 384 LINEAR  -8.96875 0.036378335 " >> acc.ctl', shell=True)
-	subprocess.call('echo "YDEF 384 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
+	replaceExpXDef = 'echo XDEF '+ str(nxgrdTRMM) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrdTRMM) +' >> acc.ctl'
+	subprocess.call(replaceExpXDef, shell=True)
+	replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
+	subprocess.call(replaceExpYDef, shell=True)
+	#subprocess.call('echo "XDEF 384 LINEAR  -8.96875 0.036378335 " >> acc.ctl', shell=True)
+	#subprocess.call('echo "YDEF 384 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
 	subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
 	subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
 	subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
@@ -3236,13 +3419,16 @@ def createTextFile(finalMCCList, identifier):
 	if identifier == 1:
 		MCSUserFile = open((MAINDIRECTORY+'/textFiles/MCCsUserFile.txt'),'wb')
 		MCSSummaryFile = open((MAINDIRECTORY+'/textFiles/MCCSummary.txt'),'wb')
+		MCSPostFile = open((MAINDIRECTORY+'/textFiles/MCCPostPrecessing.txt'),'wb')
 	
 	if identifier == 2:
 		MCSUserFile = open((MAINDIRECTORY+'/textFiles/MCSsUserFile.txt'),'wb')
 		MCSSummaryFile = open((MAINDIRECTORY+'/textFiles/MCSSummary.txt'),'wb')
+		MCSPostFile = open((MAINDIRECTORY+'/textFiles/MCSPostPrecessing.txt'),'wb')
 
 	for eachPath in finalMCCList:
 		eachPath.sort(key=lambda nodeID:(len(nodeID.split('C')[0]), nodeID.split('C')[0], nodeID.split('CE')[1]))
+		MCSPostFile.write("\n %s" %eachPath)
 
 		startTime = thisDict(eachPath[0])['cloudElementTime']
 		endTime = thisDict(eachPath[-1])['cloudElementTime']
@@ -3494,6 +3680,7 @@ def createTextFile(finalMCCList, identifier):
 
 	MCSUserFile.close
 	MCSSummaryFile.close
+	MCSPostFile.close
 	return
 #******************************************************************
 #			PLOTTING UTIL SCRIPTS
