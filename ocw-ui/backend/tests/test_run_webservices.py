@@ -6,12 +6,6 @@ from ..run_webservices import app
 
 test_app = TestApp(app)
 
-class TestInitialization(unittest.TestCase):
-    def test_status_page(self):
-        response = test_app.get('/')
-
-        self.assertEqual(response.status_int, 200)
-
 class TestStaticEvalResults(unittest.TestCase):
     @classmethod
     def setUpClass(self):
