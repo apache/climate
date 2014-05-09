@@ -1,6 +1,5 @@
 import os
 import unittest
-from urllib import urlretrieve
 import datetime as dt
 
 from webtest import TestApp
@@ -18,24 +17,10 @@ import numpy
 
 test_app = TestApp(app)
 
-FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
-FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
-FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
-
 class TestLocalDatasetLoad(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        if not os.path.exists('test.nc'):
-            urlretrieve(FILE_LEADER + FILE_1, 'test.nc')
-
-    @classmethod
-    def tearDownClass(self):
-        if os.path.exists('test.nc'):
-            os.remove('test.nc')
-
     def setUp(self):
         self.dataset_object = {
-            'dataset_id': os.path.abspath('test.nc'),
+            'dataset_id': os.path.abspath('/tmp/d1.nc'),
             'var_name': 'tasmax',
             'lat_name': 'lat',
             'lon_name': 'lon',
@@ -48,7 +33,7 @@ class TestLocalDatasetLoad(unittest.TestCase):
 
     def test_default_name_assignment(self):
         dataset = bp._load_local_dataset_object(self.dataset_object)
-        self.assertEqual(dataset.name, 'test.nc')
+        self.assertEqual(dataset.name, 'd1.nc')
 
     def test_custom_name_assignment(self):
         self.dataset_object['name'] = 'CustomName'
@@ -261,26 +246,12 @@ class TestPlotTitleCreation(unittest.TestCase):
         )
 
 class TestRunEvaluation(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        if not os.path.exists('d1.nc'):
-            urlretrieve(FILE_LEADER + FILE_1, 'd1.nc')
-        if not os.path.exists('d2.nc'):
-            urlretrieve(FILE_LEADER + FILE_2, 'd2.nc')
-
-    @classmethod
-    def tearDownClass(self):
-        if os.path.exists('d1.nc'):
-            os.remove('d1.nc')
-        if os.path.exists('d2.nc'):
-            os.remove('d2.nc')
-
     def test_full_evaluation(self):
         data = {
             'reference_dataset': {
                 'data_source_id': 1,
                 'dataset_info': {
-                    'dataset_id': os.path.abspath('d1.nc'),
+                    'dataset_id': os.path.abspath('/tmp/d1.nc'),
                     'var_name': 'tasmax',
                     'lat_name': 'lat',
                     'lon_name': 'lon',
@@ -291,7 +262,7 @@ class TestRunEvaluation(unittest.TestCase):
                 {
                     'data_source_id': 1,
                     'dataset_info': {
-                        'dataset_id': os.path.abspath('d2.nc'),
+                        'dataset_id': os.path.abspath('/tmp/d2.nc'),
                         'var_name': 'tasmax',
                         'lat_name': 'lat',
                         'lon_name': 'lon',
