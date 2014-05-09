@@ -97,9 +97,8 @@ class TestMetricLoad(unittest.TestCase):
         self.assertTrue(isinstance(bias, metrics.Bias))
 
     def test_valid_metric_load(self):
-        metric_objs = bp._load_metrics(['Bias', 'TemporalStdDev'])
+        metric_objs = bp._load_metrics(['Bias'])
         self.assertTrue(isinstance(metric_objs[0], metrics.Bias))
-        self.assertTrue(isinstance(metric_objs[1], metrics.TemporalStdDev))
 
     def test_invalid_metric_load(self):
         self.assertRaises(ValueError, bp._load_metrics, ['AAA'])
