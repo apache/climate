@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods
+END
+deflate.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/deflate.conf.erb
+END
+mime.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/mime.conf.erb
+END
+alias.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/alias.conf.erb
+END
+authopenid.load.erb
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/authopenid.load.erb
+END
+fcgid.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/fcgid.conf.erb
+END
+dir.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/dir.conf.erb
+END
+autoindex.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/autoindex.conf.erb
+END
+negotiation.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/negotiation.conf.erb
+END
+proxy.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/proxy.conf.erb
+END
+ssl.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/ssl.conf.erb
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/README
+END
+setenvif.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/setenvif.conf.erb
+END
+status.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/templates/default/mods/status.conf.erb
+END

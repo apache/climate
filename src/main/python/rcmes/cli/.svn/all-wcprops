@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/repos/asf/!svn/ver/1485875/incubator/climate/trunk/rcmet/src/main/python/rcmes/cli
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/cli/__init__.py
+END
+do_rcmes_processing_sub.py
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1485875/incubator/climate/trunk/rcmet/src/main/python/rcmes/cli/do_rcmes_processing_sub.py
+END
+rcmet20_cordexAF.py
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476806/incubator/climate/trunk/rcmet/src/main/python/rcmes/cli/rcmet20_cordexAF.py
+END
+rcmet_ui.py
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/repos/asf/!svn/ver/1485875/incubator/climate/trunk/rcmet/src/main/python/rcmes/cli/rcmet_ui.py
+END

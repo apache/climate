@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/vagrant_main/templates/default
+END
+project.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/vagrant_main/templates/default/project.conf.erb
+END
+rcmet.conf.erb
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/vagrant_main/templates/default/rcmet.conf.erb
+END

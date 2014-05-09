@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/definitions
+END
+web_app.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/definitions/web_app.rb
+END
+apache_site.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/definitions/apache_site.rb
+END
+apache_conf.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/definitions/apache_conf.rb
+END
+apache_module.rb
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/definitions/apache_module.rb
+END

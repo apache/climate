@@ -1,0 +1,11 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/scripts/ncl
+END
+wget-download.sh
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/scripts/ncl/wget-download.sh
+END

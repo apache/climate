@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes
+END
+virtualenv.rb
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes/virtualenv.rb
+END
+source.rb
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes/source.rb
+END
+default.rb
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes/default.rb
+END
+pip.rb
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes/pip.rb
+END
+package.rb
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/recipes/package.rb
+END

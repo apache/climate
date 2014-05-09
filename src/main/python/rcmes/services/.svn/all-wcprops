@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/repos/asf/!svn/ver/1482547/incubator/climate/trunk/rcmet/src/main/python/rcmes/services
+END
+run_rcmes_processing.py
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/run_rcmes_processing.py
+END
+list_vars_in_file.py
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/list_vars_in_file.py
+END
+main_ws.py
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/main_ws.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/__init__.py
+END
+bottlemet.py
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/bottlemet.py
+END
+find_latlon_var.py
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/find_latlon_var.py
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/README.txt
+END
+decode_model_times.py
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/decode_model_times.py
+END
+directory_helpers.py
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repos/asf/!svn/ver/1482547/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/directory_helpers.py
+END
+find_time_var.py
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/find_time_var.py
+END
+dataset_helpers.py
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/python/rcmes/services/dataset_helpers.py
+END

@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repos/asf/!svn/ver/1479720/incubator/climate/trunk/rcmet/src/main/python/rcmes/resources
+END
+cordexSubRegions.txt
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/python/rcmes/resources/cordexSubRegions.txt
+END
+cordexAF.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repos/asf/!svn/ver/1479720/incubator/climate/trunk/rcmet/src/main/python/rcmes/resources/cordexAF.cfg
+END

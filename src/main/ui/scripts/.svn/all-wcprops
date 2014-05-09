@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/scripts
+END
+testacular-e2e.conf.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/scripts/testacular-e2e.conf.js
+END
+e2e-test.sh
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/scripts/e2e-test.sh
+END
+test.bat
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/scripts/test.bat
+END
+testacular.conf.js
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/scripts/testacular.conf.js
+END
+test.sh
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/scripts/test.sh
+END
+watchr.rb
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/scripts/watchr.rb
+END
+web-server.js
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/scripts/web-server.js
+END
+e2e-test.bat
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/scripts/e2e-test.bat
+END

@@ -1,0 +1,233 @@
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes
+END
+mod_dir.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_dir.rb
+END
+mod_authn_file.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authn_file.rb
+END
+mod_expires.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_expires.rb
+END
+mod_negotiation.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_negotiation.rb
+END
+mod_ldap.rb
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_ldap.rb
+END
+mod_proxy.rb
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_proxy.rb
+END
+mod_setenvif.rb
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_setenvif.rb
+END
+default.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/default.rb
+END
+mod_mime.rb
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_mime.rb
+END
+mod_authz_host.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authz_host.rb
+END
+mod_authz_user.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authz_user.rb
+END
+mod_proxy_connect.rb
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_proxy_connect.rb
+END
+mod_auth_openid.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_auth_openid.rb
+END
+mod_auth_digest.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_auth_digest.rb
+END
+mod_autoindex.rb
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_autoindex.rb
+END
+mod_dav_svn.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_dav_svn.rb
+END
+mod_auth_basic.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_auth_basic.rb
+END
+mod_deflate.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_deflate.rb
+END
+mod_authnz_ldap.rb
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authnz_ldap.rb
+END
+mod_wsgi.rb
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_wsgi.rb
+END
+mod_fcgid.rb
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_fcgid.rb
+END
+mod_proxy_http.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_proxy_http.rb
+END
+god_monitor.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/god_monitor.rb
+END
+mod_python.rb
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_python.rb
+END
+mod_rewrite.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_rewrite.rb
+END
+mod_status.rb
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_status.rb
+END
+mod_env.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_env.rb
+END
+mod_alias.rb
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_alias.rb
+END
+mod_authz_default.rb
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authz_default.rb
+END
+mod_ssl.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_ssl.rb
+END
+mod_cgi.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_cgi.rb
+END
+mod_log_config.rb
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_log_config.rb
+END
+mod_authz_groupfile.rb
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_authz_groupfile.rb
+END
+mod_proxy_balancer.rb
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_proxy_balancer.rb
+END
+mod_dav.rb
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_dav.rb
+END
+mod_proxy_ajp.rb
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_proxy_ajp.rb
+END
+mod_headers.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_headers.rb
+END
+mod_php5.rb
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/recipes/mod_php5.rb
+END

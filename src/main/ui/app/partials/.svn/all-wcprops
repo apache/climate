@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/repos/asf/!svn/ver/1483170/incubator/climate/trunk/rcmet/src/main/ui/app/partials
+END
+partial1.html
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/partials/partial1.html
+END
+partial2.html
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/partials/partial2.html
+END
+modelSelect.html
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/partials/modelSelect.html
+END
+selectRcmed.html
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1483170/incubator/climate/trunk/rcmet/src/main/ui/app/partials/selectRcmed.html
+END
+selectObservation.html
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/asf/!svn/ver/1483170/incubator/climate/trunk/rcmet/src/main/ui/app/partials/selectObservation.html
+END

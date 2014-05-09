@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/repos/asf/!svn/ver/1485460/incubator/climate/trunk/rcmet/src/main/ui/app/js
+END
+jquery-1.9.1.min.js
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/jquery-1.9.1.min.js
+END
+controllers.js
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/repos/asf/!svn/ver/1485460/incubator/climate/trunk/rcmet/src/main/ui/app/js/controllers.js
+END
+filters.js
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/filters.js
+END
+leaflet.js
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/leaflet.js
+END
+bootstrap.js
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/bootstrap.js
+END
+bootstrap.min.js
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/bootstrap.min.js
+END
+app.js
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/repos/asf/!svn/ver/1485460/incubator/climate/trunk/rcmet/src/main/ui/app/js/app.js
+END
+directives.js
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/repos/asf/!svn/ver/1485460/incubator/climate/trunk/rcmet/src/main/ui/app/js/directives.js
+END
+jasny-bootstrap.min.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/jasny-bootstrap.min.js
+END
+services.js
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/app/js/services.js
+END

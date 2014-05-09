@@ -1,0 +1,278 @@
+=====================================================================================================================================
+++++++++++++++++++++++++++++++++++++++++++++++++++ Configure file for running RCMES +++++++++++++++++++++++++++++++++++++++++++++++++
+=====================================================================================================================================
+# An example of the configuration file to run RCMES version 2.1.2
+[SETTINGS]
+# Assign the work (workDir) and cache (cacheDir) directories for this run.
+#   The work directory stores the results including the interpolated obs and model data and figures. Please make sure to save
+#     these files in different names before making a new run. Existing files that are not renamed are overwritten by the new run.
+#   The cashe directory stoes the refrence data file retrieved from the database (i.e., RCMED) for later use. If the same domain/period
+#     are run repeatedly, data retrieval from RCMED occurs only in the first run and the subsequent runs utilize the data stored in
+#     the cache directory.
+workDir=/Volumes/rcmes2t/rcmet/cases/narccap/work
+cacheDir=/Volumes/rcmes2t/rcmet/cases/narccap/cache
+
+# temporalGrid assigns the data time step to be temporally regridded: Choices = full (entire period), annual, monthly, daily
+temporalGrid=monthly
+# Choices, obs, model, user
+#   gridLonStep, gridLatStep, latMin, latMax, lonMin, lonMax are used only with 'user' spatial grid option
+#   Selecting either 'obs' or 'model' will utilize the grid structure of the observational or model data, respectively,
+#     in the subsequent anlaysis/evaluation.
+#   Using the 'user' option is recommended due to the following reasons:
+#     (1) 'obs' may be useful for only a single reference data case. Multiple obs data usually come in different grid systems;
+#         there is no provision to handle such a case.
+#     (2) It was observed that different model data files prepared for the same grid nest often has different long,lat values,
+#         perhaps because of truncations in different systems.
+spatialGrid=user
+gridLonStep=0.5
+gridLatStep=0.5
+latMin=23.75            ; for NARCCAP-ConterminousUS / WUS
+latMax=49.75            ; for NARCCAP-ConterminousUS / WUS
+lonMin=-125.75          ; for NARCCAP-ConterminousUS / WUS
+lonMax=-66.75           ; for NARCCAP-Conterminous US
+#lonMax=-100.75          ; for NARCCAP-WUS.
+# Choices: False, NetCDF
+outputFile=NetCDF
+
+[MODEL]
+# The model data file(s) to be evaluated is(are) assinged here. Note that the current convention is for easy handling of
+#   multiple model datasets from coordinated experiments such as CORDEX that tend to assign a data file with a name that
+#   follows pre-determined convention (a combination of model name, institution, variable name, experiment name, etc.).
+#   In case only one model is evaluated, a user can specify the full file name for 'filenamePattern'
+# variableType (reference units): 'precipitation' (mm/day); 'temperature' (K); 'cloudiness' (%); 'radiation' (W/m^2);
+#                                 'evaporation' (mm/day); 'runoff' (mm/day); 'SMC' (fraction)'; 'SWE' (mm); heatFlux (W/m^2)
+#filenamePattern = none           # option currently not working; 2b added for obs-only processing
+filenamePattern=/Volumes/rcmes2t/rcmet/cases/narccap/mdlData/mon/prec*.nc
+latVariable=lat
+lonVariable=lon
+timeVariable=time
+varName=prec
+#precipFlag=True ; This is just used to support an unknown UNITS in precip data
+variableType='precipitation'
+
+[RCMED]
+# obsParamId designates the reference data file. see http://rcmes.jpl.nasa.gov/rcmed/parameters
+# for multiple ref datasets, provide the id separated by ',' (e.g., 36,37 for TRMM and CRU3.1).
+# obsSource specifies the source of the reference data: 0 = RCMED, 1 = user's local disk, -9 = no obs data
+#   For obsSource == 1, obsInputFile, the file that provides the list of users' own reference data
+obsSource = 0
+obsInputFile = /nas/share1-hp/jinwonki/data/rean/narr/day_narccap_domain/NARR_prec.nc,/nas/share1-hp/jinwonki/data/obs/cpc/netcdf/cpc_1979_present.nc
+obsVarName = pr,pr
+obsFileName = NARR,CPC
+obsDltaTime = daily,daily
+obsTimeVar = time,time
+obsLonVar = lon,longitude
+obsLatVar = lat,latitude
+# if obsSource = 0, the lines from 'obsSource' to 'obsLatVar' above are inactive
+#obsParamId=37,72,81,36,74
+obsParamId=37
+obsTimeStep=monthly,monthly,monthly,monthly,monthly ; WITH THE PARAMETER SERVICE THIS WILL GO AWAY
+
+[SUB_REGION]
+# Sub Region(s) Full File Path
+# Blak line will result in no region-specific analyses/evaluation (e.g., annual cycle for the Pacific Northwest region).
+subRegionFile=/Volumes/rcmes2t/rcmet/cases/narccap/work/inputs/subRgnsNARCCAP.US
+
+=====================================================================================================================================
++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Evaluation metrics ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+=====================================================================================================================================
+(1) Domain-wide metrics
+ ID   Metric
+[0]   Bias: mean bias over the full time range
+            METRIC(i,j) = M(i,j) - O(i,j), wehre M and O are the time mean of the model and obs data, respectively.
+[1]   Mean absolute error over the full time range
+            METRIC(i,j) = AVG[abs( m(i,j,t) - o(i,j,t) )]
+[2]   Temporal anomaly correlation: Eval local interannual variability
+            METRIC(i,j) = CORR[ ( m(i,j,t)-O(i,j) ), ( o(i,j,t)-O(i,j)) ]
+[3]   Temporal correlation: Eval localinterannual variability
+            METRIC(i,j) = CORR[ m(i,j,t), o(i,j,t) ]
+[5]   Spatial correlation between the REF and model climatology: a single correlation coeff
+            METRIC(model) = CORR[ O(i,j), M(i,j)]
+[6]   RMSE in time over the entire time step values: Eval local interannual variability
+            METRIC(i,j) = RMSE[ m(i,j,t), o(i,j,t) ]
+[7]   RMSE between the REF and model climatology: a single correlation coeff
+            METRIC(model) = RMSE[ M(i,j,), O(i,j,) ]_model
+[8]   Taylor diagram for spatial variability
+            Plot standardized deviation and correlations using a Taylor diagram
+[10]  Signal-to-noise ratio
+             METRIC(i,j)_model-or-obs = ENSEMBLE(i,j)_model-or-obs/Sigma(i,j)_model-or-obs
+
+(2) Time series for subregions
+RMSE and CORRELATION between the model and obs annual cycle using portrait diagrams and x-y plots.
+
+===================================================================================================================
+++++++++++++++++++++++++++++++++++++++  RCMES code modification history  ++++++++++++++++++++++++++++++++++++++++++
+===================================================================================================================
+5/28/2013
+Updates to /nas/share3-wf/jinwonki/rcmet/rcmet2.1/src/main/python/rcmes/storage/db.py by Cam has been implemented.
+7/06/2013
+Updated to version 2.1 with the feature to read reference data from users' own data files.
+This code has been tested with daily precipitation data (both model and reference) for the NARCCAP domain
+NOTE: * This version still have problem in regridding daily data into monthly - most likely due to the memory management problem.
+          Will be fixed in the next modification for generalized handling of both reference and model datasets.
+
+-----------    History of code modification    ----------------
+
+Log for the creation of rcmet2.1 from rcmet version latest on 5/28/2013
+
+(001) Modification: Implement an option to read reference data from users' local disk.
+  * Add entries into the configuration file (e.g.,resources/cordexAF.cfg):
+        obsSource, obsInputFile, obsFileName, obsLonVar, obsLatVar, obsTimeVar, obsDltaTime
+
+  * Modify 'rcmet.runUsingConfig' to read extra config parameters 'obsSource' (source indicator), 'obsInputfile'
+        (user-provided reference data file name), 'obsVarName' (the name of obs variable in the obs data file), 
+        'obsFileName' (data file identifier), 'obsTimeVar' (name of the time variable in the obs data file),
+        'obsLonVar' and 'obsLatVar' (the names indicating longitude and latititude variables in the obs data file), and
+        'obsDltaTime' (time step increment of the observed data). All these fields are read in from meta data if the reference
+        data are read from RCMED.
+        - create additional parameters & lists to be passed into do_data_prep.prep_data: obsSource,obsList,obsTimestep
+        - create obsDatasetList according to the specified reference data source
+        - pass 'obsSource' into misc.userDefinedStartEndTimes(obsSource,obsDatasetList,models)
+        - pass additional arguments into do_data_prep.prep_data \
+            (jobProperties,obsSource,obsDatasetList,obsList,obsVarName,obsLonName,obsLatName,obsTimeName,obsTimestep,gridBox,models)
+          note: arguments "obsSource, obsList, obsVarName, obsLonName, obsLatName, obsTimeName, obsTimestep" may be passed via "jobProperties"
+
+  * Modify 'utils.misc.py'
+        - add 'import toolkit.process'
+        - modify 'userDefinedStartEndTimes' so that the observational inputs from RCMED and user's own files can be handled separately.
+
+  * Modify 'do_data_prep'
+        - Additional arguments from the calling routine (see the modification to 'rcmet.runUsingConfig' above)
+        - 'obsSource' is used throughout 'do_data_prep' to indicate the source of reference data. Follow this index to identify
+          the features specific to the source of reference data (RCMED or users' own file(s))
+        - All user-provided ref data must be netCDF files. This is hardwired before the loop in which the ref data files are read & regridded.
+        - User-provided data files are read in using the same routine that is used to read model data files.
+        - Extraction of the reference data for the user-specified is done in the same way as for the model data.
+        - BUG! In the current code, 'mdlList' is updated to store model ensemble (ENS-MDL). This is WRONG. Update 'mdlName' instead of 'mdlList'
+
+  * Modify 'metrics.metrics_plots'
+        - If 'maskLonMin' or 'maskLonMax' exceeds 180, subtract 360 to be consistent with defauls longitude order (from -180 to 180)
+
+(002) Combined handling of the reference and model data in metrics calculations
+  * Modify 'rcmet.runUsingConfig' to combine the reference and model data
+        - Cosmetic: 'obsList' in the line to receive the names of the reference datasets in the 'do_data_prep.prep_data' string has been replaced with
+                    'obsName' for a better consistency with 'mdlName' in the same string that are used to store the names of the model datasets
+        - import numpy and numpy.ma
+        - Pack the data in the order: All reference data sets + Ref ensemble (if any) + all model datasets + model ensemble (if any)
+        - New vars introduced for handling the combined variable:
+          ^ numDatasets = numOBS + numMDL is the tot no. of datasets of the combined ref and mdl data including the ref and mdl ens, if exist.
+          ^ dataName = obsName + mdlName contains the names of all reference and model datasets
+          ^ allData = obsData[for 0:numOBS] + mdlData[for numOBS:numDatasets]
+        -  Modify the line to call 'metrics.metrics_plots' to pass the combined variable and related parameters:
+          ^ OLD: metrics.metrics_plots(modelVarName,numOBS,numMDL,nT,ngrdY,ngrdX,Times,lons,lats,obsData,mdlData,obsList,mdlName,workdir,subRegions,fileOutputOption)
+            NEW: metrics.metrics_plots(modelVarName,numOBS,numMDL,nT,ngrdY,ngrdX,Times,lons,lats,allData,dataName,workdir,subRegions,fileOutputOption)
+
+  * Modify metrics.py
+        - Note that the changes to handle multiple data evaluation makes all metrics to be either 3-d or 4-d (monthly) fields. Modify
+               'elif metricDat.ndim == 2' with 'elif metricDat.ndim == 3' and 'elif metricDat.ndim == 4'
+        - import additional libraries
+          ^ import matplotlib
+          ^ import matplotlib.dates
+          ^ import matplotlib.pyplot as plt
+          ^ from matplotlib.font_manager import FontProperties
+          ^ from utils.Taylor import TaylorDiagram
+        - Modify the argument list for 'calling metrics_plots' to be consistent with the changes in 'rcmet.runUsingConfig'
+        - Modify the line to call 'files.writeNCfile' --> 'files.writeNCfile1'.
+        - Modify the (mp.004) Select the model/obs data for evaluation.
+          Also use modified 'misc.select_data_combined' in the place of 'misc.select_data'
+        - Modify the calculation of obs and model time series & climatology to accommodate the evaluation of multiple model datasets (mp.005)
+        - Modify calc_pat_cor in such as way that the correlation can be calculated for both 1d vs 1d, 2d vs 2d and 3d vs 3d cases
+        - Modify calc_spatial_pat_cor to ensure that std dev and corrln are calculated over the same set of unmasked (i.e., good) data
+          (a) first find masks for both variables
+          (b) re-define the input data in such a way that the data at the location of the masked values in either var are masked.
+        - Make sure to use masked array whenever calculations are performed over the domain
+        - 2-d contour plotting
+          todo: the current multi-frame plot routine (drawCntrMap) must be replaced with a matlab-based routine (remove Ngl dependence)
+        - x-y plot routine has been updated
+          can select axis options between 'log' and 'linear'
+        - Procedure to calculate & plot portrait diagrams for the anaual cycle of multiple obs and/or multiple models in multiple subregions.
+
+  * Bug fix:
+        - calc_clim_mo in metrics.py
+            replace 'mm = months[t]' with 'mm = months[t] - 1' (otherwise mm=12 is out of bound)
+        - calc_spatial_anom_cor
+            replace the string 'd1 = ((oD - mo)*(oD - mo)).sum()' --> 'd2 = ((oD - mo)*(oD - mo)).sum()'
+
+  * Modify storage/files.py
+        - Create 'files.writeNCfile1' in'storage/files.py' with the argument list consistent with the combined datasets handling.
+        - Create 'files.loadDataIntoNetCDF1' for handling the unified datasets.
+
+  * Modify misc.select_metrics
+        - Add an option to draw a Taylor diagram
+
+  * Modify utils/misc.py
+        - Add a new routine 'reshapeMonthlyData' introduced by Alex Goodman
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++  7/11/2013:                                                                                         +
++  This version modifies the release version rcmet2.1 with features specific for the cordex-sa study  +
++  Need to implement the changes in the hydro version                                                 +
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Add options to enter any combinations of data for evaluation
+      - modify metrics.py in the data selection block [e.g., refID = int(misc.select_data_combined(numDatasets, Times, dataList, 'ref'))]
+      - modify misc.select_data_combined
+  * New inpterpolation scheme "scipy.interpolate.griddata" replaces old "process.do_regrid".
+      - Inputs (x and y coordinates, data values) can be either regular grid on irregular grid.
+        Must specify masked values as "np.nan" to properly handle missing data.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++  8/21/2013:                                                                                         +
++  Changes in data retrieval and model data reading (also applies to the reading of user-provided     +
++    observation data) in the latest release [08-21-2013] trunk version has been implemented.         +
++  Note: the changes below also modifies the sub-directory sturcture in the 'cache' directory.        +
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Changes:
+    (1) replace db.py and files.py in storage/ with the updated ones.
+    (2) modify toolkit/do_data_prep.py:
+        'read_lolaT_from_file' has been removed and combined with 'read_data_from_one_file' in the new files.py
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++  NOTE: RELEASE VERSION 2.1.2, 10/20/2013  ++++++++++++++++++++++++++++++
+++ ------------------------------------------------------------------------------------------------ ++
++  * Add:                                                                                            +
++  (1) Calculation of the coeff of variation, active only for inter-obs & inter-model comparisons    +
++  (2) PDF and quantile value calculations                                                           +
++  (3) Update the creation of output file to be consistent with the combined data structure          +
++  (4) Fix: All metrics calculations in the metrics calculation option now work properly.            +
++  (5) Writing the netCDF file of re-gridded data has been fixed to conform with the new data        +
++      structure (unified treatment of the REF and MDL variables in "allData")                       +
++  For more details of the updates, please refer to the work note above.                             +
++  * Known problems:                                                                                 +
++  (a) The code does not work if numMDL = 0 (i.e., model data must present all the time)             +
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Changes:
+    (1) modify utils/misc.select_metrics to pass mdlSelect (CV and S2N applicaiton only to the all-obs or all-mdl)
+    (2) Related to (1), modify the string 'misc.select_metrics()' -> 'misc.select_metrics(mdlSelect)'
+    (3) Modify metrics.py to call writeNCfile1.
+        Also add "writeNCfile1" and "loadDataIntoNetCDF1" to "storage/files.py" to handle the combined data structure.
+        Note that the old routines "writeNCfile" and "loadDataIntoNetCDF" are now obsolete (inconsistent)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++  NOTE: RELEASE VERSION 2.1.3, 3/28/2014  +++++++++++++++++++++++++++++++
+*****************************           Crucial Release                *******************************
+++ ------------------------------------------------------------------------------------------------ ++
+  * Updates from the release version 2.1.2:
+  (1) increase the number of data to be plotted in pltXY in toolkit/metrics.py.
+  (2) handle wider variety of variable types by re-using precipFlag in the configure file.
+      purpose: The variable provisions in the version 2.1.2 are designed to handle precipitation data using "precipFlag".
+               As more variables are being processed, this procedure is expanded in the version 2.1.3 to handle more data
+               types including water fluxes, energy fluxes and the amount of water supstances.
+               See the [MODEL] section of the sample configure file in the beginning of this readme file.
+      (2.1) Modify the config file by removing "precipFlag" (boolean) and adding "variableType" (string)
+      (2.2) Modify "classes.py" - replace two lines in "class Model(object)" that are related with "precipFlag"
+            with the lines for handling "variableType".
+      (2.3) Modify "prep_data" in the module "do_data_prep.py"
+            (a) Replace "precipFlag" with "variableType" in converting the units of specific 
+                observation data (CRU3.1 precipitation) read from RCMED.
+            (b) Replace "precipFlag" with "variableType" in converting the units of specific 
+                observation data (CRU3.1 precipitation) read from users' own local files.
+            (c) Replace "precipFlag" with "variableType" in converting the model data units
+                (e.g., all water fluxes are in mm/day)
+  (3) plot frame arrangement is fixed in metrics.py for multiple plots in the same page
+      *** curical *** crucial *** crucial *** crucial *** crucial *** crucial *** crucial *** crucial ***
+  (4) updated to conform with the new RCMED access modules
+      NOTE: versions earlier than this code do not work.
+      (4.1) Replaced storage/rcmed.py with a new module.
+      (4.2) Modify rcmet.py
+            Line 194: db.get_params() --> db.get_parameters_metadata()
+            Line 217: param['parameter_id'] --> int(param['parameter_id'])
+**********  End of Release note for 2.1.3  ***  End of Release note for 2.1.3  ***************

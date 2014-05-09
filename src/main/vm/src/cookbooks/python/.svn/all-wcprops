@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/LICENSE
+END
+metadata.rb
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/metadata.rb
+END
+CHANGELOG.md
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/CHANGELOG.md
+END
+CONTRIBUTING
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/CONTRIBUTING
+END
+metadata.json
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/metadata.json
+END
+README.md
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/README.md
+END

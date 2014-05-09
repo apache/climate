@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/LICENSE
+END
+metadata.rb
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/metadata.rb
+END
+CHANGELOG.md
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/CHANGELOG.md
+END
+CONTRIBUTING
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/CONTRIBUTING
+END
+metadata.json
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/metadata.json
+END
+README.md
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/build-essential/README.md
+END

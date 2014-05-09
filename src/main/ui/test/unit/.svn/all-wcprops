@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/test/unit
+END
+directivesSpec.js
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/repos/asf/!svn/ver/1480068/incubator/climate/trunk/rcmet/src/main/ui/test/unit/directivesSpec.js
+END
+servicesSpec.js
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/test/unit/servicesSpec.js
+END
+controllersSpec.js
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/test/unit/controllersSpec.js
+END
+filtersSpec.js
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/ui/test/unit/filtersSpec.js
+END

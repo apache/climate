@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2
+END
+metadata.rb
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/metadata.rb
+END
+README.rdoc
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/README.rdoc
+END
+metadata.json
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/apache2/metadata.json
+END

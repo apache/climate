@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/providers
+END
+virtualenv.rb
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/providers/virtualenv.rb
+END
+pip.rb
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repos/asf/!svn/ver/1476460/incubator/climate/trunk/rcmet/src/main/vm/src/cookbooks/python/providers/pip.rb
+END
