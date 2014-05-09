@@ -293,7 +293,6 @@ class TestRunEvaluation(unittest.TestCase):
         eval_files = [f for f in os.listdir(eval_dir)
                       if os.path.isfile(os.path.join(eval_dir, f))]
 
-        self.assertTrue(False)
         self.assertTrue(len(eval_files) == 1)
         self.assertEquals(eval_files[0], 'd1.nc_compared_to_d2.nc_bias.png')
 
