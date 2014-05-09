@@ -11,3 +11,6 @@ def setup_package():
 
     if not os.path.exists('/tmp/d2.nc'):
         urlretrieve(FILE_LEADER + FILE_2, '/tmp/d2.nc')
+
+    if not os.path.exists('/tmp/ocw'):
+        os.mkdir('/tmp/ocw')
