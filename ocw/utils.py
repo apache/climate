@@ -225,8 +225,8 @@ def reshape_monthly_to_annually(dataset):
     :param dataset: Dataset object with full-year format
     :type dataset: Open Climate Workbench Dataset Object
 
-    :returns: Dataset object with shape (num_year, num_month, num_lat, num_lon)
-    :rtype: Open Climate Workbench Dataset Object
+    :returns: Dataset values with shape (num_year, num_month, num_lat, num_lon)
+    :rtype: Numpy array
     '''
 
     # Get dataset values
