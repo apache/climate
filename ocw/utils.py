@@ -218,9 +218,12 @@ def normalize_lat_lon_values(lats, lons, values):
 
 
 def reshape_monthly_to_annually(dataset):
-    ''' Reshaping 3D array dataset with shape (num_month, num_lat, num_lon)
-        to 4D array with shape (num_year, 12, num_lat, num_lon)
-        e.g. (24, 90, 180) to (2, 12, 90, 180)
+    ''' Reshaping monthly dataset to annually
+
+    Reshaping 3D array dataset's values with shape (num_month, num_lat, num_lon)
+    to 4D array with shape (num_year, 12, num_lat, num_lon).
+    Number 12 is constant which represents 12 months in one year
+    e.g. (24, 90, 180) to (2, 12, 90, 180)
 
     :param dataset: Dataset object with full-year format
     :type dataset: Open Climate Workbench Dataset Object
@@ -229,23 +232,16 @@ def reshape_monthly_to_annually(dataset):
     :rtype: Numpy array
     '''
 
-    # Get dataset values
     values = dataset.values
-    # Get values shape
     data_shape = values.shape
-    # Get number of month in dataset
     num_total_month = data_shape[0]
-    # Calculate number of years
-    num_year = num_total_month/12
-    # Having each year as 12 months
+    num_year = num_total_month / 12
     num_month = 12
-    # Create a new shape (number of year, number of month)
     year_month_shape = num_year, num_month
-    # Get lat and lon shape
     lat_lon_shape = data_shape[1:]
-    # Make new shape
+    # Make new shape (num_year, 12, num_lats, num_lons)
     new_shape = tuple(year_month_shape + lat_lon_shape)
-    # Reshape data with new shape (num_year, num_month, num_lat, num_lon)
+    # Reshape data with new shape
     values.shape = new_shape
 
     return values
