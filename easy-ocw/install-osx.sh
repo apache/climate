@@ -88,7 +88,7 @@ cat << ENDINTRO
 A number of dependencies for OCW will now be installed. Please check the wiki
 for a complete list of dependencies. Additionally, please read the wiki for
 useful installation guidelines and information that may be pertinent to your
-situation.
+situation. All of this can be found at http://s.apache.org/3p2
 
 ENDINTRO
 
