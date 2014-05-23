@@ -197,3 +197,11 @@ subtask "done"
 task "Installing pylint ..."
 pip install pylint >> install_log
 subtask "done"
+
+task "Installing sphinx ..."
+pip install sphinx==1.2.1 >> install_log
+subtask "done"
+
+task "Installing sphinxcontrib ..."
+pip install sphinxcontrib-httpdomain==1.2.1 >> install_log
+subtask "done"
