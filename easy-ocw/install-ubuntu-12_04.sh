@@ -216,12 +216,6 @@ task "Installing sphinxcontrib ..."
 pip install sphinxcontrib-httpdomain==1.2.1 >> install_log
 subtask "done"
 
-# Grab the latests OCW code
-header "Grabbing the latest OCW code ..."
-cd
-git clone http://www.github.com/apache/climate
-subtask "done"
-
 # Ensure that the climate code is included in the Python Path
 header "Updating PYTHONPATH ..."
 echo "export PYTHONPATH=/home/vagrant/climate:/home/vagrant/climate/ocw/:/home/vagrant/climate/rcmet/src/main/python/rcmes" >> /home/vagrant/.bashrc
