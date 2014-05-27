@@ -159,7 +159,7 @@ class TestReshapeMonthlyToAnnually(unittest.TestCase):
                                     self.value, self.variable)
 
     def test_reshape_full_year(self):
-        new_values = self.value.reshape(2,12,5,5)
+        new_values = self.value.reshape(2, 12, 5, 5)
         np.testing.assert_array_equal(
             utils.reshape_monthly_to_annually(self.test_dataset), new_values)
 
@@ -169,7 +169,32 @@ class TestReshapeMonthlyToAnnually(unittest.TestCase):
         value = flat_array.reshape(26, 5, 5)
         bad_dataset = Dataset(self.lat, self.lon, new_time, value, self.variable)
 
-        self.assertRaises(ValueError,utils.reshape_monthly_to_annually,bad_dataset)
+        self.assertRaises(ValueError, utils.reshape_monthly_to_annually, bad_dataset)
+
+class TestCalcClimatologyYear(unittest.TestCase):
+    ''' Testing function 'calc_climatology_year' from ocw.utils.py '''
+
+    def setUp(self):
+        self.lat = np.array([10, 12, 14, 16, 18])
+        self.lon = np.array([100, 102, 104, 106, 108])
+        self.time = np.array([datetime.datetime(2000, 1, 1) + relativedelta(months = x) for x in range(24)])
+        flat_array = np.array(range(600))
+        self.value = flat_array.reshape(24, 5, 5)
+        self.variable = 'prec'
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+
+    def test_annually_mean(self):
+        annually_mean = np.append(np.arange(137.5, 162.5, 1), np.arange(437.5, 462.5, 1))
+        annually_mean.shape = (2, 5, 5)
+        np.testing.assert_array_equal(
+            utils.calc_climatology_year(self.test_dataset)[0], annually_mean)
+
+    def test_total_mean(self):
+        total_mean = np.arange(287.5, 312.5, 1)
+        total_mean.shape = (5, 5)
+        np.testing.assert_array_equal(
+            utils.calc_climatology_year(self.test_dataset)[1], total_mean)
 
 if __name__ == '__main__':
     unittest.main()

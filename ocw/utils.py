@@ -245,3 +245,30 @@ def reshape_monthly_to_annually(dataset):
     values.shape = new_shape
 
     return values
+
+def calc_climatology_year(dataset):
+    ''' Calculate climatology of dataset's values for each year
+
+    :param dataset: Dataset object with full-year format
+    :type dataset: Open Climate Workbench Dataset Object
+
+    :returns: Mean values for each year (annually_mean)
+            and mean values for all years (total_mean)
+    :rtype: A tuple of two numpy arrays
+
+    :raise ValueError: If the time shape of values in not divisble by 12 (not full-year)
+    '''
+
+    values_shape = dataset.values.shape
+    time_shape = values_shape[0]
+    if time_shape % 12:
+        raise ValueError('The dataset should be in full-time format.')
+    else:
+        # Get values reshaped to (num_year, 12, num_lats, num_lons)
+        values = reshape_monthly_to_annually(dataset)
+        # Calculate mean values over year (num_year, num_lats, num_lons)
+        annually_mean = values.mean(axis=1)
+        # Calculate mean values over all years (num_lats, num_lons)
+        total_mean = annually_mean.mean(axis=0)
+
+    return annually_mean, total_mean
