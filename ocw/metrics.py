@@ -21,6 +21,8 @@ Classes:
 '''
 
 from abc import ABCMeta, abstractmethod
+import ocw.utils as utils
+import numpy
 
 class Metric(object):
     '''Base Metric Class'''
@@ -99,3 +101,39 @@ class TemporalStdDev(UnaryMetric):
         :rtype: Numpy Array
         '''
         return target_dataset.values.std(axis=0, ddof=1)
+
+
+class SpatialStdDevRatio(BinaryMetric):
+    '''Calculate the ratio of spatial standard deviation (model standard
+          deviation)/(observed standard deviation)'''
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate the ratio of spatial std. dev. between a reference and
+            target dataset.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: Dataset.
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: Dataset.
+
+        :returns: The ratio of standard deviation of the reference and target
+            dataset.
+        '''
+
+        # This is calcClimYear function for ref_dataset
+        reshaped_ref_data = utils.reshape_monthly_to_annually(ref_dataset)
+        ref_t_series = reshaped_ref_data.mean(axis=1)
+        ref_means = ref_t_series.mean(axis=0)
+
+        # This is calcClimYear function for target_dataset
+        reshaped_target_data = utils.reshape_monthly_to_annually(target_dataset)
+        target_t_series = reshaped_target_data.mean(axis=1)
+        target_means = target_t_series.mean(axis=0)
+
+        return numpy.std(ref_means) / numpy.std(target_means)
+
+

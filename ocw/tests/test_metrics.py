@@ -20,7 +20,7 @@
 import unittest
 import datetime as dt
 
-from ocw.metrics import Bias, TemporalStdDev
+from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio
 from ocw.dataset import Dataset
 
 import numpy as np
@@ -30,7 +30,7 @@ class TestBias(unittest.TestCase):
     '''Test the metrics.Bias metric.'''
     def setUp(self):
         self.bias = Bias()
-        #Initialize reference dataset
+        # Initialize reference dataset
         self.reference_lat = np.array([10, 12, 14, 16, 18])
         self.reference_lon = np.array([100, 102, 104, 106, 108])
         self.reference_time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
@@ -39,7 +39,7 @@ class TestBias(unittest.TestCase):
         self.reference_variable = 'prec'
         self.reference_dataset = Dataset(self.reference_lat, self.reference_lon,
             self.reference_time, self.reference_value, self.reference_variable)
-        #Initialize target dataset
+        # Initialize target dataset
         self.target_lat = np.array([1, 2, 4, 6, 8])
         self.target_lon = np.array([10, 12, 14, 16, 18])
         self.target_time = np.array([dt.datetime(2001, x, 1) for x in range(1, 13)])
@@ -61,7 +61,7 @@ class TestTemporalStdDev(unittest.TestCase):
     '''Test the metrics.TemporalStdDev metric.'''
     def setUp(self):
         self.temporal_std_dev = TemporalStdDev()
-        #Initialize target dataset
+        # Initialize target dataset
         self.target_lat = np.array([10, 12, 14, 16, 18])
         self.target_lon = np.array([100, 102, 104, 106, 108])
         self.target_time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
@@ -77,6 +77,34 @@ class TestTemporalStdDev(unittest.TestCase):
         expected_result = np.zeros((5, 5),)
         expected_result.fill(90.13878189)
         npt.assert_almost_equal(self.temporal_std_dev.run(self.target_dataset), expected_result)
+
+
+class TestSpatialStdDevRatio(unittest.TestCase):
+    '''Test the metrics.SpatialStdDevRatio metric'''
+    def setUp(self):
+        self.spatial_std_dev_ratio = SpatialStdDevRatio()
+        self.ref_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 5
+            np.arange(0, 1500, 5).reshape(12, 5, 5),
+            'ds1'
+        )
+
+        self.tar_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 2
+            np.arange(0, 600, 2).reshape(12, 5, 5),
+            'ds2'
+        )
+
+    def test_function_run(self):
+        print 'Test the metrics.SpatialStdDevRatio metric'
+        self.assertTrue(self.spatial_std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
+
 
 if __name__ == '__main__':
     unittest.main()
