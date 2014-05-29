@@ -174,34 +174,4 @@ echo | conda install --file ocw-conda-dependencies.txt
 # scipy, matplotlib, and basemap. For everything else, we stick
 # with pip.
 header "Installing additional Python packages"
-task "Installing requests ..."
-pip install requests >> install_log
-subtask "done"
-
-task "Installing bottle ..."
-pip install bottle >> install_log
-subtask "done"
-
-task "Installing pydap ..."
-pip install pydap >> install_log
-subtask "done"
-
-task "Installing webtest ..."
-pip install webtest >> install_log
-subtask "done"
-
-task "Installing nose ..."
-pip install nose >> install_log
-subtask "done"
-
-task "Installing pylint ..."
-pip install pylint >> install_log
-subtask "done"
-
-task "Installing sphinx ..."
-pip install sphinx==1.2.1 >> install_log
-subtask "done"
-
-task "Installing sphinxcontrib ..."
-pip install sphinxcontrib-httpdomain==1.2.1 >> install_log
-subtask "done"
+pip install -r ocw-pip-dependencies.txt >> install_log

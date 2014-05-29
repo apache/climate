@@ -1,0 +1,8 @@
+requests
+bottle
+pydap
+webtest
+nose
+pylint
+sphinx==1.2.1
+sphinxcontrib-httpdomain==1.2.1
