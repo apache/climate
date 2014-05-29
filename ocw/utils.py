@@ -22,7 +22,7 @@ import datetime as dt
 import numpy as np
 
 from mpl_toolkits.basemap import shiftgrid
-
+from dateutil.relativedelta import relativedelta
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -50,8 +50,7 @@ def decode_time_values(dataset, time_var_name):
         # datetime.timedelta doesn't support a 'months' option. To remedy
         # this, a month == 30 days for our purposes.
         for time_val in time_data:
-            num_days = 30 * time_val
-            times.append(time_base + dt.timedelta(days=num_days))
+            times.append(time_base + relativedelta(months=int(time_val)))
     else:
         for time_val in time_data:
             arg[time_units] = time_val

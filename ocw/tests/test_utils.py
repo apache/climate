@@ -39,8 +39,8 @@ class TestDecodeTimes(unittest.TestCase):
         self.assertTrue(all([type(x) is datetime.datetime for x in times]))
 
     def test_valid_time_processing(self):
-        start_time = datetime.datetime.strptime('1988-06-10 00:00:00', '%Y-%m-%d %H:%M:%S')
-        end_time = datetime.datetime.strptime('2008-01-27 00:00:00', '%Y-%m-%d %H:%M:%S')
+        start_time = datetime.datetime.strptime('1989-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.datetime.strptime('2008-12-01 00:00:00', '%Y-%m-%d %H:%M:%S')
         times = utils.decode_time_values(self.netcdf, 'time')
 
         self.assertEquals(times[0], start_time)

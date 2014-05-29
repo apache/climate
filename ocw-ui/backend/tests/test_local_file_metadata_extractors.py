@@ -105,8 +105,8 @@ class TestTimeExtraction(unittest.TestCase):
         expected_return = {
             "success": True,
             "time_name": "time",
-            "start_time": "1988-06-10 00:00:00",
-            "end_time": "2008-01-27 00:00:00"
+            "start_time": "1989-01-01 00:00:00",
+            "end_time": "2008-12-01 00:00:00"
         }
 
         file_location = os.path.abspath('tests/example_data/lat_lon_time.nc')
@@ -119,8 +119,8 @@ class TestTimeExtraction(unittest.TestCase):
 		expected_return = {
 			"success": True,
 			"time_name": "time",
-			"start_time": "1988-06-10 00:00:00",
-			"end_time": "2008-01-27 00:00:00"
+			"start_time": "1989-01-01 00:00:00",
+			"end_time": "2008-12-01 00:00:00"
 		}
 
         file_location = os.path.abspath('tests/example_data/lat_lon_time.nc')
