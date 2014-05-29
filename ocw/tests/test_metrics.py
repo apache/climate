@@ -20,7 +20,7 @@
 import unittest
 import datetime as dt
 
-from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio
+from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio, PatternCorrelation
 from ocw.dataset import Dataset
 
 import numpy as np
@@ -104,6 +104,35 @@ class TestSpatialStdDevRatio(unittest.TestCase):
     def test_function_run(self):
         print 'Test the metrics.SpatialStdDevRatio metric'
         self.assertTrue(self.spatial_std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
+
+
+class TestPatternCorrelation(unittest.TestCase):
+    '''Test the metrics.PatternCorrelation metric'''
+    def setUp(self):
+        self.pattern_correlation = PatternCorrelation()
+        self.ref_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 5
+            np.arange(0, 1500, 5).reshape(12, 5, 5),
+            'ds1'
+        )
+
+        self.tar_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 2
+            np.arange(0, 600, 2).reshape(12, 5, 5),
+            'ds2'
+        )
+
+    def test_function_run(self):
+        print 'Test the metrics.PatternCorrelation metric'
+        pattern, p_value = self.pattern_correlation.run(self.ref_dataset, self.tar_dataset)
+        self.assertEqual(pattern, 1.0)
+        self.assertEqual(p_value, 0.0)
 
 
 if __name__ == '__main__':
