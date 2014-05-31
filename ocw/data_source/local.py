@@ -24,42 +24,12 @@ from datetime import timedelta ,datetime
 import calendar
 import string
 
+import ocw.utils as utils
+
 LAT_NAMES = ['x', 'rlat', 'rlats', 'lat', 'lats', 'latitude', 'latitudes']
 LON_NAMES = ['y', 'rlon', 'rlons', 'lon', 'lons', 'longitude', 'longitudes']
 TIME_NAMES = ['time', 'times', 'date', 'dates', 'julian']
 
-def _get_time_base(time_format, since_index):
-    '''Calculate time base from time data.
-
-    :param time_format: Unit of time in netCDF
-    :type time_format: String
-    :param since_index: Index of word since in time unit
-    :type since_index: Number
-
-    :returns: Time base of time attribute in netCDF file
-    :rtype: datetime
-    '''
-
-    time_base = string.lstrip(time_format[since_index:])
-    time_base = time_base.split('.')[0] + '0' if "." in time_base else time_base
-    TIME_FORMATS =[
-                    '%Y:%m:%d %H:%M:%S', '%Y-%m-%d %H-%M-%S', '%Y/%m/%d %H/%M/%S','%Y-%m-%d %H:%M:%S', '%Y/%m/%d %H:%M:%S', '%Y%m%d %H:%M:%S',
-                    '%Y%m%d%H%M%S', '%Y-%m-%d-%H-%M-%S', '%Y/%m/%d/%H/%M/%S', '%Y:%m:%d:%H:%M:%S', '%Y-%m-%d-%H:%M:%S', '%Y-%m-%d %H:%M:%S',
-                    '%Y/%m/%d%H:%M:%S', '%Y-%m-%d %H:%M','%Y/%m/%d %H:%M', '%Y:%m:%d %H:%M','%Y%m%d %H:%M',
-                    '%Y-%m-%d', '%Y/%m/%d', '%Y:%m:%d', '%Y%m%d', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H'
-                    ]
-    count = 0
-    for time_format in TIME_FORMATS:
-            try:
-                time_base = datetime.strptime(time_base, time_format)
-                break
-            except:
-                count = count + 1
-                if count == len(TIME_FORMATS):
-                    err = "The time format is not found. Base time is " + str(time_base) + " ."
-                    raise ValueError(err)
-
-    return time_base
 
 def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     '''Return valid variable from given netCDF object.
@@ -121,82 +91,6 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
         "Unable to locate a single matching variable name in NetCDF object. "
     )
     raise ValueError(error)
-
-
-def _get_time_step(netcdf, time_variable_name):
-    '''Calculate time step from time data.
-
-    :param netcdf: NetCDF dataset object
-    :type netcdf: Object
-    :param time_variable_name: NetCDF time variable name
-    :type time_variable_name: String
-
-    :returns: Step, unit and index of word since of netCDF time variable
-            in form of (time_step, time_format, since_index)
-    :rtype: (String, String, Number)
-    '''
-
-    try:
-        time_format = netcdf.variables[time_variable_name].units.encode()
-        since_index = re.search('since', time_format).end()
-    except AttributeError:
-        err = 'Time variable attributes cannot be decoded.'
-        raise ValueError(err)
-
-    time_step = None
-    TIME_UNITS = ('minutes', 'hours', 'days', 'months', 'years')
-    for unit in TIME_UNITS:
-        if re.search(unit, time_format):
-            time_step = unit
-            break
-
-    return (time_step, time_format, since_index)
-
-
-def _calculate_time(netcdf, time_raw_values, time_variable_name):
-    '''Convert time data from integer to python datetime.
-
-    :param netcdf: NetCDF dataset object
-    :type netcdf: Object
-    :param times_raw_values: Integer list of raw time data
-    :type times_raw_values: List
-    :param time_variable_name: NetCDF time variable name
-    :type time_variable_name: String
-
-    :returns: List of converted datetime values
-    :rtype: datetime list
-    '''
-
-    time_values = []
-
-    time_step, time_format, since_index = _get_time_step(netcdf, time_variable_name)
-    time_base = _get_time_base(time_format, since_index)
-    time_step = time_step.lower()
-
-    if 'min' in time_step:
-        for time in time_raw_values:
-            time_values.append(time_base + timedelta(minutes=int(time)))
-    elif 'hour' in time_step:
-        for time in time_raw_values:
-            time_values.append(time_base + timedelta(hours=int(time)))
-    elif 'day' in time_step:
-        for time in time_raw_values:
-            time_values.append(time_base + timedelta(days=int(time)))
-    elif 'mon' in time_step:
-        for time in time_raw_values:
-            number_of_month = time_base.month -1 + int(time)
-            new_year = time_base.year + number_of_month / 12
-            new_month = number_of_month % 12 + 1
-            new_day = min(time_base.day, calendar.monthrange(new_year,new_month)[1])
-            time_values.append(datetime(new_year, new_month, new_day, time_base.hour, time_base.minute, time_base.second))
-    elif 'year' or 'annual' in time_step:
-        for time in time_raw_values:
-            time_values.append(time_base + timedelta(years=int(time)))
-    else:
-        err = "The time step cannot be defined."
-        raise ValueError(err)
-
-    return time_values
 
 
 def _get_lat_name(variable_names):
@@ -352,7 +246,7 @@ def load_file(file_path, variable_name):
     lats = netcdf.variables[lat_name][:]    
     lons = netcdf.variables[lon_name][:]
     time_raw_values = netcdf.variables[time_name][:]
-    times = _calculate_time(netcdf, time_raw_values, time_name)
+    times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
 
