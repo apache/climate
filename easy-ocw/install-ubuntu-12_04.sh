@@ -175,11 +175,6 @@ cd ..
 python setup.py install >> install_log
 subtask "done"
 
-# Install NetCDF4
-header "Installing NetCDF4 ..."
-echo | conda install netcdf4
-subtask "done"
-
 # Install miscellaneous Python packages needed for OCW. Some of these
 # can be installed with Conda, but since none of them have an annoying
 # compiled component we just installed them with Pip.
