@@ -1,7 +1,8 @@
 import datetime
+from os import path
+import urllib
 
 import numpy as np
-import urllib
 
 import ocw.data_source.local as local
 import ocw.dataset_processor as dsp
@@ -17,9 +18,16 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "wrf_bias_compared_to_knmi"
 
-# Download necessary NetCDF files
-urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
-urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+# Download necessary NetCDF files if not present
+if path.exists(FILE_1):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+
+if path.exists(FILE_2):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
 print("Loading %s into an OCW Dataset Object" % (FILE_1,))

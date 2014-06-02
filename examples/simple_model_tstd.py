@@ -16,6 +16,7 @@
 # under the License.
 
 
+from os import path
 import urllib
 
 import ocw.data_source.local as local
@@ -31,8 +32,11 @@ FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "knmi_temporal_std"
 
-# Download necessary NetCDF file
-urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+# Download necessary NetCDF file if needed
+if path.exists(FILE_1):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects """
 print "Loading %s into an OCW Dataset Object" % (FILE_1,)
