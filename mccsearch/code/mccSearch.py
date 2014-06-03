@@ -77,13 +77,14 @@ PRUNED_GRAPH = nx.DiGraph()
 #------------------------ End GLOBAL VARS -------------------------
 #************************ Begin Functions *************************
 #******************************************************************
-def readMergData(dirname):
+def readMergData(dirname, filelist = None):
 	'''
 	Purpose::
 	    Read MERG data into RCMES format
 	
 	Input::
-	    Directory to the MERG files in NETCDF format
+	    dirname: a string representing the directory to the MERG files in NETCDF format
+	    filelist (optional): a list of strings representing the filenames betweent the start and end dates provided
 	
 	Output::
 	    A 3D masked array (t,lat,lon) with only the variables which meet the minimum temperature 
@@ -107,7 +108,8 @@ def readMergData(dirname):
 	mergLonVarName = 'longitude'
 	
 	filelistInstructions = dirname + '/*'
-	filelist = glob.glob(filelistInstructions)
+	if filelist == None:
+		filelist = glob.glob(filelistInstructions)
 
 	
 	#sat_img is the array that will contain all the masked frames
@@ -1893,6 +1895,7 @@ def checkForFiles(startTime, endTime, thisDir, fileType):
 			status: a boolean representing whether all files exists
 
 	'''
+	filelist =[]
 	startFilename = ''
 	endFilename =''
 	currFilename = ''
@@ -1951,10 +1954,14 @@ def checkForFiles(startTime, endTime, thisDir, fileType):
 	currFilename = thisDir+"/"+startFilename
 
 	while currFilename is not endFilename:
+
 		if not os.path.isfile(currFilename):
 			print "file is missing! Filename: ", currFilename
 			status = False
-			return status
+			return status, filelist
+		else:
+			#create filelist
+			filelist.append(currFilename)
 	
 		status = True
 		if currFilename == endFilename:
@@ -1973,7 +1980,7 @@ def checkForFiles(startTime, endTime, thisDir, fileType):
 		if fileType == 2:
 			currFilename = thisDir+"/"+"3B42."+str(curryr)+currmmStr+currddStr+"."+currhrStr+".7A.nc"
 
-	return status
+	return status,filelist
 #******************************************************************
 def findTime(curryr, currmm, currdd, currhr):
 	'''
