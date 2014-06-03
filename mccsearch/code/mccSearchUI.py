@@ -85,13 +85,13 @@ def main():
         endDateTime = raw_input("> Please enter the end date and time yyyymmddhr: \n")
     
     #check if all the files exisits in the MERG and TRMM directories entered
-    test = mccSearch.checkForFiles(startDateTime, endDateTime, DIRS['TRMMdirName'], 2)
-    if test == False:
-        print "Error with files in the original MERG directory entered. Please check your files before restarting. "
-        return
-    test = mccSearch.checkForFiles(startDateTime, endDateTime, DIRS['CEoriDirName'],1)
+    test, _ = mccSearch.checkForFiles(startDateTime, endDateTime, DIRS['TRMMdirName'], 2)
     if test == False:
         print "Error with files in the original TRMM directory entered. Please check your files before restarting. "
+        return
+    test, filelist = mccSearch.checkForFiles(startDateTime, endDateTime, DIRS['CEoriDirName'],1)
+    if test == False:
+        print "Error with files in the original MERG directory entered. Please check your files before restarting. "
         return
 
     #create main directory and file structure for storing intel
@@ -116,7 +116,7 @@ def main():
     print "\t\t Starting the MCCSearch Analysis "
     print ("-"*80) 
     print "\n -------------- Reading MERG and TRMM Data ----------"
-    mergImgs, timeList = mccSearch.readMergData(DIRS['CEoriDirName'])
+    mergImgs, timeList = mccSearch.readMergData(DIRS['CEoriDirName'], filelist)
     print "\n -------------- findCloudElements ----------"
     CEGraph = mccSearch.findCloudElements(mergImgs,timeList,DIRS['TRMMdirName'])
     #if the TRMMdirName wasnt entered for whatever reason, you can still get the TRMM data this way
