@@ -32,9 +32,14 @@ sudo apt-get install -y vim
 
 # GUI related installs
 sudo apt-get install -y lightdm
+
+# XFCE
 sudo apt-get install -y xfce4
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y eog
+
+# Ubuntu Unity
+#sudo apt-get install -y ubuntu-desktop
 
 # Use the Easy-OCW Ubuntu install script to get everything
 # else installed!
