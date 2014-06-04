@@ -231,7 +231,7 @@ def reshape_monthly_to_annually(dataset):
     :rtype: Numpy array
     '''
 
-    values = dataset.values
+    values = dataset.values[:]
     data_shape = values.shape
     num_total_month = data_shape[0]
     num_year = num_total_month / 12
