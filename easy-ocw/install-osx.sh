@@ -149,9 +149,6 @@ conda init >> install_log
 header "Installing dependencies with conda ..."
 echo | conda install --file ocw-conda-dependencies.txt
 
-# Before installing packages with pip we need to activate the virtualenv with conda
-source ~/ocw/bin/activate ~/ocw >> install_log
-
 # We only use conda for the annoying dependencies like numpy,
 # scipy, matplotlib, and basemap. For everything else, we stick
 # with pip.
