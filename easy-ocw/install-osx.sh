@@ -62,7 +62,7 @@ echo
 WITH_VIRTUAL_ENV=0
 WITH_HOMEBREW=0
 WITH_INTERACT=1
-
+INIT_PWD=$PWD
 while getopts ":h :e :q" FLAG
 do
     case $FLAG in
@@ -131,33 +131,12 @@ if [ $WITH_VIRTUAL_ENV == 1 ]; then
         subtask "done"
     fi
 
-    # Check if virtualenvwrapper is installed or not. If it's not, we'll
-    # install it for the user. Why wouldn't you want to use virtualenvwrapper?!?!
-    # It's super awesome! By default, virtualenvwrapper installs to the same place
-    # as virtualenv so we'll look for the necessary scripts there. This is fairly
-    # brittle, but it should be sufficient for the majority of cases.
-    virtualEnvLoc=`which virtualenv`
-    virtualEnvWrapperLoc="${virtualEnvLoc}wrapper.sh"
-
-    if [ ! -f $virtualEnvWrapperLoc ]; then
-        task "Installing virtualenvwrapper ..."
-        pip install virtualenvwrapper >> install_log
-        subtask "done"
-
-        task "Setting/sourcing necessary virtualenv things ..."
-        # Need to setup environment for virtualenv
-        export WORKON_HOME=$HOME/.virtualenvs
-        subtask "done"
-    fi
-
-    # Just to be safe, we'll source virtualenvwrapper. This is really only
-    # necessary if we installed it for the user.
-    source $virtualEnvWrapperLoc
-
     # Create a new environment for OCW work
-    task "Creating a new environment ..."
-    mkvirtualenv ocw >> install_log
-    workon ocw >> install_log
+    task "Creating a new environment in ~/ocw..."
+    cd ~
+    virtualenv ocw >> install_log
+    source ~/ocw/bin/activate >> install_log
+    cd $INIT_PWD
     subtask "done"
 fi
 
@@ -175,3 +154,43 @@ echo | conda install --file ocw-conda-dependencies.txt
 # with pip.
 header "Installing additional Python packages"
 pip install -r ocw-pip-dependencies.txt >> install_log
+
+
+if [ $WITH_VIRTUAL_ENV == 1 ]; then
+    echo "***POST INSTALLATION NOTE***
+
+If you are familiar with virtualenv you should know that activating
+the new 'ocw' environment is different because we use conda to install
+packages.  An example of the command you want to run is listed in the
+alias below.
+
+To make it easier to change into the 'ocw' virtualenv add the
+following alias to your ~/.bash_profile
+
+    alias ocw='source ~/ocw/bin/activate ~/ocw/'
+
+When you want to use ocw in the future, you just have to type 'ocw'
+in your terminal."
+else
+    echo "***POST INSTALLATION NOTE***
+
+If you have run this script within your own virtualenv you need to know
+a couple of caveats/side effects that are caused by using conda to install
+packages within the virtualenv.
+
+- Virtualenv wrapper will throw errors like those outlined here:
+https://issues.apache.org/jira/browse/CLIMATE-451
+
+- You will not be able to 'activate' the environment using the normal
+virtualenv command, you must instead use the conda activate command as follows:
+
+source path/to/your_env/bin/activate path/to/your_env
+
+Example:  (assuming your env is in ~/.virtualenv/ocw)
+
+source ~/.virtualenv/ocw/bin/activate ~/.virtualenv/ocw
+
+"
+
+fi
+
