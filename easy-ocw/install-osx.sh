@@ -158,6 +158,12 @@ pip install -r ocw-pip-dependencies.txt >> install_log
 
 if [ $WITH_VIRTUAL_ENV == 1 ]; then
     echo "***POST INSTALLATION NOTE***
+
+If you are familiar with virtualenv you should know that activating
+the new 'ocw' environment is different because we use conda to install
+packages.  An example of the command you want to run is listed in the
+alias below.
+
 To make it easier to change into the 'ocw' virtualenv add the
 following alias to your ~/.bash_profile
 
@@ -165,5 +171,26 @@ following alias to your ~/.bash_profile
 
 When you want to use ocw in the future, you just have to type 'ocw'
 in your terminal."
+else
+    echo "***POST INSTALLATION NOTE***
+
+If you have run this script within your own virtualenv you need to know
+a couple of caveats/side effects that are caused by using conda to install
+packages within the virtualenv.
+
+- Virtualenv wrapper will throw errors like those outlined here:
+https://issues.apache.org/jira/browse/CLIMATE-451
+
+- You will not be able to 'activate' the environment using the normal
+virtualenv command, you must instead use the conda activate command as follows:
+
+source path/to/your_env/bin/activate path/to/your_env
+
+Example:  (assuming your env is in ~/.virtualenv/ocw)
+
+source ~/.virtualenv/ocw/bin/activate ~/.virtualenv/ocw
+
+"
+
 fi
 
