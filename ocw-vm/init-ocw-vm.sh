@@ -41,3 +41,9 @@ sudo apt-get install -y eog
 git clone http://git-wip-us.apache.org/repos/asf/climate.git
 cp climate/easy-ocw/install-ubuntu-12_04.sh .
 bash install-ubuntu-12_04.sh -q
+
+# Set symlink for the UI frontend code
+cd climate/ocw-ui/backend
+ln -s ../frontend/app app
+
+cd
