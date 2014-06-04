@@ -157,3 +157,16 @@ source ~/ocw/bin/activate ~/ocw >> install_log
 # with pip.
 header "Installing additional Python packages"
 pip install -r ocw-pip-dependencies.txt >> install_log
+
+
+if [ $WITH_VIRTUAL_ENV == 1 ]; then
+    echo "***POST INSTALLATION NOTE***
+To make it easier to change into the 'ocw' virtualenv add the
+following alias to your ~/.bash_profile
+
+    alias ocw='source ~/ocw/bin/activate ~/ocw/'
+
+When you want to use ocw in the future, you just have to type 'ocw'
+in your terminal."
+fi
+
