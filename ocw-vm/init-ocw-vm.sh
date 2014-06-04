@@ -51,3 +51,9 @@ cp climate/easy-ocw/install-ubuntu-12_04.sh .
 cp climate/easy-ocw/*.txt .
 
 bash install-ubuntu-12_04.sh -q
+
+# Set symlink for the UI frontend code
+cd climate/ocw-ui/backend
+ln -s ../frontend/app app
+
+cd
