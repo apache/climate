@@ -62,7 +62,7 @@ echo
 WITH_VIRTUAL_ENV=0
 WITH_HOMEBREW=0
 WITH_INTERACT=1
-
+INIT_PWD=$PWD
 while getopts ":h :e :q" FLAG
 do
     case $FLAG in
@@ -131,33 +131,12 @@ if [ $WITH_VIRTUAL_ENV == 1 ]; then
         subtask "done"
     fi
 
-    # Check if virtualenvwrapper is installed or not. If it's not, we'll
-    # install it for the user. Why wouldn't you want to use virtualenvwrapper?!?!
-    # It's super awesome! By default, virtualenvwrapper installs to the same place
-    # as virtualenv so we'll look for the necessary scripts there. This is fairly
-    # brittle, but it should be sufficient for the majority of cases.
-    virtualEnvLoc=`which virtualenv`
-    virtualEnvWrapperLoc="${virtualEnvLoc}wrapper.sh"
-
-    if [ ! -f $virtualEnvWrapperLoc ]; then
-        task "Installing virtualenvwrapper ..."
-        pip install virtualenvwrapper >> install_log
-        subtask "done"
-
-        task "Setting/sourcing necessary virtualenv things ..."
-        # Need to setup environment for virtualenv
-        export WORKON_HOME=$HOME/.virtualenvs
-        subtask "done"
-    fi
-
-    # Just to be safe, we'll source virtualenvwrapper. This is really only
-    # necessary if we installed it for the user.
-    source $virtualEnvWrapperLoc
-
     # Create a new environment for OCW work
-    task "Creating a new environment ..."
-    mkvirtualenv ocw >> install_log
-    workon ocw >> install_log
+    task "Creating a new environment in ~/ocw..."
+    cd ~
+    virtualenv ocw >> install_log
+    source ~/ocw/bin/activate >> install_log
+    cd $INIT_PWD
     subtask "done"
 fi
 
@@ -169,6 +148,9 @@ conda init >> install_log
 
 header "Installing dependencies with conda ..."
 echo | conda install --file ocw-conda-dependencies.txt
+
+# Before installing packages with pip we need to activate the virtualenv with conda
+source ~/ocw/bin/activate ~/ocw >> install_log
 
 # We only use conda for the annoying dependencies like numpy,
 # scipy, matplotlib, and basemap. For everything else, we stick
