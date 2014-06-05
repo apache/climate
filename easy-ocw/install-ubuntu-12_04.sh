@@ -148,10 +148,6 @@ bash Anaconda-1.9.2-Linux-x86_64.sh
 export PATH="/home/vagrant/anaconda/bin:$PATH"
 subtask "done"
 
-task "Cleaning up Anaconda download ..."
-rm -f Anaconda-1.9.2-Linux-x86_64.sh
-subtask "done"
-
 # Install Basemap. Conda cannot be used for this install since
 # it fails to analyse the dependencies (at the time of writing). This
 # will install it manually. At some point, this should be replaced with
@@ -179,11 +175,7 @@ cd ..
 python setup.py install >> install_log
 subtask "done"
 
-task "Cleaning up Basemap install ..."
 cd
-rm -f basemap-1.0.7.tar.gz
-rm -rf basemap-1.0.7
-subtask "done"
 
 # Install miscellaneous Python packages needed for OCW. Some of these
 # can be installed with Conda, but since none of them have an annoying
