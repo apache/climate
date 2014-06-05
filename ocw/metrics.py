@@ -169,4 +169,28 @@ class PatternCorrelation(BinaryMetric):
         pattern_correlation, p_value = stats.pearsonr(target_means.flatten(),ref_means.flatten())
         return pattern_correlation, p_value
 
+class MeanBias(BinaryMetric):
+    '''Calculate the mean bias'''
+
+    def run(self, ref_dataset, target_dataset, absolute=False):
+        '''Calculate the mean bias between a reference and target dataset over all time.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: Dataset.
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: Dataset.
+
+        :returns: The the mean bias between a reference and target dataset over all time.
+        '''
+
+        diff = ref_dataset.values - target_dataset.values
+        if absolute:
+            diff = abs(diff)
+        mean_bias = diff.mean(axis=0)
+
+        return mean_bias
 
