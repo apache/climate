@@ -56,4 +56,8 @@ bash install-ubuntu-12_04.sh -q
 cd climate/ocw-ui/backend
 ln -s ../frontend/app app
 
+# Cleanup Anaconda and Basemap downloads from the install script
 cd
+sudo rm -f Anaconda-1.9.2-Linux-x86_64.sh
+sudo rm -f basemap-1.0.7.tar.gz
+sudo rm -rf basemap-1.0.7
