@@ -20,7 +20,7 @@
 import unittest
 import datetime as dt
 
-from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio, PatternCorrelation
+from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio, PatternCorrelation, MeanBias
 from ocw.dataset import Dataset
 
 import numpy as np
@@ -102,7 +102,6 @@ class TestSpatialStdDevRatio(unittest.TestCase):
         )
 
     def test_function_run(self):
-        print 'Test the metrics.SpatialStdDevRatio metric'
         self.assertTrue(self.spatial_std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
 
 
@@ -129,11 +128,45 @@ class TestPatternCorrelation(unittest.TestCase):
         )
 
     def test_function_run(self):
-        print 'Test the metrics.PatternCorrelation metric'
         pattern, p_value = self.pattern_correlation.run(self.ref_dataset, self.tar_dataset)
         self.assertEqual(pattern, 1.0)
         self.assertEqual(p_value, 0.0)
 
+
+class TestMeanBias(unittest.TestCase):
+    '''Test the metrics.MeanBias metric.'''
+    def setUp(self):
+        self.mean_bias = MeanBias()
+        # Initialize reference dataset
+        self.reference_lat = np.array([10, 12, 14, 16, 18])
+        self.reference_lon = np.array([100, 102, 104, 106, 108])
+        self.reference_time = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        self.reference_value = flat_array.reshape(12, 5, 5)
+        self.reference_variable = 'prec'
+        self.reference_dataset = Dataset(self.reference_lat, self.reference_lon,
+            self.reference_time, self.reference_value, self.reference_variable)
+        # Initialize target dataset
+        self.target_lat = np.array([1, 2, 4, 6, 8])
+        self.target_lon = np.array([10, 12, 14, 16, 18])
+        self.target_time = np.array([dt.datetime(2001, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300, 600))
+        self.target_value = flat_array.reshape(12, 5, 5)
+        self.target_variable = 'tasmax'
+        self.target_dataset = Dataset(self.target_lat, self.target_lon, self.target_time,
+            self.target_value, self.target_variable)
+
+    def test_function_run(self):
+        '''Test mean bias function between reference dataset and target dataset.'''
+        expected_result = np.zeros((5, 5), dtype=np.int)
+        expected_result.fill(-300)
+        np.testing.assert_array_equal(self.mean_bias.run(self.reference_dataset, self.target_dataset), expected_result)
+
+    def test_function_run_abs(self):
+        '''Test mean bias function between reference dataset and target dataset with abs as True.'''
+        expected_result = np.zeros((5, 5), dtype=np.int)
+        expected_result.fill(300)
+        np.testing.assert_array_equal(self.mean_bias.run(self.reference_dataset, self.target_dataset, True), expected_result)
 
 if __name__ == '__main__':
     unittest.main()
