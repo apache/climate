@@ -1,0 +1,6 @@
+.DS_Store
+*.pyc
+.vagrant
+/docs/build
+install_log
+.coverage
