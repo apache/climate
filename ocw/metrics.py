@@ -194,3 +194,61 @@ class MeanBias(BinaryMetric):
 
         return mean_bias
 
+class SeasonalSpatialStdDevRatio(BinaryMetric):
+    '''Calculate the ratio of spatial standard deviation (model standard
+          deviation)/(observed standard deviation)'''
+
+    def __init__(self, month_start=1, month_end=12):
+        self.month_start = month_start
+        self.month_end = month_end
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate the ratio of spatial std. dev. between a reference and
+            target dataset.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: Dataset.
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: Dataset.
+
+        :returns: The ratio of standard deviation of the reference and target
+            dataset.
+        '''
+
+        ref_t_series, ref_means = utils.calc_climatology_season(self.month_start, self.month_end, ref_dataset)
+        target_t_series, target_means = utils.calc_climatology_season(self.month_start, self.month_end, target_dataset)
+
+        return numpy.std(ref_means) / numpy.std(target_means)
+
+
+class SeasonalPatternCorrelation(BinaryMetric):
+    '''Calculate the spatial correlation'''
+
+    def __init__(self, month_start=1, month_end=12):
+        self.month_start = month_start
+        self.month_end = month_end
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate the spatial correlation between a reference and target dataset.
+            Using: scipy.stats.pearsonr
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: Dataset.
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: Dataset.
+
+        :returns: The spatial correlation between a reference and target dataset.
+        '''
+        ref_t_series, ref_means = utils.calc_climatology_season(self.month_start, self.month_end, ref_dataset)
+        target_t_series, target_means = utils.calc_climatology_season(self.month_start, self.month_end, target_dataset)
+
+        pattern_correlation, p_value = stats.pearsonr(target_means.flatten(),ref_means.flatten())
+        return pattern_correlation, p_value
