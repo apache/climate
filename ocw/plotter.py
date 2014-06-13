@@ -548,8 +548,7 @@ def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
             ax.set_title(subtitles[i], fontsize='small')
 
     # Add colorbar
-    cbar = fig.colorbar(cs, cax=ax.cax, drawedges=True, orientation='horizontal',
-                        extendfrac='auto', format='%.3e')
+    cbar = fig.colorbar(cs, cax=ax.cax, drawedges=True, orientation='horizontal', extendfrac='auto')
     cbar.set_label(clabel)
     cbar.set_ticks(clevs)
     cbar.ax.tick_params(labelsize=6)
@@ -686,8 +685,7 @@ def draw_portrait_diagram(results, rowlabels, collabels, fname, fmt='png',
     # Add colorbar
     cax = ax.cax
     cbar = fig.colorbar(cs, cax=cax, norm=norm, boundaries=clevs, drawedges=True,
-                        extend=extend, orientation='horizontal', extendfrac='auto',
-                        format='%.2e')
+                        extend=extend, orientation='horizontal', extendfrac='auto')
     cbar.set_label(clabel)
     cbar.set_ticks(clevs)
     cbar.ax.tick_params(labelsize=6)
