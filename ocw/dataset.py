@@ -324,3 +324,21 @@ class Bounds(object):
             raise ValueError(error)
 
         self._end = value
+
+    def __str__(self):
+        lat_range = "({}, {})".format(self._lat_min, self._lon_min)
+        lon_range = "({}, {})".format(self._lon_min, self._lon_min)
+        time_range = "({}, {})".format(self._start, self._end)
+
+        formatted_repr = (
+            "<Bounds - "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}> "
+        )
+
+        return formatted_repr.format(
+            lat_range,
+            lon_range,
+            time_range,
+        )
