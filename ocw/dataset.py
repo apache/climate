@@ -178,6 +178,29 @@ Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
             logger.error(err_msg)
             raise ValueError(err_msg)
 
+    def __str__(self):
+        lat_min, lat_max, lon_min, lon_max = self.spatial_boundaries()
+        start, end = self.time_range()
+        lat_range = "({}, {})".format(lat_min, lon_min)
+        lon_range = "({}, {})".format(lon_min, lon_min)
+        time_range = "({}, {})".format(start, end)
+
+        formatted_repr = (
+            "<Dataset - name: {}, "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}, "
+            "var: {}>"
+        )
+
+        return formatted_repr.format(
+            self.name if self.name != "" else None,
+            lat_range,
+            lon_range,
+            time_range,
+            self.variable
+        )
+
 
 class Bounds(object):
     '''Container for holding spatial and temporal bounds information.
