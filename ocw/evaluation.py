@@ -299,3 +299,20 @@ class Evaluation(object):
                 unary_results[-1].append(metric.run(target))
         return unary_results
 
+    def __str__(self):
+        formatted_repr = (
+            "<Evaluation - ref_dataset: {}, "
+            "target_dataset(s): {}, "
+            "binary_metric(s): {}, "
+            "unary_metric(s): {}, "
+            "subregion(s): {}>"
+        )
+
+        return formatted_repr.format(
+            str(self._ref_dataset),
+            [str(ds) for ds in self.target_datasets],
+            [str(m) for m in self.metrics],
+            [str(m) for m in self.unary_metrics],
+            str(self.subregions)
+        )
+
