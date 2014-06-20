@@ -131,6 +131,30 @@ if [ $WITH_VIRTUAL_ENV == 1 ]; then
         subtask "done"
     fi
 
+    header "Checking for previously installed  ocw virtual environment..."
+    if [ -e ~/ocw/bin/python ]; then
+        echo "We found an existing 'ocw' virtualenv on your system in ~/ocw."
+        read -n1 -p "Do you want to replace it with a clean install? y/n :" replace 
+        if [ "$replace" == "y" ]; then
+            echo ""
+            echo "WARNING this will delete all file and data in ~/ocw on your system."
+            read  -p "To confirm and proceed type YES or ENTER to quit:" confirm
+            if [ "$confirm" == "YES" ]; then
+                echo "Deleting contents of ~/ocw" >> install_log
+                rm -rf ~/ocw
+            else
+                echo ""
+                echo "Stopping Open Climate Workbench Installation"
+                exit
+            fi
+        else
+            echo ""
+            echo "Stopping Open Climate Workbench Installation because an existing 'ocw'"
+            echo "virtual environment already exists."
+            exit
+        fi
+    fi
+
     # Create a new environment for OCW work
     task "Creating a new environment in ~/ocw..."
     cd ~
