@@ -20,8 +20,8 @@
 import unittest
 import datetime as dt
 
-from ocw.metrics import Bias, TemporalStdDev, SpatialStdDevRatio, PatternCorrelation, MeanBias
 from ocw.dataset import Dataset
+import ocw.metrics as metrics
 
 import numpy as np
 import numpy.testing as npt
@@ -29,7 +29,7 @@ import numpy.testing as npt
 class TestBias(unittest.TestCase):
     '''Test the metrics.Bias metric.'''
     def setUp(self):
-        self.bias = Bias()
+        self.bias = metrics.Bias()
         # Initialize reference dataset
         self.reference_lat = np.array([10, 12, 14, 16, 18])
         self.reference_lon = np.array([100, 102, 104, 106, 108])
@@ -60,7 +60,7 @@ class TestBias(unittest.TestCase):
 class TestTemporalStdDev(unittest.TestCase):
     '''Test the metrics.TemporalStdDev metric.'''
     def setUp(self):
-        self.temporal_std_dev = TemporalStdDev()
+        self.temporal_std_dev = metrics.TemporalStdDev()
         # Initialize target dataset
         self.target_lat = np.array([10, 12, 14, 16, 18])
         self.target_lon = np.array([100, 102, 104, 106, 108])
@@ -82,7 +82,7 @@ class TestTemporalStdDev(unittest.TestCase):
 class TestSpatialStdDevRatio(unittest.TestCase):
     '''Test the metrics.SpatialStdDevRatio metric'''
     def setUp(self):
-        self.spatial_std_dev_ratio = SpatialStdDevRatio()
+        self.spatial_std_dev_ratio = metrics.SpatialStdDevRatio()
         self.ref_dataset = Dataset(
             np.array([1., 1., 1., 1., 1.]),
             np.array([1., 1., 1., 1., 1.]),
@@ -108,7 +108,7 @@ class TestSpatialStdDevRatio(unittest.TestCase):
 class TestPatternCorrelation(unittest.TestCase):
     '''Test the metrics.PatternCorrelation metric'''
     def setUp(self):
-        self.pattern_correlation = PatternCorrelation()
+        self.pattern_correlation = metrics.PatternCorrelation()
         self.ref_dataset = Dataset(
             np.array([1., 1., 1., 1., 1.]),
             np.array([1., 1., 1., 1., 1.]),
@@ -136,7 +136,7 @@ class TestPatternCorrelation(unittest.TestCase):
 class TestMeanBias(unittest.TestCase):
     '''Test the metrics.MeanBias metric.'''
     def setUp(self):
-        self.mean_bias = MeanBias()
+        self.mean_bias = metrics.MeanBias()
         # Initialize reference dataset
         self.reference_lat = np.array([10, 12, 14, 16, 18])
         self.reference_lon = np.array([100, 102, 104, 106, 108])
