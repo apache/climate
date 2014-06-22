@@ -32,13 +32,13 @@ logger = logging.getLogger(__name__)
 def temporal_rebin(target_dataset, temporal_resolution):
     """ Rebin a Dataset to a new temporal resolution
     
-    :param target_dataset: Dataset object that needs temporal regridding
-    :type target_dataset: Open Climate Workbench Dataset Object
+    :param target_dataset: Dataset object that needs temporal rebinned
+    :type target_dataset: ocw.dataset.Dataset object
     :param temporal_resolution: The new temporal bin size
-    :type temporal_resolution: Python datetime.timedelta object
+    :type temporal_resolution: datetime.timedelta object
     
     :returns: A new temporally rebinned Dataset
-    :rtype: Open Climate Workbench Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     # Decode the temporal resolution into a string format that 
     # _rcmes_calc_average_on_new_time_unit_K() can understand
@@ -68,15 +68,15 @@ def temporal_rebin(target_dataset, temporal_resolution):
 def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     """ Regrid a Dataset using the new latitudes and longitudes
 
-    :param target_dataset: Dataset object that needs temporal regridding applied
-    :type target_dataset: Open Climate Workbench Dataset Object
+    :param target_dataset: Dataset object that needs spatially regridded
+    :type target_dataset: ocw.dataset.Dataset object
     :param new_latitudes: Array of latitudes
     :type new_latitudes: 1d Numpy Array
     :param new_longitudes: Array of longitudes
     :type new_longitudes: 1d Numpy Array
 
     :returns: A new spatially regridded Dataset
-    :rtype: Open Climate Workbench Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     # Make masked array of shape (times, new_latitudes,new_longitudes)
     new_values = ma.zeros([len(target_dataset.times), 
@@ -126,7 +126,7 @@ def ensemble(datasets):
     :type datasets: List of OCW Dataset Objects
     
     :returns: New Dataset with a name of 'Dataset Ensemble'
-    :rtype: OCW Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     _check_dataset_shapes(datasets)
     dataset_values = [dataset.values for dataset in datasets]
@@ -147,10 +147,10 @@ def subset(subregion, target_dataset):
     :param subregion: The Bounds with which to subset the target Dataset. 
     :type subregion: Bounds
     :param target_dataset: The Dataset object to subset.
-    :type target_dataset: Dataset
+    :type target_dataset: ocw.dataset.Dataset object
 
     :returns: The subset-ed Dataset object
-    :rtype: Dataset
+    :rtype: ocw.dataset.Dataset object
 
     :raises: ValueError
     '''
@@ -200,7 +200,7 @@ def safe_subset(subregion, target_dataset):
     :type target_dataset: ocw.dataset.Dataset
 
     :returns: The subset-ed Dataset object
-    :rtype: Dataset
+    :rtype: ocw.dataset.Dataset object
     '''
 
     lat_min, lat_max, lon_min, lon_max = target_dataset.spatial_boundaries()
@@ -232,13 +232,14 @@ def normalize_dataset_datetimes(dataset, timestep):
     Force daily to an hour time value of 00:00:00.
     Force monthly data to the first of the month at midnight.
 
-    :param dataset: The Dataset which will have its' time value normalized.
-    :type dataset: Dataset
+    :param dataset: The Dataset which will have its time value normalized.
+    :type dataset: ocw.dataset.Dataset object
     :param timestep: The timestep of the Dataset's values. Either 'daily' or
         'monthly'.
     :type timestep: String
 
-    :returns: A new Dataset with normalized datetimes.
+    :returns: A new Dataset with normalized datetime values.
+    :rtype: ocw.dataset.Dataset object
     '''
     new_times = _rcmes_normalize_datetimes(dataset.times, timestep)
     return ds.Dataset(
