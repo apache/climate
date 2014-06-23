@@ -217,17 +217,24 @@ def normalize_lat_lon_values(lats, lons, values):
 
 
 def reshape_monthly_to_annually(dataset):
-    ''' Reshaping monthly dataset to annually
+    ''' Reshape monthly binned dataset to annual bins.
 
-    Reshaping 3D array dataset's values with shape (num_month, num_lat, num_lon)
-    to 4D array with shape (num_year, 12, num_lat, num_lon).
-    Number 12 is constant which represents 12 months in one year
-    e.g. (24, 90, 180) to (2, 12, 90, 180)
+    Reshape a monthly binned dataset's 3D value array with shape
+    (num_months, num_lats, num_lons) to a 4D array with shape
+    (num_years, 12, num_lats, num_lons). This causes the data to be binned
+    annually while retaining its original shape.
+
+    It is assumed that the number of months in the dataset is evenly
+    divisible by 12. If it is not you will receive error due to
+    an invalid shape.
+
+    Example change of a dataset's shape:
+    (24, 90, 180) -> (2, 12, 90, 180)
 
     :param dataset: Dataset object with full-year format
-    :type dataset: Open Climate Workbench Dataset Object
+    :type dataset: ocw.dataset.Dataset object
 
-    :returns: Dataset values with shape (num_year, num_month, num_lat, num_lon)
+    :returns: Dataset values array with shape (num_year, 12, num_lat, num_lon)
     :rtype: Numpy array
     '''
 
@@ -248,14 +255,16 @@ def reshape_monthly_to_annually(dataset):
 def calc_climatology_year(dataset):
     ''' Calculate climatology of dataset's values for each year
 
-    :param dataset: Dataset object with full-year format
-    :type dataset: Open Climate Workbench Dataset Object
+    :param dataset: Monthly binned Dataset object with an evenly divisible
+        number of months.
+    :type dataset: ocw.dataset.Dataset object
 
-    :returns: Mean values for each year (annually_mean)
-            and mean values for all years (total_mean)
+    :returns: Mean values for each year (annual_mean) and mean values for all
+        years (total_mean)
     :rtype: A tuple of two numpy arrays
 
-    :raise ValueError: If the time shape of values in not divisble by 12 (not full-year)
+    :raise ValueError: If the number of monthly bins is not evenly divisible
+        by 12.
     '''
 
     values_shape = dataset.values.shape
@@ -280,7 +289,7 @@ def calc_climatology_season(month_start, month_end, dataset):
     :param month_end: An integer for ending month (Jan=1)
     :type month_end: Integer
     :param dataset: Dataset object with full-year format
-    :type dataset: Open Climate Workbench Dataset Object
+    :type dataset: ocw.dataset.Dataset object
 
     :returns:  
         t_series - monthly average over the given season
