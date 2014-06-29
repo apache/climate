@@ -40,6 +40,7 @@ class UnaryMetric(Metric):
 
         :param target_dataset: The dataset on which the current metric will
             be run.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The result of evaluating the metric on the target_dataset.
         '''
@@ -55,9 +56,10 @@ class BinaryMetric(Metric):
 
         :param ref_dataset: The Dataset to use as the reference dataset when
             running the evaluation.
-        :type ref_dataset: Dataset
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The Dataset to use as the target dataset when
             running the evaluation.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The result of evaluation the metric on the reference and 
             target dataset.
@@ -74,10 +76,10 @@ class Bias(BinaryMetric):
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The difference between the reference and target datasets.
         :rtype: Numpy Array
@@ -96,7 +98,7 @@ class TemporalStdDev(UnaryMetric):
 
         :param target_dataset: The target_dataset on which to calculate the 
             temporal standard deviation.
-        :type target_dataset: Dataset
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The temporal standard deviation of the target dataset
         :rtype: Numpy Array
@@ -116,10 +118,10 @@ class SpatialStdDevRatio(BinaryMetric):
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The ratio of standard deviation of the reference and target
             dataset.
@@ -149,10 +151,10 @@ class PatternCorrelation(BinaryMetric):
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The spatial correlation between a reference and target dataset.
         '''
@@ -170,21 +172,21 @@ class PatternCorrelation(BinaryMetric):
         return pattern_correlation, p_value
 
 class MeanBias(BinaryMetric):
-    '''Calculate the mean bias'''
+    '''Calculate the bias averaged over time.'''
 
     def run(self, ref_dataset, target_dataset, absolute=False):
-        '''Calculate the mean bias between a reference and target dataset over all time.
+        '''Calculate the bias averaged over time.
 
         .. note::
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
-        :returns: The the mean bias between a reference and target dataset over all time.
+        :returns: The mean bias between a reference and target dataset over time.
         '''
 
         diff = ref_dataset.values - target_dataset.values
@@ -195,25 +197,23 @@ class MeanBias(BinaryMetric):
         return mean_bias
 
 class SeasonalSpatialStdDevRatio(BinaryMetric):
-    '''Calculate the ratio of spatial standard deviation (model standard
-          deviation)/(observed standard deviation)'''
+    '''Calculate the seasonal spatial standard deviation ratio.'''
 
     def __init__(self, month_start=1, month_end=12):
         self.month_start = month_start
         self.month_end = month_end
 
     def run(self, ref_dataset, target_dataset):
-        '''Calculate the ratio of spatial std. dev. between a reference and
-            target dataset.
+        '''Calculate the seasonal spatial standard deviation ratio.
 
         .. note::
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The ratio of standard deviation of the reference and target
             dataset.
@@ -226,24 +226,23 @@ class SeasonalSpatialStdDevRatio(BinaryMetric):
 
 
 class SeasonalPatternCorrelation(BinaryMetric):
-    '''Calculate the spatial correlation'''
+    '''Calculate the seasonal pattern correlation.'''
 
     def __init__(self, month_start=1, month_end=12):
         self.month_start = month_start
         self.month_end = month_end
 
     def run(self, ref_dataset, target_dataset):
-        '''Calculate the spatial correlation between a reference and target dataset.
-            Using: scipy.stats.pearsonr
+        '''Calculate the seasonal pattern correlation.
 
         .. note::
            Overrides BinaryMetric.run()
 
         :param ref_dataset: The reference dataset to use in this metric run.
-        :type ref_dataset: Dataset.
+        :type ref_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run.
-        :type target_dataset: Dataset.
+        :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The spatial correlation between a reference and target dataset.
         '''

@@ -201,8 +201,8 @@ def load_file(file_path, variable_name):
     :param variable_name: The given (by user) value variable name
     :type variable_name: String
 
-    :returns: A dataset object from dataset.py
-    :rtype: Object
+    :returns: An OCW Dataset object containing the requested parameter data.
+    :rtype: ocw.dataset.Dataset object
 
     :raises: ValueError
     '''
