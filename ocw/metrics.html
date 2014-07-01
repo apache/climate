@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Metrics Module &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="next" title="Plotter Module" href="plotter.html" />
+    <link rel="prev" title="Evaluation Module" href="evaluation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotter.html" title="Plotter Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="evaluation.html" title="Evaluation Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="metrics-module">
+<h1>Metrics Module<a class="headerlink" href="#metrics-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="unarymetric">
+<h2>UnaryMetric<a class="headerlink" href="#unarymetric" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="metrics.UnaryMetric">
+<em class="property">class </em><tt class="descclassname">metrics.</tt><tt class="descname">UnaryMetric</tt><a class="headerlink" href="#metrics.UnaryMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract Base Class from which all unary metrics inherit.</p>
+<dl class="method">
+<dt id="metrics.UnaryMetric.run">
+<tt class="descname">run</tt><big>(</big><em>target_dataset</em><big>)</big><a class="headerlink" href="#metrics.UnaryMetric.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the metric for a given target dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_dataset</strong> &#8211; The dataset on which the current metric will
+be run.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The result of evaluating the metric on the target_dataset.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="binarymetric">
+<h2>BinaryMetric<a class="headerlink" href="#binarymetric" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="metrics.BinaryMetric">
+<em class="property">class </em><tt class="descclassname">metrics.</tt><tt class="descname">BinaryMetric</tt><a class="headerlink" href="#metrics.BinaryMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract Base Class from which all binary metrics inherit.</p>
+<dl class="method">
+<dt id="metrics.BinaryMetric.run">
+<tt class="descname">run</tt><big>(</big><em>ref_dataset</em>, <em>target_dataset</em><big>)</big><a class="headerlink" href="#metrics.BinaryMetric.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the metric for the given reference and target datasets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ref_dataset</strong> (<em>Dataset</em>) &#8211; The Dataset to use as the reference dataset when
+running the evaluation.</li>
+<li><strong>target_dataset</strong> &#8211; The Dataset to use as the target dataset when
+running the evaluation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The result of evaluation the metric on the reference and 
+target dataset.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="bias">
+<h2>Bias<a class="headerlink" href="#bias" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="metrics.Bias">
+<em class="property">class </em><tt class="descclassname">metrics.</tt><tt class="descname">Bias</tt><a class="headerlink" href="#metrics.Bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the bias between a reference and target dataset.</p>
+<dl class="method">
+<dt id="metrics.Bias.run">
+<tt class="descname">run</tt><big>(</big><em>ref_dataset</em>, <em>target_dataset</em><big>)</big><a class="headerlink" href="#metrics.Bias.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the bias between a reference and target dataset.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Overrides BinaryMetric.run()</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ref_dataset</strong> (<em>Dataset.</em>) &#8211; The reference dataset to use in this metric run.</li>
+<li><strong>target_dataset</strong> (<em>Dataset.</em>) &#8211; The target dataset to evaluate against the
+reference dataset in this metric run.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The difference between the reference and target datasets.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Numpy Array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="temporalstddev">
+<h2>TemporalStdDev<a class="headerlink" href="#temporalstddev" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="metrics.TemporalStdDev">
+<em class="property">class </em><tt class="descclassname">metrics.</tt><tt class="descname">TemporalStdDev</tt><a class="headerlink" href="#metrics.TemporalStdDev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the standard deviation over the time.</p>
+<dl class="method">
+<dt id="metrics.TemporalStdDev.run">
+<tt class="descname">run</tt><big>(</big><em>target_dataset</em><big>)</big><a class="headerlink" href="#metrics.TemporalStdDev.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the temporal std. dev. for a datasets.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Overrides UnaryMetric.run()</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_dataset</strong> (<em>Dataset</em>) &#8211; The target_dataset on which to calculate the 
+temporal standard deviation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The temporal standard deviation of the target dataset</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy Array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Metrics Module</a><ul>
+<li><a class="reference internal" href="#unarymetric">UnaryMetric</a></li>
+<li><a class="reference internal" href="#binarymetric">BinaryMetric</a></li>
+<li><a class="reference internal" href="#bias">Bias</a></li>
+<li><a class="reference internal" href="#temporalstddev">TemporalStdDev</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="evaluation.html"
+                        title="previous chapter">Evaluation Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plotter.html"
+                        title="next chapter">Plotter Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ocw/metrics.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotter.html" title="Plotter Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="evaluation.html" title="Evaluation Module"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

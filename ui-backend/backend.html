@@ -1,0 +1,627 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Evaluation UI Webservices &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="prev" title="Data Sources" href="../data_source/data_sources.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data_source/data_sources.html" title="Data Sources"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="evaluation-ui-webservices">
+<h1>Evaluation UI Webservices<a class="headerlink" href="#evaluation-ui-webservices" title="Permalink to this headline">¶</a></h1>
+<p>The OCW evaluation UI is a demonstration web application that is built upon the
+OCW toolkit. The web services for the application are written in Python on top
+of the Bottle Web Framework.</p>
+<div class="section" id="configuration-and-dependencies">
+<h2>Configuration and Dependencies<a class="headerlink" href="#configuration-and-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The Evaluation UI is built on top of the OCW toolkit and as such requires it to
+function properly. Please check the toolkit&#8217;s documentation for relevant
+installation instructions. You will also need to ensure that you have Bottle
+installed. You can install it with:</p>
+<div class="code highlight-python"><div class="highlight"><pre>pip install bottle
+</pre></div>
+</div>
+<p>The backend serves the static files for the evaluation frontend as well. If you
+plan to use the frontend you need to ensure that the <em>app</em> directory is present
+in the main web service directory. The easiest way to do this is to create a
+symbolic link where the <em>run_webservices</em> module is located. Assuming you have
+the entire <em>ocw-ui</em> directory, you can do this with the following command.</p>
+<div class="code highlight-python"><div class="highlight"><pre>cd ocw-ui/backend
+ln -s ../frontend/app app
+</pre></div>
+</div>
+<p>Finally, to start the backend just run the following command.</p>
+<div class="code highlight-python"><div class="highlight"><pre>python run_webservices.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="web-service-explanation">
+<h2>Web Service Explanation<a class="headerlink" href="#web-service-explanation" title="Permalink to this headline">¶</a></h2>
+<p>The backend endpoints are broken up into a number of modules for ease of
+maintenance and understanding. The <em>run_webservices</em> module is the primary
+application module. It brings together all the various submodules into a
+useful system. It also defines a number of helpful endpoints for returning
+static files such as the index page, CSS files, JavaScript files, and more.</p>
+<div class="section" id="local-file-metadata-extractors">
+<h3>Local File Metadata Extractors<a class="headerlink" href="#local-file-metadata-extractors" title="Permalink to this headline">¶</a></h3>
+<p>The <em>local_file_metadata_extractors</em> module contains all the endpoints that are
+used to strip information out of various objects for display in the UI. At the
+moment, the main functionality is stripping out metadata from NetCDF files when
+a user wishes to <em>load</em> a local file into the evaluation.</p>
+<dl class="get">
+<dt id="get--list_latlon-(file_path-path)">
+<tt class="descname">GET </tt><tt class="descname">/list_latlon/</tt><big>(</big><em class="property">file_path: </em><em>path</em><big>)</big><a class="headerlink" href="#get--list_latlon-(file_path-path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve lat/lon information from given file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>string:</em>) &#8211; Path to the NetCDF file from which lat/lon information
+should be extracted</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary containing lat/lon information if successful, otherwise
+failure information is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example successful JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;success&#39;</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="s1">&#39;lat_name&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">guessed</span> <span class="nx">latitude</span> <span class="nx">variable</span> <span class="nx">name</span><span class="p">,</span>
+    <span class="s1">&#39;lon_name&#39;</span><span class="o">:</span> <span class="nx">the</span> <span class="nx">guessed</span> <span class="nx">longitude</span> <span class="nx">variable</span> <span class="nx">name</span><span class="p">,</span>
+    <span class="s1">&#39;lat_min&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">latitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lat_max&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">latitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lon_min&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">longitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lon_max&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">longitude</span> <span class="nx">value</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example failure JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;success&#39;</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="s1">&#39;variables&#39;</span><span class="o">:</span> <span class="nx">List</span> <span class="nx">of</span> <span class="nx">all</span> <span class="nx">variables</span> <span class="nx">present</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">NetCDF</span> <span class="nx">file</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--list_time-(file_path-path)">
+<tt class="descname">GET </tt><tt class="descname">/list_time/</tt><big>(</big><em class="property">file_path: </em><em>path</em><big>)</big><a class="headerlink" href="#get--list_time-(file_path-path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve time information from provided file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>String:</em>) &#8211; Path to the NetCDF file from which time information
+should be extracted</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary containing time information if successful, otherwise
+failure information is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example successful JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;success&quot;</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="s2">&quot;time_name&quot;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">guessed</span> <span class="nx">time</span> <span class="nx">variable</span> <span class="nx">name</span><span class="p">,</span>
+    <span class="s2">&quot;start_time&quot;</span><span class="o">:</span> <span class="s2">&quot;1988-06-10 00:00:00&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_time&quot;</span><span class="o">:</span> <span class="s2">&quot;2008-01-27 00:00:00&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example failure JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;success&quot;</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="s2">&quot;variables&quot;</span><span class="o">:</span> <span class="nx">List</span> <span class="nx">of</span> <span class="nx">all</span> <span class="nx">variable</span> <span class="nx">names</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">file</span>
+<span class="p">}</span> 
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--list_vars-(file_path-path)">
+<tt class="descname">GET </tt><tt class="descname">/list_vars/</tt><big>(</big><em class="property">file_path: </em><em>path</em><big>)</big><a class="headerlink" href="#get--list_vars-(file_path-path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve variable names from file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>String:</em>) &#8211; Path to the NetCDF file from which variable information
+should be extracted</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary containing variable information if succesful, otherwise
+failure information is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example successful JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;success&quot;</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="s2">&quot;variables&quot;</span><span class="o">:</span> <span class="nx">List</span> <span class="nx">of</span> <span class="nx">variable</span> <span class="nx">names</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">file</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example failure JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;success&quot;</span><span class="o">:</span> <span class="kc">false</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="directory-helpers">
+<h3>Directory Helpers<a class="headerlink" href="#directory-helpers" title="Permalink to this headline">¶</a></h3>
+<p>The <em>directory_helpers</em> module contains a number of endpoints for working
+directory manipulation. The frontend uses these endpoints to grab directory
+information (within a prefix path for security), return result directory
+information, and other things.</p>
+<dl class="get">
+<dt id="get--list-">
+<tt class="descname">GET </tt><tt class="descname">/list/</tt><a class="headerlink" href="#get--list-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the listing of a supplied path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir_path</strong> (<em>String</em>) &#8211; The directory path to list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary containing the directory listing if possible.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example successful JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">&#39;/bar/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/baz.txt&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/test.txt&#39;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example failure JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[]}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--list-(dir_path-path)">
+<tt class="descname">GET </tt><tt class="descname">/list/</tt><big>(</big><em class="property">dir_path: </em><em>path</em><big>)</big><a class="headerlink" href="#get--list-(dir_path-path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the listing of a supplied path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir_path</strong> (<em>String</em>) &#8211; The directory path to list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary containing the directory listing if possible.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example successful JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">&#39;/bar/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/baz.txt&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/test.txt&#39;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example failure JSON return</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[]}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--results-">
+<tt class="descname">GET </tt><tt class="descname">/results/</tt><a class="headerlink" href="#get--results-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve results directory information.</p>
+<p>The backend&#8217;s results directory is determined by WORK_DIR. All the 
+directories there are formatted and returned as results. If WORK_DIR does
+not exist, an empty listing will be returned (shown as a &#8216;failure below&#8217;).</p>
+<p><strong>Successful JSON Response</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">&#39;/bar&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/foo&#39;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Failure JSON Response</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--path_leader-">
+<tt class="descname">GET </tt><tt class="descname">/path_leader/</tt><a class="headerlink" href="#get--path_leader-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path leader used for clean path creation.</p>
+<p><strong>Example JSON Response</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span><span class="s1">&#39;leader&#39;</span><span class="o">:</span> <span class="s1">&#39;/usr/local/ocw&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--results-(dir_path-path)">
+<tt class="descname">GET </tt><tt class="descname">/results/</tt><big>(</big><em class="property">dir_path: </em><em>path</em><big>)</big><a class="headerlink" href="#get--results-(dir_path-path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve specific result files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir_path</strong> (<em>String</em>) &#8211; The relative results path to list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary of the requested result&#8217;s directory listing.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Successful JSON Response</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">&#39;file1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;file2&#39;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Failure JSON Response</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;listing&#39;</span><span class="o">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="rcmed-helpers">
+<h3>RCMED Helpers<a class="headerlink" href="#rcmed-helpers" title="Permalink to this headline">¶</a></h3>
+<p>The <em>rcmed_helpers</em> module contains endpoints for loading datasets from the
+Regional Climate Model Evaluation Database at NASA&#8217;s Jet Propulsion Laboratory.</p>
+<dl class="get">
+<dt id="get--parameters-">
+<tt class="descname">GET </tt><tt class="descname">/parameters/</tt><a class="headerlink" href="#get--parameters-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return dataset specific parameter information from JPL&#8217;s RCMED.</p>
+<p><strong>Example Call Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre>/parameters/?dataset=&lt;dataset&#39;s short name&gt;
+</pre></div>
+</div>
+<p><strong>Example Return JSON Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;parameter_id&quot;</span><span class="o">:</span> <span class="s2">&quot;80&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shortname&quot;</span><span class="o">:</span> <span class="s2">&quot;The dataset&#39;s short name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;datasetshortname&quot;</span><span class="o">:</span> <span class="s2">&quot;The dataset&#39;s short name again&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longname&quot;</span><span class="o">:</span> <span class="s2">&quot;The dataset&#39;s long name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;units&quot;</span><span class="o">:</span> <span class="s2">&quot;Units for the dataset&#39;s measurements&quot;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--parameters-bounds">
+<tt class="descname">GET </tt><tt class="descname">/parameters/bounds</tt><a class="headerlink" href="#get--parameters-bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return temporal and spatial bounds metadata for all of JPL&#8217;s RCMED parameters.</p>
+<p><strong>Example Call Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre>/parameters/bounds/
+</pre></div>
+</div>
+<p><strong>Example Return JSON Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">&quot;38&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;start_date&quot;</span><span class="o">:</span> <span class="s2">&quot;1901-01-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_date&quot;</span><span class="o">:</span> <span class="s2">&quot;2009-12-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lat_max&quot;</span><span class="o">:</span> <span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lat_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_max&quot;</span><span class="o">:</span> <span class="mf">179.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">179.75</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;39&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;start_date&quot;</span><span class="o">:</span> <span class="s2">&quot;1901-01-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_date&quot;</span><span class="o">:</span> <span class="s2">&quot;2009-12-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lat_max&quot;</span><span class="o">:</span> <span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lat_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_max&quot;</span><span class="o">:</span> <span class="mf">179.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">179.75</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--datasets-">
+<tt class="descname">GET </tt><tt class="descname">/datasets/</tt><a class="headerlink" href="#get--datasets-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of dataset information from JPL&#8217;s RCMED.</p>
+<p><strong>Example Return JSON Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;dataset_id&quot;</span><span class="o">:</span> <span class="s2">&quot;17&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shortname&quot;</span><span class="o">:</span> <span class="s2">&quot;The dataset&#39;s short name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longname&quot;</span><span class="o">:</span> <span class="s2">&quot;The dataset&#39;s, full name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;Where the dataset originated&quot;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--parameters-bounds-">
+<tt class="descname">GET </tt><tt class="descname">/parameters/bounds/</tt><a class="headerlink" href="#get--parameters-bounds-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return temporal and spatial bounds metadata for all of JPL&#8217;s RCMED parameters.</p>
+<p><strong>Example Call Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre>/parameters/bounds/
+</pre></div>
+</div>
+<p><strong>Example Return JSON Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">&quot;38&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;start_date&quot;</span><span class="o">:</span> <span class="s2">&quot;1901-01-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_date&quot;</span><span class="o">:</span> <span class="s2">&quot;2009-12-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lat_max&quot;</span><span class="o">:</span> <span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lat_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_max&quot;</span><span class="o">:</span> <span class="mf">179.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">179.75</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;39&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;start_date&quot;</span><span class="o">:</span> <span class="s2">&quot;1901-01-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_date&quot;</span><span class="o">:</span> <span class="s2">&quot;2009-12-15&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lat_max&quot;</span><span class="o">:</span> <span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lat_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">89.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_max&quot;</span><span class="o">:</span> <span class="mf">179.75</span><span class="p">,</span>
+    <span class="s2">&quot;lon_min&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mf">179.75</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="processing-endpoints">
+<h3>Processing Endpoints<a class="headerlink" href="#processing-endpoints" title="Permalink to this headline">¶</a></h3>
+<p>The <em>processing</em> module contains all the endpoints related to the running of
+evaluations.</p>
+<dl class="get">
+<dt id="get--metrics-">
+<tt class="descname">GET </tt><tt class="descname">/metrics/</tt><a class="headerlink" href="#get--metrics-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve available metric names.</p>
+<p><strong>Example Return JSON Format</strong></p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;metrics&#39;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s1">&#39;MetricName1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MetricName2&#39;</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--run_evaluation-">
+<tt class="descname">POST </tt><tt class="descname">/run_evaluation/</tt><a class="headerlink" href="#post--run_evaluation-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run an OCW Evaluation.</p>
+<p><em>run_evaluation</em> expects the Evaluation parameters to be POSTed in
+the following format.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="nx">reference_dataset</span><span class="o">:</span> <span class="p">{</span>
+        <span class="c1">// Id that tells us how we need to load this dataset.</span>
+        <span class="s1">&#39;data_source_id&#39;</span><span class="o">:</span> <span class="mi">1</span> <span class="o">==</span> <span class="nx">local</span><span class="p">,</span> <span class="mi">2</span> <span class="o">==</span> <span class="nx">rcmed</span><span class="p">,</span>
+
+        <span class="c1">// Dict of data_source specific identifying information.</span>
+        <span class="c1">//</span>
+        <span class="c1">// if data_source_id == 1 == local:</span>
+        <span class="c1">// {</span>
+        <span class="c1">//     &#39;id&#39;: The path to the local file on the server for loading.</span>
+        <span class="c1">//     &#39;var_name&#39;: The variable data to pull from the file.</span>
+        <span class="c1">//     &#39;lat_name&#39;: The latitude variable name.</span>
+        <span class="c1">//     &#39;lon_name&#39;: The longitude variable name.</span>
+        <span class="c1">//     &#39;time_name&#39;: The time variable name</span>
+        <span class="c1">//     &#39;name&#39;: Optional dataset name</span>
+        <span class="c1">// }</span>
+        <span class="c1">//</span>
+        <span class="c1">// if data_source_id == 2 == rcmed:</span>
+        <span class="c1">// {</span>
+        <span class="c1">//     &#39;dataset_id&#39;: The dataset id to grab from RCMED.</span>
+        <span class="c1">//     &#39;parameter_id&#39;: The variable id value used by RCMED.</span>
+        <span class="c1">//     &#39;name&#39;: Optional dataset name</span>
+        <span class="c1">// }</span>
+        <span class="s1">&#39;dataset_info&#39;</span><span class="o">:</span> <span class="p">{..}</span>
+    <span class="p">},</span>
+
+    <span class="c1">// The list of target datasets to use in the Evaluation. The data</span>
+    <span class="c1">// format for the dataset objects should be the same as the</span>
+    <span class="c1">// reference_dataset above.</span>
+    <span class="s1">&#39;target_datasets&#39;</span><span class="o">:</span> <span class="p">[{...},</span> <span class="p">{...},</span> <span class="p">...],</span>
+
+    <span class="c1">// All the datasets are re-binned to the reference dataset</span>
+    <span class="c1">// before being added to an experiment. This step (in degrees)</span>
+    <span class="c1">// is used when re-binning both the reference and target datasets.</span>
+    <span class="s1">&#39;spatial_rebin_lat_step&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">lat</span> <span class="nx">degree</span> <span class="nx">step</span><span class="p">.</span> <span class="nx">Integer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+
+    <span class="c1">// Same as above, but for lon</span>
+    <span class="s1">&#39;spatial_rebin_lon_step&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">lon</span> <span class="nx">degree</span> <span class="nx">step</span><span class="p">.</span> <span class="nx">Integer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+
+    <span class="c1">// The temporal resolution to use when doing a temporal re-bin</span>
+    <span class="c1">// This is a timedelta of days to use so daily == 1, monthly is</span>
+    <span class="c1">// (1, 31], annual/yearly is (31, 366], and full is anything &gt; 366.</span>
+    <span class="s1">&#39;temporal_resolution&#39;</span><span class="o">:</span> <span class="nx">Integer</span> <span class="k">in</span> <span class="nx">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">999</span><span class="p">),</span>
+
+    <span class="c1">// A list of the metric class names to use in the evaluation. The</span>
+    <span class="c1">// names must match the class name exactly.</span>
+    <span class="s1">&#39;metrics&#39;</span><span class="o">:</span> <span class="p">[</span><span class="nx">Bias</span><span class="p">,</span> <span class="nx">TemporalStdDev</span><span class="p">,</span> <span class="p">...]</span>
+
+    <span class="c1">// The bounding values used in the Evaluation. Note that lat values</span>
+    <span class="c1">// should range from -180 to 180 and lon values from -90 to 90.</span>
+    <span class="s1">&#39;start_time&#39;</span><span class="o">:</span> <span class="nx">start</span> <span class="nx">time</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">format</span> <span class="s1">&#39;%Y-%m-%d %H:%M:%S&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;end_time&#39;</span><span class="o">:</span> <span class="nx">end</span> <span class="nx">time</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">format</span> <span class="s1">&#39;%Y-%m-%d %H:%M:%S&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;lat_min&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">latitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lat_max&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">latitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lon_min&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">minimum</span> <span class="nx">longitude</span> <span class="nx">value</span><span class="p">,</span>
+    <span class="s1">&#39;lon_max&#39;</span><span class="o">:</span> <span class="nx">The</span> <span class="nx">maximum</span> <span class="nx">longitude</span> <span class="nx">value</span><span class="p">,</span>
+
+    <span class="c1">// NOTE: At the moment, subregion support is fairly minimal. This</span>
+    <span class="c1">// will be addressed in the future. Ideally, the user should be able</span>
+    <span class="c1">// to load a file that they have locally. That would change the</span>
+    <span class="c1">// format that this data is passed.</span>
+    <span class="s1">&#39;subregion_information&#39;</span><span class="o">:</span> <span class="nx">Path</span> <span class="nx">to</span> <span class="nx">a</span> <span class="nx">subregion</span> <span class="nx">file</span> <span class="nx">on</span> <span class="nx">the</span> <span class="nx">server</span><span class="p">.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Evaluation UI Webservices</a><ul>
+<li><a class="reference internal" href="#configuration-and-dependencies">Configuration and Dependencies</a></li>
+<li><a class="reference internal" href="#web-service-explanation">Web Service Explanation</a><ul>
+<li><a class="reference internal" href="#local-file-metadata-extractors">Local File Metadata Extractors</a></li>
+<li><a class="reference internal" href="#directory-helpers">Directory Helpers</a></li>
+<li><a class="reference internal" href="#rcmed-helpers">RCMED Helpers</a></li>
+<li><a class="reference internal" href="#processing-endpoints">Processing Endpoints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../data_source/data_sources.html"
+                        title="previous chapter">Data Sources</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ui-backend/backend.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data_source/data_sources.html" title="Data Sources"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

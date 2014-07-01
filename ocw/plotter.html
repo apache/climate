@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plotter Module &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="next" title="Data Sources" href="../data_source/data_sources.html" />
+    <link rel="prev" title="Metrics Module" href="metrics.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data_source/data_sources.html" title="Data Sources"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="metrics.html" title="Metrics Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-plotter">
+<span id="plotter-module"></span><h1>Plotter Module<a class="headerlink" href="#module-plotter" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="plotter.TaylorDiagram">
+<em class="property">class </em><tt class="descclassname">plotter.</tt><tt class="descname">TaylorDiagram</tt><big>(</big><em>refstd</em>, <em>radmax=1.5</em>, <em>fig=None</em>, <em>rect=111</em>, <em>label='_'</em><big>)</big><a class="headerlink" href="#plotter.TaylorDiagram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Taylor diagram helper class</p>
+<p>Plot model standard deviation and correlation to reference (data)
+sample in a single-quadrant polar plot, with r=stddev and
+theta=arccos(correlation).</p>
+<p>Set up Taylor diagram axes, i.e. single quadrant polar
+plot, using mpl_toolkits.axisartist.floating_axes. refstd is
+the reference standard deviation to be compared to.</p>
+<dl class="method">
+<dt id="plotter.TaylorDiagram.add_contours">
+<tt class="descname">add_contours</tt><big>(</big><em>std1</em>, <em>corr1</em>, <em>std2</em>, <em>corr2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#plotter.TaylorDiagram.add_contours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a line between two points
+[std1, corr1] and [std2, corr2]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="plotter.TaylorDiagram.add_rms_contours">
+<tt class="descname">add_rms_contours</tt><big>(</big><em>levels=5</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#plotter.TaylorDiagram.add_rms_contours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add constant centered RMS difference contours.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="plotter.TaylorDiagram.add_sample">
+<tt class="descname">add_sample</tt><big>(</big><em>stddev</em>, <em>corrcoef</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#plotter.TaylorDiagram.add_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add sample (stddev,corrcoeff) to the Taylor diagram. args
+and kwargs are directly propagated to the Figure.plot
+command.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="plotter.TaylorDiagram.add_stddev_contours">
+<tt class="descname">add_stddev_contours</tt><big>(</big><em>std</em>, <em>corr1</em>, <em>corr2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#plotter.TaylorDiagram.add_stddev_contours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a curved line with a radius of std between two points
+[std, corr1] and [std, corr2]</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.draw_contour_map">
+<tt class="descclassname">plotter.</tt><tt class="descname">draw_contour_map</tt><big>(</big><em>dataset</em>, <em>lats</em>, <em>lons</em>, <em>fname</em>, <em>fmt='png'</em>, <em>gridshape=(1</em>, <em>1)</em>, <em>clabel=''</em>, <em>ptitle=''</em>, <em>subtitles=None</em>, <em>cmap=None</em>, <em>clevs=None</em>, <em>nlevs=10</em>, <em>parallels=None</em>, <em>meridians=None</em>, <em>extend='neither'</em>, <em>aspect=3.4</em><big>)</big><a class="headerlink" href="#plotter.draw_contour_map" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose::</dt>
+<dd>Create a multiple panel contour map plot.</dd>
+<dt>Input::</dt>
+<dd><p class="first">dataset -  3d array of the field to be plotted with shape (nT, nLon, nLat)
+lats - array of latitudes
+lons - array of longitudes
+fname  - a string specifying the filename of the plot
+fmt  - an optional string specifying the filetype, default is .png
+gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging</p>
+<blockquote>
+<div>the subplots.</div></blockquote>
+<p>clabel - an optional string specifying the colorbar title
+ptitle - an optional string specifying plot title
+subtitles - an optional list of strings specifying the title for each subplot
+cmap - an string or optional matplotlib.colors.LinearSegmentedColormap instance</p>
+<blockquote>
+<div>denoting the colormap</div></blockquote>
+<p>clevs - an optional list of ints or floats specifying contour levels
+nlevs - an optional integer specifying the target number of contour levels if</p>
+<blockquote>
+<div>clevs is None</div></blockquote>
+<p>parallels - an optional list of ints or floats for the parallels to be drawn
+meridians - an optional list of ints or floats for the meridians to be drawn
+extend - an optional string to toggle whether to place arrows at the colorbar</p>
+<blockquote class="last">
+<div>boundaries. Default is &#8216;neither&#8217;, but can also be &#8216;min&#8217;, &#8216;max&#8217;, or
+&#8216;both&#8217;. Will be automatically set to &#8216;both&#8217; if clevs is None.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.draw_portrait_diagram">
+<tt class="descclassname">plotter.</tt><tt class="descname">draw_portrait_diagram</tt><big>(</big><em>results</em>, <em>rowlabels</em>, <em>collabels</em>, <em>fname</em>, <em>fmt='png'</em>, <em>gridshape=(1</em>, <em>1)</em>, <em>xlabel=''</em>, <em>ylabel=''</em>, <em>clabel=''</em>, <em>ptitle=''</em>, <em>subtitles=None</em>, <em>cmap=None</em>, <em>clevs=None</em>, <em>nlevs=10</em>, <em>extend='neither'</em>, <em>aspect=None</em><big>)</big><a class="headerlink" href="#plotter.draw_portrait_diagram" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose::</dt>
+<dd>Makes a portrait diagram plot.</dd>
+<dt>Input::</dt>
+<dd><dl class="first docutils">
+<dt>results - 3d array of the field to be plotted. The second dimension</dt>
+<dd>should correspond to the number of rows in the diagram and the
+third should correspond to the number of columns.</dd>
+</dl>
+<p>rowlabels - a list of strings denoting labels for each row
+collabels - a list of strings denoting labels for each column
+fname - a string specifying the filename of the plot
+fmt - an optional string specifying the output filetype
+gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging</p>
+<blockquote>
+<div>the subplots.</div></blockquote>
+<p>xlabel - an optional string specifying the x-axis title
+ylabel - an optional string specifying the y-axis title
+clabel - an optional string specifying the colorbar title
+ptitle - a string specifying the plot title
+subtitles - an optional list of strings specifying the title for each subplot
+cmap - an optional string or matplotlib.colors.LinearSegmentedColormap instance</p>
+<blockquote>
+<div>denoting the colormap</div></blockquote>
+<p>clevs - an optional list of ints or floats specifying colorbar levels
+nlevs - an optional integer specifying the target number of contour levels if</p>
+<blockquote>
+<div>clevs is None</div></blockquote>
+<dl class="last docutils">
+<dt>extend - an optional string to toggle whether to place arrows at the colorbar</dt>
+<dd>boundaries. Default is &#8216;neither&#8217;, but can also be &#8216;min&#8217;, &#8216;max&#8217;, or
+&#8216;both&#8217;. Will be automatically set to &#8216;both&#8217; if clevs is None.</dd>
+<dt>aspect - Float denoting approximate aspect ratio of each subplot</dt>
+<dd>(width / height). Default is 8.5 / 5.5</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.draw_subregions">
+<tt class="descclassname">plotter.</tt><tt class="descname">draw_subregions</tt><big>(</big><em>subregions</em>, <em>lats</em>, <em>lons</em>, <em>fname</em>, <em>fmt='png'</em>, <em>ptitle=''</em>, <em>parallels=None</em>, <em>meridians=None</em>, <em>subregion_masks=None</em><big>)</big><a class="headerlink" href="#plotter.draw_subregions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose::</dt>
+<dd>Function to draw subregion domain(s) on a map</dd>
+<dt>Input::</dt>
+<dd><p class="first">subregions - a list of subRegion objects
+lats - array of latitudes
+lons - array of longitudes
+fname  - a string specifying the filename of the plot
+fmt  - an optional string specifying the filetype, default is .png
+ptitle - an optional string specifying plot title
+parallels - an optional list of ints or floats for the parallels to be drawn
+meridians - an optional list of ints or floats for the meridians to be drawn
+subregion_masks - optional dictionary of boolean arrays for each subRegion</p>
+<blockquote class="last">
+<div>for giving finer control of the domain to be drawn, by default
+the entire domain is drawn.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.draw_taylor_diagram">
+<tt class="descclassname">plotter.</tt><tt class="descname">draw_taylor_diagram</tt><big>(</big><em>results</em>, <em>names</em>, <em>refname</em>, <em>fname</em>, <em>fmt='png'</em>, <em>gridshape=(1</em>, <em>1)</em>, <em>ptitle=''</em>, <em>subtitles=None</em>, <em>pos='upper right'</em>, <em>frameon=True</em>, <em>radmax=1.5</em><big>)</big><a class="headerlink" href="#plotter.draw_taylor_diagram" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose::</dt>
+<dd>Draws a Taylor diagram</dd>
+<dt>Input::</dt>
+<dd><dl class="first docutils">
+<dt>results - an Nx2 array containing normalized standard deviations,</dt>
+<dd>correlation coefficients, and names of evaluation results</dd>
+</dl>
+<p>names - list of names for each evaluated dataset
+refname - The name of the reference dataset
+fname  - a string specifying the filename of the plot
+fmt  - an optional string specifying the filetype, default is .png
+gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging</p>
+<blockquote>
+<div>the subplots.</div></blockquote>
+<p>ptitle - an optional string specifying the plot title
+subtitles - an optional list of strings specifying the title for each subplot
+pos - an optional string or tuple of float for determining</p>
+<blockquote>
+<div>the position of the legend</div></blockquote>
+<dl class="last docutils">
+<dt>frameon - an optional boolean that determines whether to draw a frame</dt>
+<dd>around the legend box</dd>
+<dt>radmax - an optional float to adjust the extent of the axes in terms of</dt>
+<dd>standard deviation.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.draw_time_series">
+<tt class="descclassname">plotter.</tt><tt class="descname">draw_time_series</tt><big>(</big><em>results</em>, <em>times</em>, <em>labels</em>, <em>fname</em>, <em>fmt='png'</em>, <em>gridshape=(1</em>, <em>1)</em>, <em>xlabel=''</em>, <em>ylabel=''</em>, <em>ptitle=''</em>, <em>subtitles=None</em>, <em>label_month=False</em>, <em>yscale='linear'</em>, <em>aspect=None</em><big>)</big><a class="headerlink" href="#plotter.draw_time_series" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose::</dt>
+<dd>Function to draw a time series plot</dd>
+<dt>Input::</dt>
+<dd><p class="first">results - a 3d array of time series
+times - a list of python datetime objects
+labels - a list of strings with the names of each set of data
+fname - a string specifying the filename of the plot
+fmt - an optional string specifying the output filetype
+gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging</p>
+<blockquote>
+<div>the subplots.</div></blockquote>
+<p>xlabel - a string specifying the x-axis title
+ylabel - a string specifying the y-axis title
+ptitle - a string specifying the plot title
+subtitles - an optional list of strings specifying the title for each subplot
+label_month - optional bool to toggle drawing month labels
+yscale - optional string for setting the y-axis scale, &#8216;linear&#8217; for linear</p>
+<blockquote>
+<div>and &#8216;log&#8217; for log base 10.</div></blockquote>
+<dl class="last docutils">
+<dt>aspect - Float denoting approximate aspect ratio of each subplot</dt>
+<dd>(width / height). Default is 8.5 / 5.5</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="plotter.set_cmap">
+<tt class="descclassname">plotter.</tt><tt class="descname">set_cmap</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#plotter.set_cmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the default colormap (eg when setting cmap=None in a function)
+See: <a class="reference external" href="http://matplotlib.org/examples/pylab_examples/show_colormaps.html">http://matplotlib.org/examples/pylab_examples/show_colormaps.html</a>
+for a list of possible colormaps.
+Appending &#8216;_r&#8217; to a matplotlib colormap name will give you a reversed
+version of it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the colormap.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="metrics.html"
+                        title="previous chapter">Metrics Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../data_source/data_sources.html"
+                        title="next chapter">Data Sources</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ocw/plotter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data_source/data_sources.html" title="Data Sources"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="metrics.html" title="Metrics Module"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

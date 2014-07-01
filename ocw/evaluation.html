@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Evaluation Module &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="next" title="Metrics Module" href="metrics.html" />
+    <link rel="prev" title="Dataset Processor Module" href="dataset_processor.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metrics.html" title="Metrics Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dataset_processor.html" title="Dataset Processor Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="evaluation-module">
+<h1>Evaluation Module<a class="headerlink" href="#evaluation-module" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="evaluation.Evaluation">
+<em class="property">class </em><tt class="descclassname">evaluation.</tt><tt class="descname">Evaluation</tt><big>(</big><em>reference</em>, <em>targets</em>, <em>metrics</em>, <em>subregions=None</em><big>)</big><a class="headerlink" href="#evaluation.Evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for running an evaluation</p>
+<p>An <em>Evaluation</em> is the running of one or more metrics on one or more 
+target datasets and a (possibly optional) reference dataset. Evaluation
+can handle two types of metrics, <tt class="docutils literal"><span class="pre">unary</span></tt> and <tt class="docutils literal"><span class="pre">binary</span></tt>. The validity
+of an Evaluation is dependent upon the number and type of metrics as well
+as the number of datasets.</p>
+<p>A <tt class="docutils literal"><span class="pre">unary</span></tt> metric is a metric that runs over a single dataset. If you add
+a <tt class="docutils literal"><span class="pre">unary</span></tt> metric to the Evaluation you are only required to add a 
+reference dataset or a target dataset. If there are multiple datasets
+in the evaluation then the <tt class="docutils literal"><span class="pre">unary</span></tt> metric is run over all of them.</p>
+<p>A <tt class="docutils literal"><span class="pre">binary</span></tt> metric is a metric that runs over a reference dataset and
+target dataset. If you add a <tt class="docutils literal"><span class="pre">binary</span></tt> metric you are required to add a
+reference dataset and at least one target dataset. The <tt class="docutils literal"><span class="pre">binary</span></tt> metrics
+are run over every (reference dataset, target dataset) pair in the
+Evaluation.</p>
+<p>An Evaluation must have at least one metric to be valid.</p>
+<p>Default Evaluation constructor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reference</strong> (<em>Dataset</em>) &#8211; The reference Dataset for the evaluation.</li>
+<li><strong>targets</strong> (<em>List of Datasets</em>) &#8211; A list of one or more target datasets for the 
+evaluation.</li>
+<li><strong>metrics</strong> (<em>List of Metrics</em>) &#8211; A list of one or more Metric instances to run 
+in the evaluation.</li>
+<li><strong>subregions</strong> (<em>List of Bounds objects</em>) &#8211; (Optional) Subregion information to use in the
+evaluation. A subregion is specified with a Bounds object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="evaluation.Evaluation.add_dataset">
+<tt class="descname">add_dataset</tt><big>(</big><em>target_dataset</em><big>)</big><a class="headerlink" href="#evaluation.Evaluation.add_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a Dataset to the Evaluation.</p>
+<p>A target Dataset is compared against the reference dataset when the 
+Evaluation is run with one or more metrics.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_dataset</strong> (<em>Dataset</em>) &#8211; The target Dataset to add to the Evaluation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If a dataset to add isn&#8217;t an instance of Dataset.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="evaluation.Evaluation.add_datasets">
+<tt class="descname">add_datasets</tt><big>(</big><em>target_datasets</em><big>)</big><a class="headerlink" href="#evaluation.Evaluation.add_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add multiple Datasets to the Evaluation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_datasets</strong> (<em>List of Dataset objects</em>) &#8211; The list of datasets that should be added to 
+the Evaluation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If a dataset to add isn&#8217;t an instance of Dataset.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="evaluation.Evaluation.add_metric">
+<tt class="descname">add_metric</tt><big>(</big><em>metric</em><big>)</big><a class="headerlink" href="#evaluation.Evaluation.add_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a metric to the Evaluation.</p>
+<p>A metric is an instance of a class which inherits from metrics.Metric.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>Metric</em>) &#8211; The metric instance to add to the Evaluation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the metric to add isn&#8217;t a class that inherits
+from metrics.Metric.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="evaluation.Evaluation.add_metrics">
+<tt class="descname">add_metrics</tt><big>(</big><em>metrics</em><big>)</big><a class="headerlink" href="#evaluation.Evaluation.add_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add multiple metrics to the Evaluation.</p>
+<p>A metric is an instance of a class which inherits from metrics.Metric.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metrics</strong> (<em>List of Metrics</em>) &#8211; The list of metric instances to add to the Evaluation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If a metric to add isn&#8217;t a class that inherits
+from metrics.Metric.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="evaluation.Evaluation.metrics">
+<tt class="descname">metrics</tt><em class="property"> = None</em><a class="headerlink" href="#evaluation.Evaluation.metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of &#8220;binary&#8221; metrics (A metric which takes two Datasets)
+that the Evaluation should use.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="evaluation.Evaluation.results">
+<tt class="descname">results</tt><em class="property"> = None</em><a class="headerlink" href="#evaluation.Evaluation.results" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list containing the results of running regular metric evaluations.
+The shape of results is <tt class="docutils literal"><span class="pre">(num_metrics,</span> <span class="pre">num_target_datasets)</span></tt> if
+the user doesn&#8217;t specify subregion information. Otherwise the shape
+is <tt class="docutils literal"><span class="pre">(num_metrics,</span> <span class="pre">num_target_datasets,</span> <span class="pre">num_subregions)</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="evaluation.Evaluation.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#evaluation.Evaluation.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the evaluation.</p>
+<p>There are two phases to a run of the Evaluation. First, if there are
+any &#8220;binary&#8221; metrics they are run through the evaluation. Binary
+metrics are only run if there is a reference dataset and at least one
+target dataset.</p>
+<p>If there is subregion information provided then each dataset is subset
+before being run through the binary metrics.</p>
+<p>..note:: Only the binary metrics are subset with subregion information.</p>
+<p>Next, if there are any &#8220;unary&#8221; metrics they are run. Unary metrics are
+only run if there is at least one target dataset or a reference dataset.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="evaluation.Evaluation.target_datasets">
+<tt class="descname">target_datasets</tt><em class="property"> = None</em><a class="headerlink" href="#evaluation.Evaluation.target_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>The target dataset(s) which should each be compared with
+the reference dataset when the evaluation is run.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="evaluation.Evaluation.unary_metrics">
+<tt class="descname">unary_metrics</tt><em class="property"> = None</em><a class="headerlink" href="#evaluation.Evaluation.unary_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of &#8220;unary&#8221; metrics (A metric which takes one Dataset) that
+the Evaluation should use.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="evaluation.Evaluation.unary_results">
+<tt class="descname">unary_results</tt><em class="property"> = None</em><a class="headerlink" href="#evaluation.Evaluation.unary_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list containing the results of running the unary metric
+evaluations. The shape of unary_results is
+<tt class="docutils literal"><span class="pre">(num_metrics,</span> <span class="pre">num_targets)</span></tt> where <tt class="docutils literal"><span class="pre">num_targets</span> <span class="pre">=</span>
+<span class="pre">num_target_ds</span> <span class="pre">+</span> <span class="pre">(1</span> <span class="pre">if</span> <span class="pre">ref_dataset</span> <span class="pre">!=</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">0</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dataset_processor.html"
+                        title="previous chapter">Dataset Processor Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="metrics.html"
+                        title="next chapter">Metrics Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ocw/evaluation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="metrics.html" title="Metrics Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dataset_processor.html" title="Dataset Processor Module"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

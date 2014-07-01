@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dataset Module &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="next" title="Dataset Processor Module" href="dataset_processor.html" />
+    <link rel="prev" title="Welcome to Apache Open Climate Workbench’s documentation!" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dataset_processor.html" title="Dataset Processor Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Apache Open Climate Workbench’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dataset-module">
+<h1>Dataset Module<a class="headerlink" href="#dataset-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="bounds">
+<h2>Bounds<a class="headerlink" href="#bounds" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dataset.Bounds">
+<em class="property">class </em><tt class="descclassname">dataset.</tt><tt class="descname">Bounds</tt><big>(</big><em>lat_min</em>, <em>lat_max</em>, <em>lon_min</em>, <em>lon_max</em>, <em>start</em>, <em>end</em><big>)</big><a class="headerlink" href="#dataset.Bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for holding spatial and temporal bounds information.</p>
+<p>Certain operations require valid bounding information to be present for
+correct functioning. Bounds guarantees that a function receives well 
+formed information without the need to do the validation manually.</p>
+<p>Spatial and temporal bounds must follow the following guidelines.</p>
+<ul class="simple">
+<li>Latitude values must be in the range [-90, 90]</li>
+<li>Longitude values must be in the range [-180, 180]</li>
+<li>Lat/Lon Min values must be less than the corresponding Lat/Lon Max values.</li>
+<li>Temporal bounds must a valid datetime object</li>
+</ul>
+<p>Default Bounds constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lat_min</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The minimum latitude bound.</li>
+<li><strong>lat_max</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The maximum latitude bound.</li>
+<li><strong>lon_min</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The minimum longitude bound.</li>
+<li><strong>lon_max</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The maximum longitude bound.</li>
+<li><strong>start</strong> (<a class="reference external" href="http://docs.python.org/library/datetime.html#module-datetime" title="(in Python v2.7)"><em>datetime</em></a>) &#8211; The starting datetime bound.</li>
+<li><strong>end</strong> (<a class="reference external" href="http://docs.python.org/library/datetime.html#module-datetime" title="(in Python v2.7)"><em>datetime</em></a>) &#8211; The ending datetime bound.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dataset.Dataset">
+<em class="property">class </em><tt class="descclassname">dataset.</tt><tt class="descname">Dataset</tt><big>(</big><em>lats</em>, <em>lons</em>, <em>times</em>, <em>values</em>, <em>variable=None</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#dataset.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for a dataset&#8217;s attributes and data.</p>
+<p>Default Dataset constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lats</strong> (<em>numpy array</em>) &#8211; One dimensional numpy array of unique latitude values.</li>
+<li><strong>lons</strong> (<em>numpy array</em>) &#8211; One dimensional numpy array of unique longitude values.</li>
+<li><strong>times</strong> (<em>numpy array</em>) &#8211; One dimensional numpy array of unique python datetime 
+objects.</li>
+<li><strong>values</strong> (<em>numpy array</em>) &#8211; Three dimensional numpy array of parameter values with 
+shape [timesLength, latsLength, lonsLength].</li>
+<li><strong>variable</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Name of the value variable.</li>
+<li><strong>name</strong> &#8211; An optional string name for the Dataset.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dataset.Dataset.spatial_boundaries">
+<tt class="descname">spatial_boundaries</tt><big>(</big><big>)</big><a class="headerlink" href="#dataset.Dataset.spatial_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the spatial boundaries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Dataset&#8217;s bounding latitude and longitude values as a
+tuple in the form (min_lat, max_lat, min_lon, max_lon)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(float, float, float, float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataset.Dataset.spatial_resolution">
+<tt class="descname">spatial_resolution</tt><big>(</big><big>)</big><a class="headerlink" href="#dataset.Dataset.spatial_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the latitudinal and longitudinal spatial resolution.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This only works with properly gridded data.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Dataset&#8217;s latitudinal and longitudinal spatial resolution
+as a tuple of the form (lat_resolution, lon_resolution).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(float, float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataset.Dataset.temporal_resolution">
+<tt class="descname">temporal_resolution</tt><big>(</big><big>)</big><a class="headerlink" href="#dataset.Dataset.temporal_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the temporal resolution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">If timedelta.days as calculated from the sorted             list of times is an unrecognized value a ValueError is raised.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The temporal resolution.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataset.Dataset.time_range">
+<tt class="descname">time_range</tt><big>(</big><big>)</big><a class="headerlink" href="#dataset.Dataset.time_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the temporal range</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The start and end date of the Dataset&#8217;s temporal range as 
+a tuple in the form (start_time, end_time).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(datetime, datetime)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dataset Module</a><ul>
+<li><a class="reference internal" href="#bounds">Bounds</a></li>
+<li><a class="reference internal" href="#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to Apache Open Climate Workbench&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dataset_processor.html"
+                        title="next chapter">Dataset Processor Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/ocw/dataset.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dataset_processor.html" title="Dataset Processor Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Apache Open Climate Workbench’s documentation!"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

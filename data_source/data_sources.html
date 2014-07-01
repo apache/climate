@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data Sources &mdash; Apache Open Climate Workbench 0.3-incubating documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3-incubating',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Apache Open Climate Workbench 0.3-incubating documentation" href="../index.html" />
+    <link rel="next" title="Evaluation UI Webservices" href="../ui-backend/backend.html" />
+    <link rel="prev" title="Plotter Module" href="../ocw/plotter.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ui-backend/backend.html" title="Evaluation UI Webservices"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../ocw/plotter.html" title="Plotter Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="data-sources">
+<h1>Data Sources<a class="headerlink" href="#data-sources" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-local">
+<span id="local-module"></span><h2>Local Module<a class="headerlink" href="#module-local" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="local.load_file">
+<tt class="descclassname">local.</tt><tt class="descname">load_file</tt><big>(</big><em>file_path</em>, <em>variable_name</em><big>)</big><a class="headerlink" href="#local.load_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load netCDF file, get the all variables name and get the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>String</em>) &#8211; NetCDF directory with file name</li>
+<li><strong>variable_name</strong> (<em>String</em>) &#8211; The given (by user) value variable name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dataset object from dataset.py</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Object</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-rcmed">
+<span id="rcmed-module"></span><h2>RCMED Module<a class="headerlink" href="#module-rcmed" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Classes:</dt>
+<dd>RCMED - A class for retrieving data from Regional Climate Model Evalutaion Database (JPL).</dd>
+</dl>
+<dl class="function">
+<dt id="rcmed.get_parameters_metadata">
+<tt class="descclassname">rcmed.</tt><tt class="descname">get_parameters_metadata</tt><big>(</big><big>)</big><a class="headerlink" href="#rcmed.get_parameters_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the metadata of all parameter from RCMED.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dictionary of information for each parameter stored in one list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List of dictionaries</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rcmed.parameter_dataset">
+<tt class="descclassname">rcmed.</tt><tt class="descname">parameter_dataset</tt><big>(</big><em>dataset_id</em>, <em>parameter_id</em>, <em>min_lat</em>, <em>max_lat</em>, <em>min_lon</em>, <em>max_lon</em>, <em>start_time</em>, <em>end_time</em><big>)</big><a class="headerlink" href="#rcmed.parameter_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get data from one database(parameter).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataset_id</strong> (<em>Integer</em>) &#8211; Dataset id.</li>
+<li><strong>parameter_id</strong> (<em>Integer</em>) &#8211; Parameter id</li>
+<li><strong>min_lat</strong> (<em>Float</em>) &#8211; Minimum latitude</li>
+<li><strong>max_lat</strong> (<em>Float</em>) &#8211; Maximum latitude</li>
+<li><strong>min_lon</strong> (<em>Float</em>) &#8211; Minimum longitude</li>
+<li><strong>max_lon</strong> (<em>Float</em>) &#8211; Maximum longitude</li>
+<li><strong>start_time</strong> (<em>Datetime</em>) &#8211; Start time</li>
+<li><strong>end_time</strong> (<em>Datetime</em>) &#8211; End time</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dataset object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dap">
+<span id="dap-module"></span><h2>DAP Module<a class="headerlink" href="#module-dap" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dap.load">
+<tt class="descclassname">dap.</tt><tt class="descname">load</tt><big>(</big><em>url</em>, <em>variable</em><big>)</big><a class="headerlink" href="#dap.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a Dataset from an OpenDAP URL</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>String</em>) &#8211; The OpenDAP URL for the dataset of interest.</li>
+<li><strong>variable</strong> (<em>String</em>) &#8211; The name of the variable to read from the dataset.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Dataset object containing the dataset pointed to by the 
+OpenDAP URL.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ServerError</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Data Sources</a><ul>
+<li><a class="reference internal" href="#module-local">Local Module</a></li>
+<li><a class="reference internal" href="#module-rcmed">RCMED Module</a></li>
+<li><a class="reference internal" href="#module-dap">DAP Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../ocw/plotter.html"
+                        title="previous chapter">Plotter Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../ui-backend/backend.html"
+                        title="next chapter">Evaluation UI Webservices</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/data_source/data_sources.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ui-backend/backend.html" title="Evaluation UI Webservices"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../ocw/plotter.html" title="Plotter Module"
+             >previous</a> |</li>
+        <li><a href="../index.html">Apache Open Climate Workbench 0.3-incubating documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Michael Joyce.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>
