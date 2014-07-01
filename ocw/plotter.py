@@ -225,22 +225,32 @@ def draw_taylor_diagram(results, names, refname, fname, fmt='png',
 
 def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
                     parallels=None, meridians=None, subregion_masks=None):
-    '''
-    Purpose::
-        Function to draw subregion domain(s) on a map
+    ''' Draw subregion domain(s) on a map.
 
-    Input::
-        subregions - a list of subRegion objects
-        lats - array of latitudes
-        lons - array of longitudes
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        ptitle - an optional string specifying plot title
-        parallels - an optional list of ints or floats for the parallels to be drawn
-        meridians - an optional list of ints or floats for the meridians to be drawn
-        subregion_masks - optional dictionary of boolean arrays for each subRegion
-                         for giving finer control of the domain to be drawn, by default
-                         the entire domain is drawn.
+    :param subregions: The subregion objects to plot on the map.
+    :type subregions: List of subregion objects
+    :param lats: Array of latitudes values.
+    :type lats: Numpy Array
+    :param lons: Array of longitudes values.
+    :type lons: Numpy Array
+    :param fname: The filename of the plot.
+    :type fname: string
+    :param fmt: Optional filetype for the output.
+    :type fmt: string
+    :param ptitle: Optional plot title.
+    :type ptitle: string
+    :param parallels: Optional list of ints or floats for the parallels to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type parallels: List of ints or floats
+    :param meridians: Optional list of ints or floats for the meridians to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type meridians: List of ints or floats
+    :param subregion_masks: Optional dictionary of boolean arrays for each
+        subregion for giving finer control of the domain to be drawn, by default
+        the entire domain is drawn.
+    :type subregion_masks: Dictionary of boolean arrays
     '''
     # Set up the figure
     fig = plt.figure()
