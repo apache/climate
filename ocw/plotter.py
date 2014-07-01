@@ -462,31 +462,47 @@ def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
                      clabel='', ptitle='', subtitles=None, cmap=None,
                      clevs=None, nlevs=10, parallels=None, meridians=None,
                      extend='neither', aspect=8.5/2.5):
-    '''
-    Purpose::
-        Create a multiple panel contour map plot.
+    ''' Draw a multiple panel contour map plot.
 
-    Input::
-        dataset -  3d array of the field to be plotted with shape (nT, nLon, nLat)
-        lats - array of latitudes
-        lons - array of longitudes
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        clabel - an optional string specifying the colorbar title
-        ptitle - an optional string specifying plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        cmap - an string or optional matplotlib.colors.LinearSegmentedColormap instance
-               denoting the colormap
-        clevs - an optional list of ints or floats specifying contour levels
-        nlevs - an optional integer specifying the target number of contour levels if
-                clevs is None
-        parallels - an optional list of ints or floats for the parallels to be drawn
-        meridians - an optional list of ints or floats for the meridians to be drawn
-        extend - an optional string to toggle whether to place arrows at the colorbar
-             boundaries. Default is 'neither', but can also be 'min', 'max', or
-             'both'. Will be automatically set to 'both' if clevs is None.
+    :param dataset: 3D array of data to be plotted with shape (nT, nLon, nLat).
+    :type dataset: Numpy Array
+    :param lats: Array of latitudes values.
+    :type lats: Numpy Array
+    :param lons: Array of longitudes
+    :type lons: Numpy Array
+    :param fname: The filename of the plot.
+    :type fname: string
+    :param fmt: Optional filetype for the output.
+    :type fmt: string
+    :param gridshape: Optional tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: Tuple (num_rows, num_cols)
+    :param clabel: Optional colorbar title.
+    :type clabel: string
+    :param ptitle: Optional plot title.
+    :type ptitle: string
+    :param subtitles: Optional list of titles for each subplot.
+    :type subtitles: List of strings
+    :param cmap: Optional string or matplotlib.colors.LinearSegmentedColormap
+        instance denoting the colormap. This must be able to be recognized by
+        `Matplotlib's get_cmap function <http://matplotlib.org/api/cm_api.html#matplotlib.cm.get_cmap>`_.
+    :type cmap: string or LinearSegmentedColormap object
+    :param clevs: Optional contour levels values.
+    :type clevs: List of ints or floats
+    :param nlevs: Optional target number of contour levels if clevs is None.
+    :type nlevs: int
+    :param parallels: Optional list of ints or floats for the parallels to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type parallels: List of ints or floats
+    :param meridians: Optional list of ints or floats for the meridians to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type meridians: List of ints or floats
+    :param extend: Optional flag to toggle whether to place arrows at the colorbar
+         boundaries. Default is 'neither', but can also be 'min', 'max', or
+         'both'. Will be automatically set to 'both' if clevs is None.
+    :type extend: string
     '''
     # Handle the single plot case. Meridians and Parallels are not labeled for
     # multiple plots to save space.
