@@ -152,27 +152,37 @@ def _fig_size(gridshape, aspect=None):
 def draw_taylor_diagram(results, names, refname, fname, fmt='png',
                         gridshape=(1,1), ptitle='', subtitles=None,
                         pos='upper right', frameon=True, radmax=1.5):
-    '''
-    Purpose::
-        Draws a Taylor diagram
+    ''' Draw a Taylor diagram.
 
-    Input::
-        results - an Nx2 array containing normalized standard deviations,
-               correlation coefficients, and names of evaluation results
-        names - list of names for each evaluated dataset
-        refname - The name of the reference dataset
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        ptitle - an optional string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        pos - an optional string or tuple of float for determining
-                    the position of the legend
-        frameon - an optional boolean that determines whether to draw a frame
-                        around the legend box
-        radmax - an optional float to adjust the extent of the axes in terms of
-                 standard deviation.
+    :param results: An Nx2 array containing normalized standard deviations,
+       correlation coefficients, and names of evaluation results.
+    :type results: Numpy Array
+    :param names: A list of names for each evaluated dataset
+    :type names: List of strings
+    :param refname: The name of the reference dataset.
+    :type refname: string
+    :param fname: The filename of the plot.
+    :type fname: string
+    :param fmt: Optional filetype for the output plot.
+    :type fmt: string
+    :param gridshape: Optional tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: Tuple (num_rows, num_cols)
+    :param ptitle: Optional plot title.
+    :type ptitle: string
+    :param subtitles: Optional list of strings specifying the title for each
+        subplot.
+    :type subtitles: List of strings
+    :param pos: Optional string or tuple of floats used to set the position
+        of the legend. Check the `Matplotlib docs <http://matplotlib.org/api/legend_api.html#matplotlib.legend.Legend>`_
+        for additional information.
+    :type pos: string or tuple of floats
+    :param frameon: Optional boolean specifying whether to draw a frame
+        around the legend box.
+    :type frameon: boolean
+    :param radmax: Optional float to adjust the extent of the axes in terms of
+        standard deviation.
+    :type radmax: float
     '''
     # Handle the single plot case.
     if results.ndim == 2:
