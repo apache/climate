@@ -622,35 +622,48 @@ def draw_portrait_diagram(results, rowlabels, collabels, fname, fmt='png',
                           gridshape=(1, 1), xlabel='', ylabel='', clabel='',
                           ptitle='', subtitles=None, cmap=None, clevs=None,
                           nlevs=10, extend='neither', aspect=None):
-    '''
-    Purpose::
-        Makes a portrait diagram plot.
+    ''' Draw a portrait diagram plot.
 
-    Input::
-        results - 3d array of the field to be plotted. The second dimension
-                  should correspond to the number of rows in the diagram and the
-                  third should correspond to the number of columns.
-        rowlabels - a list of strings denoting labels for each row
-        collabels - a list of strings denoting labels for each column
-        fname - a string specifying the filename of the plot
-        fmt - an optional string specifying the output filetype
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        xlabel - an optional string specifying the x-axis title
-        ylabel - an optional string specifying the y-axis title
-        clabel - an optional string specifying the colorbar title
-        ptitle - a string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        cmap - an optional string or matplotlib.colors.LinearSegmentedColormap instance
-               denoting the colormap
-        clevs - an optional list of ints or floats specifying colorbar levels
-        nlevs - an optional integer specifying the target number of contour levels if
-                clevs is None
-        extend - an optional string to toggle whether to place arrows at the colorbar
-             boundaries. Default is 'neither', but can also be 'min', 'max', or
-             'both'. Will be automatically set to 'both' if clevs is None.
-        aspect - Float denoting approximate aspect ratio of each subplot
-                 (width / height). Default is 8.5 / 5.5
+    :param results: 3D array of the fields to be plotted. The second dimension
+              should correspond to the number of rows in the diagram and the
+              third should correspond to the number of columns.
+    :type results: Numpy Array
+    :param rowlabels: Labels for each row.
+    :type rowlabels: List of strings
+    :param collabels: Labels for each row.
+    :type collabels: List of strings
+    :param fname: Filename of the plot.
+    :type fname: string
+    :param fmt: Optional filetype for the output.
+    :type fmt: string
+    :param gridshape: Optional tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: Tuple (num_rows, num_cols)
+    :param xlabel: Optional x-axis title.
+    :type xlabel: string
+    :param ylabel: Optional y-ayis title.
+    :type ylabel: string
+    :param clabel: Optional colorbar title.
+    :type clabel: string
+    :param ptitle: Optional plot title.
+    :type ptitle: string
+    :param subtitles: Optional list of titles for each subplot.
+    :type subtitles: List of strings
+    :param cmap: Optional string or matplotlib.colors.LinearSegmentedColormap
+        instance denoting the colormap. This must be able to be recognized by
+        `Matplotlib's get_cmap function <http://matplotlib.org/api/cm_api.html#matplotlib.cm.get_cmap>`_.
+    :type cmap: string or LinearSegmentedColormap object
+    :param clevs: Optional contour levels values.
+    :type clevs: List of ints or floats
+    :param nlevs: Optional target number of contour levels if clevs is None.
+    :type nlevs: int
+    :param extend: Optional flag to toggle whether to place arrows at the colorbar
+         boundaries. Default is 'neither', but can also be 'min', 'max', or
+         'both'. Will be automatically set to 'both' if clevs is None.
+    :type extend: string
+    :param aspect: Optional approximate aspect ratio of each subplot
+        (width / height). Default is 8.5 / 5.5
+    :type aspect: float
     '''
     # Handle the single plot case.
     if results.ndim == 2:
