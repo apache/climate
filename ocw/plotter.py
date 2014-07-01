@@ -330,27 +330,39 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
                      xlabel='', ylabel='', ptitle='', subtitles=None,
                      label_month=False, yscale='linear', aspect=None):
-    '''
-    Purpose::
-        Function to draw a time series plot
+    ''' Draw a time series plot.
 
-    Input::
-        results - a 3d array of time series
-        times - a list of python datetime objects
-        labels - a list of strings with the names of each set of data
-        fname - a string specifying the filename of the plot
-        fmt - an optional string specifying the output filetype
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        xlabel - a string specifying the x-axis title
-        ylabel - a string specifying the y-axis title
-        ptitle - a string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        label_month - optional bool to toggle drawing month labels
-        yscale - optional string for setting the y-axis scale, 'linear' for linear
-                 and 'log' for log base 10.
-        aspect - Float denoting approximate aspect ratio of each subplot
-                 (width / height). Default is 8.5 / 5.5
+    :param results: 3D array of time series data.
+    :type results: Numpy Array
+    :param times: List of Python datetime objects used by Matplotlib to handle
+        axis formatting.
+    :type times: List of datetime objects
+    :param labels: List of names for each data being plotted.
+    :type labels: List of string
+    :param fname: Filename of the plot.
+    :type fname: string
+    :param fmt: Optional filetype for the output.
+    :type fmt: string
+    :param gridshape: Optional tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: Tuple (num_rows, num_cols)
+    :param xlabel: Optional x-axis title.
+    :type xlabel: string
+    :param ylabel: Optional y-ayis title.
+    :type ylabel: string
+    :param ptitle: Optional plot title.
+    :type ptitle: string
+    :param subtitles: Optional list of titles for each subplot.
+    :type subtitles: List of strings
+    :param label_month: Optional flag to toggle drawing month labels on the
+        x-axis.
+    :type label_month: boolean
+    :param yscale: Optional y-axis scale value, 'linear' for linear and 'log'
+        for log base 10.
+    :type yscale: string
+    :param aspect: Optional approximate aspect ratio of each subplot
+        (width / height). Default is 8.5 / 5.5
+    :type aspect: float
     '''
     # Handle the single plot case.
     if results.ndim == 2:
