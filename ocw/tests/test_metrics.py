@@ -79,10 +79,10 @@ class TestTemporalStdDev(unittest.TestCase):
         npt.assert_almost_equal(self.temporal_std_dev.run(self.target_dataset), expected_result)
 
 
-class TestSpatialStdDevRatio(unittest.TestCase):
-    '''Test the metrics.SpatialStdDevRatio metric'''
+class TestStdDevRatio(unittest.TestCase):
+    '''Test the metrics.StdDevRatio metric'''
     def setUp(self):
-        self.spatial_std_dev_ratio = metrics.SpatialStdDevRatio()
+        self.std_dev_ratio = metrics.StdDevRatio()
         self.ref_dataset = Dataset(
             np.array([1., 1., 1., 1., 1.]),
             np.array([1., 1., 1., 1., 1.]),
@@ -102,7 +102,7 @@ class TestSpatialStdDevRatio(unittest.TestCase):
         )
 
     def test_function_run(self):
-        self.assertTrue(self.spatial_std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
+        self.assertTrue(self.std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
 
 
 class TestPatternCorrelation(unittest.TestCase):
