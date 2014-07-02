@@ -106,6 +106,26 @@ class TemporalStdDev(UnaryMetric):
         return target_dataset.values.std(axis=0, ddof=1)
 
 
+class StdDevRatio(BinaryMetric):
+    '''Calculate the standard deviation ratio between two datasets.'''
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate the standard deviation ratio.
+
+        .. note::
+            Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: ocw.dataset.Dataset object
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: ocw.dataset.Dataset object
+
+        :returns: The standard deviation ratio of the reference and target
+        '''
+        return target_dataset.values.std() / ref_dataset.values.std()
+
+
 class SpatialStdDevRatio(BinaryMetric):
     '''Calculate the ratio of spatial standard deviation (model standard
           deviation)/(observed standard deviation)'''
