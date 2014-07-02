@@ -128,9 +128,8 @@ class TestPatternCorrelation(unittest.TestCase):
         )
 
     def test_function_run(self):
-        pattern, p_value = self.pattern_correlation.run(self.ref_dataset, self.tar_dataset)
+        pattern = self.pattern_correlation.run(self.tar_dataset, self.ref_dataset)
         self.assertEqual(pattern, 1.0)
-        self.assertEqual(p_value, 0.0)
 
 
 class TestMeanBias(unittest.TestCase):

@@ -161,6 +161,29 @@ class SpatialStdDevRatio(BinaryMetric):
 
 
 class PatternCorrelation(BinaryMetric):
+    '''Calculate the correlation coefficient between two datasets'''
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate the correlation coefficient between two dataset.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: ocw.dataset.Dataset object
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: ocw.dataset.Dataset object
+
+        :returns: The correlation coefficient between a reference and target dataset.
+        '''
+        # stats.pearsonr returns correlation_coefficient, 2-tailed p-value
+        # We only care about the correlation coefficient
+        # Docs at http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
+        return stats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
+
+
+class TemporalPatternCorrelation(BinaryMetric):
     '''Calculate the spatial correlation'''
 
     def run(self, ref_dataset, target_dataset):
