@@ -32,7 +32,7 @@ import ocw.plotter as plotter
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
 # This way we can easily adjust the time span of the retrievals
-YEARS = 3
+YEARS = 1
 # Two Local Model Files 
 FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
@@ -55,10 +55,9 @@ else:
 # Load local knmi model data
 knmi_dataset = local.load_file(FILE_1, "tasmax")
 knmi_dataset.name = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax"
-print(knmi_dataset)
+
 wrf311_dataset = local.load_file(FILE_2, "tasmax")
 wrf311_dataset.name = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax"
-print(wrf311_dataset)
 
 
 
@@ -81,7 +80,7 @@ dataset_id = int(cru_31['dataset_id'])
 parameter_id = int(cru_31['parameter_id'])
 
 #  The spatial_boundaries() function returns the spatial extent of the dataset
-min_lat, max_lat, min_lon, max_lon = knmi_dataset.spatial_boundaries()
+min_lat, max_lat, min_lon, max_lon = wrf311_dataset.spatial_boundaries()
 
 print("Calculating the Maximum Overlap in Time for the datasets")
 
@@ -99,7 +98,6 @@ end_time = datetime.datetime(start_time.year + YEARS, start_time.month, start_ti
 print("Final Overlap is: %s to %s" % (start_time.strftime("%Y-%m-%d"),
                                           end_time.strftime("%Y-%m-%d")))
 
-
 print("Fetching data from RCMED...")
 cru31_dataset = rcmed.parameter_dataset(dataset_id,
                                         parameter_id,
@@ -110,42 +108,44 @@ cru31_dataset = rcmed.parameter_dataset(dataset_id,
                                         start_time,
                                         end_time)
 
-import sys; sys.exit()
 """ Step 3: Resample Datasets so they are the same shape """
-print("CRU31_Dataset.values shape: (times, lats, lons) - %s" % (cru31_dataset.values.shape,))
-print("KNMI_Dataset.values shape: (times, lats, lons) - %s" % (knmi_dataset.values.shape,))
-print("Our two datasets have a mis-match in time. We will subset on time to %s years\n" % YEARS)
 
+print("Temporally Rebinning the Datasets to a Monthly Timestep")
+# To run monthly temporal Rebinning use a timedelta of 30 days.
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=30))
+wrf311_dataset = dsp.temporal_rebin(wrf311_dataset, datetime.timedelta(days=30))
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=30))
+
+# Running Temporal Rebin early helps negate the issue of datasets being on different 
+# days of the month (1st vs. 15th)
 # Create a Bounds object to use for subsetting
 new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
+
+# DEBUG
+print new_bounds
+print knmi_dataset
+print wrf311_dataset
+
 knmi_dataset = dsp.subset(new_bounds, knmi_dataset)
+wrf311_dataset = dsp.subset(new_bounds, wrf311_dataset)
 
-print("CRU31_Dataset.values shape: (times, lats, lons) - %s" % (cru31_dataset.values.shape,))
-print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.values.shape,))
 
-print("Temporally Rebinning the Datasets to a Single Timestep")
-# To run FULL temporal Rebinning use a timedelta > 366 days.  I used 999 in this example
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=999))
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=999))
 
-print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
-print("CRU31_Dataset.values shape: %s \n\n" % (cru31_dataset.values.shape,))
- 
+
 """ Spatially Regrid the Dataset Objects to a 1/2 degree grid """
-# Using the bounds we will create a new set of lats and lons on 1 degree step
+# Using the bounds we will create a new set of lats and lons on 1/2 degree step
 new_lons = np.arange(min_lon, max_lon, 0.5)
 new_lats = np.arange(min_lat, max_lat, 0.5)
  
 # Spatially regrid datasets using the new_lats, new_lons numpy arrays
-print("Spatially Regridding the KNMI_Dataset...")
 knmi_dataset = dsp.spatial_regrid(knmi_dataset, new_lats, new_lons)
-print("Spatially Regridding the CRU31_Dataset...")
+wrf311_dataset = dsp.spatial_regrid(wrf311_dataset, new_lats, new_lons)
 cru31_dataset = dsp.spatial_regrid(cru31_dataset, new_lats, new_lons)
-print("Final shape of the KNMI_Dataset:%s" % (knmi_dataset.values.shape, ))
-print("Final shape of the CRU31_Dataset:%s" % (cru31_dataset.values.shape, ))
- 
+
+# Generate an ensemble dataset from knmi and wrf models
+ensemble_dataset = dsp.ensemble([knmi_dataset, wrf311_dataset])
+
 """ Step 4:  Build a Metric to use for Evaluation - Bias for this example """
-# You can build your own metrics, but OCW also ships with some common metrics
 print("Setting up a Bias metric to use for evaluation")
 bias = metrics.Bias()
 
@@ -155,7 +155,7 @@ bias = metrics.Bias()
 # Evaluation can take in multiple targets and metrics, so we need to convert
 # our examples into Python lists.  Evaluation will iterate over the lists
 print("Making the Evaluation definition")
-bias_evaluation = evaluation.Evaluation(knmi_dataset, [cru31_dataset], [bias])
+bias_evaluation = evaluation.Evaluation(cru31_dataset, [knmi_dataset, wrf311_dataset, ensemble_dataset], [bias])
 print("Executing the Evaluation using the object's run() method")
 bias_evaluation.run()
  
@@ -176,9 +176,9 @@ print("Generating a contour map using ocw.plotter.draw_contour_map()")
 lats = new_lats
 lons = new_lons
 fname = OUTPUT_PLOT
-gridshape = (1, 1)  # Using a 1 x 1 since we have a single Bias for the full time range
-plot_title = "TASMAX Bias of KNMI Compared to CRU 3.1 (%s - %s)" % (start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
-sub_titles = ["Full Temporal Range"]
+gridshape = (3, 12)  # Using a 3 x 12 since we have a 1 year of monthly data for 3 models
+plot_title = "TASMAX Bias of CRU 3.1 vs. KNMI, WRF311 and ENSEMBLE (%s - %s)" % (start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
+sub_titles = ["Monthly Time Step"]
  
 plotter.draw_contour_map(results, lats, lons, fname,
                          gridshape=gridshape, ptitle=plot_title, 
