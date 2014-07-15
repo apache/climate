@@ -769,6 +769,10 @@ class TaylorDiagram(object):
     Plot model standard deviation and correlation to reference (data)
     sample in a single-quadrant polar plot, with r=stddev and
     theta=arccos(correlation).
+
+    This class was released as public domain by the original author
+    Yannick Copin. You can find the original Gist where it was
+    released at: https://gist.github.com/ycopin/3342888
     """
 
     def __init__(self, refstd, radmax=1.5, fig=None, rect=111, label='_'):
