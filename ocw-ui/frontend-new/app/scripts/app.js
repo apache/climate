@@ -16,17 +16,60 @@ angular
     'ngRoute',
     'ui.router'
   ])
-  .config(function ($routeProvider) {
-    $routeProvider
-      .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl'
-      })
-      .when('/about', {
-        templateUrl: 'views/about.html',
-        controller: 'AboutCtrl'
-      })
-      .otherwise({
-        redirectTo: '/'
-      });
-  });
+  .config(['$stateProvider', '$routeProvider', '$urlRouterProvider',
+    function ($stateProvider,   $routeProvider,   $urlRouterProvider) {
+      $urlRouterProvider
+        .when('/r?id', '/results/:id')
+        .otherwise('/');
+
+      $routeProvider
+        .when('/evaluation/:id', {
+          redirectTo: '/results/:id',
+        })
+        .when('/', {
+          redirectTo: '/evaluate',
+        });
+
+      $stateProvider
+        .state('main',{
+          url: '/evaluate',
+          templateUrl: 'partials/main.html',
+        })
+        .state('results', {
+          url: '/results',
+          abstract: true,
+          templateUrl: 'partials/results.html',
+          controller: 'ResultCtrl'
+        })
+        .state('results.list', {
+          // parent: 'results',
+          url: '',
+          templateUrl: 'partials/results.list.html',
+        })
+        .state('results.detail', {
+          // parent: 'results',
+          url: '/{resultId}',
+          views: {
+            '': {
+              templateUrl: 'partials/results.detail.html',
+              controller: 'ResultDetailCtrl'
+            },
+            'menu': {
+              templateProvider:
+                [ '$stateParams',
+                function ($stateParams){
+                  return '<hr><small class="muted">result ID: ' + $stateParams.resultId + '</small>';
+                }],
+            },
+          },
+        });
+    }])
+  .run(['$rootScope', '$state', '$stateParams',
+    function ($rootScope,   $state,   $stateParams) {
+      $rootScope.$state = $state;
+      $rootScope.$stateParams = $stateParams;
+      $rootScope.evalResults = '';
+      $rootScope.fillColors = ['#ff0000', '#00c90d', '#cd0074', '#f3fd00'];
+      $rootScope.surroundColors = ['#a60000', '#008209', '#8f004b', '#93a400'];
+      $rootScope.baseURL = 'http://localhost:8082';
+  }]);
