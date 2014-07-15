@@ -10,15 +10,15 @@
 angular.module('ocwUiApp')
   .controller('DatasetDisplayCtrl', ['$rootScope', '$scope', 'selectedDatasetInformation', 
     function($rootScope, $scope, selectedDatasetInformation) {
-	$scope.datasets = selectedDatasetInformation.getDatasets();
+	  $scope.datasets = selectedDatasetInformation.getDatasets();
 
-	$scope.removeDataset = function($index) {
-	  selectedDatasetInformation.removeDataset($index);
-	}
+	  $scope.removeDataset = function($index) {
+	    selectedDatasetInformation.removeDataset($index);
+	  };
 
-	$scope.setRegridBase = function(index) {
-      for (var i = 0; i < $scope.datasets.length; i++) {
-        $scope.datasets[i].regrid = ((i == index) ? $scope.datasets[i].regrid : false);
-      }
-	}
+	  $scope.setRegridBase = function(index) {
+        for (var i = 0; i < $scope.datasets.length; i++) {
+          $scope.datasets[i].regrid = ((i === index) ? $scope.datasets[i].regrid : false);
+        }
+	  };
 }]);
