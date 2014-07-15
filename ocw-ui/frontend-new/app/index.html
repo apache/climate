@@ -8,7 +8,7 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -20,24 +20,39 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
-    <!-- Add your site or application content here -->
     <div class="container">
-      <div class="header">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a ng-href="#">Home</a></li>
-          <li><a ng-href="#/about">About</a></li>
-          <li><a ng-href="#">Contact</a></li>
-        </ul>
-        <h3 class="text-muted">ocwUi</h3>
+      <div class="row-fluid">
+        <div class="span12">
+          <!-- Title -->
+          <div class="row-fluid">
+            <div class="span12">
+            <br><br>
+            <div id="header">
+              <img id="header-img" src=""/>
+              <h3 id="header-title">Project Name</h3>
+              <h5 id="OCW-powered">Powered by Apache Open Climate Workbench</h5>
+            </div>
+            </div>
+          </div>
+          <!-- Navigation bar -->
+          <div class="row-fluid">
+          <div class="navbar navbar-fixed-top">
+           <div class="navbar-inner">
+             <div class="container">
+               <a class="brand" href="#">OCW UI</a>
+               <ul class="nav">
+                 <li ng-class="{ active: $state.includes('main') }"><a href="#">Evaluate</a></li>
+                 <li ng-class="{ active: $state.includes('results') }"><a href="#/results">Results</a></li>
+               </ul>
+             </div>
+           </div>
+          </div>
+          </div>
+        </div>
       </div>
-
-      <div ng-view=""></div>
-
-      <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
-      </div>
+      <!-- Main Content -->
+      <div id="main-container" class="container" ui-view ng-animate="{enter:'fade-enter'}"></div>
     </div>
-
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>
