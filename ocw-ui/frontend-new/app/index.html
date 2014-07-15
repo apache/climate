@@ -20,49 +20,46 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
-    <div class="container">
-      <div class="row-fluid">
-        <div class="span12">
-          <!-- Title -->
-          <div class="row-fluid">
-            <div class="span12">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="navbar navbar-default" role="navigation">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand brand" href="#">OCW UI</a>
+            </div>
+            <div class="navbar-collapse">
+              <ul class="navbar-nav">
+                <li ng-class="{ active: $state.includes('main') }"><a href="#">Evaluate</a></li>
+                <li ng-class="{ active: $state.includes('results') }"><a href="#/results">Results</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
             <br><br>
             <div id="header">
               <img id="header-img" src=""/>
               <h3 id="header-title">Project Name</h3>
               <h5 id="OCW-powered">Powered by Apache Open Climate Workbench</h5>
             </div>
-            </div>
-          </div>
-          <!-- Navigation bar -->
-          <div class="row-fluid">
-          <div class="navbar navbar-fixed-top">
-           <div class="navbar-inner">
-             <div class="container">
-               <a class="brand" href="#">OCW UI</a>
-               <ul class="nav">
-                 <li ng-class="{ active: $state.includes('main') }"><a href="#">Evaluate</a></li>
-                 <li ng-class="{ active: $state.includes('results') }"><a href="#/results">Results</a></li>
-               </ul>
-             </div>
-           </div>
-          </div>
           </div>
         </div>
+        <!--div>-->
       </div>
       <!-- Main Content -->
-      <div id="main-container" class="container" ui-view ng-animate="{enter:'fade-enter'}"></div>
+      <!--<div id="main-container" class="container" ui-view ng-animate="{enter:'fade-enter'}"></div>-->
+      <div id="main-container" class="container-fluid" ui-view></div>
     </div>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
-     <script>
-       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-       ga('create', 'UA-XXXXX-X');
-       ga('send', 'pageview');
+      ga('create', 'UA-XXXXX-X');
+      ga('send', 'pageview');
     </script>
 
     <!-- build:js(.) scripts/oldieshim.js -->
@@ -82,14 +79,15 @@
     <script src="bower_components/angular-cookies/angular-cookies.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
-        <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <script src="scripts/controllers/datasetdisplay.js"></script>
-        <!-- endbuild -->
-</body>
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <script src="scripts/controllers/datasetdisplay.js"></script>
+    <!-- endbuild -->
+  </body>
 </html>
