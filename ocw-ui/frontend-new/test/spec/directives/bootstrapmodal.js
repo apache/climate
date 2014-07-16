@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Directive: boostrapModal', function () {
+describe('Directive: bootstrapModal', function () {
 
   // load the directive's module
   beforeEach(module('ocwUiApp'));
@@ -13,8 +13,8 @@ describe('Directive: boostrapModal', function () {
   }));
 
   it('should make hidden element visible', inject(function ($compile) {
-    element = angular.element('<boostrap-modal></boostrap-modal>');
+    element = angular.element('<bootstrap-modal></bootstrap-modal>');
     element = $compile(element)(scope);
-    expect(element.text()).toBe('this is the boostrapModal directive');
+    expect(element.text()).toBe('this is the bootstrapModal directive');
   }));
 });

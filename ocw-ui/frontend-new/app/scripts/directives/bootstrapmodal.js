@@ -2,9 +2,9 @@
 
 /**
  * @ngdoc directive
- * @name ocwUiApp.directive:boostrapModal
+ * @name ocwUiApp.directive:bootstrapModal
  * @description
- * # boostrapModal
+ * # bootstrapModal
  */
 angular.module('ocwUiApp')
 .directive('bootstrapModal', function($timeout) {
