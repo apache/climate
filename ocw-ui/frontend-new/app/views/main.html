@@ -41,14 +41,14 @@
 	            <div class="col-md-1 col-md-offset-10">
 	              <button class="btn btn-link no-color-link" ng-click="clearDatasets()" ng-disabled="shouldDisableClearButton()">
 	                <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Clear Datasets">
-	                  <i class="icon-trash icon-2x"></i>
+	                  <i class="fa fa-trash-o fa-2x"></i>
 	                </span>
 	              </button>
 	            </div>
 	            <div class="col-md-1">
 	              <button class="btn btn-link no-color-link" ng-click="open()">
 	                <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Add Dataset">
-	                  <i class="icon-plus icon-2x"></i>
+	                  <i class="fa fa-plus fa-2x"></i>
 	                </span>
 	              </button>
 	            </div>
@@ -88,7 +88,7 @@
                   <div class="col-md-1 col-md-offset-2">
                     <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Remove Dataset">  
                       <a class="no-color-link" href="#" ng-click="removeDataset($index)">
-                        <i class="icon-remove"></i>
+                        <i class="fa fa-remove"></i>
                       </a>
                     </span>
                   </div>
@@ -220,9 +220,9 @@
                 <div class="col-md-2 col-md-offset-6">
                   <button class="btn btn-link no-color-link pull-right" bootstrap-modal-open="evaluationSettings">
                     <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Settings">
-                      <span class="icon-stack">
-                        <i class="icon-check-empty icon-stack-base"></i>
-                        <i class="icon-cogs"></i>
+                      <span class="fa-stack fa-lg">
+                        <i class="fa fa-square-o fa-stack-2x"></i>
+                        <i class="fa fa-cogs fa-stack-1x"></i>
                       </span>
                     </span>
                   </button>
@@ -230,7 +230,7 @@
                 <div class="col-md-4">
                   <button ng-click="runEvaluation()" ng-disabled="shouldDisableEvaluateButton()" class="btn btn-block btn-primary">
                     <div ng-hide="runningEval">Evaluate</div>
-                    <div ng-show="runningEval"><i class="icon-spinner icon-spin"></i></div>
+                    <div ng-show="runningEval"><i class="fa fa-spinner fa-spin"></i></div>
                   </button>
                 </div>
               </div>
