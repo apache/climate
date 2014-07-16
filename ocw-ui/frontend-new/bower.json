@@ -10,7 +10,8 @@
     "angular-cookies": "1.2.16",
     "angular-animate": "1.2.16",
     "angular-route": "1.2.16",
-    "angular-ui-router": "angular-ui/ui-router#~0.2.10"
+    "angular-ui-router": "angular-ui/ui-router#~0.2.10",
+    "leaflet": "~0.7.3"
   },
   "devDependencies": {
     "angular-mocks": "1.2.16",
