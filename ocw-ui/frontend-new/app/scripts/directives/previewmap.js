@@ -10,7 +10,6 @@ angular.module('ocwUiApp')
 .directive('previewMap', function($rootScope) {
 	return {
 		restrict: 'A',
-		replace: true,
 		scope: {dataset: '=previewMap', index: '=index'},
 		template: '<div id="{{dataset.name}}" class="preview-map"></div>',
 		replace: true,
