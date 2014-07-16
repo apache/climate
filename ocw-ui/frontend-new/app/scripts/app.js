@@ -44,14 +44,14 @@ angular
         .state('results.list', {
           // parent: 'results',
           url: '',
-          templateUrl: 'views/results.list.html',
+          templateUrl: 'views/resultslist.html',
         })
         .state('results.detail', {
           // parent: 'results',
           url: '/{resultId}',
           views: {
             '': {
-              templateUrl: 'views/results.detail.html',
+              templateUrl: 'views/resultsdetail.html',
               controller: 'ResultDetailCtrl'
             },
             'menu': {
