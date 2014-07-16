@@ -12,7 +12,8 @@
     "angular-route": "1.2.16",
     "angular-ui-router": "angular-ui/ui-router#~0.2.10",
     "leaflet": "~0.7.3",
-    "chap-links-timeline": "~2.6.1"
+    "chap-links-timeline": "~2.6.1",
+    "components-font-awesome": "~4.1.0"
   },
   "devDependencies": {
     "angular-mocks": "1.2.16",
