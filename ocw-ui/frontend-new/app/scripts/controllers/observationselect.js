@@ -2,9 +2,9 @@
 
 /**
  * @ngdoc function
- * @name ocwUiApp.controller:ObservationselectCtrl
+ * @name ocwUiApp.controller:ObservationSelectCtrl
  * @description
- * # ObservationselectCtrl
+ * # ObservationSelectCtrl
  * Controller of the ocwUiApp
  */
 angular.module('ocwUiApp')
