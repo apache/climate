@@ -33,25 +33,25 @@ angular
       $stateProvider
         .state('main',{
           url: '/evaluate',
-          templateUrl: 'partials/main.html',
+          templateUrl: 'views/main.html',
         })
         .state('results', {
           url: '/results',
           abstract: true,
-          templateUrl: 'partials/results.html',
+          templateUrl: 'views/results.html',
           controller: 'ResultCtrl'
         })
         .state('results.list', {
           // parent: 'results',
           url: '',
-          templateUrl: 'partials/results.list.html',
+          templateUrl: 'views/results.list.html',
         })
         .state('results.detail', {
           // parent: 'results',
           url: '/{resultId}',
           views: {
             '': {
-              templateUrl: 'partials/results.detail.html',
+              templateUrl: 'views/results.detail.html',
               controller: 'ResultDetailCtrl'
             },
             'menu': {
