@@ -36,36 +36,6 @@ angular.module('ocwUiApp')
     $scope.latSliderVal = 0;
     $scope.lonSliderVal = 0;
 
-    $('#latSlider').slider({
-      value: 0,
-      step: 0.25,
-      min: 0.25,
-      max: 180,
-      slide: function(event, ui) {
-        $scope.updateLatSliderDisplayValue(ui.value);
-      },
-    });
-
-    $('#lonSlider').slider({
-      value: 0,
-      step: 0.25,
-      min: 0.25,
-      max: 360,
-      slide: function(event, ui) {
-        $scope.updateLonSliderDisplayValue(ui.value);
-      },
-    });
-
-    $scope.updateLatSliderDisplayValue = function(value) {
-      $scope.latSliderVal = value;
-      $scope.$apply();
-    };
-
-    $scope.updateLonSliderDisplayValue = function(value) {
-      $scope.lonSliderVal = value;
-      $scope.$apply();
-    };
-
     // Settings for jQuery datepicker directives!
     $scope.datepickerSettings = {
       changeMonth: true,
@@ -282,5 +252,5 @@ angular.module('ocwUiApp')
           } else {
               return Math.ceil(floatVal);
           }
-      }
+      };
   }]);
