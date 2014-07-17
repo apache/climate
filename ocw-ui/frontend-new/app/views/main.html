@@ -1,34 +1,38 @@
 <!-- Modal for evaluation settings -->
-  <bootstrap-modal modal-id="evaluationSettings">
-  <div class="modal-header">
-    <button class="close">&times;</button>
-    <h3>Settings</h3>
-  </div>
-  <div class="modal-body" ng-controller="SettingsCtrl">
-    <h4>Select the metrics you would like to run.</h4>
-    <div ng-repeat="metric in settings.metrics">
-      <label><input type="checkbox" ng-model="metric.select"> {{metric.name}}</label>
+<div class="modal fade" id="evaluationSettingsModal" role="dialog" aria-labelledby="datasetSelectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" data-dismiss="modal">&times;</button>
+        <h3>Settings</h3>
+      </div>
+      <div class="modal-body" ng-controller="SettingsCtrl">
+        <h4>Select the metrics you would like to run.</h4>
+        <div ng-repeat="metric in settings.metrics">
+          <label><input type="checkbox" ng-model="metric.select"> {{metric.name}}</label>
+        </div>
+        <hr />
+        <h4>Select how you would like to temporally re-grid the datasets.</h4>
+        <select ng-model="settings.temporal.selected" ng-options="opt for opt in settings.temporal.options"></select>
+        <hr />
+        <h4>Select which dataset to use as the reference.</h4>
+        <select ng-model="settings.spatialSelect" ng-options="dataset as dataset.name for dataset in datasets"></select>
+        <hr />
+        <!-- Temporarily hidden for work on CLIMATE-365.-->
+        <div ng-hide=true>
+        <h4>Select a file which will define the bounds of subregions.</h4>
+        <form class="form-inline" autocomplete="off">
+          <input id="subregionFileInput" predictive-file-browser-input ng-model="settings.subregionFile" type="text" class="input-xlarge" autocomplete="off" />
+        </form>
+        </div>
+        <!--End hidden section for CLIMATE-365-->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning cancel" data-dismiss="modal">Close</button>
+      </div>
     </div>
-    <hr />
-    <h4>Select how you would like to temporally re-grid the datasets.</h4>
-    <select ng-model="settings.temporal.selected" ng-options="opt for opt in settings.temporal.options"></select>
-    <hr />
-    <h4>Select which dataset to use as the reference.</h4>
-    <select ng-model="settings.spatialSelect" ng-options="dataset as dataset.name for dataset in datasets"></select>
-    <hr />
-    <!-- Temporarily hidden for work on CLIMATE-365.-->
-    <div ng-hide=true>
-    <h4>Select a file which will define the bounds of subregions.</h4>
-    <form class="form-inline" autocomplete="off">
-      <input id="subregionFileInput" predictive-file-browser-input ng-model="settings.subregionFile" type="text" class="input-xlarge" autocomplete="off" />
-    </form>
-    </div>
-    <!--End hidden section for CLIMATE-365-->
   </div>
-  <div class="modal-footer">
-    <a href="#" class="btn btn-warning close">Close</a>
-  </div>
-  </bootstrap-modal>
+</div>
 <!-- END - Modal for evaluation settings -->
 
   <div class="row">
@@ -222,7 +226,8 @@
               </div>
               <div class="row">
                 <div class="col-md-2 col-md-offset-6">
-                  <button class="btn btn-link no-color-link pull-right" bootstrap-modal-open="evaluationSettings">
+                  <!--<button class="btn btn-link no-color-link pull-right" bootstrap-modal-open="evaluationSettings">-->
+                  <button class="btn btn-link no-color-link pull-right" data-toggle="modal" data-target="#evaluationSettingsModal">
                     <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Settings">
                       <span class="fa-stack fa-lg">
                         <i class="fa fa-square-o fa-stack-2x"></i>
