@@ -18,41 +18,63 @@
 -->
 
 <div ng-controller="ObservationSelectCtrl">
-  <form class="form-inline" autocomplete="off">
-    <input id="observationFileInput" predictive-file-browser-input ng-model="filePathInput" type="text" class="input-xlarge" autocomplete="off" />
-    <button class="btn" ng-click="uploadLocalFile()" ng-disabled="shouldDisableLoadButton()">
-      <div ng-hide="loadingFile">Parse File</div>
-      <div ng-show="loadingFile"><i class="icon-spinner icon-spin"></i></div>
-    </button>
-  </form>
-
   <div class="row">
-    <div class="span2 text-center">
-      Evaluation Variable
-    </div>
-    <div class="span3">
-      <select ng-model="paramSelect" ng-options="param for param in params"></select>
-    </div>
-    <div class="span2 text-center">
-      Latitude Variable
-    </div>
-    <div class="span3">
-      <select ng-model="latsSelect" ng-options="lat for lat in lats"></select>
-    </div>
-    <div class="span2 text-center">
-      Longitude Variable
-    </div>
-    <div class="span3">
-      <select ng-model="lonsSelect" ng-options="lon for lon in lons"></select>
-    </div>
-    <div class="span2 text-center">
-      Date/Time Variable
-    </div>
-    <div class="span3">
-      <select ng-model="timeSelect" ng-options="time for time in times"></select>
+    <div class="col-md-12">
+      <div class="row">
+        <!--<form class="form-inline" autocomplete="off">-->
+        <form class="form" autocomplete="off">
+          <div class="form-group">
+            <div class="col-md-9">
+              <input id="observationFileInput" predictive-file-browser-input ng-model="filePathInput" type="text" class="form-control" autocomplete="off" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn" ng-click="uploadLocalFile()" ng-disabled="shouldDisableLoadButton()">
+                <div ng-hide="loadingFile">Parse File</div>
+                <div ng-show="loadingFile"><i class="icon-spinner icon-spin"></i></div>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="col-md-6 text-center">
+          Evaluation Variable
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+          <select ng-model="paramSelect" ng-options="param for param in params"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 text-center">
+          Latitude Variable
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+          <select ng-model="latsSelect" ng-options="lat for lat in lats"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 text-center">
+          Longitude Variable
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+          <select ng-model="lonsSelect" ng-options="lon for lon in lons"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 text-center">
+          Date/Time Variable
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+          <select ng-model="timeSelect" ng-options="time for time in times"></select>
+        </div>
+      </div>
     </div>
   </div>
-
-  <button class="btn btn-primary pull-left" ng-click="addDataSet()">Add Dataset</button>
-  <div class="pull-left small-alert" ng-show="fileAdded">Successfully added dataset...</div>
+  <div class="row">
+    <div class="col-md-4 col-md-offset-1">
+      <button class="btn btn-primary btn-block" ng-click="addDataSet()">Add Dataset</button>
+    </div>
+    <div class="pull-left small-alert" ng-show="fileAdded">Successfully added dataset...</div>
+  </div>
 </div>
