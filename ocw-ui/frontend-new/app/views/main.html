@@ -46,7 +46,7 @@
 	              </button>
 	            </div>
 	            <div class="col-md-1">
-	              <button class="btn btn-link no-color-link" ng-click="open()">
+	              <button class="btn btn-link no-color-link" data-toggle="modal" data-target="#datasetSelect">
 	                <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Add Dataset">
 	                  <i class="fa fa-plus fa-2x"></i>
 	                </span>
@@ -54,20 +54,24 @@
 	            </div>
             </div>
             <!-- Modal for dataset selection -->
-            <div modal="datasetSelect" close="close()" options="opts">
-              <div class="modal-header">
-                <h3>Dataset Select</h3>
-              </div>
-              <div class="modal-body">
-                <tabset>
-                  <tab ng-repeat="tab in templates" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">
-                    <div ng-include src="tab.url"></div>
-                  </tab>
-                  <li class="pull-right">Queued Datasets: {{datasetCount.length}}</li>
-                </tabset>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-warning cancel" ng-click="close()">Close</button>
+            <div class="modal fade" id="datasetSelect" role="dialog" aria-labelledby="datasetSelectModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h3>Dataset Select</h3>
+                  </div>
+                  <div class="modal-body">
+                    <tabset>
+                      <tab ng-repeat="tab in templates" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">
+                        <div ng-include src="tab.url"></div>
+                      </tab>
+                      <li class="pull-right">Queued Datasets: {{datasetCount.length}}</li>
+                    </tabset>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-warning cancel" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
               </div>
             </div>
             <!-- END - Modal for dataset selection -->
