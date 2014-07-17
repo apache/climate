@@ -14,7 +14,8 @@ angular
     'ngCookies',
     'ngResource',
     'ngRoute',
-    'ui.router'
+    'ui.router',
+    'ui.bootstrap'
   ])
   .config(['$stateProvider', '$routeProvider', '$urlRouterProvider',
     function ($stateProvider,   $routeProvider,   $urlRouterProvider) {
