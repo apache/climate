@@ -25,7 +25,7 @@
         <form class="form" autocomplete="off">
           <div class="form-group">
             <div class="col-md-9">
-              <input id="observationFileInput" predictive-file-browser-input ng-model="filePathInput" type="text" class="form-control" autocomplete="off" />
+              <input id="observationFileInput" predictive-file-browser-input ng-model="filePathInput" type="text" class="form-control" autocomplete="off" placeholder="Navigate to a .nc file. Start by typing '/'" />
             </div>
             <div class="col-md-2">
               <button class="btn" ng-click="uploadLocalFile()" ng-disabled="shouldDisableLoadButton()">
