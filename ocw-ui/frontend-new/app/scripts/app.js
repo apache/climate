@@ -21,7 +21,7 @@ angular
     function ($stateProvider,   $routeProvider,   $urlRouterProvider) {
       $urlRouterProvider
         .when('/r?id', '/results/:id')
-        .otherwise('/');
+        .otherwise('/evaluate');
 
       $routeProvider
         .when('/evaluation/:id', {
