@@ -13,10 +13,10 @@
         </div>
         <hr />
         <h4>Select how you would like to temporally re-grid the datasets.</h4>
-        <select ng-model="settings.temporal.selected" ng-options="opt for opt in settings.temporal.options"></select>
+        <select class="form-control" ng-model="settings.temporal.selected" ng-options="opt for opt in settings.temporal.options"></select>
         <hr />
         <h4>Select which dataset to use as the reference.</h4>
-        <select ng-model="settings.spatialSelect" ng-options="dataset as dataset.name for dataset in datasets"></select>
+        <select class="form-control" ng-model="settings.spatialSelect" ng-options="dataset as dataset.name for dataset in datasets"></select>
         <hr />
         <!-- Temporarily hidden for work on CLIMATE-365.-->
         <div ng-hide=true>
