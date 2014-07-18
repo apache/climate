@@ -111,7 +111,7 @@ angular.module('ocwUiApp')
 
       // Determine the temporal resolution to use when doing a temporal rebin. The
       // value is used to determine the timedelta in days to use.
-      temporal_res = settings.temporal.selected;
+      var temporal_res = settings.temporal.selected;
 
       if (temporal_res == 'daily') {
         data['temporal_resolution'] = 1;
@@ -128,7 +128,7 @@ angular.module('ocwUiApp')
 
       // Load the Metrics for the evaluation
       data['metrics'] = []
-      metrics = settings.metrics
+      var metrics = settings.metrics
       for (var i = 0; i < metrics.length; i++) {
         var metric = metrics[i];
 
