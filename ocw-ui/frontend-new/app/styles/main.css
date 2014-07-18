@@ -106,3 +106,10 @@ div.ocw-bar { height: 5px; }
 }
 
 #results-sidebar-header { font-size: 14px; }
+
+/* Helpers for vertical offsets */
+.top3 { margin-top: 3%; }
+.top7 { margin-top: 7%; }
+.top14 { margin-top:14%; }
+.top21 { margin-top:21%; }
+.top42 { margin-top:42%; }
