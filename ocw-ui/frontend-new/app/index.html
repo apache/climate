@@ -73,6 +73,12 @@
     <![endif]-->
     <!-- endbuild -->
 
+    <!-- Google visualization library needs to be initialized for the timeline -->
+    <!-- Note that the terms of use forbid having a local copy of the code, so we're -->
+    <!-- stuck downloading it this way unfortunately. -->
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("visualization", "1");</script>
+
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
