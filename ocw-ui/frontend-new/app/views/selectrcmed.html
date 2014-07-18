@@ -20,17 +20,17 @@
 <div ng-controller="RcmedSelectionCtrl">
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
-      <div class="row">Select the RCMED dataset that you would like use.</div>
-      <div class="row">
+      <div class="row top3">Select the RCMED dataset that you would like use.</div>
+      <div class="row top3">
         <select ng-change="dataSelectUpdated()" class="form-control" ng-model="datasetSelection" ng-options="obs as obs.longname for obs in availableObs"></select>
       </div>
-      <div class="row">Select the dataset parameter that you would like to test.</div>
-      <div class="row">
+      <div class="row top3">Select the dataset parameter that you would like to test.</div>
+      <div class="row top3">
         <select class="form-control" ng-model="parameterSelection" ng-options="param as param.shortname for param in retrievedObsParams"></select>
       </div>
 
-      <div class="row">
-        <div class="col-md-4 col-md-offset-1">
+      <div class="row top3">
+        <div class="col-md-3">
           <button class="btn btn-primary btn-block-left" ng-click="addObservation()">Add Observation</button>
         </div>
         <div class="pull-left small-alert" ng-show="fileAdded">Successfully added dataset...</div>
