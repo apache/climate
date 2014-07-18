@@ -15,7 +15,8 @@ angular
     'ngResource',
     'ngRoute',
     'ui.router',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'ui.date',
   ])
   .config(['$stateProvider', '$routeProvider', '$urlRouterProvider',
     function ($stateProvider,   $routeProvider,   $urlRouterProvider) {

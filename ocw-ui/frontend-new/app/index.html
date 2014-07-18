@@ -16,6 +16,7 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
     <!-- endbuild -->
   </head>
   <body ng-app="ocwUiApp">
@@ -87,6 +88,8 @@
     <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
     <script src="bower_components/chap-links-timeline/timeline-min.js"></script>
     <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="bower_components/angular-ui-date/ui-date.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -116,5 +119,8 @@
     <script src="scripts/services/regionselectparams.js"></script>
     <script src="scripts/services/selecteddatasetinformation.js"></script>
     <!-- endbuild -->
+
+    <!-- grunt wiredep wasn't properly linking this. Had to add manually -->
+    <script src="bower_components/angular-ui-date/src/date.js"></script>
   </body>
 </html>
