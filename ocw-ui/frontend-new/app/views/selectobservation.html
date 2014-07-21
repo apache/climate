@@ -1,0 +1,80 @@
+<!--
+ ~ Licensed to the Apache Software Foundation (ASF) under one
+ ~ or more contributor license agreements.  See the NOTICE file
+ ~ distributed with this work for additional information
+ ~ regarding copyright ownership.  The ASF licenses this file
+ ~ to you under the Apache License, Version 2.0 (the
+ ~ "License"); you may not use this file except in compliance
+ ~ with the License.  You may obtain a copy of the License at
+ ~
+ ~    http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing,
+ ~ software distributed under the License is distributed on an
+ ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~ KIND, either express or implied.  See the License for the
+ ~ specific language governing permissions and limitations
+ ~ under the License.
+-->
+
+<div ng-controller="ObservationSelectCtrl">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row">
+        <!--<form class="form-inline" autocomplete="off">-->
+        <form class="form" autocomplete="off">
+          <div class="form-group">
+            <div class="col-md-9">
+              <input id="observationFileInput" predictive-file-browser-input ng-model="filePathInput" type="text" class="form-control" autocomplete="off" placeholder="Navigate to a .nc file. Start by typing '/'" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn" ng-click="uploadLocalFile()" ng-disabled="shouldDisableLoadButton()">
+                <div ng-hide="loadingFile">Parse File</div>
+                <div ng-show="loadingFile"><i class="icon-spinner icon-spin"></i></div>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <hr />
+      <div class="row top3">
+        <div class="col-md-5 text-center">
+          Evaluation Variable
+        </div>
+        <div class="col-md-6">
+          <select class="form-control" ng-model="paramSelect" ng-options="param for param in params"></select>
+        </div>
+      </div>
+      <div class="row top3">
+        <div class="col-md-5 text-center">
+          Latitude Variable
+        </div>
+        <div class="col-md-6">
+          <select class="form-control" ng-model="latsSelect" ng-options="lat for lat in lats"></select>
+        </div>
+      </div>
+      <div class="row top3">
+        <div class="col-md-5 text-center">
+          Longitude Variable
+        </div>
+        <div class="col-md-6">
+          <select class="form-control" ng-model="lonsSelect" ng-options="lon for lon in lons"></select>
+        </div>
+      </div>
+      <div class="row top3">
+        <div class="col-md-5 text-center">
+          Date/Time Variable
+        </div>
+        <div class="col-md-6">
+          <select class="form-control" ng-model="timeSelect" ng-options="time for time in times"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row top3">
+    <div class="col-md-3 col-md-offset-1">
+      <button class="btn btn-primary btn-block" ng-click="addDataSet()">Add Dataset</button>
+    </div>
+    <div class="pull-left small-alert" ng-show="fileAdded">Successfully added dataset...</div>
+  </div>
+</div>
