@@ -19,7 +19,7 @@
 
 'use strict';
 
-describe('Controller: ObservationselectCtrl', function () {
+describe('Controller: ObservationSelectCtrl', function () {
 
   // load the controller's module
   beforeEach(module('ocwUiApp'));
@@ -30,12 +30,102 @@ describe('Controller: ObservationselectCtrl', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
-    ObservationselectCtrl = $controller('ObservationselectCtrl', {
+    ObservationselectCtrl = $controller('ObservationSelectCtrl', {
       $scope: scope
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
+  it('should grab the default set of selected datasets from the service', function() {
+    expect(typeof scope.datasetCount).toBe('object');
+    expect(Object.keys(scope.datasetCount).length).toBe(0);
+  });
+
+  it('should initialize option arrays and default to the first element', function() {
+    expect(scope.params.length).toBe(1);
+    expect(scope.lats.length).toBe(1);
+    expect(scope.lons.length).toBe(1);
+    expect(scope.times.length).toBe(1);
+
+    expect(scope.params[0]).toEqual("Please select a file above");
+    expect(scope.lats[0]).toEqual("Please select a file above");
+    expect(scope.lons[0]).toEqual("Please select a file above");
+    expect(scope.times[0]).toEqual("Please select a file above");
+  });
+
+  /*
+  it('should initialize scope attributes properly', function() {
+    inject(function($httpBackend, $rootScope, $controller) {
+      $rootScope.baseURL = "http://localhost:8082"
+      $httpBackend.expectJSONP($rootScope.baseURL + '/getPathLeader/?callback=JSON_CALLBACK').
+        respond(200, {'leader': '/usr/local/rcmes'});
+
+      var scope = $rootScope.$new();
+      var ctrl = $controller("ObservationSelectCtrl", {$scope: scope});
+      $httpBackend.flush();
+
+      expect(scope.pathLeader).toEqual('/usr/local/rcmes');
+      expect(scope.loadingFile).toBe(false);
+      expect(scope.fileAdded).toBe(false);
+      expect(typeof scope.latLonVals).toEqual('object');
+      expect(scope.latLonVals.length).toBe(0);
+      expect(typeof scope.timeVals).toEqual('object');
+      expect(scope.timeVals.length).toEqual(0);
+      expect(typeof scope.localSelectForm).toEqual('object');
+      expect(Object.keys(scope.localSelectForm).length).toEqual(0);
+    });
+  });
+  */
+
+  /*
+  it('should initialize the uploadLocalFile function', function() {
+    inject(function($httpBackend, $rootScope, $controller) {
+      $rootScope.baseURL = "http://localhost:8082"
+      $httpBackend.expectJSONP($rootScope.baseURL + '/dir/path_leader/?callback=JSON_CALLBACK').
+        respond(200, {'leader': '/usr/local/rcmes'});
+
+      var scope = $rootScope.$new();
+      var ctrl = $controller("ObservationSelectCtrl", {$scope: scope});
+      $httpBackend.flush();
+
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/vars/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(200, {"variables": ["lat", "lon", "prec", "time" ]});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/latlon/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(200, {'latMax': '75.25', 'success': 1, 'latname': 'lat', 'lonMax': '-29.75', 'lonMin': '-159.75', 'lonname': 'lon', 'latMin': '15.25'});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/time/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(200, {"start_time": "1980-01-01 00:00:00", "timename": "time", "success": 1, "end_time": "2004-12-01 00:00:00"});
+
+      scope.uploadLocalFile();
+      $httpBackend.flush();
+
+      expect(scope.latsSelect).toEqual("lat");
+      expect(scope.lonsSelect).toEqual("lon");
+      expect(scope.timeSelect).toEqual("time");
+      expect(scope.paramSelect).toEqual("prec");
+
+      // Simulate failure on one of the backend calls. Should
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/vars/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(200, {});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/latlon/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(404, {});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/list/time/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+        respond(200, {});
+
+      scope.uploadLocalFile();
+      $httpBackend.flush();
+
+      expect(scope.paramSelect).toEqual("Unable to load variable(s)");
+      expect(scope.params.length).toEqual(1);
+      expect(scope.latsSelect).toEqual("Unable to load variable(s)");
+      expect(scope.lats.length).toEqual(1);
+      expect(scope.lonsSelect).toEqual("Unable to load variable(s)");
+      expect(scope.lons.length).toEqual(1);
+      expect(scope.timeSelect).toEqual("Unable to load variable(s)");
+      expect(scope.times.length).toEqual(1);
+    });
+  });
+  */
+
+  it('should initialize the addDatasets function', function() {
+    expect(typeof(scope.addDataSet)).toBe("function");
   });
 });
