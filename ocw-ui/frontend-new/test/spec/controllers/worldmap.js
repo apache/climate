@@ -19,7 +19,7 @@
 
 'use strict';
 
-describe('Controller: WorldmapCtrl', function () {
+describe('Controller: WorldMapCtrl', function () {
 
   // load the controller's module
   beforeEach(module('ocwUiApp'));
@@ -30,12 +30,28 @@ describe('Controller: WorldmapCtrl', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
-    WorldmapCtrl = $controller('WorldmapCtrl', {
+    WorldmapCtrl = $controller('WorldMapCtrl', {
       $scope: scope
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
+  it('should initialize the updateMap function', function() {
+    inject(function($rootScope, $controller) {
+      var scope = $rootScope.$new();
+      var ctrl = $controller("WorldMapCtrl", {$scope: scope});
+
+      // Set the important attributes for a fake dataset
+      scope.datasets.push({shouldDisplay: true, latlonVals: {latMin: 0, latMax: 0, lonMin: 0, lonMax: 0}});
+      // Don't try to add the user defined region since we don't have one
+      scope.regionParams.areValid = false;
+      // We need to fake the map object. The only thing we care about is faking the "addLayer" function
+      // and the "fitBounds" functions which our map controllers makes use of.
+      $rootScope.map = {addLayer: function(){}, fitBounds: function(){}};
+      $rootScope.fillColors = ['#ff0000'];
+
+      expect("rectangleGroup" in $rootScope).toBe(false);
+      scope.updateMap();
+      expect("rectangleGroup" in $rootScope).toBe(true);
+    });
   });
 });
