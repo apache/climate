@@ -30,8 +30,15 @@ describe('Service: regionSelectParams', function () {
     regionSelectParams = _regionSelectParams_;
   }));
 
-  it('should do something', function () {
-    expect(!!regionSelectParams).toBe(true);
+  it('should initialize the regionSelectParams service', function() {
+    inject(function(regionSelectParams) {
+      expect(regionSelectParams).not.toEqual(null);
+    });
   });
 
+  it('should provide the getParameters function', function() {
+    inject(function(regionSelectParams) {
+      expect(regionSelectParams.getParameters()).not.toEqual(null);
+    });
+  });
 });
