@@ -35,6 +35,13 @@
     <programming-language>Python</programming-language>
     <category rdf:resource="http://projects.apache.org/category/content" />
     <release>
+        <Version>
+            <name>Apache Open Climate Workbench 0.4</name>
+            <created>2014-08-06</created>
+            <revision>0.4</revision>
+        </Version>
+    </release>
+    <release>
       <Version>
         <name>Apache Open Climate Workbench 0.3-incubating</name>
         <created>2013-10-12</created>
