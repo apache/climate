@@ -11,3 +11,13 @@ There are a number of examples in the *examples* directory to help users get sta
 ## Development
 
 OCW always welcomes pull request. Please check the [Developer Area](https://cwiki.apache.org/confluence/display/CLIMATE/Developer+Area) on the wiki for additional information on how to contribute. The [project's JIRA](https://issues.apache.org/jira/browse/CLIMATE) is a great place to start looking for issues to solve. Make sure to stop by the mailing lists and introduce yourself as well!
+
+## Documentation
+
+If you would like to build the documentation for the project run the following command from the root of the repository:
+
+```
+cd docs && make html
+```
+
+You will need to have installed the project dependencies first. Checkout the [Getting Started](https://cwiki.apache.org/confluence/display/CLIMATE/Getting+Started) and [Easy OCW](https://cwiki.apache.org/confluence/display/CLIMATE/Easy-OCW+-+A+Guide+to+Simplifying+OCW+Installation) pages for help getting the necessary dependencies installed.
