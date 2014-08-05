@@ -30,9 +30,47 @@ describe('Filter: ISODateToMiddleEndian', function () {
     ISODateToMiddleEndian = $filter('ISODateToMiddleEndian');
   }));
 
-  it('should return the input prefixed with "ISODateToMiddleEndian filter:"', function () {
-    var text = 'angularjs';
-    expect(ISODateToMiddleEndian(text)).toBe('ISODateToMiddleEndian filter: ' + text);
-  });
+	describe('ISODateToMiddleEndian', function() {
+		it('should replace the ISO Date/Time stamp', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('2012-01-02T00:00:00')).toEqual('01/02/2012');
+			});
+		});
 
+		it('should replace the modified ISO Date/Time stamp', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('2012-01-02 00:00:00')).toEqual('01/02/2012');
+			});
+		});
+
+		it('should replace the ISO Date stamp', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('2012-01-02')).toEqual('01/02/2012');
+			});
+		});
+
+		it('should replace leading and trailing whitespace', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('      2012-01-02T00:00:00    ')).toEqual('01/02/2012');
+			});
+		});
+
+		it('should do nothing when the date format has the incorrect number of hyphens', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('2012-234T234')).toEqual('2012-234T234')
+			});
+		});
+
+		it('should do nothing when the date format has no hyphens', function() {
+			inject(function($filter) {
+				var filter = $filter('ISODateToMiddleEndian');
+				expect(filter('2012234T234')).toEqual('2012234T234')
+			});
+		});
+	});
 });

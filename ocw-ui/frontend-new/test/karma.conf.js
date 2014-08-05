@@ -24,6 +24,17 @@ module.exports = function(config) {
       'bower_components/angular-cookies/angular-cookies.js',
       'bower_components/angular-resource/angular-resource.js',
       'bower_components/angular-route/angular-route.js',
+      'bower_components/angular-animate/angular-animate.js',
+      'bower_components/angular-bootstrap/ui-bootstrap.js',
+      // For some reason this causes the tests to completely fail to run
+      // if it is uncommented.
+      //'bower_components/angular-scenario/angular-scenario.js',
+      'bower_components/angular-ui-date/src/date.js',
+      'bower_components/angular-ui-router/release/angular-ui-router.js',
+      'bower_components/chap-links-timeline/timeline.js',
+      'bower_components/jquery/dist/jquery.js',
+      'bower_components/jquery-ui/jquery-ui.js',
+      'bower_components/leaflet/dist/leaflet.js',
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
       'test/spec/**/*.js'
@@ -44,12 +55,14 @@ module.exports = function(config) {
     // - PhantomJS
     // - IE (only Windows)
     browsers: [
-      'PhantomJS'
+      'PhantomJS',
+      //'Chrome'
     ],
 
     // Which plugins to enable
     plugins: [
       'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
       'karma-jasmine'
     ],
 

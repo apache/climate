@@ -30,8 +30,15 @@ describe('Service: evaluationSettings', function () {
     evaluationSettings = _evaluationSettings_;
   }));
 
-  it('should do something', function () {
-    expect(!!evaluationSettings).toBe(true);
+  it('should initialize the evaluationSettings service', function() {
+    inject(function(evaluationSettings) {
+      expect(evaluationSettings).not.toEqual(null);
+    });
   });
 
+  it('should provide a getSettings function', function() {
+    inject(function(evaluationSettings) {
+      expect(evaluationSettings.getSettings()).not.toEqual(null);
+    })
+  })
 });

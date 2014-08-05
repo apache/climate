@@ -31,9 +31,20 @@ describe('Directive: onBlur', function () {
     scope = $rootScope.$new();
   }));
 
-  it('should make hidden element visible', inject(function ($compile) {
-    element = angular.element('<on-blur></on-blur>');
-    element = $compile(element)(scope);
-    expect(element.text()).toBe('this is the onBlur directive');
-  }));
+  it('should call the supplied function on the blur event', function() {
+    inject(function($compile) {
+      // Set a scope variable to make sure that on-blur calls 
+      // the function that we pass to it.
+      scope.bogusFunction = function() {
+        scope.test = "hi"
+      }
+
+      var element = angular.element('<input on-blur="bogusFunction();" />')
+      element = $compile(element)(scope)
+
+      expect(scope.test).toNotBe('hi');
+      element.triggerHandler('blur');
+      expect(scope.test).toBe('hi');
+    });
+  });
 });

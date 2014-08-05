@@ -19,7 +19,7 @@
 
 'use strict';
 
-describe('Controller: DatasetselectCtrl', function () {
+describe('Controller: DatasetSelectCtrl', function () {
 
   // load the controller's module
   beforeEach(module('ocwUiApp'));
@@ -30,12 +30,25 @@ describe('Controller: DatasetselectCtrl', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
-    DatasetselectCtrl = $controller('DatasetselectCtrl', {
+    DatasetselectCtrl = $controller('DatasetSelectCtrl', {
       $scope: scope
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
+  it('should initialize the disable clear button function', function() {
+    inject(function(selectedDatasetInformation) {
+      expect(scope.shouldDisableClearButton()).toBe(true);
+      selectedDatasetInformation.addDataset({});
+      expect(scope.shouldDisableClearButton()).toBe(false);
+    });
+  });
+
+  it('should initialize the clear datasets function', function() {
+    inject(function(selectedDatasetInformation) {
+      selectedDatasetInformation.addDataset({});
+      expect(selectedDatasetInformation.getDatasetCount()).toBe(1);
+      scope.clearDatasets();
+      expect(selectedDatasetInformation.getDatasetCount()).toBe(0);
+    });
   });
 });

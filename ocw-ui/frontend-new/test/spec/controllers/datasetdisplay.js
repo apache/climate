@@ -19,23 +19,41 @@
 
 'use strict';
 
-describe('Controller: DatasetdisplayctrlCtrl', function () {
+describe('Controller: DatasetDisplayCtrl', function () {
 
   // load the controller's module
   beforeEach(module('ocwUiApp'));
 
   var DatasetdisplayctrlCtrl,
-    scope;
+      scope;
 
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
-    DatasetdisplayctrlCtrl = $controller('DatasetdisplayctrlCtrl', {
+    DatasetdisplayctrlCtrl = $controller('DatasetDisplayCtrl', {
       $scope: scope
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
+  it('should initialize the removeDataset function', function() {
+    scope.datasets.push(1);
+    scope.datasets.push(2);
+
+    expect(scope.datasets[0]).toBe(1);
+
+    scope.removeDataset(0);
+
+    expect(scope.datasets[0]).toBe(2);
+  });
+
+  it('should initialize the removeDataset function', function() {
+    scope.datasets.push(1);
+    scope.datasets.push(2);
+
+    expect(scope.datasets[0]).toBe(1);
+
+    scope.removeDataset(0);
+
+    expect(scope.datasets[0]).toBe(2);
   });
 });
