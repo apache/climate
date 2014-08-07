@@ -605,8 +605,8 @@ def settings_screen(header):
      obs_temp_res = observations_info[0]['timestep']        #just accepts one obs at this time
      model_lat_res = model_datasets[0].spatial_resolution()[0] #just accepts one model at this time
      model_lon_res = model_datasets[0].spatial_resolution()[1]  #just accepts one model at this time
-     obs_lat_res = observations_info[0].observations_info['lat_res']     #just accepts one obs at this time
-     obs_lon_res = observations_info[0].observations_info['lon_res']    #just accepts one obs at this time
+     obs_lat_res = observations_info[0]['lat_res']     #just accepts one obs at this time
+     obs_lon_res = observations_info[0]['lon_res']    #just accepts one obs at this time
 
      temp_grid_option = "Observation"
      temp_grid_setting = obs_temp_res
