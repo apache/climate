@@ -158,7 +158,7 @@ def manage_model_screen(header, note = ""):
 
      option = ''
      while option != '0':
-          ready_screen(note, page="manage_model_screen")
+          ready_screen("manage_model_screen", note)
           screen.addstr(1, 1, header)
           screen.addstr(4, 4, "1 - Load Model File     [Number of loaded model: {0}]".format(len(model_datasets)))
           screen.addstr(6, 4, "2 - Unload Model File")
@@ -311,7 +311,7 @@ def manage_obs_screen(header, note = ""):
 
      option = ''
      while option != '0':
-          ready_screen(note, page="manage_obs_screen")
+          ready_screen("manage_obs_screen", note)
           screen.addstr(1, 1, header)
           screen.addstr(4, 4, "1 - Select Observation     [Number of selected observation: {0}]".format(len(observations_info)))
           screen.addstr(6, 4, "2 - Unselect Observation")
@@ -370,7 +370,7 @@ def run_screen(model_datasets, models_info, observations_info,
 
      option = None
      if option != "0":
-          ready_screen(page="manage_obs_screen")
+          ready_screen("manage_obs_screen")
           y = screen.getmaxyx()[0]
           screen.addstr(2, 2, "Evaluation started....")
           screen.refresh()
@@ -626,7 +626,7 @@ def settings_screen(header):
 
      option = ''
      while option != '0':
-          ready_screen(note, page="settings_screen")
+          ready_screen("settings_screen", note)
           screen.addstr(1, 1, header)
           screen.addstr(4, 4, "Number of model file:   {0}".format(str(len(model_datasets))))
           screen.addstr(5, 4, "Number of observation:  {0}".format(str(len(observations_info))))
@@ -803,7 +803,7 @@ def main_menu(model_datasets, models_info, observation_datasets, observations_in
 
      option = ''
      while option != '0':
-          ready_screen(note, "main_menu")
+          ready_screen("main_menu", note='')
           model_status = "NC" if len(model_datasets) == 0 else "C"     #NC (Not Complete), if there is no model added, C (Complete) if model is added
           obs_status = "NC" if len(observations_info) == 0 else "C"    #NC (Not Complete), if there is no observation added, C (Complete) if observation is added
           screen.addstr(1, 1, "Main Menu:")
