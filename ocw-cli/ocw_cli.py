@@ -58,7 +58,7 @@ def ready_screen(page, note=""):
           screen.addstr(y-2, x-21, "(C)  = Complete")
      screen.addstr(y-2, 1, note)
 
-     return y,x
+     return y, x
 
 
 ##############################################################
@@ -147,7 +147,7 @@ def list_model_screen(header):
      screen.getstr()
 
 
-def manage_model_screen(header, note = ""):
+def manage_model_screen(header, note=""):
      '''Generates Manage Model screen.
 
      :param header: Header of page
@@ -204,14 +204,14 @@ def select_obs_screen(header):   #TODO: if the observation is already selected, 
           for position, obs_info in enumerate(all_obs_info):
                dataset_id = obs_info['dataset_id']
                parameter_id = obs_info['parameter_id']
-               timestep = obs_info ['timestep']
-               start_date = obs_info ['start_date']
-               end_date = obs_info ['end_date']
+               timestep = obs_info['timestep']
+               start_date = obs_info['start_date']
+               end_date = obs_info['end_date']
                min_lat = eval(obs_info['bounding_box'].encode())[2][0] if obs_info['bounding_box'] else None
                max_lat = eval(obs_info['bounding_box'].encode())[0][0] if obs_info['bounding_box'] else None
                min_lon = eval(obs_info['bounding_box'].encode())[2][1] if obs_info['bounding_box'] else None
                max_lon = eval(obs_info['bounding_box'].encode())[0][1] if obs_info['bounding_box'] else None
-               database = obs_info ['database']
+               database = obs_info['database']
                line = "|{0:>10}| - |{1:>12}| - |{2:>9}| - |{3}| - |{4}| - |{5:>9}| - |{6:>9}| - |{7:>9}| - |{8:>9}| - |{9}".format(
                     dataset_id, parameter_id, timestep, start_date, end_date,
                     str(min_lat), str(max_lat), str(min_lon), str(max_lon), database)
@@ -300,7 +300,7 @@ def list_obs_screen(header):
      screen.getstr()
 
 
-def manage_obs_screen(header, note = ""):
+def manage_obs_screen(header, note=""):
      '''Generates Manage Observation screen.
 
      :param header: Header of page
@@ -378,7 +378,7 @@ def run_screen(model_datasets, models_info, observations_info,
           OUTPUT_PLOT = "plot"
 
           dataset_id = int(observations_info[0]['dataset_id'])       #just accepts one dataset at this time
-          parameter_id =  int(observations_info[0]['parameter_id'])  #just accepts one dataset at this time
+          parameter_id = int(observations_info[0]['parameter_id'])  #just accepts one dataset at this time
 
           new_bounds = Bounds(overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon, overlap_start_time, overlap_end_time)
           model_dataset = dsp.subset(new_bounds, model_datasets[0])   #just accepts one model at this time
@@ -481,10 +481,13 @@ def get_model_temp_bound():
      :rtypes: (datatime, datetime)
      '''
 
-     model_start_time = model_datasets[0].time_range()[0]    #just accepts one model at this time
-     model_end_time = model_datasets[0].time_range()[1]      #just accepts one model at this time
+     models_start_time = []
+     models_end_time = []
+     for model in model_datasets:
+          models_start_time.append(model.time_range()[0])
+          models_end_time.append(model.time_range()[1])
 
-     return model_start_time, model_end_time
+     return models_start_time, models_end_time
 
 
 def get_obs_temp_bound():
@@ -494,32 +497,40 @@ def get_obs_temp_bound():
      :rtype: (datetime, datetime)
      '''
 
-     obs_start_time = observations_info[0]['start_date']    #just accepts one obs at this time
-     obs_end_time = observations_info[0]['end_date']        #just accepts one obs at this time
-     obs_start_time = datetime.strptime(obs_start_time, "%Y-%m-%d")
-     obs_end_time = datetime.strptime(obs_end_time, "%Y-%m-%d")
+     observations_start_time = []
+     observations_end_time = []
+     for obs in observations_info:
+          obs_start_time = datetime.strptime(obs['start_date'], "%Y-%m-%d")
+          observations_start_time.append(obs_start_time)
+          obs_end_time = datetime.strptime(obs['end_date'], "%Y-%m-%d")
+          observations_end_time.append(obs_end_time)
 
-     return obs_start_time, obs_end_time
+     return observations_start_time, observations_end_time
 
 
-def get_temp_overlap(model_start_time, model_end_time, obs_start_time, obs_end_time):
+def get_temp_overlap(models_start_time, models_end_time, observations_start_time, observations_end_time):
      '''Calculate temporal overlap between given datasets.
 
-     :param model_start_time: model start time
-     :type model_start_time: datetime
-     :param model_end_time: model end time
-     :type model_end_time: datetime
-     :param obs_start_time: obs start time
-     :type obs_start_time: datetime
-     :param obs_end_time: obs end time
-     :type obs_end_time: datetime
+     :param models_start_time: models start time
+     :type models_start_time: list of datetimes
+     :param models_end_time: models end time
+     :type models_end_time: list of datetime
+     :param observations_start_time: obs start time
+     :type observations_start_time: list of datetimes
+     :param observations_end_time: obs end time
+     :type observations_end_time: list of datetimes
 
      :returns: overlap start and end time between model and observation
      :rtype: (datetime, datetime)
      '''
 
-     overlap_start_time = max(model_start_time, obs_start_time)
-     overlap_end_time = min(model_end_time, obs_end_time)
+     overlap_start_time = max(models_start_time + observations_start_time)
+     overlap_end_time = min(models_end_time + observations_end_time)
+
+     #Need to check if all datasets have temporal overlap, otherwise return
+     # to main menu and print a warning as notification.
+     if overlap_end_time <= overlap_start_time:
+          main_menu(model_datasets, models_info, observation_datasets, observations_info, note="WARNING: One or more dataset does not have temporal overlap with others.")
 
      return overlap_start_time, overlap_end_time
 
@@ -595,9 +606,9 @@ def settings_screen(header):
      '''
 
      note = ""
-     model_start_time, model_end_time = get_model_temp_bound()
-     obs_start_time, obs_end_time = get_obs_temp_bound()
-     overlap_start_time, overlap_end_time = get_temp_overlap(model_start_time, model_end_time, obs_start_time, obs_end_time)
+     models_start_time, models_end_time = get_model_temp_bound()
+     observations_start_time, observations_end_time = get_obs_temp_bound()
+     overlap_start_time, overlap_end_time = get_temp_overlap(models_start_time, models_end_time, observations_start_time, observations_end_time)
      model_min_lat, model_max_lat, model_min_lon, model_max_lon = get_model_spatial_bound()
      obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon = get_obs_spatial_bound()
      overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon = get_spatial_overlap(model_min_lat, model_max_lat, model_min_lon, model_max_lon, obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon)
@@ -788,7 +799,7 @@ def settings_screen(header):
 #     Main Menu Screen
 ##############################################################
 
-def main_menu(model_datasets, models_info, observation_datasets, observations_info, note = ""):
+def main_menu(model_datasets, models_info, observation_datasets, observations_info, note=""):
      '''This function Generates main menu page.
 
      :param model_datasets: list of model dataset objects
@@ -803,7 +814,7 @@ def main_menu(model_datasets, models_info, observation_datasets, observations_in
 
      option = ''
      while option != '0':
-          ready_screen("main_menu", note='')
+          ready_screen("main_menu", note)
           model_status = "NC" if len(model_datasets) == 0 else "C"     #NC (Not Complete), if there is no model added, C (Complete) if model is added
           obs_status = "NC" if len(observations_info) == 0 else "C"    #NC (Not Complete), if there is no observation added, C (Complete) if observation is added
           screen.addstr(1, 1, "Main Menu:")
