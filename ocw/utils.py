@@ -23,6 +23,7 @@ import numpy as np
 
 from mpl_toolkits.basemap import shiftgrid
 from dateutil.relativedelta import relativedelta
+from netCDF4 import num2date
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -52,10 +53,17 @@ def decode_time_values(dataset, time_var_name):
         for time_val in time_data:
             times.append(time_base + relativedelta(months=int(time_val)))
     else:
-        for time_val in time_data:
-            arg[time_units] = time_val
-            times.append(time_base + dt.timedelta(**arg))
+    #    for time_val in time_data:
+    #        arg[time_units] = time_val
+    #        times.append(time_base + dt.timedelta(**arg))
+    
+        times_calendar = 'standard'
+        try:
+            times_calendar = time_data.calendar
+        except:
+            pass
 
+        times = num2date(time_data, units = time_format, calendar = times_calendar)
     return times
 
 def parse_time_units(time_format):
@@ -281,33 +289,3 @@ def calc_climatology_year(dataset):
 
     return annually_mean, total_mean
 
-def calc_climatology_season(month_start, month_end, dataset):
-    ''' Calculate seasonal mean and time series for given months.
-
-    :param month_start: An integer for beginning month (Jan=1)
-    :type month_start: Integer
-    :param month_end: An integer for ending month (Jan=1)
-    :type month_end: Integer
-    :param dataset: Dataset object with full-year format
-    :type dataset: ocw.dataset.Dataset object
-
-    :returns:  
-        t_series - monthly average over the given season
-        means - mean over the entire season
-    :rtype: A tuple of two numpy arrays
-    '''
-
-    if month_start > month_end:
-        # Offset the original array so that the the first month
-        # becomes month_start, note that this cuts off the first year of data
-        offset = slice(month_start - 1, month_start - 13)
-        reshape_data = reshape_monthly_to_annually(dataset[offset])
-        month_index = slice(0, 13 - month_start + month_end)
-    else:
-        # Since month_start <= month_end, just take a slice containing those months
-        reshape_data = reshape_monthly_to_annually(dataset)
-        month_index = slice(month_start - 1, month_end)
-    
-    t_series = reshape_data[:, month_index].mean(axis=1)
-    means = t_series.mean(axis=0)
-    return t_series, means
