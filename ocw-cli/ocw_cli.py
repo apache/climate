@@ -538,62 +538,53 @@ def get_temp_overlap(models_start_time, models_end_time, observations_start_time
 def get_model_spatial_bound():               #TODO: convert longitudes to -180, 180 to match with observation data
      '''Get model spatial bound.
 
-     :returns: model spatial boundaries
-     :rtype: (float, float, float, float)
+     :returns: all models spatial boundaries
+     :rtype: list
      '''
 
-     model_bound = model_datasets[0].spatial_boundaries()    #just accepts one model at this time
-     model_min_lat = model_bound[0]
-     model_max_lat = model_bound[1]
-     model_min_lon = model_bound[2]
-     model_max_lon = model_bound[3]
+     models_bound = []
+     for model in model_datasets:
+          models_bound.append(model.spatial_boundaries())
 
-     return model_min_lat, model_max_lat, model_min_lon, model_max_lon
+     return models_bound
 
 
 def get_obs_spatial_bound():
      '''Get observation spatial bound.
 
-     :returns: observation spatial boundaries
-     :rtype: (float, float, float, float)
+     :returns: all observations spatial boundaries
+     :rtype: list
      '''
 
-     obs_min_lat = observations_info[0]['min_lat']     #just accepts one obs at this time
-     obs_max_lat = observations_info[0]['max_lat']     #just accepts one obs at this time
-     obs_min_lon = observations_info[0]['min_lon']     #just accepts one obs at this time
-     obs_max_lon = observations_info[0]['max_lon']     #just accepts one obs at this time
+     observations_bound = []
+     for obs in observations_info:
+          observations_bound.append([obs['min_lat'], obs['max_lat'], obs['min_lon'], obs['max_lon']])
 
-     return obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon
+     return observations_bound
 
 
-def get_spatial_overlap(model_min_lat, model_max_lat, model_min_lon, model_max_lon, obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon):
+def get_spatial_overlap(models_bound, observations_bound):
      '''Calculate spatial overlap between given datasets.
 
-     :param model_min_lat: model minumum latitude
-     :type model_min_lat: float
-     :param model_max_lat: model maximum latitude
-     :type model_max_lat: float
-     :param model_min_lon: model minimum longitude
-     :type model_min_lon: float
-     :param model_max_lon: model maximum longitude
-     :type model_max_lon: float
-     :param obs_min_lat: observation minimum latitude
-     :type obs_min_lat: float
-     :param obs_max_lat: observation maximum latitude
-     :type obs_max_lat: float
-     :param obs_min_lon: observation minimum longitude
-     :type obs_min_lon: float
-     :param obs_max_lon: observation maximum longitude
-     :type obs_max_lon: float
+     :param models_bound: all models spatial boundaries information
+     :type models_bound: list
+     :param observations_bound: all observations spatial boundaries information
+     :type observations_bound: list
 
      :returns: spatial boundaries overlap between model and observation
      :rtype: (float, float, float, float)
      '''
 
-     overlap_min_lat = max(model_min_lat, obs_min_lat)
-     overlap_max_lat = min(model_max_lat, obs_max_lat)
-     overlap_min_lon = max(model_min_lon, obs_min_lon)
-     overlap_max_lon = min(model_max_lon, obs_max_lon)
+     datasets_bound = models_bound + observations_bound
+     overlap_min_lat = max(each[0] for each in datasets_bound)
+     overlap_max_lat = min(each[1] for each in datasets_bound)
+     overlap_min_lon = max(each[2] for each in datasets_bound)
+     overlap_max_lon = min(each[3] for each in datasets_bound)
+
+     #Need to check if all datasets have spatial overlap, otherwise return
+     # to main menu and print a warning as notification.
+     if overlap_max_lat <= overlap_min_lat or overlap_max_lon <= overlap_min_lon:
+          main_menu(model_datasets, models_info, observation_datasets, observations_info, note="WARNING: One or more dataset does not have spatial overlap with others.")
 
      return overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon
 
@@ -609,9 +600,9 @@ def settings_screen(header):
      models_start_time, models_end_time = get_model_temp_bound()
      observations_start_time, observations_end_time = get_obs_temp_bound()
      overlap_start_time, overlap_end_time = get_temp_overlap(models_start_time, models_end_time, observations_start_time, observations_end_time)
-     model_min_lat, model_max_lat, model_min_lon, model_max_lon = get_model_spatial_bound()
-     obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon = get_obs_spatial_bound()
-     overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon = get_spatial_overlap(model_min_lat, model_max_lat, model_min_lon, model_max_lon, obs_min_lat, obs_max_lat, obs_min_lon, obs_max_lon)
+     models_bound = get_model_spatial_bound()
+     observations_bound = get_obs_spatial_bound()
+     overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon = get_spatial_overlap(models_bound, observations_bound)
      model_temp_res = model_datasets[0].temporal_resolution()       #just accepts one model at this time
      obs_temp_res = observations_info[0]['timestep']        #just accepts one obs at this time
      model_lat_res = model_datasets[0].spatial_resolution()[0] #just accepts one model at this time
