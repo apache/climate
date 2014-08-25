@@ -1,18 +1,28 @@
+#
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
 '''
 # All the functions for the MCC search algorithm
 # Following RCMES dataformat in format (t,lat,lon), value
 '''
 
-import datetime
 from datetime import timedelta, datetime
-import calendar
-import fileinput
 import glob
 import itertools
-import json
-import math
-import Nio
-from netCDF4 import Dataset, num2date, date2num
+from netCDF4 import Dataset, date2num
 import numpy as np
 import numpy.ma as ma
 import os
@@ -25,10 +35,10 @@ import sys
 import time
 
 import networkx as nx
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.dates import DateFormatter,HourLocator 
-from matplotlib import cm
+
+import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from matplotlib.ticker import FuncFormatter, FormatStrFormatter
@@ -48,14 +58,14 @@ XRES = 4.0				#x direction spatial resolution in km
 YRES = 4.0				#y direction spatial resolution in km
 TRES = 1 				#temporal resolution in hrs
 LAT_DISTANCE = 111.0 	#the avg distance in km for 1deg lat for the region being considered 
-LON_DISTANCE = 111.0    #the avg distance in km for 1deg lon for the region being considered
+LON_DISTANCE = 111.0	#the avg distance in km for 1deg lon for the region being considered
 STRUCTURING_ELEMENT = [[0,1,0],[1,1,1],[0,1,0]] #the matrix for determining the pattern for the contiguous boxes and must
-    											#have same rank of the matrix it is being compared against 
+												#have same rank of the matrix it is being compared against 
 #criteria for determining cloud elements and edges
 T_BB_MAX = 243  #warmest temp to allow (-30C to -55C according to Morel and Sensi 2002)
 T_BB_MIN = 218  #cooler temp for the center of the system
 CONVECTIVE_FRACTION = 0.90 #the min temp/max temp that would be expected in a CE.. this is highly conservative (only a 10K difference)
-MIN_MCS_DURATION = 3    #minimum time for a MCS to exist
+MIN_MCS_DURATION = 3	#minimum time for a MCS to exist
 AREA_MIN = 2400.0		#minimum area for CE criteria in km^2 according to Vila et al. (2008) is 2400
 MIN_OVERLAP= 10000.00   #km^2  from Williams and Houze 1987, indir ref in Arnaud et al 1992
 
@@ -80,19 +90,19 @@ PRUNED_GRAPH = nx.DiGraph()
 def readMergData(dirname, filelist = None):
 	'''
 	Purpose::
-	    Read MERG data into RCMES format
+		Read MERG data into RCMES format
 	
 	Input::
-	    dirname: a string representing the directory to the MERG files in NETCDF format
-	    filelist (optional): a list of strings representing the filenames betweent the start and end dates provided
+		dirname: a string representing the directory to the MERG files in NETCDF format
+		filelist (optional): a list of strings representing the filenames betweent the start and end dates provided
 	
 	Output::
-	    A 3D masked array (t,lat,lon) with only the variables which meet the minimum temperature 
-	    criteria for each frame
+		A 3D masked array (t,lat,lon) with only the variables which meet the minimum temperature 
+		criteria for each frame
 
 	Assumptions::
-	    The MERG data has been converted to NETCDF using LATS4D
-	    The data has the same lat/lon format
+		The MERG data has been converted to NETCDF using LATS4D
+		The data has the same lat/lon format
 
 	TODO:: figure out how to use netCDF4 to do the clipping tmp = netCDF4.Dataset(filelist[0])
 
@@ -129,8 +139,9 @@ def readMergData(dirname, filelist = None):
 		sys.exit()
 	else:
 		# Open the first file in the list to read in lats, lons and generate the  grid for comparison
-		tmp = Nio.open_file(filelist[0], format='nc')
-		
+		#tmp = Nio.open_file(filelist[0], format='nc')
+		tmp = Dataset(filelist[0], format='NETCDF4')
+
 		#clip the lat/lon grid according to user input
 		#http://www.pyngl.ucar.edu/NioExtendedSelection.shtml
 		latsraw = tmp.variables[mergLatVarName][mergLatVarName+"|"+LATMIN+":"+LATMAX].astype('f2')
@@ -146,11 +157,12 @@ def readMergData(dirname, filelist = None):
 	
 	for files in filelist:
 		try:
-			thisFile = Nio.open_file(files, format='nc') 
+			#thisFile = Nio.open_file(files, format='nc') 
+			thisFile = Dataset(files, format='NETCDF4')
 			#clip the dataset according to user lat,lon coordinates
 			#mask the data and fill with zeros for later 
 			tempRaw = thisFile.variables[mergVarName][mergLatVarName+"|"+LATMIN+":"+LATMAX \
-			                           +" " +mergLonVarName+"|"+LONMIN+":"+LONMAX ].astype('int16')
+									   +" " +mergLonVarName+"|"+LONMIN+":"+LONMAX ].astype('int16')
 
 			tempMask = ma.masked_array(tempRaw, mask=(tempRaw > T_BB_MAX), fill_value=0) 
 			
@@ -180,8 +192,8 @@ def readMergData(dirname, filelist = None):
 def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	'''
 	Purpose::
-	    Determines the contiguous boxes for a given time of the satellite images i.e. each frame
-        using scipy ndimage package
+		Determines the contiguous boxes for a given time of the satellite images i.e. each frame
+		using scipy ndimage package
 	
 	Input::	
 		mergImgs: masked numpy array in (time,lat,lon),T_bb representing the satellite data. This is masked based on the
@@ -190,8 +202,8 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 		TRMMdirName (optional): string representing the path where to find the TRMM datafiles
 		
 	Output::
-	    CLOUD_ELEMENT_GRAPH: a Networkx directed graph where each node contains the information in cloudElementDict
-	    The nodes are determined according to the area of contiguous squares. The nodes are linked through weighted edges.
+		CLOUD_ELEMENT_GRAPH: a Networkx directed graph where each node contains the information in cloudElementDict
+		The nodes are determined according to the area of contiguous squares. The nodes are linked through weighted edges.
 
 		cloudElementDict = {'uniqueID': unique tag for this CE, 
 							'cloudElementTime': time of the CE,
@@ -207,9 +219,9 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 							'CETRMMmax':floating-point representing the max rate in the CE if TRMMdirName entered, 
 							'CETRMMmin':floating-point representing the min rate in the CE if TRMMdirName entered}
 	Assumptions::
-	    Assumes we are dealing with MERG data which is 4kmx4km resolved, thus the smallest value 
-        required according to Vila et al. (2008) is 2400km^2 
-        therefore, 2400/16 = 150 contiguous squares
+		Assumes we are dealing with MERG data which is 4kmx4km resolved, thus the smallest value 
+		required according to Vila et al. (2008) is 2400km^2 
+		therefore, 2400/16 = 150 contiguous squares
 	'''
 
 	frame = ma.empty((1,mergImgs.shape[1],mergImgs.shape[2]))
@@ -293,7 +305,7 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 	   			CEuniqueID = 'F'+str(frameNum)+'CE'+str(frameCEcounter) 
 
 	   			#-------------------------------------------------
-	    		#textfile name for accesing CE data using MATLAB code
+				#textfile name for accesing CE data using MATLAB code
 				# thisFileName = MAINDIRECTORY+'/' + (str(timelist[t])).replace(" ", "_") + CEuniqueID +'.txt'
 				# cloudElementsTextFile = open(thisFileName,'w')
 				#-------------------------------------------------
@@ -417,8 +429,8 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 					#-----------End most of NETCDF file stuff ------------------------------------
 
 	   			#populate cloudElementLatLons by unpacking the original values from loc to get the actual value for lat and lon
-    			#TODO: KDW - too dirty... play with itertools.izip or zip and the enumerate with this
-    			# 			as cloudElement is masked
+				#TODO: KDW - too dirty... play with itertools.izip or zip and the enumerate with this
+				# 			as cloudElement is masked
 				for index,value in np.ndenumerate(cloudElement):
 					if value != 0 : 
 						lat_index,lon_index = index
@@ -443,7 +455,7 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 					#calculate the total precip associated with the feature
 					for index, value in np.ndenumerate(finalCETRMMvalues):
 						precipTotal += value 
-	    				precip.append(value)
+						precip.append(value)
 			
 					rainFallacc[:] = finalCETRMMvalues[:]
 					currNetCDFTRMMData.close()
@@ -460,19 +472,19 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 
 				#determine if the cloud element the shape 
 				cloudElementEpsilon = eccentricity (cloudElement)
-	   			cloudElementsUserFile.write("\n\nTime is: %s" %(str(timelist[t])))
-	   			cloudElementsUserFile.write("\nCEuniqueID is: %s" %CEuniqueID)
-	   			latCenter, lonCenter = ndimage.measurements.center_of_mass(cloudElement, labels=labels)
-	   			
-	   			#latCenter and lonCenter are given according to the particular array defining this CE
-	   			#so you need to convert this value to the overall domain truth
-	   			latCenter = cloudElementLat[round(latCenter)]
-	   			lonCenter = cloudElementLon[round(lonCenter)]
-	   			cloudElementsUserFile.write("\nCenter (lat,lon) is: %.2f\t%.2f" %(latCenter, lonCenter))
-	   			cloudElementCenter.append(latCenter)
-	   			cloudElementCenter.append(lonCenter)
-	   			cloudElementsUserFile.write("\nNumber of boxes are: %d" %numOfBoxes)
-	   			cloudElementsUserFile.write("\nArea is: %.4f km^2" %(cloudElementArea))
+				cloudElementsUserFile.write("\n\nTime is: %s" %(str(timelist[t])))
+				cloudElementsUserFile.write("\nCEuniqueID is: %s" %CEuniqueID)
+				latCenter, lonCenter = ndimage.measurements.center_of_mass(cloudElement, labels=labels)
+				
+				#latCenter and lonCenter are given according to the particular array defining this CE
+				#so you need to convert this value to the overall domain truth
+				latCenter = cloudElementLat[round(latCenter)]
+				lonCenter = cloudElementLon[round(lonCenter)]
+				cloudElementsUserFile.write("\nCenter (lat,lon) is: %.2f\t%.2f" %(latCenter, lonCenter))
+				cloudElementCenter.append(latCenter)
+				cloudElementCenter.append(lonCenter)
+				cloudElementsUserFile.write("\nNumber of boxes are: %d" %numOfBoxes)
+				cloudElementsUserFile.write("\nArea is: %.4f km^2" %(cloudElementArea))
 				cloudElementsUserFile.write("\nAverage brightness temperature is: %.4f K" %ndimage.mean(cloudElement, labels=labels))
 				cloudElementsUserFile.write("\nMin brightness temperature is: %.4f K" %ndimage.minimum(cloudElement, labels=labels))
 				cloudElementsUserFile.write("\nMax brightness temperature is: %.4f K" %ndimage.maximum(cloudElement, labels=labels))
@@ -507,42 +519,42 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 						elif areaOverlap >= MIN_OVERLAP:
 							CLOUD_ELEMENT_GRAPH.add_edge(cloudElementDict['uniqueID'], CEuniqueID, weight=edgeWeight[2])
 
-    			else:
-    				#TODO: remove this else as we only wish for the CE details
-    				#ensure only the non-zero elements are considered
-    				#store intel in allCE file
-    				labels, _ = ndimage.label(cloudElement)
-    				cloudElementsFile.write("\n-----------------------------------------------")
-    				cloudElementsFile.write("\n\nTime is: %s" %(str(timelist[t])))
-    				# cloudElementLat = LAT[loc[0],0]
-    				# cloudElementLon = LON[0,loc[1]] 
-    				
-    				#populate cloudElementLatLons by unpacking the original values from loc
-    				#TODO: KDW - too dirty... play with itertools.izip or zip and the enumerate with this
-    				# 			as cloudElement is masked
-    				for index,value in np.ndenumerate(cloudElement):
-    					if value != 0 : 
-    						lat_index,lon_index = index
-    						lat_lon_tuple = (cloudElementLat[lat_index], cloudElementLon[lon_index])
-    						cloudElementLatLons.append(lat_lon_tuple)
+				else:
+					#TODO: remove this else as we only wish for the CE details
+					#ensure only the non-zero elements are considered
+					#store intel in allCE file
+					labels, _ = ndimage.label(cloudElement)
+					cloudElementsFile.write("\n-----------------------------------------------")
+					cloudElementsFile.write("\n\nTime is: %s" %(str(timelist[t])))
+					# cloudElementLat = LAT[loc[0],0]
+					# cloudElementLon = LON[0,loc[1]] 
+					
+					#populate cloudElementLatLons by unpacking the original values from loc
+					#TODO: KDW - too dirty... play with itertools.izip or zip and the enumerate with this
+					# 			as cloudElement is masked
+					for index,value in np.ndenumerate(cloudElement):
+						if value != 0 : 
+							lat_index,lon_index = index
+							lat_lon_tuple = (cloudElementLat[lat_index], cloudElementLon[lon_index])
+							cloudElementLatLons.append(lat_lon_tuple)
 	
-    				cloudElementsFile.write("\nLocation of rejected CE (lat,lon) points are: %s" %cloudElementLatLons)
-    				#latCenter and lonCenter are given according to the particular array defining this CE
+					cloudElementsFile.write("\nLocation of rejected CE (lat,lon) points are: %s" %cloudElementLatLons)
+					#latCenter and lonCenter are given according to the particular array defining this CE
 		   			#so you need to convert this value to the overall domain truth
-    				latCenter, lonCenter = ndimage.measurements.center_of_mass(cloudElement, labels=labels)
-    				latCenter = cloudElementLat[round(latCenter)]
-    				lonCenter = cloudElementLon[round(lonCenter)]
-    				cloudElementsFile.write("\nCenter (lat,lon) is: %.2f\t%.2f" %(latCenter, lonCenter))
-    				cloudElementsFile.write("\nNumber of boxes are: %d" %numOfBoxes)
-    				cloudElementsFile.write("\nArea is: %.4f km^2" %(cloudElementArea))
-    				cloudElementsFile.write("\nAverage brightness temperature is: %.4f K" %ndimage.mean(cloudElement, labels=labels))
-    				cloudElementsFile.write("\nMin brightness temperature is: %.4f K" %ndimage.minimum(cloudElement, labels=labels))
-    				cloudElementsFile.write("\nMax brightness temperature is: %.4f K" %ndimage.maximum(cloudElement, labels=labels))
-    				cloudElementsFile.write("\nBrightness temperature variance is: %.4f K" %ndimage.variance(cloudElement, labels=labels))
-    				cloudElementsFile.write("\nConvective fraction is: %.4f " %(((ndimage.minimum(cloudElement, labels=labels))/float((ndimage.maximum(cloudElement, labels=labels))))*100.0))
-    				cloudElementsFile.write("\nEccentricity is: %.4f " %(cloudElementEpsilon))
-    				cloudElementsFile.write("\n-----------------------------------------------")
-    				
+					latCenter, lonCenter = ndimage.measurements.center_of_mass(cloudElement, labels=labels)
+					latCenter = cloudElementLat[round(latCenter)]
+					lonCenter = cloudElementLon[round(lonCenter)]
+					cloudElementsFile.write("\nCenter (lat,lon) is: %.2f\t%.2f" %(latCenter, lonCenter))
+					cloudElementsFile.write("\nNumber of boxes are: %d" %numOfBoxes)
+					cloudElementsFile.write("\nArea is: %.4f km^2" %(cloudElementArea))
+					cloudElementsFile.write("\nAverage brightness temperature is: %.4f K" %ndimage.mean(cloudElement, labels=labels))
+					cloudElementsFile.write("\nMin brightness temperature is: %.4f K" %ndimage.minimum(cloudElement, labels=labels))
+					cloudElementsFile.write("\nMax brightness temperature is: %.4f K" %ndimage.maximum(cloudElement, labels=labels))
+					cloudElementsFile.write("\nBrightness temperature variance is: %.4f K" %ndimage.variance(cloudElement, labels=labels))
+					cloudElementsFile.write("\nConvective fraction is: %.4f " %(((ndimage.minimum(cloudElement, labels=labels))/float((ndimage.maximum(cloudElement, labels=labels))))*100.0))
+					cloudElementsFile.write("\nEccentricity is: %.4f " %(cloudElementEpsilon))
+					cloudElementsFile.write("\n-----------------------------------------------")
+					
 			#reset list for the next CE
 			nodeExist = False
 			cloudElementCenter=[]
@@ -563,7 +575,7 @@ def findCloudElements(mergImgs,timelist,TRMMdirName=None):
 		prevFrameCEs =[]
 		prevFrameCEs = currFrameCEs
 		currFrameCEs =[]
-		    			
+						
 	cloudElementsFile.close
 	cloudElementsUserFile.close
 	#if using ARCGIS data store code, uncomment this file close line
@@ -593,11 +605,11 @@ def findPrecipRate(TRMMdirName, timelist):
 		TRMMdirName: a string representing the directory for the original TRMM netCDF files
 		timelist: a list of python datatimes
 
-    Output:: a list of dictionary of the TRMM data 
-    	NB: also creates netCDF with TRMM data for each CE (for post processing) index
-    		in MAINDIRECTORY/TRMMnetcdfCEs
+	Output:: a list of dictionary of the TRMM data 
+		NB: also creates netCDF with TRMM data for each CE (for post processing) index
+			in MAINDIRECTORY/TRMMnetcdfCEs
    
-    Assumptions:: Assumes that findCloudElements was run without the TRMMdirName value 
+	Assumptions:: Assumes that findCloudElements was run without the TRMMdirName value 
  
 	'''
 	allCEnodesTRMMdata =[]
@@ -765,14 +777,14 @@ def findCloudClusters(CEGraph):
 	'''
 	Purpose:: 
 		Determines the cloud clusters properties from the subgraphs in 
-	    the graph i.e. prunes the graph according to the minimum depth
+		the graph i.e. prunes the graph according to the minimum depth
 
 	Input:: 
 		CEGraph: a Networkx directed graph of the CEs with weighted edges
 		according the area overlap between nodes (CEs) of consectuive frames
-    
-    Output:: 
-    	PRUNED_GRAPH: a Networkx directed graph of with CCs/ MCSs
+	
+	Output:: 
+		PRUNED_GRAPH: a Networkx directed graph of with CCs/ MCSs
 
 	'''
 
@@ -828,11 +840,11 @@ def findMCC (prunedGraph):
 	Input:: 
 		prunedGraph: a Networkx Graph representing the CCs 
 
-    Output:: 
-    	finalMCCList: a list of list of tuples representing a MCC
-             
-    Assumptions: 
-    	frames are ordered and are equally distributed in time e.g. hrly satellite images
+	Output:: 
+		finalMCCList: a list of list of tuples representing a MCC
+			 
+	Assumptions: 
+		frames are ordered and are equally distributed in time e.g. hrly satellite images
  
 	'''
 	MCCList = []
@@ -999,12 +1011,12 @@ def traverseTree(subGraph,node, stack, checkedNodes=None):
 			stack: a list of strings representing a list of nodes in a stack functionality 
 					i.e. Last-In-First-Out (LIFO) for sorting the information from each visited node
 			checkedNodes: a list of strings representing the list of the nodes in the traversal
-    
-    Output:: 
-    	checkedNodes: a list of strings representing the list of the nodes in the traversal
+	
+	Output:: 
+		checkedNodes: a list of strings representing the list of the nodes in the traversal
 
-    Assumptions: 
-    	frames are ordered and are equally distributed in time e.g. hrly satellite images
+	Assumptions: 
+		frames are ordered and are equally distributed in time e.g. hrly satellite images
  
 	'''
 	if len(checkedNodes) == len(subGraph):
@@ -1043,7 +1055,7 @@ def checkedNodesMCC (prunedGraph, nodeList):
 	'''
 	Purpose :: 
 		Determine if this path is (or is part of) a MCC and provides 
-	    preliminary information regarding the stages of the feature
+		preliminary information regarding the stages of the feature
 
 	Input:: 
 		prunedGraph: a Networkx Graph representing all the cloud clusters 
@@ -1154,7 +1166,7 @@ def updateMCCList(prunedGraph, potentialMCCList,node,stage, CounterCriteriaAFlag
 	'''
 	Purpose:: 
 		Utility function to determine if a path is (or is part of) a MCC and provides 
-	           preliminary information regarding the stages of the feature
+			   preliminary information regarding the stages of the feature
 
 	Input:: 
 		prunedGraph: a Networkx Graph representing all the cloud clusters
@@ -1389,7 +1401,7 @@ def maxExtentAndEccentricity(eachList):
 
 	Output:: 
 		maxShieldNode: a string representing the node with the maximum maxShieldNode
-	    definiteMCCFlag: a boolean indicating that the MCC has met all requirements
+		definiteMCCFlag: a boolean indicating that the MCC has met all requirements
 
 	'''
 	maxShieldNode =''
@@ -1581,7 +1593,7 @@ def allAncestors(path, aNode):
 
 	Input:: 
 		path: a list of strings representing the nodes in the path 
-	    aNode: a string representing a node to be checked for parents
+		aNode: a string representing a node to be checked for parents
 
 	Output:: 
 		path: a list of strings representing the list of the nodes connected to aNode through its parents
@@ -1607,7 +1619,7 @@ def allDescendants(path, aNode):
 
 	Input:: 
 		path: a list of strings representing the nodes in the path 
-	    aNode: a string representing a node to be checked for children
+		aNode: a string representing a node to be checked for children
 
 	Output:: 
 		path: a list of strings representing the list of the nodes connected to aNode through its children
@@ -1653,7 +1665,7 @@ def addNodeBehaviorIdentifier (thisNode, nodeBehaviorIdentifier):
 
 	Input:: 
 		thisNode: a string representing the unique ID of a node
-	    nodeBehaviorIdentifier: a string representing the behavior S- split, M- merge, B- both split and merge, N- neither split or merge 
+		nodeBehaviorIdentifier: a string representing the behavior S- split, M- merge, B- both split and merge, N- neither split or merge 
 
 	Output :: None
 
@@ -1703,9 +1715,9 @@ def updateNodeMCSIdentifier (thisNode, nodeMCSIdentifier):
 def eccentricity (cloudElementLatLon):
 	'''
 	Purpose::
-	    Determines the eccentricity (shape) of contiguous boxes 
-	    Values tending to 1 are more circular by definition, whereas 
-	    values tending to 0 are more linear
+		Determines the eccentricity (shape) of contiguous boxes 
+		Values tending to 1 are more circular by definition, whereas 
+		values tending to 0 are more linear
 	
 	Input::
 		cloudElementLatLon: 2D array in (lat,lon) representing T_bb contiguous squares 
@@ -1720,29 +1732,29 @@ def eccentricity (cloudElementLatLon):
 	#loop over all lons and determine longest (non-zero) col
 	#loop over all lats and determine longest (non-zero) row
 	for latLon in cloudElementLatLon:
-	    #assign a matrix to determine the legit values
-	    
-	    nonEmptyLons = sum(sum(cloudElementLatLon)>0)
-        nonEmptyLats = sum(sum(cloudElementLatLon.transpose())>0)
-        
-        lonEigenvalues = 1.0 * nonEmptyLats / (nonEmptyLons+0.001) #for long oval on y axis
-        latEigenvalues = 1.0 * nonEmptyLons / (nonEmptyLats +0.001) #for long oval on x-axs
-        epsilon = min(latEigenvalues,lonEigenvalues)
-        
+		#assign a matrix to determine the legit values
+		
+		nonEmptyLons = sum(sum(cloudElementLatLon)>0)
+		nonEmptyLats = sum(sum(cloudElementLatLon.transpose())>0)
+		
+		lonEigenvalues = 1.0 * nonEmptyLats / (nonEmptyLons+0.001) #for long oval on y axis
+		latEigenvalues = 1.0 * nonEmptyLons / (nonEmptyLats +0.001) #for long oval on x-axs
+		epsilon = min(latEigenvalues,lonEigenvalues)
+		
 	return epsilon
 #******************************************************************
 def cloudElementOverlap (currentCELatLons, previousCELatLons):
 	'''
 	Purpose::
-	    Determines the percentage overlap between two list of lat-lons passed
+		Determines the percentage overlap between two list of lat-lons passed
 
 	Input::
-	    currentCELatLons: a list of tuples for the current CE
-	    previousCELatLons: a list of tuples for the other CE being considered
+		currentCELatLons: a list of tuples for the current CE
+		previousCELatLons: a list of tuples for the other CE being considered
 
 	Output::
-	    percentageOverlap: a floating-point representing the number of overlapping lat_lon tuples
-	    areaOverlap: a floating-point number representing the area overlapping
+		percentageOverlap: a floating-point representing the number of overlapping lat_lon tuples
+		areaOverlap: a floating-point number representing the area overlapping
 
 	'''
 
@@ -1829,8 +1841,8 @@ def findCESpeed(node, MCSList):
 def maenumerate(mArray):
 	'''
 	Purpose::
-	    Utility script for returning the actual values from the masked array
-	    Taken from: http://stackoverflow.com/questions/8620798/numpy-ndenumerate-for-masked-arrays
+		Utility script for returning the actual values from the masked array
+		Taken from: http://stackoverflow.com/questions/8620798/numpy-ndenumerate-for-masked-arrays
 	
 	Input::
 		mArray: the masked array returned from the ma.array() command
@@ -1844,7 +1856,7 @@ def maenumerate(mArray):
 	mask = ~mArray.mask.ravel()
 	#beware yield fast, but generates a type called "generate" that does not allow for array methods
 	for index, maskedValue in itertools.izip(np.ndenumerate(mArray), mask):
-	    if maskedValue: 
+		if maskedValue: 
 			yield index	
 #******************************************************************
 def createMainDirectory(mainDirStr):
@@ -2046,20 +2058,20 @@ def find_nearest(thisArray,value):
 def preprocessingMERG(MERGdirname):
 	'''
 	Purpose::
-	    Utility script for unzipping and converting the merg*.Z files from Mirador to 
-	    NETCDF format. The files end up in a folder called mergNETCDF in the directory
-	    where the raw MERG data is
-	    NOTE: VERY RAW AND DIRTY 
+		Utility script for unzipping and converting the merg*.Z files from Mirador to 
+		NETCDF format. The files end up in a folder called mergNETCDF in the directory
+		where the raw MERG data is
+		NOTE: VERY RAW AND DIRTY 
 
 	Input::
-	    Directory to the location of the raw MERG files, preferably zipped
+		Directory to the location of the raw MERG files, preferably zipped
 		
 	Output::
 	   none
 
 	Assumptions::
 	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-	     have been installed on the system and the user can access 
+		 have been installed on the system and the user can access 
 	   2 User can write files in location where script is being called
 	   3 the files havent been unzipped	
 	'''
@@ -2156,20 +2168,20 @@ def postProcessingNetCDF(dataset, dirName = None):
 	TODO: UPDATE TO PICK UP LIMITS FROM FILE FOR THE GRADS SCRIPTS
 
 	Purpose::
-	    Utility script displaying the data in generated NETCDF4 files 
-	    in GrADS
-	    NOTE: VERY RAW AND DIRTY 
+		Utility script displaying the data in generated NETCDF4 files 
+		in GrADS
+		NOTE: VERY RAW AND DIRTY 
 
 	Input::
-	    dataset: integer representing post-processed MERG (1) or TRMM data (2) or original MERG(3)
-	    string: Directory to the location of the raw (MERG) files, preferably zipped
+		dataset: integer representing post-processed MERG (1) or TRMM data (2) or original MERG(3)
+		string: Directory to the location of the raw (MERG) files, preferably zipped
 		
 	Output::
 	   images in location as specfied in the code
 
 	Assumptions::
 	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-	     have been installed on the system and the user can access 
+		 have been installed on the system and the user can access 
 	   2 User can write files in location where script is being called	
 	'''	
 	
@@ -2190,7 +2202,7 @@ def postProcessingNetCDF(dataset, dirName = None):
 	if dataset == 1:
 		var = 'ch4'
 		ctlTitle = 'TITLE MCC search Output Grid: Time  lat lon'
-		ctlLine = 'brightnesstemp=\>ch4     1  t,y,x    brightnesstemperature'
+		ctlLine = 'brightnesstemp=\>ch4	 1  t,y,x	brightnesstemperature'
 		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
 		gsFile = coreDir+"/../GrADSscripts/cs2.gs"
 		sologsFile = coreDir+"/../GrADSscripts/mergeCE.gs"
@@ -2199,7 +2211,7 @@ def postProcessingNetCDF(dataset, dirName = None):
 	elif dataset ==2:
 		var = 'precipAcc'
 		ctlTitle ='TITLE  TRMM MCS accumulated precipitation search Output Grid: Time  lat lon '
-		ctlLine = 'precipitation_Accumulation=\>precipAcc     1  t,y,x    precipAccu'
+		ctlLine = 'precipitation_Accumulation=\>precipAcc	 1  t,y,x	precipAccu'
 		origsFile = coreDir+"/../GrADSscripts/cs3.gs"
 		gsFile = coreDir+"/../GrADSscripts/cs4.gs"
 		sologsFile = coreDir+"/../GrADSscripts/TRMMCE.gs"
@@ -2208,7 +2220,7 @@ def postProcessingNetCDF(dataset, dirName = None):
 	elif dataset ==3:
 		var = 'ch4'
 		ctlTitle = 'TITLE MERG DATA'
-		ctlLine = 'ch4=\>ch4     1  t,y,x    brightnesstemperature'
+		ctlLine = 'ch4=\>ch4	 1  t,y,x	brightnesstemperature'
 		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
 		sologsFile = coreDir+"/../GrADSscripts/infrared.gs"
 		lineNum = 54			
@@ -2415,15 +2427,15 @@ def tempMaskedImages(imgFilename):
 		To generate temperature-masked images for a first pass verification
 
 	Input::
-	    imgFilename: filename for the gif file
+		imgFilename: filename for the gif file
 		
 	Output::
-	    None - Gif images for each file of T_bb less than 250K are generated in folder called mergImgs
+		None - Gif images for each file of T_bb less than 250K are generated in folder called mergImgs
 
 	Assumptions::
 	   Same as for preprocessingMERG
 	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-	     have been installed on the system and the user can access 
+		 have been installed on the system and the user can access 
 	   2 User can write files in location where script is being called
 	   3 the files havent been unzipped	
 	'''
@@ -2445,7 +2457,7 @@ def tempMaskedImages(imgFilename):
 	return
 #******************************************************************
 # 
-#             METRICS FUNCTIONS FOR MERG.PY
+#			 METRICS FUNCTIONS FOR MERG.PY
 # TODO: rewrite these metrics so that they use the data from the 
 #	file instead of the graph as this reduce mem resources needed
 #	
@@ -2523,7 +2535,7 @@ def longestDuration(allMCCtimes):
 
 	Output::
 		an integer - lenMCC: representing the duration of the longest MCC found
-	       a list of strings - longestMCC: representing the nodes of longest MCC
+		   a list of strings - longestMCC: representing the nodes of longest MCC
 
 	Assumptions:: 
 
@@ -2551,7 +2563,7 @@ def shortestDuration(allMCCtimes):
 			  of MCC temporal details for each MCC in the period considered
 
 	Output::an integer - lenMCC: representing the duration of the shortest MCC found
-	        a list of strings - longestMCC: representing the nodes of shortest MCC
+			a list of strings - longestMCC: representing the nodes of shortest MCC
 
 	Assumptions:: 
 
@@ -2577,7 +2589,7 @@ def averageDuration(allMCCtimes):
 			  of MCC temporal details for each MCC in the period considered
 
 	Output::a floating-point representing the average duration of a MCC in the period
-	        
+			
 	Assumptions:: 
 
 	'''
@@ -2614,7 +2626,7 @@ def averageFeatureSize(finalMCCList):
 	Input:: a list of list of strings - finalMCCList: a list of list of nodes representing a MCC
 	
 	Output::a floating-point representing the average area of a MCC in the period
-	        
+			
 	Assumptions:: 
 
 	'''
@@ -2643,7 +2655,7 @@ def commonFeatureSize(finalMCCList):
 	
 	Output::
 		a floating-point representing the average area of a MCC in the period
-	        
+			
 	Assumptions:: 
 
 	'''
@@ -2917,7 +2929,7 @@ def displayPrecip(finalMCCList):
 			title = 'Precipitation distribution of the MCS '
 			fig,ax = plt.subplots(1, facecolor='white', figsize=(20,7))
 
-			cmap = cm.jet
+			cmap = plt.jet
 			ax.scatter(x, y, s=partialArea,  c= colorBarTime, edgecolors='none', marker='o', cmap =cmap)  
 			colorBarTime=[]
 			colorBarTime =list(set(timeList))
@@ -3012,12 +3024,12 @@ def plotPrecipHistograms(finalMCCList):
 						# Set the formatter
 						plt.gca().yaxis.set_major_formatter(formatter)
 						plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
-	    				imgFilename = MAINDIRECTORY+'/images/'+str(thisTime)+eachNode['uniqueID']+'TRMMMCS.gif'
-	    				
-	    				plt.savefig(imgFilename, transparent=True)
-	    				precip =[]
-	    				
-	    			# ------ NETCDF File get info ------------------------------------
+						imgFilename = MAINDIRECTORY+'/images/'+str(thisTime)+eachNode['uniqueID']+'TRMMMCS.gif'
+						
+						plt.savefig(imgFilename, transparent=True)
+						precip =[]
+						
+					# ------ NETCDF File get info ------------------------------------
 					thisFileName = MAINDIRECTORY+'/TRMMnetcdfCEs/TRMM' + str(thisTime).replace(" ", "_") + eachNode['uniqueID'] +'.nc'
 					TRMMData = Dataset(thisFileName,'r', format='NETCDF4')
 					precipRate = TRMMData.variables['precipitation_Accumulation'][:,:,:]
@@ -3046,8 +3058,8 @@ def plotHistogram(aList, aTitle, aLabel):
 
 	Input:: 
 		aList: the list of floating points representing values for e.g. averageArea, averageDuration, etc.
-	    aTitle: a string representing the title and the name of the plot e.g. "Average area [km^2]"
-	    aLabel: a string representing the x axis info i.e. the data that is being passed and the units e.g. "Area km^2"
+		aTitle: a string representing the title and the name of the plot e.g. "Average area [km^2]"
+		aLabel: a string representing the x axis info i.e. the data that is being passed and the units e.g. "Area km^2"
 
 	Output:: 
 		plots (gif files)
@@ -3143,7 +3155,7 @@ def plotAccTRMM (finalMCCList):
 				accuPrecipRate += precipRate
 
 		imgFilename = MAINDIRECTORY+'/images/MCSaccu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.gif'
-        #create new netCDF file
+		#create new netCDF file
 		accuTRMMFile = MAINDIRECTORY+'/TRMMnetcdfCEs/accu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.nc'
 		#write the file
 		accuTRMMData = Dataset(accuTRMMFile, 'w', format='NETCDF4')
@@ -3190,37 +3202,37 @@ def plotAccTRMM (finalMCCList):
 		replaceExpXDef = 'echo XDEF '+ str(nxgrdTRMM) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrdTRMM) +' >> acc.ctl'
 		subprocess.call(replaceExpXDef, shell=True)
 		#subprocess.call('echo "XDEF 413 LINEAR  -9.984375 0.036378335 " >> acc.ctl', shell=True)
-        #subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
-        replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
-        subprocess.call(replaceExpYDef, shell=True)
-        subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
-        subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
-        #subprocess.call(replaceExpTdef, shell=True)
-        subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
-        subprocess.call('echo "precipitation_Accumulation=>precipAcc     1  t,y,x    precipAccu" >> acc.ctl', shell=True)
-        subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
+		#subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
+		replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
+		subprocess.call(replaceExpYDef, shell=True)
+		subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
+		subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
+		#subprocess.call(replaceExpTdef, shell=True)
+		subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
+		subprocess.call('echo "precipitation_Accumulation=>precipAcc	 1  t,y,x	precipAccu" >> acc.ctl', shell=True)
+		subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
 
-        #generate GrADS script
-        subprocess.call('rm accuTRMM1.gs', shell=True)
-        subprocess.call('touch accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'reinit''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'open acc.ctl ''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'set grads off''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'set mpdset hires''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'set gxout shaded''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'set datawarn off''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'d precipacc''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'draw title TRMM Accumulated Precipitation [mm]''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'run cbarn''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800 white''\'" >> accuTRMM1.gs', shell=True)
-        subprocess.call('echo "''\'quit''\'" >> accuTRMM1.gs', shell=True)
-        gradscmd = 'grads -blc ' + '\'run accuTRMM1.gs''\''
-        subprocess.call(gradscmd, shell=True)
-        sys.exit()
+		#generate GrADS script
+		subprocess.call('rm accuTRMM1.gs', shell=True)
+		subprocess.call('touch accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'reinit''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'open acc.ctl ''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'set grads off''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'set mpdset hires''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'set gxout shaded''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'set datawarn off''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'d precipacc''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'draw title TRMM Accumulated Precipitation [mm]''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'run cbarn''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800 white''\'" >> accuTRMM1.gs', shell=True)
+		subprocess.call('echo "''\'quit''\'" >> accuTRMM1.gs', shell=True)
+		gradscmd = 'grads -blc ' + '\'run accuTRMM1.gs''\''
+		subprocess.call(gradscmd, shell=True)
+		sys.exit()
 
-        #clean up
-        subprocess.call('rm accuTRMM1.gs', shell=True)
-        subprocess.call('rm acc.ctl', shell=True)
+		#clean up
+		subprocess.call('rm accuTRMM1.gs', shell=True)
+		subprocess.call('rm acc.ctl', shell=True)
 	
 	return	
 #******************************************************************
@@ -3328,7 +3340,7 @@ def plotAccuInTimeRange(starttime, endtime):
 	subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
 	subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
 	subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
-	subprocess.call('echo "precipitation_Accumulation=>precipAcc     1  t,y,x    precipAccu" >> acc.ctl', shell=True)
+	subprocess.call('echo "precipitation_Accumulation=>precipAcc	 1  t,y,x	precipAccu" >> acc.ctl', shell=True)
 	subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
 	#generate GrADS script
 	imgFilename = MAINDIRECTORY+'/images/accu'+starttime+'-'+endtime+'.gif'
@@ -3715,33 +3727,32 @@ def colorbar_index(ncolors, nlabels, cmap):
 	return
 #******************************************************************
 def cmap_discretize(cmap, N):
-    '''
-    Taken from: http://stackoverflow.com/questions/18704353/correcting-matplotlib-colorbar-ticks
-    http://wiki.scipy.org/Cookbook/Matplotlib/ColormapTransformations
-    Return a discrete colormap from the continuous colormap cmap.
+	'''
+	Taken from: http://stackoverflow.com/questions/18704353/correcting-matplotlib-colorbar-ticks
+	http://wiki.scipy.org/Cookbook/Matplotlib/ColormapTransformations
+	Return a discrete colormap from the continuous colormap cmap.
 
-        cmap: colormap instance, eg. cm.jet. 
-        N: number of colors.
+		cmap: colormap instance, eg. cm.jet. 
+		N: number of colors.
 
-    Example
-        x = resize(arange(100), (5,100))
-        djet = cmap_discretize(cm.jet, 5)
-        imshow(x, cmap=djet)
-    '''
+	Example
+		x = resize(arange(100), (5,100))
+		djet = cmap_discretize(cm.jet, 5)
+		imshow(x, cmap=djet)
+	'''
 
-    if type(cmap) == str:
-        cmap = plt.get_cmap(cmap)
-    colors_i = np.concatenate((np.linspace(0, 1., N), (0.,0.,0.,0.)))
-    colors_rgba = cmap(colors_i)
-    indices = np.linspace(0, 1., N+1)
-    cdict = {}
-    for ki,key in enumerate(('red','green','blue')):
-        cdict[key] = [ (indices[i], colors_rgba[i-1,ki], colors_rgba[i,ki])
-                       for i in xrange(N+1) ]
-    # Return colormap object.
-    return mcolors.LinearSegmentedColormap(cmap.name + "_%d"%N, cdict, 1024)
+	if type(cmap) == str:
+		cmap = plt.get_cmap(cmap)
+	colors_i = np.concatenate((np.linspace(0, 1., N), (0.,0.,0.,0.)))
+	colors_rgba = cmap(colors_i)
+	indices = np.linspace(0, 1., N+1)
+	cdict = {}
+	for ki,key in enumerate(('red','green','blue')):
+		cdict[key] = [ (indices[i], colors_rgba[i-1,ki], colors_rgba[i,ki])
+					   for i in xrange(N+1) ]
+	# Return colormap object.
+	return mcolors.LinearSegmentedColormap(cmap.name + "_%d"%N, cdict, 1024)
 #******************************************************************
 
 
 			
-

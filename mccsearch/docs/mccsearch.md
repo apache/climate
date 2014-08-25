@@ -9,14 +9,14 @@ The data is read from netCDF files into arrays with the dimensions time, latitud
 
 ##What is needed?
  * Python 2.7.4 (We used Anaconda 1.5.1 64 bit libraries, which installed most of the dependencies.) Other module dependences: 
- * Nio
- * netCDF
- * sciPy
- * NumPy
- * Networkx
- * matplotlib
- * GrADS (We used OpenGrADS grads2 Version 2.0.1.oga.1)
- * LATS4D
+ * Nio - https://www.pyngl.ucar.edu/Nio.shtml
+ * netCDF - http://www.unidata.ucar.edu/software/netcdf/
+ * sciPy - http://www.scipy.org/scipylib/index.html
+ * NumPy - http://www.scipy.org/scipylib/download.html
+ * Networkx - https://networkx.github.io/download.html
+ * matplotlib - http://matplotlib.org/downloads.html
+ * GrADS (We used OpenGrADS grads2 Version 2.0.1.oga.1) - http://sourceforge.net/projects/opengrads/files/
+ * LATS4D - http://sourceforge.net/projects/opengrads/files/
 
 ##Download the source code and store in a folder
  * mccSearch.py contains all the function needed 
@@ -24,7 +24,7 @@ The data is read from netCDF files into arrays with the dimensions time, latitud
  * process.py contains some needed functions (from older version of Apache OCW)
  * file.py contains some needed functions (from older version of Apache OCW)
  * mainProg.py contains a sample of the  general workflow of the order the modules should be called. There are three main inputs you will have to supply:
-     * mainDirStr : this is the directory where you wish all the output files –images, textfiles, clipped netCDF files- to be store
+     * mainDirStr : this is the directory where you wish all the output files –images, textfiles, clipped netCDF files- to be stored
      * TRMMdirName : this is the directory where the original TRMM data in netCDF format is stored
      * CEoriDirName : this is the directory where the original MERG data in netCDF format is stored
  * Store the GrADsScripts folder (and contents) in a separate folder in the same main directory as the source code folder.  
