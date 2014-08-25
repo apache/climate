@@ -1,25 +1,36 @@
+#
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
 """
-Module for handling data input files.  Requires PyNIO and Numpy be 
+Module for handling data input files.  Requires netCDF and Numpy be 
 installed.
 
-This module can easily open NetCDF, HDF and Grib files.  Search the PyNIO
+This module can easily open NetCDF, HDF and Grib files.  Search the netCDF4
 documentation for a complete list of supported formats.
 """
 
 from os import path
-
-try:
-    import Nio
-except ImportError:
-    import nio as Nio
-
+import netCDF4
 import numpy as np
 import numpy.ma as ma
 import sys
-import process #KDW added 
-#from toolkit import process
-#from utils import fortranfile
-#from utils import misc
+
+from toolkit import process
+from utils import fortranfile
+from utils import misc
 
 
 VARIABLE_NAMES = {'time': ['time', 'times', 'date', 'dates', 'julian'],
@@ -48,15 +59,14 @@ def getVariableByType(filename, variableType):
         name match cannot be found.
     """
     try:
-        f = Nio.open_file(filename)
+        f = netCDF4.Dataset(filename, mode='r')
     except:
-        #print 'PyNio had an issue opening the filename (%s) you provided' % filename
-        print "NIOError:", sys.exc_info()[0]
+        print "netCDF4Error:", sys.exc_info()[0]
         raise
     
     variableKeys = f.variables.keys()
     f.close()
-    variableKeys = [variable.lower() for variable in variableKeys]
+    variableKeys = [variable.encode().lower() for variable in variableKeys]
     variableMatch = VARIABLE_NAMES[variableType]
 
     commonVariables = list(set(variableKeys).intersection(variableMatch)) 
@@ -80,10 +90,9 @@ def getVariableRange(filename, variableName):
         variableRange - tuple of order (variableMin, variableMax)
     """
     try:
-        f = Nio.open_file(filename)
+        f = netCDF4.Dataset(filename, mode='r')
     except:
-        #print 'PyNio had an issue opening the filename (%s) you provided' % filename
-        print "NIOError:", sys.exc_info()[0]
+        print "netCDF4Error:", sys.exc_info()[0]
         raise
     
     varArray = f.variables[variableName][:]
@@ -121,13 +130,9 @@ def read_data_from_file_list(filelist, myvar, timeVarName, latVarName, lonVarNam
     #    ii) find out how many timesteps in the file 
     #        (assume same ntimes in each file in list)
     #     -allows you to create an empty array to store variable data for all times
-    tmp = Nio.open_file(filename)
+    tmp = netCDF4.Dataset(filename, mode='r')
     latsraw = tmp.variables[latVarName][:]
     lonsraw = tmp.variables[lonVarName][:]
-    lonsraw[lonsraw > 180] = lonsraw[lonsraw > 180] - 360.  # convert to -180,180 if necessary
-
-    """TODO:  Guard against case where latsraw and lonsraw are not the same dim?"""
-   
     if(latsraw.ndim == 1):
         lon, lat = np.meshgrid(lonsraw, latsraw)
     if(latsraw.ndim == 2):
@@ -137,7 +142,7 @@ def read_data_from_file_list(filelist, myvar, timeVarName, latVarName, lonVarNam
     timesraw = tmp.variables[timeVarName]
     ntimes = len(timesraw)
     
-    print 'Lats and lons read in for first file in filelist', ntimes
+    print 'Lats and lons read in for first file in filelist'
 
     # Create a single empty masked array to store model data from all files
     t2store = ma.zeros((ntimes * len(filelist), len(lat[:, 0]), len(lon[0, :])))
@@ -151,16 +156,16 @@ def read_data_from_file_list(filelist, myvar, timeVarName, latVarName, lonVarNam
     #      as no assumption made that same number of times in each file...
 
 
-    for ifile in filelist:
+    for i, ifile in enumerate(filelist):
 
         #print 'Loading data from file: ',filelist[i]
-        f = Nio.open_file(ifile)
-        t2raw = f.variables[myvar][:]
+        f = netCDF4.Dataset(ifile, mode='r')
+        t2raw = ma.array(f.variables[myvar][:])
         timesraw = f.variables[timeVarName]
         time = timesraw[:]
         ntimes = len(time)
         print 'file= ', i, 'ntimes= ', ntimes, filelist[i]
-        print '\nt2raw shape: ', t2raw.shape
+        print 't2raw shape: ', t2raw.shape
         
         # Flatten dimensions which needn't exist, i.e. level 
         #   e.g. if for single level then often data have 4 dimensions, when 3 dimensions will do.
@@ -175,32 +180,26 @@ def read_data_from_file_list(filelist, myvar, timeVarName, latVarName, lonVarNam
         if t2tmp.ndim == 2:
             t2tmp = np.expand_dims(t2tmp, 0)
 
-        print "\n timesaccu is: ", timesaccu, time,timesaccu + np.arange(ntimes)
-
         t2store[timesaccu + np.arange(ntimes), :, :] = t2tmp[:, :, :]
         timestore[timesaccu + np.arange(ntimes)] = time
-        timesaccu = timesaccu + ntimes
-        print "\n ***timesaccu is: ", timesaccu
+        timesaccu += ntimes
         f.close()
-        i += 1 
-      
-    print '\nData read in successfully with dimensions: ', t2store.shape, timesaccu
+        
+    print 'Data read in successfully with dimensions: ', t2store.shape
     
     # TODO: search for duplicated entries (same time) and remove duplicates.
     # Check to see if number of unique times == number of times, if so then no problem
 
     if(len(np.unique(timestore)) != len(np.where(timestore != 0)[0].view())):
-        print '\nWARNING: Possible duplicated times'
+        print 'WARNING: Possible duplicated times'
 
     # Decode model times into python datetime objects. Note: timestore becomes a list (no more an array) here
     timestore, _ = process.getModelTimes(filename, timeVarName)
     
-    data_dict = {}
-    data_dict['lats'] = lat
-    data_dict['lons'] = lon
-    data_dict['times'] = timestore
-    data_dict['data'] = t2store
-    #return lat, lon, timestore, t2store
+    # Make sure latlon grid is monotonically increasing and that the domains
+    # are correct
+    lat, lon, t2store = checkLatLon(lat, lon, t2store)
+    data_dict = {'lats': lat, 'lons': lon, 'times': timestore, 'data': t2store}
     return data_dict
 
 def select_var_from_file(myfile, fmt='not set'):
@@ -209,7 +208,7 @@ def select_var_from_file(myfile, fmt='not set'):
      
       Input:
          myfile - filename
-         fmt - (optional) specify fileformat for PyNIO if filename suffix is non-standard
+         fmt - (optional) specify fileformat for netCDF4 if filename suffix is non-standard
     
       Output:
          myvar - variable name in file
@@ -220,12 +219,12 @@ def select_var_from_file(myfile, fmt='not set'):
     print fmt
     
     if fmt == 'not set':
-        f = Nio.open_file(myfile)
+        f = netCDF4.Dataset(myfile, mode='r')
     
     if fmt != 'not set':
-        f = Nio.open_file(myfile, format=fmt)
+        f = netCDF4.Dataset(myfile, mode='r', format=fmt)
     
-    keylist = f.variables.keys()
+    keylist = [key.encode().lower() for key in f.variables.keys()]
     
     i = 0
     for v in keylist:
@@ -251,9 +250,8 @@ def select_var_from_wrf_file(myfile):
         Peter Lean  September 2010
     '''
 
-    f = Nio.open_file(myfile, format='nc')
-    
-    keylist = f.variables.keys()
+    f = netCDF4.Dataset(myfile, mode='r', format='NETCDF4')
+    keylist = [key.encode().lower() for key in f.variables.keys()]
 
     i = 0
     for v in keylist:
@@ -270,68 +268,50 @@ def select_var_from_wrf_file(myfile):
     
     return mywrfvar
 
-def read_lolaT_from_file(filename, latVarName, lonVarName, timeVarName, file_type):
+def read_data_from_one_file(ifile, myvar, latVarName, lonVarName, timeVarName, file_type):
     """
-    Function that will return lat, lon, and time arrays
+    Purpose::
+        Read in data from one file at a time
     
-    Input::
-        filename - the file to inspect
-        latVarName - name of the Latitude Variable
+    Input::   
+        filelist - list of filenames (including path)
+        myvar - string containing name of variable to load in (as it appears in file)s
         lonVarName - name of the Longitude Variable
         timeVarName - name of the Time Variable
-        fileType = type of file we are trying to parse
-    
-    Output::
-        lat - MESH GRID of Latitude values with shape (nx, ny)
-        lon - MESH GRID of Longitude values with shape (nx, ny)
-        timestore - Python list of Datetime objects
+        fileType - type of file we are trying to parse
         
-        MESHGRID docs: http://docs.scipy.org/doc/numpy/reference/generated/numpy.meshgrid.html
+     Output::  
+        lat, lon - 2D arrays of latitude and longitude values
+        times - list of times
+        t2store - numpy array containing data from the file for the requested variable
+        varUnit - units for the variable given by t2store  
+    """           
+    f = netCDF4.Dataset(ifile, mode='r')
+    try:
+        varUnit = f.variables[myvar].units.encode().upper()
+    except:
+        varUnit = raw_input('Enter the model variable unit: \n> ').upper()
+    t2raw = ma.array(f.variables[myvar][:])
+    t2tmp = t2raw.squeeze()
+    if t2tmp.ndim == 2:
+        t2tmp = np.expand_dims(t2tmp, 0)
         
-    """
-
-    tmp = Nio.open_file(filename, format=file_type)
-    lonsraw = tmp.variables[lonVarName][:]
-    latsraw = tmp.variables[latVarName][:]
-    lonsraw[lonsraw > 180] = lonsraw[lonsraw > 180] - 360.  # convert to -180,180 if necessary
+    lonsraw = f.variables[lonVarName][:]
+    latsraw = f.variables[latVarName][:]
     if(latsraw.ndim == 1):
         lon, lat = np.meshgrid(lonsraw, latsraw)
     if(latsraw.ndim == 2):
         lon = lonsraw
         lat = latsraw
-    timestore, _ = process.getModelTimes(filename, timeVarName)
-    print '  read_lolaT_from_file: Lats, lons and times read in for the model domain'
-    return lat, lon, timestore
-
-def read_data_from_one_file(ifile, myvar, timeVarName, lat, file_type):
-    ##################################################################################
-    # Read in data from one file at a time
-    # Input:   filelist - list of filenames (including path)
-    #          myvar    - string containing name of variable to load in (as it appears in file)
-    # Output:  lat, lon - 2D array of latitude and longitude values
-    #          times    - list of times
-    #          t2store  - numpy array containing data from all files    
-    # Modified from read_data_from_file_list to read data from multiple models into a 4-D array
-    # 1. The code now processes model data that completely covers the 20-yr period. Thus,
-    #    all model data must have the same time levels (ntimes). Unlike in the oroginal, ntimes
-    #    is fixed here.
-    # 2. Because one of the model data exceeds 240 mos (243 mos), the model data must be
-    #    truncated to the 240 mons using the ntimes determined from the first file.
-    ##################################################################################
-    f = Nio.open_file(ifile)
-    try:
-        varUnit = f.variables[myvar].units.upper()
-    except:
-        varUnit = raw_input('Enter the model variable unit: \n> ').upper()
-    t2raw = f.variables[myvar][:]
-    t2tmp = t2raw.squeeze()
-    if t2tmp.ndim == 2:
-        t2tmp = np.expand_dims(t2tmp, 0)
-    t2tmp = t2tmp
+    
     f.close()
     print '  success read_data_from_one_file: VarName=', myvar, ' Shape(Full)= ', t2tmp.shape, ' Unit= ', varUnit
     timestore = process.decode_model_timesK(ifile, timeVarName, file_type)
-    return timestore, t2tmp, varUnit
+    
+    # Make sure latlon grid is monotonically increasing and that the domains
+    # are correct
+    lat, lon, t2store = checkLatLon(lat, lon, t2tmp)
+    return lat, lon, timestore, t2store, varUnit
 
 def findTimeVariable(filename):
     """
@@ -343,12 +323,12 @@ def findTimeVariable(filename):
             variableNameList - list of variable names from the input filename
     """
     try:
-        f = Nio.open_file(filename, mode='r')
+        f = netCDF4.Dataset(filename, mode='r')
     except:
         print("Unable to open '%s' to try and read the Time variable" % filename)
         raise
 
-    variableNameList = f.variables.keys()
+    variableNameList = [variable.encode() for variable in f.variables.keys()]
     # convert all variable names into lower case
     varNameListLowerCase = [x.lower() for x in variableNameList]
 
@@ -383,12 +363,12 @@ def findLatLonVarFromFile(filename):
         -lonMax
     """
     try:
-        f = Nio.open_file(filename, mode='r')
+        f = netCDF4.Dataset(filename, mode='r')
     except:
         print("Unable to open '%s' to try and read the Latitude and Longitude variables" % filename)
         raise
 
-    variableNameList = f.variables.keys()
+    variableNameList = [variable.encode() for variable in f.variables.keys()]
     # convert all variable names into lower case
     varNameListLowerCase = [x.lower() for x in variableNameList]
 
@@ -449,16 +429,17 @@ def read_data_from_file_list_K(filelist, myvar, timeVarName, latVarName, lonVarN
     #    i)  read in lats, lons
     #    ii) find out how many timesteps in the file (assume same ntimes in each file in list)
     #     -allows you to create an empty array to store variable data for all times
-    tmp = Nio.open_file(filelist[0], format=file_type)
+    tmp = netCDF4.Dataset(filelist[0], mode='r', format=file_type)
     latsraw = tmp.variables[latVarName][:]
     lonsraw = tmp.variables[lonVarName][:]
-    lonsraw[lonsraw > 180] = lonsraw[lonsraw > 180] - 360.  # convert to -180,180 if necessary
+    timesraw = tmp.variables[timeVarName]
+    
     if(latsraw.ndim == 1):
         lon, lat = np.meshgrid(lonsraw, latsraw)
-    if(latsraw.ndim == 2):
-        lon = lonsraw; lat = latsraw
-    
-    timesraw = tmp.variables[timeVarName]
+        
+    elif(latsraw.ndim == 2):
+        lon = lonsraw
+        lat = latsraw
     ntimes = len(timesraw); nygrd = len(lat[:, 0]); nxgrd = len(lon[0, :])
     
     print 'Lats and lons read in for first file in filelist'
@@ -474,16 +455,13 @@ def read_data_from_file_list_K(filelist, myvar, timeVarName, latVarName, lonVarN
     #  NB. this method allows for missing times in data files 
     #      as no assumption made that same number of times in each file...
 
-    i = 0
-    for ifile in filelist:
+    for i, ifile in enumerate(filelist):
         #print 'Loading data from file: ',filelist[i]
-        f = Nio.open_file(ifile)
-        t2raw = f.variables[myvar][:]
+        f = netCDF4.Dataset(ifile, mode='r')
+        t2raw = ma.array(f.variables[myvar][:])
         timesraw = f.variables[timeVarName]
-        #time = timesraw[0:ntimes]
-        ntimes = len(timesraw)
         #ntimes=len(time)
-        print 'file= ',i,' ntimes= ',ntimes,filelist[i]
+        #print 'file= ',i,'ntimes= ',ntimes,filelist[i]
         ## Flatten dimensions which needn't exist, i.e. level 
         ##   e.g. if for single level then often data have 4 dimensions, when 3 dimensions will do.
         ##  Code requires data to have dimensions, (time,lat,lon)
@@ -493,18 +471,20 @@ def read_data_from_file_list_K(filelist, myvar, timeVarName, latVarName, lonVarN
         if t2tmp.ndim == 2:
             t2tmp = np.expand_dims(t2tmp, 0)
         #t2store[timesaccu+np.arange(ntimes),:,:]=t2tmp[0:ntimes,:,:]
-        t2store[i, 0:(ntimes-1), :, :] = t2tmp[0:(ntimes-1), :, :]
+        t2store[i, 0:ntimes, :, :] = t2tmp[0:ntimes, :, :]
         #timestore[timesaccu+np.arange(ntimes)]=time
         #timesaccu=timesaccu+ntimes
         f.close()
-        i += 1 
 
     print 'Data read in successfully with dimensions: ', t2store.shape
     
     # Decode model times into python datetime objects. Note: timestore becomes a list (no more an array) here
     ifile = filelist[0]
     timestore, _ = process.getModelTimes(ifile, timeVarName)
-    
+
+    # Make sure latlon grid is monotonically increasing and that the domains
+    # are correct
+    lat, lon, t2store = checkLatLon(lat, lon, t2store)
     return lat, lon, timestore, t2store
 
 def find_latlon_ranges(filelist, lat_var_name, lon_var_name):
@@ -524,7 +504,7 @@ def find_latlon_ranges(filelist, lat_var_name, lon_var_name):
     filename = filelist[0]
     
     try:
-        f = Nio.open_file(filename)
+        f = netCDF4.Dataset(filename, mode='r')
         
         lats = f.variables[lat_var_name][:]
         latMin = lats.min()
@@ -622,30 +602,30 @@ def writeNCfile(fileName, numSubRgn, lons, lats, obsData, mdlData, obsRgnAvg, md
     dimY = mdlData.shape[2]      # y-dimension
     dimX = mdlData.shape[3]      # x-dimension
     dimR = obsRgnAvg.shape[1]    # the number of subregions
-    f = Nio.open_file(fileName, mode='w', format='nc')
+    f = netCDF4.Dataset(fileName, mode='w', format='NETCDF4')
     print mdlRgnAvg.shape, dimM, dimR, dimT
     #create global attributes
-    f.globalAttName = ''
+    f.description = ''
     # create dimensions
     print 'Creating Dimensions within the NetCDF Object...'
-    f.create_dimension('unity', 1)
-    f.create_dimension('time', dimT)
-    f.create_dimension('west_east', dimX)
-    f.create_dimension('south_north', dimY)
-    f.create_dimension('obs', dimO)
-    f.create_dimension('models', dimM)
+    f.createDimension('unity', 1)
+    f.createDimension('time', dimT)
+    f.createDimension('west_east', dimX)
+    f.createDimension('south_north', dimY)
+    f.createDimension('obs', dimO)
+    f.createDimension('models', dimM)
         
     # create the variable (real*4) to be written in the file
     print 'Creating Variables...'
-    f.create_variable('lon', 'd', ('south_north', 'west_east'))
-    f.create_variable('lat', 'd', ('south_north', 'west_east'))
-    f.create_variable('oDat', 'd', ('obs', 'time', 'south_north', 'west_east'))
-    f.create_variable('mDat', 'd', ('models', 'time', 'south_north', 'west_east'))
+    f.createVariable('lon', 'd', ('south_north', 'west_east'))
+    f.createVariable('lat', 'd', ('south_north', 'west_east'))
+    f.createVariable('oDat', 'd', ('obs', 'time', 'south_north', 'west_east'))
+    f.createVariable('mDat', 'd', ('models', 'time', 'south_north', 'west_east'))
     
     if subRegions:
-        f.create_dimension('regions', dimR)
-        f.create_variable('oRgn', 'd', ('obs', 'regions', 'time'))
-        f.create_variable('mRgn', 'd', ('models', 'regions', 'time'))
+        f.createDimension('regions', dimR)
+        f.createVariable('oRgn', 'd', ('obs', 'regions', 'time'))
+        f.createVariable('mRgn', 'd', ('models', 'regions', 'time'))
         f.variables['oRgn'].varAttName = 'Observation time series: Subregions'
         f.variables['mRgn'].varAttName = 'Model time series: Subregions'
 
@@ -664,33 +644,140 @@ def writeNCfile(fileName, numSubRgn, lons, lats, obsData, mdlData, obsRgnAvg, md
     f.variables['mDat'].varAttName = 'Model time series: entire domain'
 
     # assign the values to the variable and write it
-    f.variables['lon'][:, :] = lons
-    f.variables['lat'][:, :] = lats
+    f.variables['lon'][:] = lons[:]
+    f.variables['lat'][:] = lats[:]
     if subRegions:
-        f.variables['oRgn'][:, :, :] = obsRgnAvg
-        f.variables['mRgn'][:, :, :] = mdlRgnAvg
+        f.variables['oRgn'][:] = obsRgnAvg[:]
+        f.variables['mRgn'][:] = mdlRgnAvg[:]
 
     f.close()
 
 def loadDataIntoNetCDF(fileObject, datasets, dataArray, dataType):
     """
     Input::
-        fileObject - PyNIO file object data will be loaded into
+        fileObject - netCDF4 file object data will be loaded into
         datasets - List of dataset names
         dataArray - Multi-dimensional array of data to be loaded into the NetCDF file
         dataType - String with value of either 'Model' or 'Observation'
     Output::
-        No return value.  PyNIO file object is updated in place
+        No return value.  netCDF4 file object is updated in place
     """
     datasetCount = 0
-    for dataset in datasets:
+    for datasetCount, dataset in enumerate(datasets):
         if dataType.lower() == 'observation':
             datasetName = dataset.replace(' ','')
         elif dataType.lower() == 'model':
             datasetName = path.splitext(path.basename(dataset))[0]
         print "Creating variable %s" % datasetName
-        fileObject.create_variable(datasetName, 'd', ('time', 'south_north', 'west_east'))
+        fileObject.createVariable(datasetName, 'd', ('time', 'south_north', 'west_east'))
         fileObject.variables[datasetName].varAttName = 'Obseration time series: entire domain'
         print 'Loading values into %s' % datasetName
-        fileObject.variables[datasetName].assign_value(dataArray[datasetCount,:,:,:])
-        datasetCount += 1
+        fileObject.variables[datasetName][:] = dataArray[datasetCount,:,:,:]
+
+def checkLatLon(latsin, lonsin, datain):
+    """
+    Purpose::
+        Checks whether latitudes and longitudes are monotonically increasing
+        within the domains [-90, 90) and [-180, 180) respectively, and rearranges the input data
+        accordingly if they are not.
+    
+    Input::
+        latsin - Array of latitudes read from a raw netcdf file
+        lonsin - Array of longitudes read from a raw netcdf file
+        datain  - Array of data values read from a raw netcdf file.
+                   The shape is assumed to be (..., nLat, nLon).
+        
+    Output::
+        latsout - 2D array of (rearranged) latitudes
+        lonsout - 2D array of (rearranged) longitudes
+        dataout - Array of (rearranged) data
+    """
+    # Avoid unnecessary shifting if all lons are higher than 180
+    if lonsin.min() > 180:
+        lonsin -= 360
+        
+    # Make sure lats and lons are monotonically increasing
+    latsDecreasing = np.diff(latsin[:, 0]) < 0
+    lonsDecreasing = np.diff(lonsin[0]) < 0
+    
+    # If all values are decreasing then they just need to be reversed
+    latsReversed, lonsReversed = latsDecreasing.all(), lonsDecreasing.all()
+    
+    # If the lat values are unsorted then raise an exception
+    if not latsReversed and latsDecreasing.any():
+        raise ValueError('Latitudes must be monotonically increasing.')
+    
+    # Perform same checks now for lons
+    if not lonsReversed and lonsDecreasing.any():
+        raise ValueError('Longitudes must be monotonically increasing.')
+    
+    # Also check if lons go from [0, 360), and convert to [-180, 180)
+    # if necessary
+    lonsShifted = lonsin.max() > 180
+    latsout, lonsout, dataout = latsin[:], lonsin[:], datain[:]
+    # Now correct data if latlon grid needs to be shifted    
+    if latsReversed:
+        latsout = latsout[::-1]
+        dataout = dataout[..., ::-1, :]
+        
+    if lonsReversed:
+        lonsout = lonsout[..., ::-1]
+        dataout = dataout[..., ::-1]
+        
+    if lonsShifted:
+        lat1d = latsout[:, 0]
+        dataout, lon1d = shiftgrid(180, dataout, lonsout[0], start=False)
+        lonsout, latsout = np.meshgrid(lon1d, lat1d) 
+        
+    return latsout, lonsout, dataout
+    
+def shiftgrid(lon0, datain, lonsin, start= True, cyclic=360.0):
+    """
+    Purpose::
+        Shift global lat/lon grid east or west. This function is taken directly
+        from the (unreleased) basemap 1.0.7 source code as version 1.0.6 does not
+        currently support arrays with more than two dimensions.
+        https://github.com/matplotlib/basemap
+        
+    Input::
+        lon0 - starting longitude for shifted grid (ending longitude if start=False). 
+               lon0 must be on input grid (within the range of lonsin).
+        datain - original data with longitude the right-most dimension.
+        lonsin - original longitudes.
+        start  - if True, lon0 represents the starting longitude of the new grid. 
+                 if False, lon0 is the ending longitude. Default True.
+        cyclic - width of periodic domain (default 360)
+
+    Output:: 
+        dataout - data on shifted grid
+        lonsout - lons on shifted grid
+    """
+    if np.fabs(lonsin[-1]-lonsin[0]-cyclic) > 1.e-4:
+        # Use all data instead of raise ValueError, 'cyclic point not included'
+        start_idx = 0
+    else:
+        # If cyclic, remove the duplicate point
+        start_idx = 1
+    if lon0 < lonsin[0] or lon0 > lonsin[-1]:
+        raise ValueError('lon0 outside of range of lonsin')
+    i0 = np.argmin(np.fabs(lonsin-lon0))
+    i0_shift = len(lonsin)-i0
+    if ma.isMA(datain):
+        dataout  = ma.zeros(datain.shape,datain.dtype)
+    else:
+        dataout  = np.zeros(datain.shape,datain.dtype)
+    if ma.isMA(lonsin):
+        lonsout = ma.zeros(lonsin.shape,lonsin.dtype)
+    else:
+        lonsout = np.zeros(lonsin.shape,lonsin.dtype)
+    if start:
+        lonsout[0:i0_shift] = lonsin[i0:]
+    else:
+        lonsout[0:i0_shift] = lonsin[i0:]-cyclic
+    dataout[...,0:i0_shift] = datain[...,i0:]
+    if start:
+        lonsout[i0_shift:] = lonsin[start_idx:i0+start_idx]+cyclic
+    else:
+        lonsout[i0_shift:] = lonsin[start_idx:i0+start_idx]
+    dataout[...,i0_shift:] = datain[...,start_idx:i0+start_idx]
+    return dataout,lonsout
