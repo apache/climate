@@ -19,21 +19,21 @@ The data is read from netCDF files into arrays with the dimensions time, latitud
  * LATS4D
 
 ##Download the source code and store in a folder
- (1) mccSearch.py contains all the function needed 
- (2) mccSearchUI.py contains a wizard type Q&A for running the program
- (3) process.py contains some needed functions (from older version of Apache OCW)
- (4) file.py contains some needed functions (from older version of Apache OCW)
- (5) mainProg.py contains a sample of the  general workflow of the order the modules should be called. There are three main inputs you will have to supply:
+ * mccSearch.py contains all the function needed 
+ * mccSearchUI.py contains a wizard type Q&A for running the program
+ * process.py contains some needed functions (from older version of Apache OCW)
+ * file.py contains some needed functions (from older version of Apache OCW)
+ * mainProg.py contains a sample of the  general workflow of the order the modules should be called. There are three main inputs you will have to supply:
      * mainDirStr : this is the directory where you wish all the output files –images, textfiles, clipped netCDF files- to be store
      * TRMMdirName : this is the directory where the original TRMM data in netCDF format is stored
      * CEoriDirName : this is the directory where the original MERG data in netCDF format is stored
- (6) Store the GrADsScripts folder (and contents) in a separate folder in the same main directory as the source code folder.  
+ * Store the GrADsScripts folder (and contents) in a separate folder in the same main directory as the source code folder.  
 
 ##Download data in one folder (with only the data files)
 This is a very crude program. The following assumptions are made:
- (1) input data are in one folder. For MERG data this is CEoriDirName and for the TRMM data this is TRMMdirName in mainProg.py.  These directories cannot be the same.
- (2) THERE IS NO FILE CHECKING. So please ensure ALL your files are there in netCDF format. 
- (3)  THERE IS NO FILE ERROR HANDLING. Please ensure that the MERG data and the TRMM data files are correlated temporally and spatially
+ * input data are in one folder. For MERG data this is CEoriDirName and for the TRMM data this is TRMMdirName in mainProg.py.  These directories cannot be the same.
+ * THERE IS NO FILE CHECKING. So please ensure ALL your files are there in netCDF format. 
+ * THERE IS NO FILE ERROR HANDLING. Please ensure that the MERG data and the TRMM data files are correlated temporally and spatially
 
 ##Run mccSearchUI.py
 As a first try to determine the workflow, run the mccSearchUI.py wizard. 
