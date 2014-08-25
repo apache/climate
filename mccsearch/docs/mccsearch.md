@@ -9,8 +9,7 @@ The data is read from netCDF files into arrays with the dimensions time, latitud
 
 ##What is needed?
  * Python 2.7.4 (We used Anaconda 1.5.1 64 bit libraries, which installed most of the dependencies.) Other module dependences: 
- * Nio - https://www.pyngl.ucar.edu/Nio.shtml
- * netCDF - http://www.unidata.ucar.edu/software/netcdf/
+ * netCDF4 - http://www.unidata.ucar.edu/software/netcdf/
  * sciPy - http://www.scipy.org/scipylib/index.html
  * NumPy - http://www.scipy.org/scipylib/download.html
  * Networkx - https://networkx.github.io/download.html
