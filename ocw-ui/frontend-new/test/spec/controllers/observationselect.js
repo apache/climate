@@ -52,18 +52,15 @@ describe('Controller: ObservationSelectCtrl', function () {
     expect(scope.times[0]).toEqual("Please select a file above");
   });
 
-  /*
   it('should initialize scope attributes properly', function() {
     inject(function($httpBackend, $rootScope, $controller) {
       $rootScope.baseURL = "http://localhost:8082"
-      $httpBackend.expectJSONP($rootScope.baseURL + '/getPathLeader/?callback=JSON_CALLBACK').
-        respond(200, {'leader': '/usr/local/rcmes'});
-
-      var scope = $rootScope.$new();
-      var ctrl = $controller("ObservationSelectCtrl", {$scope: scope});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/dir/path_leader/?callback=JSON_CALLBACK').
+        respond(200, {'leader': '/usr/local/ocw'});
+      $httpBackend.whenGET('views/main.html').respond(200);
       $httpBackend.flush();
 
-      expect(scope.pathLeader).toEqual('/usr/local/rcmes');
+      expect(scope.pathLeader).toEqual('/usr/local/ocw');
       expect(scope.loadingFile).toBe(false);
       expect(scope.fileAdded).toBe(false);
       expect(typeof scope.latLonVals).toEqual('object');
@@ -74,25 +71,20 @@ describe('Controller: ObservationSelectCtrl', function () {
       expect(Object.keys(scope.localSelectForm).length).toEqual(0);
     });
   });
-  */
 
-  /*
   it('should initialize the uploadLocalFile function', function() {
     inject(function($httpBackend, $rootScope, $controller) {
       $rootScope.baseURL = "http://localhost:8082"
       $httpBackend.expectJSONP($rootScope.baseURL + '/dir/path_leader/?callback=JSON_CALLBACK').
-        respond(200, {'leader': '/usr/local/rcmes'});
+        respond(200, {'leader': null});
+      $httpBackend.whenGET('views/main.html').respond(200);
 
-      var scope = $rootScope.$new();
-      var ctrl = $controller("ObservationSelectCtrl", {$scope: scope});
-      $httpBackend.flush();
-
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/vars/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_vars/undefined?callback=JSON_CALLBACK').
         respond(200, {"variables": ["lat", "lon", "prec", "time" ]});
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/latlon/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
-        respond(200, {'latMax': '75.25', 'success': 1, 'latname': 'lat', 'lonMax': '-29.75', 'lonMin': '-159.75', 'lonname': 'lon', 'latMin': '15.25'});
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/time/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
-        respond(200, {"start_time": "1980-01-01 00:00:00", "timename": "time", "success": 1, "end_time": "2004-12-01 00:00:00"});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_latlon/undefined?callback=JSON_CALLBACK').
+        respond(200, {'latMax': '75.25', 'success': 1, 'lat_name': 'lat', 'lonMax': '-29.75', 'lonMin': '-159.75', 'lon_name': 'lon', 'latMin': '15.25'});
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_time/undefined?callback=JSON_CALLBACK').
+        respond(200, {"start_time": "1980-01-01 00:00:00", "time_name": "time", "success": 1, "end_time": "2004-12-01 00:00:00"});
 
       scope.uploadLocalFile();
       $httpBackend.flush();
@@ -103,11 +95,11 @@ describe('Controller: ObservationSelectCtrl', function () {
       expect(scope.paramSelect).toEqual("prec");
 
       // Simulate failure on one of the backend calls. Should
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/vars/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_vars/undefined?callback=JSON_CALLBACK').
         respond(200, {});
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/latlon/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_latlon/undefined?callback=JSON_CALLBACK').
         respond(404, {});
-      $httpBackend.expectJSONP($rootScope.baseURL + '/list/time/"/usr/local/rcmesundefined"?callback=JSON_CALLBACK').
+      $httpBackend.expectJSONP($rootScope.baseURL + '/lfme/list_time/undefined?callback=JSON_CALLBACK').
         respond(200, {});
 
       scope.uploadLocalFile();
@@ -123,7 +115,6 @@ describe('Controller: ObservationSelectCtrl', function () {
       expect(scope.times.length).toEqual(1);
     });
   });
-  */
 
   it('should initialize the addDatasets function', function() {
     expect(typeof(scope.addDataSet)).toBe("function");
