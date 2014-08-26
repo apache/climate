@@ -43,7 +43,7 @@ angular.module('ocwUiApp')
     $scope.timeSelect  = $scope.times[0];
 
     // Grab the path leader information that the webserver is using to limit directory access.
-    $scope.pathLeader = 'False';
+    $scope.pathLeader = false;
     $http.jsonp($rootScope.baseURL + '/dir/path_leader/?callback=JSON_CALLBACK').
       success(function(data) {
       $scope.pathLeader = data.leader;
@@ -72,7 +72,7 @@ angular.module('ocwUiApp')
 
       // If the backend is limiting directory access we need to add that leader to our path
       // so it remains valid!
-      if ($scope.pathLeader != 'False') {
+      if ($scope.pathLeader) {
         input = $scope.pathLeader + input
       }
 
