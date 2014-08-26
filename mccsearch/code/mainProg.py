@@ -19,13 +19,8 @@
 # running the program
 '''
 
-import sys
 import networkx as nx
-from mccSearch
-import numpy as np
-import numpy.ma as ma
-import files
-import matplotlib.pyplot as plt
+import mccSearch
 import subprocess
 
 
@@ -82,7 +77,6 @@ def main():
     print ("-"*80)
     print "number of nodes in prunedGraph is: ", prunedGraph.number_of_nodes()
     print ("-"*80)
-    #sys.exit()
     print "\n -------------- TESTING findMCCs ----------"
     MCCList,MCSList = mccSearch.findMCC(prunedGraph)
     print ("-"*80)
