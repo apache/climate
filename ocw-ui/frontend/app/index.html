@@ -7,7 +7,7 @@ to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
@@ -18,108 +18,131 @@ under the License.
 -->
 
 <!doctype html>
-<html lang="en" ng-app="ocw">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OCW UI</title>
-  <link rel="stylesheet" href="css/lib/bootstrap.min.css"/>
-  <link rel="stylesheet" href="css/lib/bootstrap-responsive.min.css"/>
-  <link rel="stylesheet" href="css/lib/font-awesome.min.css"/>
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
-  <link rel="stylesheet" href="css/lib/timeline.css"/>
-  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" type="text/css"/> 
-  <!--[if lte IE 8]>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
-  <![endif]-->
-  <link rel="stylesheet" href="css/app.css"/>
-</head>
-<body ng-cloak>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="bower_components/chap-links-timeline/timeline.css" />
+    <link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+  </head>
+  <body ng-app="ocwUiApp">
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
 
-<div class="container">
-  <div class="row-fluid">
-    <div class="span12">
-      <!-- Title -->
-      <div class="row-fluid">
-        <div class="span12">
-        <br><br>
-        <div id="header">
-          <img id="header-img" src=""/>
-          <h3 id="header-title">Project Name</h3>
-          <h5 id="OCW-powered">Powered by Apache Open Climate Workbench</h5>
+    <div class="container">
+      <div class="row">
+        <div class="navbar navbar-default" id="ocw-navbar" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand brand" href="#">OCW UI</a>
+            </div>
+            <div class="navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li ng-class="{ active: $state.includes('main') }"><a href="#/evalute">Evaluate</a></li>
+                <li ng-class="{ active: $state.includes('results') }"><a href="#/results">Results</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div id="header">
+              <img id="header-img" src=""/>
+              <h3 id="header-title">Project Name</h3>
+              <h5 id="OCW-powered">Powered by Apache Open Climate Workbench</h5>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- Navigation bar -->
-      <div class="row-fluid">
-      <div class="navbar navbar-fixed-top">
-       <div class="navbar-inner">
-         <div class="container">
-           <a class="brand" href="#">OCW UI</a>
-           <ul class="nav">
-             <li ng-class="{ active: $state.includes('main') }"><a href="#">Evaluate</a></li>
-             <li ng-class="{ active: $state.includes('results') }"><a href="#/results">Results</a></li>
-           </ul>
-         </div>
-       </div>
-      </div>
-      </div>
+      <!-- Main Content -->
+      <div id="main-container" class="container" ui-view></div>
     </div>
-  </div>
-  <!-- Main Content -->
-  <div id="main-container" class="container" ui-view ng-animate="{enter:'fade-enter'}"></div>
-</div>
 
-  <!--Libraries-->
-  <script src="js/lib/jquery/jquery-1.10.1.js"></script>
-  <script src="js/lib/jquery/jquery-ui/jquery-ui-1.10.3.min.js"></script>
-  <script src="js/lib/angular/angular.min.js"></script>
-  <script src="js/lib/angular-ui/angular-ui-0.4-tpls.js"></script>
-  <script src="js/lib/jquery/jquery-ui/datepicker-wrapper/date.js"></script>
-  <script src="js/lib/bootstrap/bootstrap.js"></script>
-  <script src="js/lib/leaflet/leaflet-0.5.js"></script>
-  <script src="http://www.google.com/jsapi"></script>
-  <script src="js/lib/timeline/timeline.js"></script>
-  <script src="js/lib/angular-ui/angular-ui-router.min.js"></script>
-  <script src="js/lib/angular-ui/ui-bootstrap-tpls-0.5.0.min.js"></script>
-  <!--Timeline refuses to initialize nicely so we're doing this as a workaround-->
-  <script type="text/javascript">google.load("visualization", "1");</script>
-  
-  <!--General-->
-  <script src="js/app.js"></script>
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-XXXXX-X');
+      ga('send', 'pageview');
+    </script>
 
-  <!--Services-->
-  <script src="js/services/SelectedDatasetInformation.js"></script>
-  <script src="js/services/RegionSelectParams.js"></script>
-  <script src="js/services/EvaluationSettings.js"></script>
+    <!-- build:js(.) scripts/oldieshim.js -->
+    <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.min.js"></script>
+    <![endif]-->
+    <!-- endbuild -->
 
-  <!--Controllers-->
-  <script src="js/controllers/WorldMapCtrl.js"></script>
-  <script src="js/controllers/ParameterSelectCtrl.js"></script>
-  <script src="js/controllers/DatasetDisplayCtrl.js"></script>
-  <script src="js/controllers/ObservationSelectCtrl.js"></script>
-  <script src="js/controllers/RcmedSelectionCtrl.js"></script>
-  <script src="js/controllers/SettingsCtrl.js"></script>
-  <script src="js/controllers/TimelineCtrl.js"></script>
-  <script src="js/controllers/DatasetSelectCtrl.js"></script>
-  <script src="js/controllers/ResultCtrl.js"></script>
-  <script src="js/controllers/ResultDetailCtrl.js"></script>
+    <!-- Google visualization library needs to be initialized for the timeline -->
+    <!-- Note that the terms of use forbid having a local copy of the code, so we're -->
+    <!-- stuck downloading it this way unfortunately. -->
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("visualization", "1");</script>
 
-  <!--Directives-->
-  <script src="js/directives/LeafletMap.js"></script>
-  <script src="js/directives/PreviewMap.js"></script>
-  <script src="js/directives/BootstrapModal.js"></script>
-  <script src="js/directives/BootstrapModalOpen.js"></script>
-  <script src="js/directives/PredictiveFileBrowserInput.js"></script>
-  <script src="js/directives/OnBlur.js"></script>
-  <script src="js/directives/Timeline.js"></script>
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/json3/lib/json3.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="bower_components/leaflet/dist/leaflet.js"></script>
+    <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
+    <script src="bower_components/chap-links-timeline/timeline-min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="bower_components/angular-ui-date/ui-date.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
 
-  <!--Filters-->
-  <script src="js/filters/ISODateToMiddleEndian.js"></script>
-</body>
-<footer class="container well well-small" style="margin-top: 40px">
-  <div class="span4 offset1">
-    <h6>Powered by Apache Open Climate Workbench</h6>
-  </div>
-</footer>
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <script src="scripts/controllers/datasetdisplay.js"></script>
+    <script src="scripts/controllers/datasetselect.js"></script>
+    <script src="scripts/controllers/observationselect.js"></script>
+    <script src="scripts/controllers/parameterselect.js"></script>
+    <script src="scripts/controllers/rcmedselection.js"></script>
+    <script src="scripts/controllers/result.js"></script>
+    <script src="scripts/controllers/resultdetail.js"></script>
+    <script src="scripts/controllers/settings.js"></script>
+    <script src="scripts/controllers/timeline.js"></script>
+    <script src="scripts/controllers/worldmap.js"></script>
+    <script src="scripts/directives/bootstrapmodal.js"></script>
+    <script src="scripts/directives/bootstrapmodalopen.js"></script>
+    <script src="scripts/directives/leafletmap.js"></script>
+    <script src="scripts/directives/onblur.js"></script>
+    <script src="scripts/directives/predictivefilebrowserinput.js"></script>
+    <script src="scripts/directives/previewmap.js"></script>
+    <script src="scripts/directives/timeline.js"></script>
+    <script src="scripts/filters/isodatetomiddleendian.js"></script>
+    <script src="scripts/services/evaluationsettings.js"></script>
+    <script src="scripts/services/regionselectparams.js"></script>
+    <script src="scripts/services/selecteddatasetinformation.js"></script>
+    <!-- endbuild -->
+
+    <!-- grunt wiredep wasn't properly linking this. Had to add manually -->
+    <script src="bower_components/angular-ui-date/src/date.js"></script>
+  </body>
 </html>
