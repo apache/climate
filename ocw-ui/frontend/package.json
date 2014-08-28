@@ -3,8 +3,12 @@
   "version": "0.0.0",
   "dependencies": {},
   "devDependencies": {
+    "bower": "^1.3.9",
+    "generator-angular": "^0.9.5",
+    "generator-karma": "^0.8.3",
     "grunt": "^0.4.1",
     "grunt-autoprefixer": "^0.7.3",
+    "grunt-cli": "^0.1.13",
     "grunt-concurrent": "^0.5.0",
     "grunt-contrib-clean": "^0.5.0",
     "grunt-contrib-concat": "^0.4.0",
@@ -29,7 +33,8 @@
     "karma-jasmine": "^0.1.5",
     "karma-phantomjs-launcher": "^0.1.4",
     "load-grunt-tasks": "^0.4.0",
-    "time-grunt": "^0.3.1"
+    "time-grunt": "^0.3.1",
+    "yo": "^1.2.1"
   },
   "engines": {
     "node": ">=0.10.0"
