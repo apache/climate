@@ -31,27 +31,23 @@ app.mount('/processing/', processing_app)
 @app.route('/')
 @app.route('/index.html')
 def index():
-    return static_file('index.html', root='./app')
+    return static_file('index.html', root='./frontend/app/')
 
-@app.route('/js/:path#.+#')
-def server_static(path):
-    return static_file(path, root='./app/js/')
+@app.route('/bower_components/:path#.+#')
+def serve_static(path):
+    return static_file(path, root='./frontend/bower_components/')
 
-@app.route('/css/:path#.+#')
-def server_static(path):
-    return static_file(path, root='./app/css/')
+@app.route('/styles/:path#.+#')
+def serve_static(path):
+    return static_file(path, root='./frontend/app/styles/')
 
-@app.route('/img/:path#.+#')
-def server_static(path):
-    return static_file(path, root='./app/img/')
+@app.route('/scripts/:path#.+#')
+def serve_static(path):
+    return static_file(path, root='./frontend/app/scripts/')
 
-@app.route('/partials/:path#.+#')
-def server_static(path):
-    return static_file(path, root='./app/partials/')
-
-@app.route('/font/:path#.+#')
-def server_static(path):
-    return static_file(path, root='./app/font/')
+@app.route('/views/:path#.+#')
+def serve_static(path):
+    return static_file(path, root='./frontend/app/views/')
 
 @app.route('/static/eval_results/<file_path:path>')
 def get_eval_result_image(file_path):
