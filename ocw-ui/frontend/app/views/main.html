@@ -110,7 +110,7 @@ under the License.
             <div ng-repeat="dataset in datasets">
               <div class="row">
                 <!--Data section-->
-                <div class="col-md-8 col-md-offset-1 muted">
+                <div class="datasetNameDisplay col-md-8 col-md-offset-1 muted" tooltip="{{dataset.name}}">
                   {{dataset.name}}
                 </div>
                 <div class="col-md-1 col-md-offset-2">

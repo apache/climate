@@ -46,6 +46,15 @@ body {
 	overflow-x: hidden;
 }
 
+.datasetNameDisplay {
+    max-width: 320px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 0;
+}
+
 #ocw-navbar {
     margin-bottom: 0;
 }
