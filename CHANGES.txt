@@ -17,6 +17,17 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-394] - Remove inactive subregion file box
     * [CLIMATE-482] - Add non-rebinning version of StdDevRatio
     * [CLIMATE-483] - Add non-rebinning version of PatternCorrelation metric
+    * [CLIMATE-497] - Update OCW release management process documentation
+    * [CLIMATE-498] - Update OCW DOAP.rdf to accommodate recent releases
+    * [CLIMATE-499] - Add directions to build documentation to README
+    * [CLIMATE-500] - Determine actions and address DRAT reporting output.
+    * [CLIMATE-502] - Transition frontend tests to new frontend
+    * [CLIMATE-506] - Find temporal overlap between models and obervations
+    * [CLIMATE-510] - Find spatial overlap between models and observations
+    * [CLIMATE-511] - OCW cli should let user to pick target and reference dataset before run the evaluation
+    * [CLIMATE-512] - Replace frontend-ui code with new Yeoman/Grunt/Bower powered frontend
+    * [CLIMATE-513] - Document new UI features on Wiki
+
 
 
 ** Bug
@@ -62,6 +73,11 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-470] - utils.parse_time_base fails to handle time format
     * [CLIMATE-472] - Contour map colorbar labels overlap with large float values
     * [CLIMATE-481] - StddevRatio and PatternCorr metrics outputting bad values
+    * [CLIMATE-503] - OCW-cli notification center is broken due to passing wrong argument
+    * [CLIMATE-504] - OCW cli cannot get observation spatial resolution 
+    * [CLIMATE-514] - Dependencies are missing from package.json
+    * [CLIMATE-516] - Backend static file serving does not work
+    * [CLIMATE-517] - Start and End day values overlap in dataset display
 
 
 ** Documentation
@@ -137,7 +153,8 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-477] - Add nose-exclude as a development dependency
     * [CLIMATE-479] - Clean up return type documentation in toolkit
     * [CLIMATE-489] - Improve dataset_processor.subset()'s ValueError Message
-
+    * [CLIMATE-492] - Move OCW-UI over to Yeomann, Bower, and Grunt
+    * [CLIMATE-496] - Address discrepancies within 0.4 RC#1
 
 ** New Feature
     * [CLIMATE-137] - OCW refactoring code
@@ -149,7 +166,7 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-404] - OCW Command Line Tool
     * [CLIMATE-425] - Example of Temporal STD Metric with Contour Map plot
     * [CLIMATE-463] - refactoring calcBiasAveragedOverTime metric
-
+    * [CLIMATE-505] - OCW cli to support multi observations and multi models
 
 ** Task
     * [CLIMATE-2] - Refactor source code to use ASF package names
@@ -157,6 +174,7 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-171] - Preparing daily TRMM data to evaluate NARCCAP models
     * [CLIMATE-259] - Create branch to refactor updates to ui/services to support multiple metrics/plotting
     * [CLIMATE-342] - utils.taylor lacks proper licensing
+    * [CLIMATE-355] - Update UI frontend tests
     * [CLIMATE-356] - Pull metric names from backend for UI dropdowns
     * [CLIMATE-357] - ParameterSelectCtrl should only allow users to select values on a integer grid
     * [CLIMATE-368] - Add JIRA labels for issue difficulty estimation
@@ -174,7 +192,6 @@ Release Notes - Apache Open Climate Workbench - Version 0.4
     * [CLIMATE-485] - Ensure all metrics are included in Sphinx build
     * [CLIMATE-490] - Drop DISCLAIMER.txt
     * [CLIMATE-491] - Add author note to TaylorDiagram
-
 
 
 Release Notes - Apache Open Climate Workbench - Version 0.3-incubating
