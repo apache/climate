@@ -23,7 +23,7 @@ RCMES module to execute a faceted search for ESGF files.
 
 from pyesgf.search import SearchConnection
 
-from esgf.rcmes.constants import JPL_SEARCH_SERVICE_URL
+from ocw.esgf.constants import JPL_SEARCH_SERVICE_URL
 
 class SearchClient():
     """

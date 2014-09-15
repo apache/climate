@@ -20,7 +20,7 @@
 RCMES module to logon onto the ESGF by contacting the IdP RESTful service.
 '''
 
-from esgf.rcmes.constants import ESGF_CREDENTIALS, CERT_SERVICE_URL, REALM
+from ocw.esgf.constants import ESGF_CREDENTIALS, CERT_SERVICE_URL, REALM
 
 import urllib2
 from os.path import expanduser

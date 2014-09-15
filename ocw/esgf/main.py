@@ -26,10 +26,10 @@ USER_OPENID = "https://esg-datanode.jpl.nasa.gov/esgf-idp/openid/lucacinquini"
 USER_PASSWORD = "*****"
 DATA_DIRECTORY = "/tmp"
 
-from esgf.rcmes.logon import logon
-from esgf.rcmes.logon2 import logon2
-from esgf.rcmes.search import SearchClient
-from esgf.rcmes.download import download
+from ocw.esgf.logon import logon
+from ocw.esgf.logon2 import logon2
+from ocw.esgf.search import SearchClient
+from ocw.esgf.download import download
 
 def main():
     '''Example driver program'''

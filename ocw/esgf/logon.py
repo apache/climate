@@ -23,7 +23,7 @@ RCMES module to logon onto the ESGF.
 from pyesgf.logon import LogonManager
 import os
 
-from esgf.rcmes.constants import JPL_MYPROXY_SERVER_DN
+from ocw.esgf.constants import JPL_MYPROXY_SERVER_DN
 
 def logon(openid, password):
     '''
