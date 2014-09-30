@@ -26,6 +26,7 @@ import factory
 import numpy
 from factory.formats import import_equation
 from Toolbox.ESGFresources import *
+from Toolbox.ESGFexcel import *
 from Toolbox.CMORresources import CMORTable
 
 
@@ -38,11 +39,18 @@ def process( rc ):
     '''
     Convert netcdf/matlab/grads files into CMIP5 format.
     '''
-    #pdb.set_trace()
+    pdb.set_trace()
     # ----------------------------
     #  Loop yearly on file list.  
     # ----------------------------
-    for year in rc['years'].split(","):
+    file_template = rc['file_template'].split(",");
+    if( len(file_template) == 2 ):
+        template_parameter = file_template[1]
+        rc['file_template'] = file_template[0]
+    else:
+        template_parameter = 'years'
+
+    for year in rc[template_parameter].split(","):
         if(year == ''):
             files= os.popen( "ls " + rc['file_template'] ).readlines()
         else:
@@ -419,9 +427,10 @@ def usage(message):
 def main():
     '''
     '''
+    pdb.set_trace()
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hy:r:",
-                                   ["help" ,"year=","resource="])
+        opts, args = getopt.getopt(sys.argv[1:], "hy:r:x:",
+                                   ["help" ,"year=","resource=","excel="])
     except getopt.GetoptError, err:
         usage(str(err))# will print something like "option -a not recognized"
         return(2)
@@ -431,9 +440,12 @@ def main():
     # --------------------------
     year     = -1
     resource = None
+    excel    = None
     for o, a in opts:
         if o in ("-r", "--resource"):
             resource = a
+        elif o in ("-x", "--excel"):
+            excel = a
         elif o in ("-h", "--help"):
             usage()
             return(0)
@@ -445,14 +457,17 @@ def main():
     # ------------------------------
     # Does the resource file exist?
     # ------------------------------
-    if( resource == None ) or ( not os.path.isfile( resource ) ) :
-        usage("bad Input Resource File")
+    if( ((resource == None ) or ( not os.path.isfile( resource ) )) and (( excel == None ) or ( not os.path.isfile( excel ) )) ):
+        usage("bad Input Resource/Excel File")
         return 1
 
     # -----------------------
     # Read in "rc" file
     # -----------------------
-    rc=ESGFresources(resource)
+    if( resource ):
+       rc = ESGFresources( resource )
+    if( excel ):
+       rc = ESGFexcel( excel )
 
     # --------------------------------
     # Extract CMIP5 Table information

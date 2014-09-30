@@ -54,6 +54,9 @@ http://code.google.com/p/netcdf4-python/
 
 RESSOURCE file documentation
 =============================
+**********************
+*** NOTE:  The Resource file can now be including in the Excel spreadsheet as a new sheet called: Resources.  See "ecmwf_table_obs4MIPs.xls" for details.
+**********************
 
 In order to run osb4MIPs, the first thing to do is to create a resource file giving information about your original data. The resource files contain all Global Attributes and information needed to convert a variable to a CMIP5 variable.  
 
