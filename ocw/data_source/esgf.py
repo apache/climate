@@ -31,7 +31,32 @@ def load_dataset(dataset_id,
                  esgf_password,
                  search_url=JPL_SEARCH_SERVICE_URL,
                  **additional_constraints):
-    ''''''
+    ''' Load an ESGF dataset.
+
+    .. note:
+        Currently, multi-file datasets aren't supported. This functionality
+        will be added soon!
+
+    :param dataset_id: The ESGF ID of the dataset to load.
+    :type dataset_id: String
+    :param variable: The variable to load.
+    :type variable: String
+    :param esgf_username: ESGF OpenID value to use for authentication.
+    :type esgf_username: String
+    :param esgf_password: ESGF Password to use for authentication.
+    :type esgf_password: String
+    :param search_url: (Optional) The ESGF node to use for searching. Defaults
+        to the Jet Propulsion Laboratory node.
+    :type search_url: String
+    :param additional_constraints: (Optional) Additional key,value pairs to
+        pass as constraints to the search wrapper. These can be anything found
+        on the ESGF metadata page for a dataset.
+
+    :returns: An ocw.dataset.Dataset object contained the requested dataset.
+
+    :raises ValueError: If no dataset can be found for the supplied ID and
+        variable, or if the requested dataset is a multi-file dataset.
+    '''
     urls = _get_file_urls(url=search_url,
                           id=dataset_id,
                           variable=variable,
@@ -56,6 +81,8 @@ def load_dataset(dataset_id,
 
 def _get_file_urls(**constraints):
     ''''''
+    # Allow the user to optionally specify the URL for a search node to use.
+    # Default to the Jet Propulsion Laboratory node if nothing is specified.
     if 'url' in constraints:
         url = constraints['url']
         constraints.pop('url', None)
@@ -68,8 +95,6 @@ def _get_file_urls(**constraints):
 
 def _download_files(file_urls, username, password, download_directory='/tmp'):
     ''''''
-    username = 'https://esg-datanode.jpl.nasa.gov/esgf-idp/openid/mjjoyce'
-    password = '?pu}8gHM{2T2EB]jRX}TmKx6kCGEwPqfaP8aN8jGq8r4HDf82Y'
     try:
         logon2(username, password)
     except urllib2.HTTPError:
