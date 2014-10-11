@@ -1,7 +1,25 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import datetime
+import urllib
+from os import path
 
 import numpy as np
-import urllib
 
 import ocw.data_source.local as local
 import ocw.data_source.rcmed as rcmed
@@ -20,8 +38,11 @@ MODEL = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "cru_31_tmax_knmi_africa_bias_full"
 
-# Download necessary NetCDF file
-urllib.urlretrieve(FILE_LEADER + MODEL, MODEL)
+# Download necessary NetCDF file if not present
+if path.exists(MODEL):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + MODEL, MODEL)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects """
 print("Loading %s into an OCW Dataset Object" % (MODEL,))

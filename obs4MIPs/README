@@ -12,6 +12,8 @@ obs4MIPs.py -r trmm.rc
 
 Convert trmm data to CMIP5 format using excel spreadsheet 
 obs4MIPs.py -r ecmwf.rc
+or 
+obs4MIPs.py -x ecmwf_table_obs4MIPs.xls
 
 --------------
 Installation 

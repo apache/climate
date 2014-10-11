@@ -2,6 +2,197 @@ Apache Open Climate Workbench Change Log
 ============================================
 
 
+Release Notes - Apache Open Climate Workbench - Version 0.4
+
+** Sub-task
+    * [CLIMATE-271] - Breaking down "run_rcmes_processing.py" code to more functions
+    * [CLIMATE-328] - Add Helpers for converting NetCDF time data to Python datetimes
+    * [CLIMATE-329] - Add tests for ocw.utils
+    * [CLIMATE-330] - Remove datetime conversion code from ocw.data_sources.local
+    * [CLIMATE-332] - Rewrite UI evaluation code with OCW
+    * [CLIMATE-333] - Integrate OCW-UI with refactored backend
+    * [CLIMATE-334] - Drop old OCW-UI front/back end code
+    * [CLIMATE-335] - Add OCW-UI to documentation build
+    * [CLIMATE-361] - Normalize datetime values in UI backend
+    * [CLIMATE-394] - Remove inactive subregion file box
+    * [CLIMATE-482] - Add non-rebinning version of StdDevRatio
+    * [CLIMATE-483] - Add non-rebinning version of PatternCorrelation metric
+    * [CLIMATE-497] - Update OCW release management process documentation
+    * [CLIMATE-498] - Update OCW DOAP.rdf to accommodate recent releases
+    * [CLIMATE-499] - Add directions to build documentation to README
+    * [CLIMATE-500] - Determine actions and address DRAT reporting output.
+    * [CLIMATE-502] - Transition frontend tests to new frontend
+    * [CLIMATE-506] - Find temporal overlap between models and obervations
+    * [CLIMATE-510] - Find spatial overlap between models and observations
+    * [CLIMATE-511] - OCW cli should let user to pick target and reference dataset before run the evaluation
+    * [CLIMATE-512] - Replace frontend-ui code with new Yeoman/Grunt/Bower powered frontend
+    * [CLIMATE-513] - Document new UI features on Wiki
+
+
+
+** Bug
+    * [CLIMATE-49] - Add the 'obs' regrid option into toolkit.do_data_prep.prep_data function
+    * [CLIMATE-298] - Remove external dependencies from test_local
+    * [CLIMATE-320] - To make UI handle CMIP5 model outputs
+    * [CLIMATE-321] - dataset_processor._get_subregion_slice_indices cannot handle imprecise subregion input
+    * [CLIMATE-322] - dataset_processor._get_subregion_slice_indices cannot handle imprecise start and end time input
+    * [CLIMATE-339] - Metrics.py has typo in Class TemporalStdDev, def Run (axi --> axis) + test_metrics.py need to be modified
+    * [CLIMATE-344] - Temporal rebin doesn't propagate dataset name or variable name
+    * [CLIMATE-345] - Spatial regrid doesn't propagate dataset name or variable name
+    * [CLIMATE-346] - Subsetting must be performed after Temporal Rebin
+    * [CLIMATE-350] - Access-Control-Allow-Origin is not set on response from UI backend
+    * [CLIMATE-352] - Dataset.spatial_boundaries doesn't return proper data format
+    * [CLIMATE-354] - ResultCtrl doesn't handle missing cache directory removal properly
+    * [CLIMATE-363] - Backend processing doesn't parse temporal resolution properly
+    * [CLIMATE-364] - Invalid metric names doesn't exclude ABCMeta
+    * [CLIMATE-380] - Unary metric evaluation fails on reference dataset
+    * [CLIMATE-382] - UI backend return types aren't recognized as JSON
+    * [CLIMATE-387] - reStructuredText is malformed in UI backend
+    * [CLIMATE-390] - OCW UI maps no longer display properly
+    * [CLIMATE-391] - Date ranges for UI evaluation are not normalized
+    * [CLIMATE-392] - OCW Dataset should shift lon values that range from 0-360
+    * [CLIMATE-396] - RCMED Parameters are improperly parsed in UI backend
+    * [CLIMATE-398] - OCW is unable to parse an acceptable date format
+    * [CLIMATE-402] - Dataset bounds are not properly set in ParameterSelectCtrl
+    * [CLIMATE-405] - UI backend documentation isn't building for /parameters/bounds
+    * [CLIMATE-412] - Create README for OCW
+    * [CLIMATE-414] - Overhaul OCW Wiki
+    * [CLIMATE-416] - Clean up UI backend tests
+    * [CLIMATE-420] - Download link to most recent release is broken
+    * [CLIMATE-422] - easy-ocw install.sh still references svn code
+    * [CLIMATE-423] - Evaluation Unary Metric is missing return resutls
+    * [CLIMATE-435] - Fix easy-ocw path in VM build
+    * [CLIMATE-437] - Remove provisioning from Vagrant VM build
+    * [CLIMATE-440] - Remove local PATH_LEADER settings from test_directory_helpers
+    * [CLIMATE-442] - Cannot have multiple nested directories that don't exist in UI backend tests
+    * [CLIMATE-445] - Remove unneeded OCW checkout from easy-ocw Ubuntu script
+    * [CLIMATE-449] - NetCDF4 is installed twice in easy-ocw Ubuntu install
+    * [CLIMATE-451] - Getting Errors in virtualenv wrapper after running easy-ocw/install-osx.sh 
+    * [CLIMATE-454] - VM Build does not copy dependency files to install directory
+    * [CLIMATE-455] - utils.reshape_monthly_to_annually should modify a copy of the passed dataset
+    * [CLIMATE-470] - utils.parse_time_base fails to handle time format
+    * [CLIMATE-472] - Contour map colorbar labels overlap with large float values
+    * [CLIMATE-481] - StddevRatio and PatternCorr metrics outputting bad values
+    * [CLIMATE-503] - OCW-cli notification center is broken due to passing wrong argument
+    * [CLIMATE-504] - OCW cli cannot get observation spatial resolution 
+    * [CLIMATE-514] - Dependencies are missing from package.json
+    * [CLIMATE-516] - Backend static file serving does not work
+    * [CLIMATE-517] - Start and End day values overlap in dataset display
+
+
+** Documentation
+    * [CLIMATE-54] - Updating the docstrings in metrics.py
+
+
+** Improvement
+    * [CLIMATE-47] - precipFlag attribute within the Model class needs to be refactored
+    * [CLIMATE-91] - Webapps directory restructure
+    * [CLIMATE-241] - Make old docstrings in plotter.py sphinx compliant
+    * [CLIMATE-261] - Consolidate Code that converts a String into a Datetime Object
+    * [CLIMATE-262] - Develop simple examples of an End to End Evaluation using OCW API
+    * [CLIMATE-270] - UI Back-End update 
+    * [CLIMATE-309] - Add OpenDAP support to OCW
+    * [CLIMATE-310] - Update setup.py version
+    * [CLIMATE-311] - Add Sphinx doc building
+    * [CLIMATE-312] - Add dataset.py to Sphinx build
+    * [CLIMATE-313] - Add dataset_processor.py to Sphinx build
+    * [CLIMATE-314] - Add evaluation.py to Sphinx build
+    * [CLIMATE-315] - Add metrics.py to Sphinx build
+    * [CLIMATE-317] - Fix plotter.py documentation
+    * [CLIMATE-318] - Add plotter.py to the Sphinx build
+    * [CLIMATE-319] - Add data sources to Sphinx build
+    * [CLIMATE-324] - Reorganize OCW UI Code
+    * [CLIMATE-325] - Reorganize OCW UI Backend Code
+    * [CLIMATE-326] - Refactor OCW-UI backend services
+    * [CLIMATE-331] - Make OCW-UI use OCW code instead of old RCMES backend
+    * [CLIMATE-343] - Integrate utils.taylor into OCW
+    * [CLIMATE-347] - UI backend grid shape calculations can result in widely imbalanced shapes
+    * [CLIMATE-349] - Refactoring "reshapeMonthlyData" from rcmes/utils/misc.py 
+    * [CLIMATE-351] - obs4MIPs data ingestion
+    * [CLIMATE-358] - Truncate lat/lon values in DatasetDisplayCtrl
+    * [CLIMATE-359] - Change wording of reference dataset selection to reflect new backend
+    * [CLIMATE-360] - Fix subsetting in UI backend
+    * [CLIMATE-370] - Update Easy-OCW
+    * [CLIMATE-377] - Update UI to latest Angular version
+    * [CLIMATE-378] - Setup proper build/dependency management for UI
+    * [CLIMATE-395] - Add more unit tests for normalize_lat_lon_values() helper
+    * [CLIMATE-397] - Switch UI backend over to safe_subset
+    * [CLIMATE-399] - Use functions in numpy.testing for unit tests involving array comparisons
+    * [CLIMATE-401] - Remove UnaryMetrics from UI settings menu
+    * [CLIMATE-403] - Integrate /parameters/bounds endpoint into UI frontend
+    * [CLIMATE-408] - Dataset select window should have a close button
+    * [CLIMATE-427] - Make easy-ocw pip dependencies install from a requirements file
+    * [CLIMATE-428] - Add versions to all the easy-ocw dependency installs
+    * [CLIMATE-429] - Add sphinx doc building dependencies to easy-ocw
+    * [CLIMATE-430] - Add link to relevant wiki documentation from easy-ocw install scripts
+    * [CLIMATE-432] - Add wiki page for easy-ocw
+    * [CLIMATE-433] - Add wiki page for Vagrant VM build
+    * [CLIMATE-434] - Add README for Github
+    * [CLIMATE-436] - Pull VM OCW code from ASF repo
+    * [CLIMATE-438] - adding new time format to data_source/local.py
+    * [CLIMATE-439] - Refactoring 'calcClimYear' function to OCW API
+    * [CLIMATE-441] - easy-ocw needs to check if a previous 'ocw' virtualenv exists
+    * [CLIMATE-443] - move calcSpatialStdevRatio to OCW metrics
+    * [CLIMATE-444] - move calcPatternCorrelation to OCW metrics
+    * [CLIMATE-446] - easy-ocw Anaconda download should point to an archive link
+    * [CLIMATE-447] - ocw.tests lacks __init__.py
+    * [CLIMATE-450] - OCW examples download remote netCDF files without checking if they exist
+    * [CLIMATE-452] - Add Ubuntu Unity desktop install option to OCW VM build
+    * [CLIMATE-453] - Add Taylor Diagram example
+    * [CLIMATE-456] - Update DAP tests to use setupClass method for initialization
+    * [CLIMATE-457] - Clean up after Easy-OCW install on Ubuntu
+    * [CLIMATE-458] - Add OCW UI setup to VM build
+    * [CLIMATE-462] - Move Ubuntu Easy OCW install leftovers cleanup into VM build
+    * [CLIMATE-464] - Move calcClimSeason to utils
+    * [CLIMATE-468] - Add helpful links to the OCW-VM build
+    * [CLIMATE-471] - Add seasonal versions of SpatialStdDevRatio and SeasonalPatternCorrelation
+    * [CLIMATE-473] - Add a gitignore
+    * [CLIMATE-474] - Make colorbar labels not use scientific notation
+    * [CLIMATE-475] - Make metric imports in ocw.tests not explicit
+    * [CLIMATE-476] - OCW objects should implement __str__
+    * [CLIMATE-477] - Add nose-exclude as a development dependency
+    * [CLIMATE-479] - Clean up return type documentation in toolkit
+    * [CLIMATE-489] - Improve dataset_processor.subset()'s ValueError Message
+    * [CLIMATE-492] - Move OCW-UI over to Yeomann, Bower, and Grunt
+    * [CLIMATE-496] - Address discrepancies within 0.4 RC#1
+
+** New Feature
+    * [CLIMATE-137] - OCW refactoring code
+    * [CLIMATE-327] - Add OCW Utils module
+    * [CLIMATE-336] - test (Unit Test) for Class BIAS on metrics.py
+    * [CLIMATE-337] - test (Unit Test) for Class TemporalStdDev on metrics.py
+    * [CLIMATE-386] - Add NetCDF writer to Dataset Processor
+    * [CLIMATE-393] - Add less strict subsetting functionality
+    * [CLIMATE-404] - OCW Command Line Tool
+    * [CLIMATE-425] - Example of Temporal STD Metric with Contour Map plot
+    * [CLIMATE-463] - refactoring calcBiasAveragedOverTime metric
+    * [CLIMATE-505] - OCW cli to support multi observations and multi models
+
+** Task
+    * [CLIMATE-2] - Refactor source code to use ASF package names
+    * [CLIMATE-127] - Easy-RCMET changes after transition
+    * [CLIMATE-171] - Preparing daily TRMM data to evaluate NARCCAP models
+    * [CLIMATE-259] - Create branch to refactor updates to ui/services to support multiple metrics/plotting
+    * [CLIMATE-342] - utils.taylor lacks proper licensing
+    * [CLIMATE-355] - Update UI frontend tests
+    * [CLIMATE-356] - Pull metric names from backend for UI dropdowns
+    * [CLIMATE-357] - ParameterSelectCtrl should only allow users to select values on a integer grid
+    * [CLIMATE-368] - Add JIRA labels for issue difficulty estimation
+    * [CLIMATE-369] - Setup automatic VM build
+    * [CLIMATE-381] - Update setup.py to reflect the change from Incubating to Top Level Project
+    * [CLIMATE-384] - Clean new git repo's pack file
+    * [CLIMATE-385] - Copyright dates need updated
+    * [CLIMATE-415] - Create a *Contributing to OCW* wiki page 
+    * [CLIMATE-417] - Backend UI tests are missing ASF Header
+    * [CLIMATE-431] - Add ASF header to easy-ocw install scripts
+    * [CLIMATE-460] - Drop old RCMET Webapp
+    * [CLIMATE-461] - Drop old RCMET VM
+    * [CLIMATE-469] - Add ASF headers to OCW example files
+    * [CLIMATE-484] - Remove rebinning metrics
+    * [CLIMATE-485] - Ensure all metrics are included in Sphinx build
+    * [CLIMATE-490] - Drop DISCLAIMER.txt
+    * [CLIMATE-491] - Add author note to TaylorDiagram
+
 
 Release Notes - Apache Open Climate Workbench - Version 0.3-incubating
 

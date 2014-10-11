@@ -1,7 +1,25 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import datetime
+from os import path
+import urllib
 
 import numpy as np
-import urllib
 
 import ocw.data_source.local as local
 import ocw.dataset_processor as dsp
@@ -17,9 +35,16 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "wrf_bias_compared_to_knmi"
 
-# Download necessary NetCDF files
-urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
-urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+# Download necessary NetCDF files if not present
+if path.exists(FILE_1):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+
+if path.exists(FILE_2):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
 print("Loading %s into an OCW Dataset Object" % (FILE_1,))

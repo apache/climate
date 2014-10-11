@@ -20,8 +20,10 @@ import ocw.data_source.dap as dap
 from ocw.dataset import Dataset
 import datetime as dt
 
-class test_dap(unittest.TestCase):
-    dataset = dap.load('http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz', 'sst')
+class TestDap(unittest.TestCase):
+    @classmethod
+    def setup_class(self):
+        dataset = dap.load('http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz', 'sst')
 
     def test_dataset_is_returned(self):
         self.assertTrue(isinstance(self.dataset, Dataset))

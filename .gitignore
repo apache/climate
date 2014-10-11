@@ -1,0 +1,13 @@
+.coverage
+.DS_Store
+.vagrant
+
+install_log
+
+*.nc
+*.pyc
+examples/*.png
+
+build/
+docs/build/
+

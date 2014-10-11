@@ -332,8 +332,8 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     :param end_time: End time 
     :type end_time: Datetime
 
-    :returns: Dataset object
-    :rtype: Object
+    :returns: An OCW Dataset object contained the requested data from RCMED.
+    :rtype: ocw.dataset.Dataset object
     '''
     
     parameters_metadata = get_parameters_metadata()

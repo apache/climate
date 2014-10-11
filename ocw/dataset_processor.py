@@ -32,13 +32,13 @@ logger = logging.getLogger(__name__)
 def temporal_rebin(target_dataset, temporal_resolution):
     """ Rebin a Dataset to a new temporal resolution
     
-    :param target_dataset: Dataset object that needs temporal regridding
-    :type target_dataset: Open Climate Workbench Dataset Object
+    :param target_dataset: Dataset object that needs temporal rebinned
+    :type target_dataset: ocw.dataset.Dataset object
     :param temporal_resolution: The new temporal bin size
-    :type temporal_resolution: Python datetime.timedelta object
+    :type temporal_resolution: datetime.timedelta object
     
     :returns: A new temporally rebinned Dataset
-    :rtype: Open Climate Workbench Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     # Decode the temporal resolution into a string format that 
     # _rcmes_calc_average_on_new_time_unit_K() can understand
@@ -68,15 +68,15 @@ def temporal_rebin(target_dataset, temporal_resolution):
 def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     """ Regrid a Dataset using the new latitudes and longitudes
 
-    :param target_dataset: Dataset object that needs temporal regridding applied
-    :type target_dataset: Open Climate Workbench Dataset Object
+    :param target_dataset: Dataset object that needs spatially regridded
+    :type target_dataset: ocw.dataset.Dataset object
     :param new_latitudes: Array of latitudes
     :type new_latitudes: 1d Numpy Array
     :param new_longitudes: Array of longitudes
     :type new_longitudes: 1d Numpy Array
 
     :returns: A new spatially regridded Dataset
-    :rtype: Open Climate Workbench Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     # Make masked array of shape (times, new_latitudes,new_longitudes)
     new_values = ma.zeros([len(target_dataset.times), 
@@ -126,7 +126,7 @@ def ensemble(datasets):
     :type datasets: List of OCW Dataset Objects
     
     :returns: New Dataset with a name of 'Dataset Ensemble'
-    :rtype: OCW Dataset Object
+    :rtype: ocw.dataset.Dataset object
     """
     _check_dataset_shapes(datasets)
     dataset_values = [dataset.values for dataset in datasets]
@@ -147,22 +147,16 @@ def subset(subregion, target_dataset):
     :param subregion: The Bounds with which to subset the target Dataset. 
     :type subregion: Bounds
     :param target_dataset: The Dataset object to subset.
-    :type target_dataset: Dataset
+    :type target_dataset: ocw.dataset.Dataset object
 
     :returns: The subset-ed Dataset object
-    :rtype: Dataset
+    :rtype: ocw.dataset.Dataset object
 
     :raises: ValueError
     '''
 
     # Ensure that the subregion information is well formed
-    if not _are_bounds_contained_by_dataset(subregion, target_dataset):
-        error = (
-            "dataset_processor.subset received a subregion that is not "
-            "completely within the bounds of the target dataset."
-        )
-        logger.error(error)
-        raise ValueError(error)
+    _are_bounds_contained_by_dataset(subregion, target_dataset)
 
     # Get subregion indices into subregion data
     dataset_slices = _get_subregion_slice_indices(subregion, target_dataset)
@@ -200,7 +194,7 @@ def safe_subset(subregion, target_dataset):
     :type target_dataset: ocw.dataset.Dataset
 
     :returns: The subset-ed Dataset object
-    :rtype: Dataset
+    :rtype: ocw.dataset.Dataset object
     '''
 
     lat_min, lat_max, lon_min, lon_max = target_dataset.spatial_boundaries()
@@ -232,13 +226,14 @@ def normalize_dataset_datetimes(dataset, timestep):
     Force daily to an hour time value of 00:00:00.
     Force monthly data to the first of the month at midnight.
 
-    :param dataset: The Dataset which will have its' time value normalized.
-    :type dataset: Dataset
+    :param dataset: The Dataset which will have its time value normalized.
+    :type dataset: ocw.dataset.Dataset object
     :param timestep: The timestep of the Dataset's values. Either 'daily' or
         'monthly'.
     :type timestep: String
 
-    :returns: A new Dataset with normalized datetimes.
+    :returns: A new Dataset with normalized datetime values.
+    :rtype: ocw.dataset.Dataset object
     '''
     new_times = _rcmes_normalize_datetimes(dataset.times, timestep)
     return ds.Dataset(
@@ -763,19 +758,43 @@ def _are_bounds_contained_by_dataset(bounds, dataset):
         Bounds
     :type dataset: Dataset
 
-    :returns: True if the Bounds are contained by the Dataset, False
-        otherwise
+    :returns: True if the Bounds are contained by the Dataset, Raises
+        a ValueError otherwise
     '''
     lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
     start, end = dataset.time_range()
-    return (
-        lat_min <= bounds.lat_min <= lat_max and
-        lat_min <= bounds.lat_max <= lat_max and
-        lon_min <= bounds.lon_min <= lon_max and
-        lon_min <= bounds.lon_max <= lon_max and
-        start <= bounds.start <= end and
-        start <= bounds.end <= end
-    )
+    errors = []
+
+    # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry lib instead in the future
+    if not lat_min <= bounds.lat_min <= lat_max:
+        error = "bounds.lat_min: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_min, lat_min, lat_max)
+        errors.append(error)
+
+    if not lat_min <= bounds.lat_max <= lat_max:
+        error = "bounds.lat_max: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_max, lat_min, lat_max)
+        errors.append(error)
+
+    if not lon_min <= bounds.lon_min <= lon_max:
+        error = "bounds.lon_min: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_min, lon_min, lon_max)
+        errors.append(error)
+
+    if not lon_min <= bounds.lon_max <= lon_max:
+        error = "bounds.lon_max: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_max, lon_min, lon_max)
+        errors.append(error)
+
+    if not start <= bounds.start <= end:
+        error = "bounds.start: %s is not between start: %s and end: %s" % (bounds.start, start, end)
+        errors.append(error)
+
+    if not start <= bounds.end <= end:
+        error = "bounds.end: %s is not between start: %s and end: %s" % (bounds.end, start, end)
+        errors.append(error)
+
+    if len(errors) == 0:
+        return True
+    else:
+        error_message = '\n'.join(errors)
+        raise ValueError(error_message)
 
 def _get_subregion_slice_indices(subregion, target_dataset):
     '''Get the indices for slicing Dataset values to generate the subregion.

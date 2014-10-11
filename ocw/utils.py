@@ -22,6 +22,7 @@ import datetime as dt
 import numpy as np
 
 from mpl_toolkits.basemap import shiftgrid
+from dateutil.relativedelta import relativedelta
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -49,8 +50,7 @@ def decode_time_values(dataset, time_var_name):
         # datetime.timedelta doesn't support a 'months' option. To remedy
         # this, a month == 30 days for our purposes.
         for time_val in time_data:
-            num_days = 30 * time_val
-            times.append(time_base + dt.timedelta(days=num_days))
+            times.append(time_base + relativedelta(months=int(time_val)))
     else:
         for time_val in time_data:
             arg[time_units] = time_val
@@ -61,8 +61,8 @@ def decode_time_values(dataset, time_var_name):
 def parse_time_units(time_format):
     ''' Parse units value from time units string.
 
-    The only units that are supported are: seconds, minutes, hours, days, 
-        months, or years. 
+    The only units that are supported are: seconds, minutes, hours, days,
+        months, or years.
 
     :param time_format: The time data units string from the dataset
         being processed. The string should be of the format
@@ -111,7 +111,7 @@ def parse_time_base(time_format):
         '%Y:%m:%d:%H:%M:%S', '%Y-%m-%d-%H:%M:%S', '%Y-%m-%d %H:%M:%S',
         '%Y/%m/%d%H:%M:%S', '%Y-%m-%d %H:%M', '%Y/%m/%d %H:%M',
         '%Y:%m:%d %H:%M', '%Y%m%d %H:%M', '%Y-%m-%d', '%Y/%m/%d',
-        '%Y:%m:%d', '%Y%m%d', '%Y-%m-%d %H:%M:%S.%f'
+        '%Y:%m:%d', '%Y%m%d', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H',
     ]
 
     # Attempt to match the base time string with a possible format parsing string.
@@ -214,3 +214,100 @@ def normalize_lat_lon_values(lats, lons, values):
         data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
 
     return lats_out, lons_out, data_out
+
+
+def reshape_monthly_to_annually(dataset):
+    ''' Reshape monthly binned dataset to annual bins.
+
+    Reshape a monthly binned dataset's 3D value array with shape
+    (num_months, num_lats, num_lons) to a 4D array with shape
+    (num_years, 12, num_lats, num_lons). This causes the data to be binned
+    annually while retaining its original shape.
+
+    It is assumed that the number of months in the dataset is evenly
+    divisible by 12. If it is not you will receive error due to
+    an invalid shape.
+
+    Example change of a dataset's shape:
+    (24, 90, 180) -> (2, 12, 90, 180)
+
+    :param dataset: Dataset object with full-year format
+    :type dataset: ocw.dataset.Dataset object
+
+    :returns: Dataset values array with shape (num_year, 12, num_lat, num_lon)
+    :rtype: Numpy array
+    '''
+
+    values = dataset.values[:]
+    data_shape = values.shape
+    num_total_month = data_shape[0]
+    num_year = num_total_month / 12
+    num_month = 12
+    year_month_shape = num_year, num_month
+    lat_lon_shape = data_shape[1:]
+    # Make new shape (num_year, 12, num_lats, num_lons)
+    new_shape = tuple(year_month_shape + lat_lon_shape)
+    # Reshape data with new shape
+    values.shape = new_shape
+
+    return values
+
+def calc_climatology_year(dataset):
+    ''' Calculate climatology of dataset's values for each year
+
+    :param dataset: Monthly binned Dataset object with an evenly divisible
+        number of months.
+    :type dataset: ocw.dataset.Dataset object
+
+    :returns: Mean values for each year (annual_mean) and mean values for all
+        years (total_mean)
+    :rtype: A tuple of two numpy arrays
+
+    :raise ValueError: If the number of monthly bins is not evenly divisible
+        by 12.
+    '''
+
+    values_shape = dataset.values.shape
+    time_shape = values_shape[0]
+    if time_shape % 12:
+        raise ValueError('The dataset should be in full-time format.')
+    else:
+        # Get values reshaped to (num_year, 12, num_lats, num_lons)
+        values = reshape_monthly_to_annually(dataset)
+        # Calculate mean values over year (num_year, num_lats, num_lons)
+        annually_mean = values.mean(axis=1)
+        # Calculate mean values over all years (num_lats, num_lons)
+        total_mean = annually_mean.mean(axis=0)
+
+    return annually_mean, total_mean
+
+def calc_climatology_season(month_start, month_end, dataset):
+    ''' Calculate seasonal mean and time series for given months.
+
+    :param month_start: An integer for beginning month (Jan=1)
+    :type month_start: Integer
+    :param month_end: An integer for ending month (Jan=1)
+    :type month_end: Integer
+    :param dataset: Dataset object with full-year format
+    :type dataset: ocw.dataset.Dataset object
+
+    :returns:  
+        t_series - monthly average over the given season
+        means - mean over the entire season
+    :rtype: A tuple of two numpy arrays
+    '''
+
+    if month_start > month_end:
+        # Offset the original array so that the the first month
+        # becomes month_start, note that this cuts off the first year of data
+        offset = slice(month_start - 1, month_start - 13)
+        reshape_data = reshape_monthly_to_annually(dataset[offset])
+        month_index = slice(0, 13 - month_start + month_end)
+    else:
+        # Since month_start <= month_end, just take a slice containing those months
+        reshape_data = reshape_monthly_to_annually(dataset)
+        month_index = slice(month_start - 1, month_end)
+    
+    t_series = reshape_data[:, month_index].mean(axis=1)
+    means = t_series.mean(axis=0)
+    return t_series, means
