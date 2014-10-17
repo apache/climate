@@ -1,36 +1,43 @@
 #Graph-based Search for the Identification and Chatacterization of Mesoscale Convective Complexes
 
-##Very Brief Introduction
-If you are in this file it means that you wish to use the mccSearch.py program, or learn more about it. 
-
-##What is this project about?
+##Introduction and Context
 This program searches for a weather feature known as a Mesoscale Convective Complex (MCC) in gridded infrared and precipitation rate satellite data (MERG and TRMM datasets have been tested). 
-The data is read from netCDF files into arrays with the dimensions time, latitude, longitude, value. 
+The work is direct output from [Dr. Kim Whitehall's](http://www.kimwhitehall.com/) Ph.D. thesis which acts as the basis and driver for inclusion in OCW.
+
+Data from MERG and TRMM datasets is read from netCDF files into arrays with the dimensions time, latitude, longitude, value. From the data we can then infer and generate a number of things:
+ * a graph representing Cloud Elements (CE)
+ * analysis of the graph to determine whether any Cloud Clusters (CC) are present
+ * determination of whether any of the CC are MCC
+ * futher metrics calculation and analysis with a specific focus on MCC examples of which include average size and duration, longest and shortest, precipitation distribution in feature
+ * numerous visualizations including histograms of precipitation during MCC, area Vs time plots, cross dataset visualization of CE... 
+If you are still reading this file it means that you wish to use the mccsearch program, or learn more about it within the context of OCW.
 
 ##What is needed?
- * Python 2.7.4 (We used Anaconda 1.5.1 64 bit libraries, which installed most of the dependencies.) Other module dependences: 
- * netCDF4 - http://www.unidata.ucar.edu/software/netcdf/
- * sciPy - http://www.scipy.org/scipylib/index.html
- * NumPy - http://www.scipy.org/scipylib/download.html
- * Networkx - https://networkx.github.io/download.html
- * matplotlib - http://matplotlib.org/downloads.html
- * GrADS (We used OpenGrADS grads2 Version 2.0.1.oga.1) - http://sourceforge.net/projects/opengrads/files/
+ * Python (verified with 2.7.4) - http://python.org
+ * netCDF4 (verified with netCDF4-1.1.1)- http://www.unidata.ucar.edu/software/netcdf/
+ * sciPy (verified with 0.14.0)- http://www.scipy.org/scipylib/index.html
+ * NumPy (verified with 1.9.0)- http://www.scipy.org/scipylib/download.html
+ * Networkx (verified with 3.4.0) - https://networkx.github.io/download.html
+ * matplotlib (verified with 1.4.0)- http://matplotlib.org/downloads.html
+ * GrADS (verified against OpenGrADS grads2 Version 2.0.1.oga.1) - http://sourceforge.net/projects/opengrads/files/
  * LATS4D - http://sourceforge.net/projects/opengrads/files/
 
-##Download the source code and store in a folder
- * mccSearch.py contains all the function needed 
- * mccSearchUI.py contains a wizard type Q&A for running the program
- * process.py contains some needed functions (from older version of Apache OCW)
- * file.py contains some needed functions (from older version of Apache OCW)
- * mainProg.py contains a sample of the  general workflow of the order the modules should be called. There are three main inputs you will have to supply:
-     * mainDirStr : this is the directory where you wish all the output files –images, textfiles, clipped netCDF files- to be stored
-     * TRMMdirName : this is the directory where the original TRMM data in netCDF format is stored
-     * CEoriDirName : this is the directory where the original MERG data in netCDF format is stored
- * Store the GrADsScripts folder (and contents) in a separate folder in the same main directory as the source code folder.  
+So, without further a-do, lets progress with using mccsearch.
 
-##Download data in one folder (with only the data files)
-This is a very crude program. The following assumptions are made:
- * input data are in one folder. For MERG data this is CEoriDirName and for the TRMM data this is TRMMdirName in mainProg.py.  These directories cannot be the same.
+##Source Code
+ * [mccSearch.py](../code/mccSearch.py) contains the primary MCC functionality
+ * [mccSearchUI.py](../code/mccSearchUI.py) contains a wizard type Q&A for running the mccSearch program
+ * [process.py](../code/process.py) currently contains some required functions from older version of OCW. This code will most likely be factored out by the release of OCW 0.5.
+ * [file.py](../code/files.py) currently contains some required functions from older version of OCW. This code will most likely be factored out by the release of OCW 0.5.
+ * [mainProg.py](../code/mainProg.py) contains a sample of the  general workflow of the order the modules should be called. You will have to supply three main input arguments:
+     * mainDirStr : a directory where you wish all the output files –images, textfiles, clipped netCDF files- to be stored
+     * TRMMdirName : a directory containing the original TRMM data in netCDF format
+     * CEoriDirName : a directory containing the original MERG data in netCDF format
+ * a [GrADsScripts](../GrADsScripts/) folder containing templating and configuration files used within the execution of mccsearch. 
+
+##Download MERG and TRMM data
+The following assumptions are made:
+ * Input data are in one folder. mainProg.py looks for MERG data as a single directory 'CEoriDirName' and TRMM data as a single directory 'TRMMdirName', just as described above. These directories cannot be the same and the data all needs to be of type netCDF data files only.
  * THERE IS NO FILE CHECKING. So please ensure ALL your files are there in netCDF format. 
  * THERE IS NO FILE ERROR HANDLING. Please ensure that the MERG data and the TRMM data files are correlated temporally and spatially
 
@@ -55,3 +62,4 @@ Keep your fingers & toes crossed!! Once everything went well, the directory you 
  * Create a user interface based on mainProg.py. 
  * Plug the project into the Regional Climate Model Evaluation Database (RCMED) that is available at Apache OCW. 
 With increased usage, it is anticipated that more metrics and visualizations will be provided. 
+ * There are a [number of issues](http://s.apache.org/mccsearch) in the OCW Jira relating to mccsearch. If you find an issue, please [open an issue](https://issues.apache.org/jira/browse/climate) and tag it with the [mcc search](http://s.apache.org/mccsearch) tag.
