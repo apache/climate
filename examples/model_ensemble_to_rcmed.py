@@ -16,6 +16,7 @@
 # under the License.
 
 import datetime
+import math
 import urllib
 from os import path
 
@@ -82,6 +83,14 @@ parameter_id = int(cru_31['parameter_id'])
 #  The spatial_boundaries() function returns the spatial extent of the dataset
 min_lat, max_lat, min_lon, max_lon = wrf311_dataset.spatial_boundaries()
 
+#  There is a boundry alignment issue with the datasets.  To mitigate this
+#  we will use the math.floor() and math.ceil() functions to shrink the 
+#  boundries slighty.
+min_lat = math.ceil(min_lat)
+max_lat = math.floor(max_lat)
+min_lon = math.ceil(min_lon)
+max_lon = math.floor(max_lon)
+
 print("Calculating the Maximum Overlap in Time for the datasets")
 
 cru_start = datetime.datetime.strptime(cru_31['start_date'], "%Y-%m-%d")
@@ -110,27 +119,20 @@ cru31_dataset = rcmed.parameter_dataset(dataset_id,
 
 """ Step 3: Resample Datasets so they are the same shape """
 
-print("Temporally Rebinning the Datasets to a Monthly Timestep")
-# To run monthly temporal Rebinning use a timedelta of 30 days.
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=30))
-wrf311_dataset = dsp.temporal_rebin(wrf311_dataset, datetime.timedelta(days=30))
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=30))
+print("Temporally Rebinning the Datasets to an Annual Timestep")
+# To run annual temporal Rebinning use a timedelta of 360 days.
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=360))
+wrf311_dataset = dsp.temporal_rebin(wrf311_dataset, datetime.timedelta(days=360))
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=360))
 
 # Running Temporal Rebin early helps negate the issue of datasets being on different 
 # days of the month (1st vs. 15th)
 # Create a Bounds object to use for subsetting
 new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
-# DEBUG
-print new_bounds
-print knmi_dataset
-print wrf311_dataset
-
+# Subset our model datasets so they are the same size
 knmi_dataset = dsp.subset(new_bounds, knmi_dataset)
 wrf311_dataset = dsp.subset(new_bounds, wrf311_dataset)
-
-
-
 
 """ Spatially Regrid the Dataset Objects to a 1/2 degree grid """
 # Using the bounds we will create a new set of lats and lons on 1/2 degree step
@@ -155,7 +157,9 @@ bias = metrics.Bias()
 # Evaluation can take in multiple targets and metrics, so we need to convert
 # our examples into Python lists.  Evaluation will iterate over the lists
 print("Making the Evaluation definition")
-bias_evaluation = evaluation.Evaluation(cru31_dataset, [knmi_dataset, wrf311_dataset, ensemble_dataset], [bias])
+bias_evaluation = evaluation.Evaluation(cru31_dataset, 
+                      [knmi_dataset, wrf311_dataset, ensemble_dataset],
+                      [bias])
 print("Executing the Evaluation using the object's run() method")
 bias_evaluation.run()
  
@@ -168,7 +172,7 @@ bias_evaluation.run()
 # Accessing the actual results when we have used 1 metric and 1 dataset is
 # done this way:
 print("Accessing the Results of the Evaluation run")
-results = bias_evaluation.results[0][0]
+results = bias_evaluation.results[0]
  
 # From the bias output I want to make a Contour Map of the region
 print("Generating a contour map using ocw.plotter.draw_contour_map()")
@@ -176,10 +180,11 @@ print("Generating a contour map using ocw.plotter.draw_contour_map()")
 lats = new_lats
 lons = new_lons
 fname = OUTPUT_PLOT
-gridshape = (3, 12)  # Using a 3 x 12 since we have a 1 year of monthly data for 3 models
+gridshape = (3, 1)  # Using a 3 x 1 since we have a 1 year of data for 3 models
 plot_title = "TASMAX Bias of CRU 3.1 vs. KNMI, WRF311 and ENSEMBLE (%s - %s)" % (start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
-sub_titles = ["Monthly Time Step"]
- 
-plotter.draw_contour_map(results, lats, lons, fname,
-                         gridshape=gridshape, ptitle=plot_title, 
-                         subtitles=sub_titles)
+plotnames = ["KNMI", "WRF311", "ENSEMBLE"]
+for i, result in enumerate(results):
+  output_file = "%s_%s" % (fname, plotnames[i])
+  print "creating %s" % (output_file,)
+  plotter.draw_contour_map(result, lats, lons, output_file,
+                         gridshape=gridshape, ptitle=plot_title)
