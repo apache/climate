@@ -38,7 +38,7 @@ YEARS = 1
 FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
-OUTPUT_PLOT = "model_ensemble_tasmax_africa_bias_monthly"
+OUTPUT_PLOT = "tasmax_africa_bias_annual"
 
 # Download necessary NetCDF file if not present
 if path.exists(FILE_1):
@@ -96,15 +96,11 @@ print("Calculating the Maximum Overlap in Time for the datasets")
 cru_start = datetime.datetime.strptime(cru_31['start_date'], "%Y-%m-%d")
 cru_end = datetime.datetime.strptime(cru_31['end_date'], "%Y-%m-%d")
 knmi_start, knmi_end = knmi_dataset.time_range()
-# Grab the Max Start Time
-start_time = max([cru_start, knmi_start])
-# Grab the Min End Time
-end_time = min([cru_end, knmi_end])
-print("Overlap computed to be: %s to %s" % (start_time.strftime("%Y-%m-%d"),
-                                          end_time.strftime("%Y-%m-%d")))
-print("We are going to grab the first %s year(s) of data" % YEARS)
-end_time = datetime.datetime(start_time.year + YEARS, start_time.month, start_time.day)
-print("Final Overlap is: %s to %s" % (start_time.strftime("%Y-%m-%d"),
+# Set the Time Range to be the year 1989
+start_time = datetime.datetime(1989,1,1)
+end_time = datetime.datetime(1989,12,1)
+
+print("Time Range is: %s to %s" % (start_time.strftime("%Y-%m-%d"),
                                           end_time.strftime("%Y-%m-%d")))
 
 print("Fetching data from RCMED...")
@@ -168,11 +164,11 @@ bias_evaluation.run()
 # possible Evaluation scenarios.
 #
 # The Evaluation results docs say:
-# The shape of results is (num_metrics, num_target_datasets) if no subregion
-# Accessing the actual results when we have used 1 metric and 1 dataset is
+# The shape of results is (num_target_datasets, num_metrics) if no subregion
+# Accessing the actual results when we have used 3 datasets and 1 metric is
 # done this way:
 print("Accessing the Results of the Evaluation run")
-results = bias_evaluation.results[0]
+results = bias_evaluation.results
  
 # From the bias output I want to make a Contour Map of the region
 print("Generating a contour map using ocw.plotter.draw_contour_map()")
@@ -181,10 +177,10 @@ lats = new_lats
 lons = new_lons
 fname = OUTPUT_PLOT
 gridshape = (3, 1)  # Using a 3 x 1 since we have a 1 year of data for 3 models
-plot_title = "TASMAX Bias of CRU 3.1 vs. KNMI, WRF311 and ENSEMBLE (%s - %s)" % (start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
 plotnames = ["KNMI", "WRF311", "ENSEMBLE"]
 for i, result in enumerate(results):
-  output_file = "%s_%s" % (fname, plotnames[i])
+  plot_title = "TASMAX Bias of CRU 3.1 vs. %s (%s - %s)" % (plotnames[i], start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
+  output_file = "%s_%s" % (fname, plotnames[i].lower())
   print "creating %s" % (output_file,)
-  plotter.draw_contour_map(result, lats, lons, output_file,
+  plotter.draw_contour_map(result[0], lats, lons, output_file,
                          gridshape=gridshape, ptitle=plot_title)
