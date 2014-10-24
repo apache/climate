@@ -19,23 +19,23 @@
 
 import urllib2
 
-from ocw.esgf.constants import JPL_SEARCH_SERVICE_URL
+from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
 from ocw.esgf.download import download
 from ocw.esgf.logon2 import logon2
 from ocw.esgf.search import SearchClient
 import ocw.data_source.local as local
 
+from bs4 import BeautifulSoup
+import requests
+
 def load_dataset(dataset_id,
                  variable,
                  esgf_username,
                  esgf_password,
-                 search_url=JPL_SEARCH_SERVICE_URL,
+                 search_url=DEFAULT_ESGF_SEARCH,
+                 elevation_index=0,
                  **additional_constraints):
     ''' Load an ESGF dataset.
-
-    .. note:
-        Currently, multi-file datasets aren't supported. This functionality
-        will be added soon!
 
     :param dataset_id: The ESGF ID of the dataset to load.
     :type dataset_id: String
@@ -48,6 +48,8 @@ def load_dataset(dataset_id,
     :param search_url: (Optional) The ESGF node to use for searching. Defaults
         to the Jet Propulsion Laboratory node.
     :type search_url: String
+    :param elevation_index: (Optional) The elevation level to strip out when
+        loading the dataset using ocw.data_source.local.
     :param additional_constraints: (Optional) Additional key,value pairs to
         pass as constraints to the search wrapper. These can be anything found
         on the ESGF metadata page for a dataset.
@@ -57,41 +59,44 @@ def load_dataset(dataset_id,
     :raises ValueError: If no dataset can be found for the supplied ID and
         variable, or if the requested dataset is a multi-file dataset.
     '''
-    urls = _get_file_urls(url=search_url,
-                          id=dataset_id,
-                          variable=variable,
-                          **additional_constraints)
+    download_data = _get_file_download_data(url=search_url,
+                                            dataset_id=dataset_id,
+                                            variable=variable)
 
-    if len(urls) > 1:
-        err = (
-            "esgf.load_dataset: Unable to handle multi-file datasets. "
-            "Feature coming soon ..."
-        )
-        raise ValueError(err)
-    elif len(urls) == 0:
-        err = (
-            "esgf.load_dataset: No files found for specified dataset."
-        )
-        raise ValueError(err)
+    datasets = []
+    for url, var in download_data:
+        _download_files([url], esgf_username, esgf_password)
+        datasets.append(local.load_file('/tmp/' + url.split('/')[-1],
+                                        var,
+                                        elevation_index=elevation_index))
 
-    # TODO: In the future, we need to combine multi-file datasets into a single
-    # file and then load it. For now we're only handling a single file use case.
-    _download_files(urls, esgf_username, esgf_password)
-    return local.load_file('/tmp/' + urls[0].split('/')[-1], variable)
+    return datasets
 
-def _get_file_urls(**constraints):
+def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     ''''''
-    # Allow the user to optionally specify the URL for a search node to use.
-    # Default to the Jet Propulsion Laboratory node if nothing is specified.
-    if 'url' in constraints:
-        url = constraints['url']
-        constraints.pop('url', None)
-    else:
-        url = ocw.esgf.constants.JPL_SEARCH_SERVICE_URL
+    url += '?distrib=false&type=File&dataset_id={}&variable={}'
+    url = url.format(dataset_id, variable)
 
-    sc = SearchClient(searchServiceUrl=url, distrib=False)
-    sc.setConstraint(**constraints)
-    return sc.getFiles()
+    r = requests.get(url)
+    xml = BeautifulSoup(r.content)
+
+    dont_have_results = not bool(xml.response.result['numfound'])
+
+    if dont_have_results:
+        err = "esgf.load_dataset: No files found for specified dataset."
+        raise ValueError(err)
+
+    # Split out URLs for dataset download along with variable names for each
+    # of those files.
+    url_groups = xml.response.result.findAll('arr', {'name': 'url'})
+    variable_groups = xml.response.result.findAll('arr', {'name': 'variable'})
+
+    urls = [group.findAll('str')[0].string.split('|')[0]
+            for group in url_groups]
+    variables = [group.findAll('str')[0].string
+                 for group in variable_groups]
+
+    return zip(urls, variables)
 
 def _download_files(file_urls, username, password, download_directory='/tmp'):
     ''''''
