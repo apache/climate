@@ -193,7 +193,7 @@ def _get_value_name(possible_value_name):
     return value_variable_name
 
 
-def load_file(file_path, variable_name):
+def load_file(file_path, variable_name, elevation_index=0):
     '''Load netCDF file, get the all variables name and get the data.
 
     :param file_path: NetCDF directory with file name
@@ -257,12 +257,12 @@ def load_file(file_path, variable_name):
         lat_lon_time_var_names = [lat_name, lon_name, time_name]
         level_index = value_dimensions_names.index(list(set(value_dimensions_names) - set(lat_lon_time_var_names))[0])
         if level_index == 0:
-            values = values [0,:,:,:]
+            values = values [elevation_index,:,:,:]
         elif level_index == 1:
-            values = values [:,0,:,:]
+            values = values [:,elevation_index,:,:]
         elif level_index == 2:
-            values = values [:,:,0,:]
+            values = values [:,:,elevation_index,:]
         else:
-            values = values [:,:,:,0]
+            values = values [:,:,:,elevation_index]
 
     return Dataset(lats, lons, times, values, variable_name)
