@@ -54,7 +54,9 @@ def load_dataset(dataset_id,
         pass as constraints to the search wrapper. These can be anything found
         on the ESGF metadata page for a dataset.
 
-    :returns: An ocw.dataset.Dataset object contained the requested dataset.
+    :returns: A list of ocw.dataset.Dataset objects contained the requested
+        dataset. If the dataset is stored in multiple files each will be loaded
+        into a separate ocw.dataset.Dataset object.
 
     :raises ValueError: If no dataset can be found for the supplied ID and
         variable, or if the requested dataset is a multi-file dataset.
