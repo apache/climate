@@ -33,3 +33,4 @@ JPL_MYPROXY_SERVER_DN = "/O=ESGF/OU=esg-datanode.jpl.nasa.gov/CN=host/esg-vm.jpl
 
 # URL of ESGF search service to contact
 JPL_SEARCH_SERVICE_URL = "http://esg-datanode.jpl.nasa.gov/esg-search/search"
+DEFAULT_ESGF_SEARCH = "http://esg-datanode.jpl.nasa.gov/esg-search/search"
