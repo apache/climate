@@ -28,7 +28,7 @@ import subprocess
 
 #mccSearch modules
 import mccSearch
-import files
+#import files
 
 def main():
     CEGraph = nx.DiGraph()
