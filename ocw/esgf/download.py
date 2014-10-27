@@ -24,7 +24,7 @@ RCMES module to download a file from ESGF.
 import urllib2, httplib
 from os.path import expanduser, join
 
-from esgf.rcmes.constants import ESGF_CREDENTIALS
+from ocw.esgf.constants import ESGF_CREDENTIALS
 
 class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
     '''
