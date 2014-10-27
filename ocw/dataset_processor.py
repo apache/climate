@@ -720,7 +720,8 @@ def _check_dataset_shapes(datasets):
             dataset_shape = dataset.values.shape
         else:
             if dataset.values.shape != dataset_shape:
-                raise ValueError("Input datasets must be the same shape for an ensemble")
+                msg = "%s != %s" % (dataset.values.shape, dataset_shape)
+                raise ValueError("Input datasets must be the same shape for an ensemble :: ", msg)
             else:
                 pass
 
