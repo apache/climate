@@ -311,3 +311,27 @@ def calc_climatology_season(month_start, month_end, dataset):
     t_series = reshape_data[:, month_index].mean(axis=1)
     means = t_series.mean(axis=0)
     return t_series, means
+
+
+def calc_climatology_monthly(dataset):
+    ''' Calculate monthly mean values for a dataset.
+
+    :param dataset: Monthly binned Dataset object with the number of months
+        divisible by 12
+    :type dataset: ocw.dataset.Dataset object
+
+    :returns: Mean values for each month of the year
+    :rtype: A 3D numpy array of shape (12, num_lats, num_lons)
+
+    :raise ValueError: If the number of monthly bins is not divisible by 12
+    '''
+
+    if dataset.values.shape[0] % 12:
+        error = (
+            "The length of the time axis in the values array should be "
+            "divisible by 12."
+        )
+        raise ValueError(error)
+    else:
+        return reshape_monthly_to_annually(dataset).mean(axis=0)
+

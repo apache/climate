@@ -196,5 +196,26 @@ class TestCalcClimatologyYear(unittest.TestCase):
         np.testing.assert_array_equal(
             utils.calc_climatology_year(self.test_dataset)[1], total_mean)
 
+
+class TestCalcClimatologyMonthly(unittest.TestCase):
+    ''' Tests the 'calc_climatology_monthly' method from ocw.utils.py '''
+
+    def setUp(self):
+        self.lats = np.array([10, 20, 30, 40, 50])
+        self.lons = np.array([20, 30, 40, 50, 60])
+        start_date = datetime.datetime(2000, 1, 1)
+        self.times = np.array([start_date + relativedelta(months=x)
+                               for x in range(36)])
+        self.values = np.array([1]*300 + [2]*300 + [0]*300).reshape(36, 5, 5)
+        self.variable = 'testdata'
+        self.dataset = Dataset(self.lats, self.lons, self.times,
+                               self.values, self.variable)
+
+    def test_calc_climatology_monthly(self):
+        expected_result = np.ones(300).reshape(12, 5, 5)
+        actual_result = utils.calc_climatology_monthly(self.dataset)
+        np.testing.assert_array_equal(actual_result, expected_result)
+
+
 if __name__ == '__main__':
     unittest.main()
