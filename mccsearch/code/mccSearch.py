@@ -43,10 +43,6 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from matplotlib.ticker import FuncFormatter, FormatStrFormatter
 
-#existing modules in services
-import Nio
-#import files
-#import process
 #----------------------- GLOBAL VARIABLES --------------------------
 # --------------------- User defined variables ---------------------
 #FYI the lat lon values are not necessarily inclusive of the points given. These are the limits
@@ -2481,6 +2477,8 @@ def getModelTimes(xtimes, timeVarName):
         times  - list of python datetime objects describing model data times
         modelTimeStep - 'hourly','daily','monthly','annual'
     '''
+
+    from ocw import utils
 
     timeFormat = xtimes.units
     # search to check if 'since' appears in units
