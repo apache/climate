@@ -316,7 +316,8 @@ def calc_climatology_season(month_start, month_end, dataset):
 def calc_climatology_monthly(dataset):
     ''' Calculate monthly mean values for a dataset.
 
-    :param dataset: Monthly binned Dataset object with the number of months divisible by 12
+    :param dataset: Monthly binned Dataset object with the number of months
+        divisible by 12
     :type dataset: ocw.dataset.Dataset object
 
     :returns: Mean values for each month of the year
@@ -326,7 +327,11 @@ def calc_climatology_monthly(dataset):
     '''
 
     if dataset.values.shape[0] % 12:
-        raise ValueError("The length of the time axis in the values array should be divisible by 12.")
+        error = (
+            "The length of the time axis in the values array should be "
+            "divisible by 12."
+        )
+        raise ValueError(error)
     else:
         return reshape_monthly_to_annually(dataset).mean(axis=0)
 
