@@ -316,14 +316,13 @@ def calc_climatology_season(month_start, month_end, dataset):
 def calc_climatology_monthly(dataset):
     ''' Calculate monthly mean values for a dataset.
 
-    :param dataset: Monthly binned Dataset object with the number of months
-        divisible by 12.
+    :param dataset: Monthly binned Dataset object with the number of months divisible by 12
     :type dataset: ocw.dataset.Dataset object
 
     :returns: Mean values for each month of the year
     :rtype: A 3D numpy array of shape (12, num_lats, num_lons)
 
-    :raise ValueError: If the number of monthly bins is not divisible by 12.
+    :raise ValueError: If the number of monthly bins is not divisible by 12
     '''
 
     if dataset.values.shape[0] % 12:
