@@ -167,5 +167,36 @@ class TestMeanBias(unittest.TestCase):
         expected_result.fill(300)
         np.testing.assert_array_equal(self.mean_bias.run(self.reference_dataset, self.target_dataset, True), expected_result)
 
+
+class TestSpatialMeanOfTemporalMeanBias(unittest.TestCase):
+    '''Test the metrics.SpatialMeanOfTemporalMeanBias metric.'''
+    def setUp(self):
+        # Set metric.
+        self.metric = metrics.SpatialMeanOfTemporalMeanBias()
+        # Initialize reference dataset.
+        self.ref_lats = np.array([10, 20, 30, 40, 50])
+        self.ref_lons = np.array([5, 15, 25, 35, 45])
+        self.ref_times = np.array([dt.datetime(2000, x, 1)
+                                   for x in range(1, 13)])
+        self.ref_values = np.array(range(300)).reshape(12, 5, 5)
+        self.ref_variable = "ref"
+        self.ref_dataset = Dataset(self.ref_lats, self.ref_lons,
+            self.ref_times, self.ref_values, self.ref_variable)
+        # Initialize target dataset.
+        self.tgt_lats = np.array([10, 20, 30, 40, 50])
+        self.tgt_lons = np.array([5, 15, 25, 35, 45])
+        self.tgt_times = np.array([dt.datetime(2000, x, 1)
+                                   for x in range(1, 13)])
+        self.tgt_values = np.array(range(299, -1, -1)).reshape(12, 5, 5)
+        self.tgt_variable = "tgt"
+        self.tgt_dataset = Dataset(self.tgt_lats, self.tgt_lons,
+            self.tgt_times, self.tgt_values, self.tgt_variable)
+
+    def test_function_run(self):
+        result = self.metric.run(self.ref_dataset, self.tgt_dataset)
+        self.assertEqual(result, 0.0)
+
+
 if __name__ == '__main__':
     unittest.main()
+

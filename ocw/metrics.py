@@ -173,3 +173,26 @@ class MeanBias(BinaryMetric):
         mean_bias = diff.mean(axis=0)
 
         return mean_bias
+
+
+class SpatialMeanOfTemporalMeanBias(BinaryMetric):
+    '''Calculate the bias averaged over time and domain.'''
+
+    def run(self, reference_dataset, target_dataset):
+        '''Calculate the bias averaged over time and domain.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param ref_dataset: The reference dataset to use in this metric run
+        :type ref_dataset: ocw.dataset.Dataset object
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run
+        :type target_dataset: ocw.dataset.Dataset object
+
+        :returns: The bias averaged over time and domain
+        '''
+
+        bias = reference_dataset.values - target_dataset.values
+        return bias.mean()
+
