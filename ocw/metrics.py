@@ -149,7 +149,7 @@ class PatternCorrelation(BinaryMetric):
         return stats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
 
 
-class MeanBias(BinaryMetric):
+class TemporalMeanBias(BinaryMetric):
     '''Calculate the bias averaged over time.'''
 
     def run(self, ref_dataset, target_dataset, absolute=False):

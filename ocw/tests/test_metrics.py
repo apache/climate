@@ -132,10 +132,10 @@ class TestPatternCorrelation(unittest.TestCase):
         self.assertEqual(pattern, 1.0)
 
 
-class TestMeanBias(unittest.TestCase):
-    '''Test the metrics.MeanBias metric.'''
+class TestTemporalMeanBias(unittest.TestCase):
+    '''Test the metrics.TemporalMeanBias metric.'''
     def setUp(self):
-        self.mean_bias = metrics.MeanBias()
+        self.mean_bias = metrics.TemporalMeanBias()
         # Initialize reference dataset
         self.reference_lat = np.array([10, 12, 14, 16, 18])
         self.reference_lon = np.array([100, 102, 104, 106, 108])
