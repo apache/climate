@@ -197,6 +197,35 @@ class TestSpatialMeanOfTemporalMeanBias(unittest.TestCase):
         self.assertEqual(result, 0.0)
 
 
+class TestRMSError(unittest.TestCase):
+    '''Test the metrics.RMSError metric.'''
+    def setUp(self):
+        # Set metric.
+        self.metric = metrics.RMSError()
+        # Initialize evaluation dataset.
+        self.eval_lats = np.array([10, 20, 30, 40, 50])
+        self.eval_lons = np.array([5, 15, 25, 35, 45])
+        self.eval_times = np.array([dt.datetime(2000, x, 1)
+                                    for x in range(1, 13)])
+        self.eval_values = np.array([4] * 300).reshape(12, 5, 5)
+        self.eval_variable = "eval"
+        self.eval_dataset = Dataset(self.eval_lats, self.eval_lons,
+            self.eval_times, self.eval_values, self.eval_variable)
+        # Initialize reference dataset.
+        self.ref_lats = np.array([10, 20, 30, 40, 50])
+        self.ref_lons = np.array([5, 15, 25, 35, 45])
+        self.ref_times = np.array([dt.datetime(2000, x, 1)
+                                   for x in range(1, 13)])
+        self.ref_values = np.array([2] * 300).reshape(12, 5, 5)
+        self.ref_variable = "ref"
+        self.ref_dataset = Dataset(self.ref_lats, self.ref_lons,
+            self.ref_times, self.ref_values, self.ref_variable)
+
+    def test_function_run(self):
+        result = self.metric.run(self.eval_dataset, self.ref_dataset)
+        self.assertEqual(result, 2.0)
+
+
 if __name__ == '__main__':
     unittest.main()
 
