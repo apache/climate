@@ -184,8 +184,9 @@ class SpatialMeanOfTemporalMeanBias(BinaryMetric):
         .. note::
            Overrides BinaryMetric.run()
 
-        :param ref_dataset: The reference dataset to use in this metric run
-        :type ref_dataset: ocw.dataset.Dataset object
+        :param reference_dataset: The reference dataset to use in this metric
+            run
+        :type reference_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run
         :type target_dataset: ocw.dataset.Dataset object
