@@ -184,8 +184,9 @@ class SpatialMeanOfTemporalMeanBias(BinaryMetric):
         .. note::
            Overrides BinaryMetric.run()
 
-        :param ref_dataset: The reference dataset to use in this metric run
-        :type ref_dataset: ocw.dataset.Dataset object
+        :param reference_dataset: The reference dataset to use in this metric
+            run
+        :type reference_dataset: ocw.dataset.Dataset object
         :param target_dataset: The target dataset to evaluate against the
             reference dataset in this metric run
         :type target_dataset: ocw.dataset.Dataset object
@@ -201,22 +202,23 @@ class RMSError(BinaryMetric):
     '''Calculate the Root Mean Square Difference (RMS Error), with the mean
        calculated over time and space.'''
 
-    def run(self, eval_dataset, ref_dataset):
+    def run(self, reference_dataset, target_dataset):
         '''Calculate the Root Mean Square Difference (RMS Error), with the mean
            calculated over time and space.
 
         .. note::
            Overrides BinaryMetric.run()
 
-        :param eval_dataset: The dataset to evaluate against the reference
-            dataset
-        :type eval_dataset: ocw.dataset.Dataset object
-        :param ref_dataset: The reference dataset for the metric
+        :param reference_dataset: The reference dataset to use in this metric
+            run
+        :type reference_dataset: ocw.dataset.Dataset object
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run
         :type target_dataset: ocw.dataset.Dataset object
 
         :returns: The RMS error, with the mean calculated over time and space
         '''
 
-        sqdiff = (eval_dataset.values - ref_dataset.values) ** 2
+        sqdiff = (reference_dataset.values - target_dataset.values) ** 2
         return numpy.sqrt(sqdiff.mean())
 
