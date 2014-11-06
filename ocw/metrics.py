@@ -171,17 +171,19 @@ class TemporalCorrelation(BinaryMetric):
             array of confidence levels associated with the temporal correlation
             coefficients
         '''
-        nt, ny, nx = reference_dataset.values.shape
-        tc = numpy.zeros([ny, nx])
-        cl = numpy.zeros([ny, nx])
-        for iy in numpy.arange(ny):
-            for ix in numpy.arange(nx):
-                tc[iy, ix], cl[iy, ix] = stats.pearsonr(
-                                           reference_dataset.values[:, iy, ix],
-                                           target_dataset.values[:, iy, ix]
-                                         )
-                cl[iy, ix] = 1 - cl[iy, ix]
-        return tc, cl 
+        nTimes, nLats, nLons = reference_dataset.values.shape
+        coefficients = numpy.zeros([nLats, nLons])
+        levels = numpy.zeros([nLats, nLons])
+        for iLats in numpy.arange(nLats):
+            for iLons in numpy.arange(nLons):
+                coefficients[iLats, iLons], levels[iLats, iLons] = (
+                    stats.pearsonr(
+                        reference_dataset.values[:, iLats, iLons],
+                        target_dataset.values[:, iLats, iLons]
+                    )
+                )
+                levels[iLats, iLons] = 1 - levels[iLats, iLons]
+        return coefficients, levels 
 
 
 class TemporalMeanBias(BinaryMetric):
