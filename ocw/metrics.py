@@ -149,6 +149,41 @@ class PatternCorrelation(BinaryMetric):
         return stats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
 
 
+class TemporalCorrelation(BinaryMetric):
+    '''Calculate the temporal correlation coefficients and associated
+       confidence levels between two datasets, using Pearson's correlation.'''
+
+    def run(self, reference_dataset, target_dataset):
+        '''Calculate the temporal correlation coefficients and associated
+           confidence levels between two datasets, using Pearson's correlation.
+
+        .. note::
+           Overrides BinaryMetric.run()
+
+        :param reference_dataset: The reference dataset to use in this metric
+            run
+        :type reference_dataset: ocw.dataset.Dataset object
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run
+        :type target_dataset: ocw.dataset.Dataset object
+
+        :returns: A 2D array of temporal correlation coefficients and a 2D
+            array of confidence levels associated with the temporal correlation
+            coefficients
+        '''
+        nt, nx, ny = reference_dataset.values.shape
+        tc = numpy.zeros([nx, ny])
+        cl = numpy.zeros([nx, ny])
+        for ix in numpy.arange(nx):
+            for iy in numpy.arange(ny):
+                tc[ix, iy], cl[ix, iy] = stats.pearsonr(
+                                           reference_dataset.values[:, ix, iy],
+                                           target_dataset.values[:, ix, iy]
+                                         )
+                cl[ix, iy] = 1 - cl[ix, iy]
+        return tc, cl 
+
+
 class TemporalMeanBias(BinaryMetric):
     '''Calculate the bias averaged over time.'''
 
