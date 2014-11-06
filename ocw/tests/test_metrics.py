@@ -159,19 +159,19 @@ class TestTemporalCorrelation(unittest.TestCase):
         self.tgt_dataset_dec = Dataset(self.tgt_lats, self.tgt_lons,
             self.tgt_times, self.tgt_values_dec, self.tgt_variable)
 
-    def test_temporal_correlation_identical_inputs(self):
+    def test_identical_inputs(self):
         expected = np.ones(25).reshape(5, 5)
         tc, cl = self.metric.run(self.ref_dataset, self.ref_dataset)
         np.testing.assert_array_equal(tc, expected)
         np.testing.assert_array_equal(cl, expected)
 
-    def test_temporal_correlation_positive_correlation(self):
+    def test_positive_correlation(self):
         expected = np.ones(25).reshape(5, 5)
         tc, cl = self.metric.run(self.ref_dataset, self.tgt_dataset_inc)
         np.testing.assert_array_equal(tc, expected)
         np.testing.assert_array_equal(cl, expected)
 
-    def test_temporal_correlation_negative_correlation(self):
+    def test_negative_correlation(self):
         expected_tc = np.array([-1] * 25).reshape(5, 5)
         expected_cl = np.ones(25).reshape(5, 5)
         tc, cl = self.metric.run(self.ref_dataset, self.tgt_dataset_dec)
