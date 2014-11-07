@@ -15,16 +15,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import re
-import netCDF4
-from ocw.dataset import Dataset
-import numpy
-import numpy.ma as ma
-from datetime import timedelta ,datetime
 import calendar
+from datetime import timedelta ,datetime
+import re
 import string
 
+from ocw.dataset import Dataset
 import ocw.utils as utils
+
+import netCDF4
+import numpy
+import numpy.ma as ma
 
 LAT_NAMES = ['x', 'rlat', 'rlats', 'lat', 'lats', 'latitude', 'latitudes']
 LON_NAMES = ['y', 'rlon', 'rlons', 'lon', 'lons', 'longitude', 'longitudes']
