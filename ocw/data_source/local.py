@@ -32,46 +32,61 @@ TIME_NAMES = ['time', 'times', 'date', 'dates', 'julian']
 
 
 def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
-    '''Return valid variable from given netCDF object.
+    ''' Determine if one of a set of variable names are in a NetCDF Dataset. 
 
-    Looks for an occurrence of a valid_var_name in the netcdf variable data.
-    If multiple possible matches are found a ValueError is raised. If no
-    matching variable names are found a Value is raised.
+    Looks for an occurrence of a valid_var_name in the NetCDF variable data.
+    This is useful for automatically determining the names of the lat, lon,
+    and time variable names inside of a dataset object.
 
     :param valid_var_names: The possible variable names to search for in 
         the netCDF object.
     :type valid_var_names: List of Strings
-    :param netcdf: The netCDF object in which to check for valid_var_names.
+    :param netcdf: The netCDF Dataset object in which to check for
+        valid_var_names.
     :type netcdf: netcdf4.Dataset
     :param netcdf_var: The relevant variable name to search over in the 
-        netcdf object.
+        netcdf object. This is used to narrow down the search for valid
+        variable names by first checking the desired variable's dimension
+        values for one or more of the valid variable names.
 
     :returns: The variable from valid_var_names that it locates in 
         the netCDF object.
 
-    :raises: ValueError
+    :raises ValueError: When unable to locate a single matching variable
+        name in the NetCDF Dataset from the supplied list of valid variable
+        names.
     '''
 
-    # Check for valid variable names in netCDF value variable dimensions
+    # Check for valid variable names in netCDF variable dimensions
     dimensions = netcdf.variables[netcdf_var].dimensions
     dims_lower = [dim.encode().lower() for dim in dimensions]
 
-    intersect = list(set(valid_var_names).intersection(dims_lower))
+    intersect = set(valid_var_names).intersection(dims_lower)
 
     if len(intersect) == 1:
-        index = dims_lower.index(intersect[0])
+        # Retrieve the name of the dimension where we found the matching
+        # variable name
+        index = dims_lower.index(intersect.pop())
         dimension_name = dimensions[index].encode()
 
+        # Locate all of the variables that share the dimension that we matched
+        # earlier. If the dimension's name matches then that variable is
+        # potentially what we want to return to the user.
         possible_vars = []
         for var in netcdf.variables.keys():
             var_dimensions = netcdf.variables[var].dimensions
 
+            # Skip any dimensions are > 1D
             if len(var_dimensions) != 1:
                 continue
 
             if var_dimensions[0].encode() == dimension_name:
                 possible_vars.append(var)
 
+        # If there are multiple variables with matching dimension names then we
+        # aren't able to determining the correct variable name using the
+        # variable dimensions. We need to try a different approach. Otherwise,
+        # we're done!
         if len(possible_vars) == 1:
             return possible_vars[0]
 
@@ -79,31 +94,41 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     variables = netcdf.variables.keys()
     vars_lower = [var.encode().lower() for var in variables]
 
-    intersect = list(set(valid_var_names).intersection(vars_lower))
+    intersect = set(valid_var_names).intersection(vars_lower)
 
     if len(intersect) == 1:
-        index = vars_lower.index(intersect[0])
+        index = vars_lower.index(intersect.pop())
         return variables[index]
 
-    # If we couldn't find a single matching valid variable name, we're
-    # unable to load the file properly.
+    # If we couldn't locate a single matching valid variable then we're unable
+    # to automatically determine the variable names for the user.
     error = (
-        "Unable to locate a single matching variable name in NetCDF object. "
+        "Unable to locate a single matching variable name from the "
+        "supplied list of valid variable names. "
     )
     raise ValueError(error)
 
 def load_file(file_path, variable_name, elevation_index=0):
-    '''Load netCDF file, get the all variables name and get the data.
+    ''' Load a NetCDF file into a Dataset.
 
-    :param file_path: NetCDF directory with file name
+    :param file_path: Path to the NetCDF file to load.
     :type file_path: String
-    :param variable_name: The given (by user) value variable name
+    :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: String
+    :param elevation_index: The elevation index for which data should be
+        returned. Climate data is often times 4 dimensional data. Some datasets
+        will have readins at different height/elevation levels. OCW expects
+        3D data so a single layer needs to be stripped out when loading. By
+        default, the first elevation layer is used. If desired you may specify
+        the elevation value to use.
 
-    :returns: An OCW Dataset object containing the requested parameter data.
+    :returns: An OCW Dataset object with the requested variable's data from
+        the NetCDF file.
     :rtype: ocw.dataset.Dataset object
 
-    :raises: ValueError
+    :raises ValueError: When the specified file path cannot be loaded by ndfCDF4
+        or when the lat/lon/time variable name cannot be determined
+        automatically.
     '''
 
     try:
@@ -122,7 +147,6 @@ def load_file(file_path, variable_name, elevation_index=0):
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
-
 
     if len(values.shape) == 4:
         value_dimensions_names = [dim_name.encode() for dim_name in netcdf.variables[variable_name].dimensions]
