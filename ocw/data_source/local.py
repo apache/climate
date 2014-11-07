@@ -109,19 +109,34 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     )
     raise ValueError(error)
 
-def load_file(file_path, variable_name, elevation_index=0):
+def load_file(file_path,
+              variable_name,
+              elevation_index=0,
+              lat_name=None,
+              lon_name=None,
+              time_name=None):
     ''' Load a NetCDF file into a Dataset.
 
     :param file_path: Path to the NetCDF file to load.
     :type file_path: String
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: String
-    :param elevation_index: The elevation index for which data should be
-        returned. Climate data is often times 4 dimensional data. Some datasets
-        will have readins at different height/elevation levels. OCW expects
-        3D data so a single layer needs to be stripped out when loading. By
-        default, the first elevation layer is used. If desired you may specify
-        the elevation value to use.
+    :param elevation_index: (Optional) The elevation index for which data should
+        be returned. Climate data is often times 4 dimensional data. Some
+        datasets will have readins at different height/elevation levels. OCW
+        expects 3D data so a single layer needs to be stripped out when loading.
+        By default, the first elevation layer is used. If desired you may
+        specify the elevation value to use.
+    :type elevation_index: Integer
+    :param lat_name: (Optional) The latitude variable name to extract from the
+        dataset.
+    :type lat_name: String
+    :param lon_name: (Optional) The longitude variable name to extract from the
+        dataset.
+    :type lon_name: String
+    :param time_name: (Optional) The time variable name to extract from the
+        dataset.
+    :type time_name: String
 
     :returns: An OCW Dataset object with the requested variable's data from
         the NetCDF file.
@@ -141,9 +156,12 @@ def load_file(file_path, variable_name, elevation_index=0):
         )
         raise ValueError(err)
 
-    lat_name = _get_netcdf_variable_name(LAT_NAMES, netcdf, variable_name)
-    lon_name = _get_netcdf_variable_name(LON_NAMES, netcdf, variable_name)
-    time_name = _get_netcdf_variable_name(TIME_NAMES, netcdf, variable_name)
+    if not lat_name:
+        lat_name = _get_netcdf_variable_name(LAT_NAMES, netcdf, variable_name)
+    if not lon_name:
+        lon_name = _get_netcdf_variable_name(LON_NAMES, netcdf, variable_name)
+    if not time_name:
+        time_name = _get_netcdf_variable_name(TIME_NAMES, netcdf, variable_name)
 
     lats = netcdf.variables[lat_name][:]    
     lons = netcdf.variables[lon_name][:]
