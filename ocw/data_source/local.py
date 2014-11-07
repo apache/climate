@@ -92,107 +92,6 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     )
     raise ValueError(error)
 
-
-def _get_lat_name(variable_names):
-    '''Find the latitude variable name
-
-    :param variable_names: List of netCDF variables' name
-    :type variable_names: List
-
-    :returns: Latitude variable name
-    :rtype: String
-    '''
-
-    common_name = set(['lat', 'lats', 'latitude', 'latitudes']).intersection(variable_names)
-    if len(common_name) !=1:
-        err = "Unable to autodetect latitude variable name."
-        raise ValueError(err)
-    else:
-        lat_variable_name = common_name.pop()
-
-    return lat_variable_name
-
-
-def _get_lon_name(variable_names):
-    '''Find the longitude variable name
-
-    :param variable_names: List of netCDF variables' name
-    :type variable_names: List
-
-    :returns: Longitude variable name
-    :rtype: String
-    '''
-
-    common_name = set(['lon', 'lons', 'longitude', 'longitudes']).intersection(variable_names)
-    if len(common_name) !=1:
-        err = "Unable to autodetect longitude variable name."
-        raise ValueError(err)
-    else:
-        lon_variable_name = common_name.pop()
-
-    return lon_variable_name
-
-
-def _get_time_name(variable_names):
-    '''Find the time variable name.
-
-    :param: variableNameList: List of netCDF variables' name
-    :type variable_names: List
-
-    :returns: Time variable name
-    :rtype: String
-    '''
-
-    common_name = set(['time', 'times', 'date', 'dates', 'julian']).intersection(variable_names)
-
-    if len(common_name) !=1:
-        err = "Unable to autodetect time variable name. These option(s) found: {0} ".format([each for each in common_name])
-        raise ValueError(err)
-    else:
-        time_variable_name = common_name.pop()
-
-    return time_variable_name
-
-
-def _get_level_name(variable_names):
-    '''Find the level variable name.
-
-    :param variable_names: List of netCDF variables' name
-    type variable_names: List
-
-    :returns: Level variable name
-    :rtype: String
-    '''
-
-    level_variable_name = None
-    common_name = set(['lev', 'level', 'levels', 'height', 'heights', 'elev', 'elevation', 'elevations']).intersection(variable_names)
-    if len(common_name) !=1:
-        pass
-    else:
-        level_variable_name = common_name.pop()
-
-    return level_variable_name
-
-
-def _get_value_name(possible_value_name):
-    '''Find the value variable name.
-
-    :param possible_value_name: List of all value variable names
-    :type possible_value_name: List
-
-    :returns: Value variable name
-    :rtype: String
-    '''
-
-    if len(possible_value_name) == 1:
-        value_variable_name = possible_value_name[0]
-    else:
-        err = "The given value variable name does not match with existing variables name."
-        raise ValueError(err)
-
-    return value_variable_name
-
-
 def load_file(file_path, variable_name, elevation_index=0):
     '''Load netCDF file, get the all variables name and get the data.
 
@@ -216,12 +115,6 @@ def load_file(file_path, variable_name, elevation_index=0):
     lat_name = _get_netcdf_variable_name(LAT_NAMES, netcdf, variable_name)
     lon_name = _get_netcdf_variable_name(LON_NAMES, netcdf, variable_name)
     time_name = _get_netcdf_variable_name(TIME_NAMES, netcdf, variable_name)
-
-    #lat_variable_name = _get_lat_name(variable_names)
-    #lon_variable_name = _get_lon_name(variable_names)
-    #time_variable_name = _get_time_name(variable_names)
-    #level_variable_name = _get_level_name(variable_names)
-
 
     # Check returned variable dimensions. lats, lons, and times should be 1D
     #
