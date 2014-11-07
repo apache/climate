@@ -134,10 +134,14 @@ def load_file(file_path, variable_name, elevation_index=0):
 
     try:
         netcdf = netCDF4.Dataset(file_path, mode='r')
+    except RuntimeError:
+        err = "Dataset filepath is invalid. Please ensure it is correct."
+        raise ValueError(err)
     except:
         err = (
-            "The given file cannot be loaded "
-            "(Only NetCDF file can be supported)."
+            "The given file cannot be loaded. Please ensure that it is a valid "
+            "NetCDF file. If problems persist, report them to the project's "
+            "mailing list."
         )
         raise ValueError(err)
 
