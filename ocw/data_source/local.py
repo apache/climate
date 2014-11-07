@@ -116,26 +116,6 @@ def load_file(file_path, variable_name, elevation_index=0):
     lon_name = _get_netcdf_variable_name(LON_NAMES, netcdf, variable_name)
     time_name = _get_netcdf_variable_name(TIME_NAMES, netcdf, variable_name)
 
-    # Check returned variable dimensions. lats, lons, and times should be 1D
-    #
-    # Check dimensions of the values
-    # if != 3
-    #   find the indices for lat, lon, time
-    #   strip out everything else by select 1st of possible options
-    #
-    # Check the order of the variables
-    # if not correct order (times, lats, lons)
-    #    reorder as appropriate
-    #
-    # Make new dataset object
-
-    '''
-    if variable_name in variable_names:
-        value_variable_name = variable_name
-    else:
-        possible_value_name = list(set(variable_names) - set([lat_variable_name, lon_variable_name, time_variable_name, level_variable_name]))
-        value_variable_name = _get_value_name(possible_value_name)
-    '''
     lats = netcdf.variables[lat_name][:]    
     lons = netcdf.variables[lon_name][:]
     time_raw_values = netcdf.variables[time_name][:]
@@ -145,7 +125,6 @@ def load_file(file_path, variable_name, elevation_index=0):
 
 
     if len(values.shape) == 4:
-        #value_dimensions_names = list(netcdf.variables[variable_name].dimensions)
         value_dimensions_names = [dim_name.encode() for dim_name in netcdf.variables[variable_name].dimensions]
         lat_lon_time_var_names = [lat_name, lon_name, time_name]
         level_index = value_dimensions_names.index(list(set(value_dimensions_names) - set(lat_lon_time_var_names))[0])
