@@ -134,7 +134,10 @@ def load_file(file_path, variable_name, elevation_index=0):
     try:
         netcdf = netCDF4.Dataset(file_path, mode='r')
     except:
-        err = "The given file cannot be loaded (Only netCDF file can be supported)."
+        err = (
+            "The given file cannot be loaded "
+            "(Only NetCDF file can be supported)."
+        )
         raise ValueError(err)
 
     lat_name = _get_netcdf_variable_name(LAT_NAMES, netcdf, variable_name)
@@ -148,10 +151,20 @@ def load_file(file_path, variable_name, elevation_index=0):
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
 
+    # If the values are 4D then we need to strip out the elevation index
     if len(values.shape) == 4:
-        value_dimensions_names = [dim_name.encode() for dim_name in netcdf.variables[variable_name].dimensions]
+        # Determine the set of possible elevation dimension names excluding
+        # the list of names that are used for the lat, lon, and time values.
+        dims = netcdf.variables[variable_name].dimensions
+        dimension_names = [dim_name.encode() for dim_name in dims]
         lat_lon_time_var_names = [lat_name, lon_name, time_name]
-        level_index = value_dimensions_names.index(list(set(value_dimensions_names) - set(lat_lon_time_var_names))[0])
+
+        elev_names = set(dimension_names) - set(lat_lon_time_var_names)
+
+        # Grab the index value for the elevation values
+        level_index = dimension_names.index(elev_names.pop())
+
+        # Strip out the elevation values so we're left with a 3D array.
         if level_index == 0:
             values = values [elevation_index,:,:,:]
         elif level_index == 1:
