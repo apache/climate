@@ -32,6 +32,8 @@ It is recommended that you pass -e when running this script. If you don't, parts
 of this installation will pollute your global Python install. If you're unsure,
 pass -e just to be safe!
 
+N.B. This install script has been tested against Ubuntu 12.04 and 14.04.
+Please report problems with this script to dev@climate.apache.org
 ENDHELP
 }
 
@@ -145,7 +147,7 @@ subtask "done"
 
 task "Installing ..."
 bash Anaconda-1.9.2-Linux-x86_64.sh
-export PATH="/home/vagrant/anaconda/bin:$PATH"
+export PATH="${HOME}/anaconda/bin:$PATH"
 subtask "done"
 
 # Install Basemap. Conda cannot be used for this install since
@@ -185,5 +187,5 @@ pip install -r ocw-pip-dependencies.txt >> install_log
 
 # Ensure that the climate code is included in the Python Path
 header "Updating PYTHONPATH ..."
-echo "export PYTHONPATH=/home/vagrant/climate:/home/vagrant/climate/ocw/:/home/vagrant/climate/rcmet/src/main/python/rcmes" >> /home/vagrant/.bashrc
+echo "export PYTHONPATH=${HOME}/climate:${HOME}/climate/ocw" >> /home/.bashrc
 subtask "done"
