@@ -187,5 +187,5 @@ pip install -r ocw-pip-dependencies.txt >> install_log
 
 # Ensure that the climate code is included in the Python Path
 header "Updating PYTHONPATH ..."
-echo "export PYTHONPATH=${HOME}/climate:${HOME}/climate/ocw" >> /home/.bashrc
+echo "export PYTHONPATH=${HOME}/climate:${HOME}/climate/ocw" >> ${HOME}/.bashrc
 subtask "done"
