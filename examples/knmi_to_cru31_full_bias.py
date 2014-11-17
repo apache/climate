@@ -122,7 +122,7 @@ print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("CRU31_Dataset.values shape: %s \n\n" % (cru31_dataset.values.shape,))
  
 """ Spatially Regrid the Dataset Objects to a 1/2 degree grid """
-# Using the bounds we will create a new set of lats and lons on 1 degree step
+# Using the bounds we will create a new set of lats and lons on 0.5 degree step
 new_lons = np.arange(min_lon, max_lon, 0.5)
 new_lats = np.arange(min_lat, max_lat, 0.5)
  
