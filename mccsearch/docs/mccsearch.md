@@ -2,7 +2,7 @@
 
 ##Introduction and Context
 This program searches for a weather feature known as a Mesoscale Convective Complex (MCC) in gridded infrared and precipitation rate satellite data (MERG and TRMM datasets have been tested). 
-The work is direct output from [Dr. Kim Whitehall's](http://www.kimwhitehall.com/) Ph.D. thesis which acts as the basis and driver for inclusion in OCW.
+The work is direct output from [Kim Whitehall's](http://www.kimwhitehall.com/) Ph.D. thesis which acts as the basis and driver for inclusion in OCW.
 
 Data from MERG and TRMM datasets is read from netCDF files into arrays with the dimensions time, latitude, longitude, value. From the data we can then infer and generate a number of things:
  * a graph representing Cloud Elements (CE)
@@ -19,7 +19,7 @@ If you are still reading this file it means that you wish to use the mccsearch p
  * NumPy (verified with 1.9.0)- http://www.scipy.org/scipylib/download.html
  * Networkx (verified with 3.4.0) - https://networkx.github.io/download.html
  * matplotlib (verified with 1.4.0)- http://matplotlib.org/downloads.html
- * GrADS (verified against OpenGrADS grads2 Version 2.0.1.oga.1) - http://sourceforge.net/projects/opengrads/files/
+ Optional if preprocessing of raw MERG files is required
  * LATS4D - http://sourceforge.net/projects/opengrads/files/
 
 So, without further a-do, lets progress with using mccsearch.
@@ -27,18 +27,15 @@ So, without further a-do, lets progress with using mccsearch.
 ##Source Code
  * [mccSearch.py](../code/mccSearch.py) contains the primary MCC functionality
  * [mccSearchUI.py](../code/mccSearchUI.py) contains a wizard type Q&A for running the mccSearch program
- * [process.py](../code/process.py) currently contains some required functions from older version of OCW. This code will most likely be factored out by the release of OCW 0.5.
- * [file.py](../code/files.py) currently contains some required functions from older version of OCW. This code will most likely be factored out by the release of OCW 0.5.
  * [mainProg.py](../code/mainProg.py) contains a sample of the  general workflow of the order the modules should be called. You will have to supply three main input arguments:
      * mainDirStr : a directory where you wish all the output files –images, textfiles, clipped netCDF files- to be stored
      * TRMMdirName : a directory containing the original TRMM data in netCDF format
      * CEoriDirName : a directory containing the original MERG data in netCDF format
- * a [GrADsScripts](../GrADsScripts/) folder containing templating and configuration files used within the execution of mccsearch. 
-
+  
 ##Download MERG and TRMM data
 The following assumptions are made:
  * Input data are in one folder. mainProg.py looks for MERG data as a single directory 'CEoriDirName' and TRMM data as a single directory 'TRMMdirName', just as described above. These directories cannot be the same and the data all needs to be of type netCDF data files only.
- * THERE IS NO FILE CHECKING. So please ensure ALL your files are there in netCDF format. 
+ * There is RUDIMENTARY FILE checking that ensures ALL files between the times requested are in the folder requested in netCDF format. 
  * THERE IS NO FILE ERROR HANDLING. Please ensure that the MERG data and the TRMM data files are correlated temporally and spatially
 
 ##Run mccSearchUI.py
