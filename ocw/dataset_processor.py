@@ -122,8 +122,8 @@ def ensemble(datasets):
     Generate a single dataset which is the mean of the input datasets
     
     :param datasets: Datasets to be used to compose the ensemble dataset from.
-    Note - All Datasets must be the same shape
-    :type datasets: List of OCW Dataset Objects
+        All Datasets must be the same shape.
+    :type datasets: List of OCW Dataset Objects.
     
     :returns: New Dataset with a name of 'Dataset Ensemble'
     :rtype: ocw.dataset.Dataset object
