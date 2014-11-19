@@ -25,14 +25,16 @@ def load(url, variable, name=''):
     '''Load a Dataset from an OpenDAP URL
 
     :param url: The OpenDAP URL for the dataset of interest.
-    :type url: String
-    :param variable: The name of the variable to read from the dataset.
-    :type variable: String
-    :param name: (Optional) A name for the loaded dataset.
-    :type name: String
+    :type url: :mod:`string`
 
-    :returns: A Dataset object containing the dataset pointed to by the 
-        OpenDAP URL.
+    :param variable: The name of the variable to read from the dataset.
+    :type variable: :mod:`string`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+
+    :returns: A :class:`dataset.Dataset` containing the dataset pointed to by
+        the OpenDAP URL.
 
     :raises: ServerError
     '''
