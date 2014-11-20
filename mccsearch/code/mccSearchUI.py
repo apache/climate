@@ -18,17 +18,9 @@
 # Wizard for running the mccSearch program
 '''
 
-import sys
 import networkx as nx
-import numpy as np
-import numpy.ma as ma
-import os
-import matplotlib.pyplot as plt
-import subprocess
-
 #mccSearch modules
 import mccSearch
-#import files
 
 def main():
     CEGraph = nx.DiGraph()
@@ -47,26 +39,23 @@ def main():
     preprocessing = ''
     rawMERG = ''
 
-    #for GrADs
-    subprocess.call('export DISPLAY=:0.0', shell=True)
-
-   
+    
     print "Running MCCSearch ..... \n"
     DIRS['mainDirStr'] = raw_input("> Please enter working directory: \n" )   # This is where data created will be stored
 
-    preprocessing = raw_input ("> Do you need to preprocess the MERG files? [y/n]: \n")
-    while preprocessing.lower() != 'n':
-        if preprocessing.lower() == 'y':
-            #get location for raw files
-            rawMERG = raw_input("> Please enter the directory to the RAW MERG (.Z) files: \n")
-            #run preprocessing
-            mccSearch.preprocessingMERG(rawMERG)
-            continue
-        elif preprocessing.lower() == 'n' :
-            pass
-        else:
-            print "Error! Invalid choice "
-            preprocessing = raw_input ("> Do you need to preprocess the MERG files? [y/n]: \n")
+    # preprocessing = raw_input ("> Do you need to preprocess the MERG files? [y/n]: \n")
+    # while preprocessing.lower() != 'n':
+    #     if preprocessing.lower() == 'y':
+    #         #get location for raw files
+    #         rawMERG = raw_input("> Please enter the directory to the RAW MERG (.Z) files: \n")
+    #         #run preprocessing
+    #         mccSearch.preprocessingMERG(rawMERG)
+    #         continue
+    #     elif preprocessing.lower() == 'n' :
+    #         pass
+    #     else:
+    #         print "Error! Invalid choice "
+    #         preprocessing = raw_input ("> Do you need to preprocess the MERG files? [y/n]: \n")
     
 
     #get the location of the MERG and TRMM data
@@ -169,7 +158,7 @@ def plotMenu(MCCList, MCSList):
         try:   
             if option == 1:
                 print "Generating Accumulated Rainfall from TRMM for the entire period ...\n"
-                mccSearch.plotAccTRMM(MCCList)
+                mccSearch.plotAccTRMM(MCSList)
             if option == 2:
                 startDateTime = raw_input("> Please enter the start date and time yyyy-mm-dd_hr:mm:ss format: \n")
                 endDateTime = raw_input("> Please enter the end date and time yyyy-mm-dd_hr:mm:ss format: \n")
@@ -251,13 +240,13 @@ def postProcessingplotMenu(DIRS):
         try:
             if option == 1:
                 print "Generating images from the original MERG dataset ... \n"
-                mccSearch.postProcessingNetCDF(3, DIRS['CEoriDirName']) 
+                mccSearch.postProcessingNetCDF(1, DIRS['CEoriDirName']) 
             if option == 2:
                 print "Generating images from the cloud elements using MERG IR data ... \n"
-                mccSearch.postProcessingNetCDF(1, CEdirName) 
+                mccSearch.postProcessingNetCDF(2, CEdirName) 
             if option == 3:
                 print "Generating precipitation accumulation images from the cloud elements using TRMM data ... \n"
-                mccSearch.postProcessingNetCDF(2, TRMMCEdirName)
+                mccSearch.postProcessingNetCDF(3, TRMMCEdirName)
             # if option == 4:
             #     print "Generating Accumulated TRMM rainfall from cloud elements for each MCS ... \n"
             #     featureType = int(raw_input("> Please enter type of MCS MCC-1 or MCS-2: \n"))

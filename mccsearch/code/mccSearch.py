@@ -14,10 +14,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-'''
-# All the functions for the MCC search algorithm
-# Following RCMES dataformat in format (t,lat,lon), value
-'''
 
 from datetime import timedelta, datetime
 import glob
@@ -37,11 +33,14 @@ import time
 import networkx as nx
 import matplotlib.dates as mdates
 from matplotlib.dates import DateFormatter,HourLocator 
-
+from mpl_toolkits.basemap import Basemap
+from mpl_toolkits.basemap import cm as cmbm
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from matplotlib.ticker import FuncFormatter, FormatStrFormatter
+
+import ocw.plotter as plotter
 
 #----------------------- GLOBAL VARIABLES --------------------------
 # --------------------- User defined variables ---------------------
@@ -2061,332 +2060,64 @@ def find_nearest(thisArray,value):
 	idx = (np.abs(thisArray-value)).argmin()
 	return thisArray[idx]
 #******************************************************************	
-def preprocessingMERG(MERGdirname):
-	'''
-	Purpose::
-		Utility script for unzipping and converting the merg*.Z files from Mirador to 
-		NETCDF format. The files end up in a folder called mergNETCDF in the directory
-		where the raw MERG data is
-		NOTE: VERY RAW AND DIRTY 
 
-	Input::
-		Directory to the location of the raw MERG files, preferably zipped
-		
-	Output::
-	   none
-
-	Assumptions::
-	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-		 have been installed on the system and the user can access 
-	   2 User can write files in location where script is being called
-	   3 the files havent been unzipped	
-	'''
-
-	os.chdir((MERGdirname+'/'))
-	imgFilename = ''
-
-	#Just incase the X11 server is giving problems
-	subprocess.call('export DISPLAY=:0.0', shell=True)
-
-	for files in glob.glob("*-pixel"):
-	#for files in glob.glob("*.Z"):
-		fname = os.path.splitext(files)[0]
-
-		#unzip it
-		bash_cmd = 'gunzip ' + files
-		subprocess.call(bash_cmd, shell=True)
-
-		#determine the time from the filename
-		ftime = re.search('\_(.*)\_',fname).group(1)
-
-		yy = ftime[0:4]
-		mm = ftime[4:6]
-		day = ftime[6:8]
-		hr = ftime [8:10]
-
-		#TODO: must be something more efficient!
-
-		if mm=='01':
-			mth = 'Jan'
-		if mm == '02':
-			mth = 'Feb'
-		if mm == '03':
-			mth = 'Mar'
-		if mm == '04':
-			mth = 'Apr'
-		if mm == '05':
-			mth = 'May'
-		if mm == '06':
-			mth = 'Jun'
-		if mm == '07':
-			mth = 'Jul'
-		if mm == '08':
-			mth = 'Aug'
-		if mm == '09':
-			mth = 'Sep'
-		if mm == '10':
-			mth = 'Oct'
-		if mm == '11':
-			mth = 'Nov'
-		if mm == '12':
-			mth = 'Dec'
-
-
-		subprocess.call('rm merg.ctl', shell=True)
-		subprocess.call('touch merg.ctl', shell=True)
-		replaceExpDset = 'echo DSET ' + fname +' >> merg.ctl'
-		replaceExpTdef = 'echo TDEF 99999 LINEAR '+hr+'z'+day+mth+yy +' 30mn' +' >> merg.ctl'
-		subprocess.call(replaceExpDset, shell=True) 
-		subprocess.call('echo "OPTIONS yrev little_endian template" >> merg.ctl', shell=True)
-		subprocess.call('echo "UNDEF  330" >> merg.ctl', shell=True)
-		subprocess.call('echo "TITLE  globally merged IR data" >> merg.ctl', shell=True)
-		subprocess.call('echo "XDEF 9896 LINEAR   0.0182 0.036378335" >> merg.ctl', shell=True)
-		subprocess.call('echo "YDEF 3298 LINEAR   -59.982 0.036383683" >> merg.ctl', shell=True)
-		subprocess.call('echo "ZDEF   01 LEVELS 1" >> merg.ctl', shell=True)
-		subprocess.call(replaceExpTdef, shell=True)
-		subprocess.call('echo "VARS 1" >> merg.ctl', shell=True)
-		subprocess.call('echo "ch4  1  -1,40,1,-1 IR BT  (add  "75" to this value)" >> merg.ctl', shell=True)
-		subprocess.call('echo "ENDVARS" >> merg.ctl', shell=True)
-
-		#generate the lats4D command for GrADS
-		lats4D = 'lats4d -v -q -lat '+LATMIN + ' ' +LATMAX +' -lon ' +LONMIN +' ' +LONMAX +' -time '+hr+'Z'+day+mth+yy + ' -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
-		
-		#lats4D = 'lats4d -v -q -lat -40 -15 -lon 10 40 -time '+hr+'Z'+day+mth+yy + ' -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
-		#lats4D = 'lats4d -v -q -lat -5 40 -lon -90 60 -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
-
-		gradscmd = 'grads -blc ' + '\'' +lats4D + '\''
-		#run grads and lats4d command
-		subprocess.call(gradscmd, shell=True)
-		imgFilename = hr+'Z'+day+mth+yy+'.gif'
-		tempMaskedImages(imgFilename)
-
-	#when all the files have benn converted, mv the netcdf files
-	subprocess.call('mkdir mergNETCDF', shell=True)
-	subprocess.call('mv *.nc mergNETCDF', shell=True)
-	#mv all images
-	subprocess.call('mkdir mergImgs', shell=True)
-	subprocess.call('mv *.gif mergImgs', shell=True)
-	return
 #******************************************************************
 def postProcessingNetCDF(dataset, dirName = None):
 	'''
-	
-	TODO: UPDATE TO PICK UP LIMITS FROM FILE FOR THE GRADS SCRIPTS
-
 	Purpose::
-		Utility script displaying the data in generated NETCDF4 files 
-		in GrADS
-		NOTE: VERY RAW AND DIRTY 
+		Utility script displaying the data in NETCDF4 files 
 
 	Input::
-		dataset: integer representing post-processed MERG (1) or TRMM data (2) or original MERG(3)
+		dataset: integer representing original MERG (1) or post-processed MERG data (2) or post-processed TRMM(3)
 		string: Directory to the location of the raw (MERG) files, preferably zipped
 		
 	Output::
-	   images in location as specfied in the code
+	   Generates 2D plots in location as specfied in the code
 
-	Assumptions::
-	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-		 have been installed on the system and the user can access 
-	   2 User can write files in location where script is being called	
 	'''	
-	
 	coreDir = os.path.dirname(os.path.abspath(__file__))
-	ImgFilename = ''
-	frameList=[]
-	fileList =[]
-	lines =[]
-	var =''
-	firstTime = True
-	printLine = 0
-	lineNum = 1
-	#Just incase the X11 server is giving problems
-	subprocess.call('export DISPLAY=:0.0', shell=True)
-
-	prevFrameNum = 0
-
-	if dataset == 1:
-		var = 'ch4'
-		ctlTitle = 'TITLE MCC search Output Grid: Time  lat lon'
-		ctlLine = 'brightnesstemp=\>ch4	 1  t,y,x	brightnesstemperature'
-		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
-		gsFile = coreDir+"/../GrADSscripts/cs2.gs"
-		sologsFile = coreDir+"/../GrADSscripts/mergeCE.gs"
-		lineNum = 50
+	imgFilename = ''
 	
-	elif dataset ==2:
-		var = 'precipAcc'
-		ctlTitle ='TITLE  TRMM MCS accumulated precipitation search Output Grid: Time  lat lon '
-		ctlLine = 'precipitation_Accumulation=\>precipAcc	 1  t,y,x	precipAccu'
-		origsFile = coreDir+"/../GrADSscripts/cs3.gs"
-		gsFile = coreDir+"/../GrADSscripts/cs4.gs"
-		sologsFile = coreDir+"/../GrADSscripts/TRMMCE.gs"
-		lineNum = 10
-
-	elif dataset ==3:
+	if dataset == 1: 
 		var = 'ch4'
-		ctlTitle = 'TITLE MERG DATA'
-		ctlLine = 'ch4=\>ch4	 1  t,y,x	brightnesstemperature'
-		origsFile = coreDir+"/../GrADSscripts/cs1.gs"
-		sologsFile = coreDir+"/../GrADSscripts/infrared.gs"
-		lineNum = 54			
+		plotTitle = 'Original MERG data '
+	elif dataset == 2:
+		var = 'brightnesstemp'
+		plotTitle = 'MERG CE data'
+	elif dataset== 3:
+		var = 'precipitation_Accumulation'
+		plotTitle = 'TRMM CE data'
 
+	
 	#sort files
-	os.chdir((dirName+'/'))
-	try:
-		os.makedirs('ctlFiles')
-	except:
-		print "ctl file folder created already"
-		
+	os.chdir((dirName+'/'))		
 	files = filter(os.path.isfile, glob.glob("*.nc"))
 	files.sort(key=lambda x: os.path.getmtime(x))
+
 	for eachfile in files:
 		fullFname = os.path.splitext(eachfile)[0]
 		fnameNoExtension = fullFname.split('.nc')[0]
 		
-		if dataset == 2 and fnameNoExtension[:4] != "TRMM":
-			continue
-
-		if dataset == 1 or dataset == 2:
-			frameNum = int((fnameNoExtension.split('CE')[0]).split('00F')[1])
-		
-		#create the ctlFile
-		ctlFile1 = dirName+'/ctlFiles/'+fnameNoExtension + '.ctl'
-		#the ctl file
-		subprocessCall = 'rm ' +ctlFile1
-		subprocess.call(subprocessCall, shell=True)
-		subprocessCall = 'touch '+ctlFile1
-		subprocess.call(subprocessCall, shell=True)
-		lineToWrite = 'echo DSET ' + dirName+'/'+fnameNoExtension+'.nc' +' >>' + ctlFile1 
-		subprocess.call(lineToWrite, shell=True)  
-		lineToWrite = 'echo DTYPE netcdf >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo UNDEF 0 >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo '+ctlTitle+' >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
 		fname = dirName+'/'+fnameNoExtension+'.nc'
+		
 		if os.path.isfile(fname):	
-			#open NetCDF file add info to the accu 
-			print "opening file ", fname
 			fileData = Dataset(fname,'r',format='NETCDF4')
+			file_variable = fileData.variables[var][:]
 			lats = fileData.variables['latitude'][:]
 			lons = fileData.variables['longitude'][:]
 			LONDATA, LATDATA = np.meshgrid(lons,lats)
 			nygrd = len(LATDATA[:,0]) 
 			nxgrd = len(LONDATA[0,:])
 			fileData.close()
-		lineToWrite = 'echo XDEF '+ str(nxgrd) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrd) +' >> ' +ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo YDEF '+ str(nygrd)+' LINEAR  ' + str(min(lats)) + ' ' + str((max(lats)-min(lats))/nygrd) +' >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo ZDEF   01 LEVELS 1 >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo TDEF 99999 linear 31aug2009 1hr >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo VARS 1 >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite ='echo '+ctlLine+' >> '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo ENDVARS >>  '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-		lineToWrite = 'echo  >>  '+ctlFile1
-		subprocess.call(lineToWrite, shell=True)
-
-		#create plot of just that data
-		subprocessCall = 'cp '+ origsFile+' '+sologsFile
-		subprocess.call(subprocessCall, shell=True)
-
-		ImgFilename = fnameNoExtension + '.gif'
-					
-		displayCmd = '\''+'d '+ var+'\''+'\n'
-		newFileCmd = '\''+'open '+ ctlFile1+'\''+'\n'
-		colorbarCmd = '\''+'run cbarn'+'\''+'\n'
-		printimCmd = '\''+'printim '+MAINDIRECTORY+'/images/'+ImgFilename+' x800 y600 white\''+'\n'
-		quitCmd = '\''+'quit'+'\''+'\n'
-			
-		GrADSscript = open(sologsFile,'r+')
-		lines1 = GrADSscript.readlines()
-		GrADSscript.seek(0)
-		lines1.insert((1),newFileCmd)
-		lines1.insert((lineNum+1),displayCmd)
-		lines1.insert((lineNum+2), colorbarCmd)
-		lines1.insert((lineNum+3), printimCmd)
-		lines1.insert((lineNum + 4), quitCmd)
-		GrADSscript.writelines(lines1)
-		GrADSscript.close()
-		#run the script
-		runGrads = 'run '+ sologsFile
-		gradscmd = 'grads -blc ' + '\'' +runGrads + '\''+'\n'
-		subprocess.call(gradscmd, shell=True)
-
-		if dataset == 1 or dataset == 2:
-
-			if prevFrameNum != frameNum and firstTime == False:
-				#counter for number of files (and for appending info to lines)
-				count = 0
-				subprocessCall = 'cp '+ origsFile+ ' '+gsFile
-				subprocess.call(subprocessCall, shell=True)
-				for fileName in frameList:
-					if count == 0:
-						frame1 = int((fileName.split('.nc')[0].split('CE')[0]).split('00F')[1])
-
-					fnameNoExtension = fileName.split('.nc')[0]
-					frameNum = int((fnameNoExtension.split('CE')[0]).split('00F')[1])
-					
-					if frameNum == frame1: 
-						CE_num = fnameNoExtension.split('CE')[1]
-						ImgFilename = fnameNoExtension.split('CE')[0] + '.gif'
-						ctlFile1 = dirName+'/ctlFiles/'+fnameNoExtension + '.ctl'
-
-						#build cs.gs script will all the CE ctl files and the appropriate display command
-						newVar = var+'.'+CE_num
-						newDisplayCmd = '\''+'d '+ newVar+'\''+'\n'
-						newFileCmd = '\''+'open '+ ctlFile1+'\''+'\n'
-						GrADSscript = open(gsFile,'r+')
-						lines1 = GrADSscript.readlines()
-						GrADSscript.seek(0)
-						lines1.insert((1+count),newFileCmd)
-						lines1.insert((lineNum+count+1),newDisplayCmd)
-						GrADSscript.writelines(lines1)
-						GrADSscript.close()
-					count +=1
-
-				colorbarCmd = '\''+'run cbarn'+'\''+'\n'
-				printimCmd = '\''+'printim '+MAINDIRECTORY+'/images/'+ImgFilename+' x800 y600 white\''+'\n'
-				quitCmd = '\''+'quit'+'\''+'\n'
-				GrADSscript = open(gsFile,'r+')
-				lines1 = GrADSscript.readlines()
-				GrADSscript.seek(0)
-				lines1.insert((lineNum+(count*2)+1), colorbarCmd)
-				lines1.insert((lineNum + (count*2)+2), printimCmd)
-				lines1.insert((lineNum + (count*2)+3), quitCmd)
-				GrADSscript.writelines(lines1)
-				GrADSscript.close()
-				
-				#run the script
-				runGrads = 'run '+ gsFile
-				gradscmd = 'grads -blc ' + '\'' +runGrads + '\''+'\n'
-				subprocess.call(gradscmd, shell=True)
-				
-				#remove the file data stuff
-				subprocessCall = 'cd '+dirName
-				
-				#reset the list for the next frame
-				fileList = frameList
-				frameList = []
-				for thisFile in fileList:
-					if int(((thisFile.split('.nc')[0]).split('CE')[0]).split('00F')[1]) == frameNum:
-						frameList.append(thisFile)
-				frameList.append(eachfile)
-				prevFrameNum = frameNum
-				
-			else:
-				frameList.append(eachfile)
-				prevFrameNum = frameNum
-				firstTime = False
-				
-	return	
+		
+		imgFilename = MAINDIRECTORY+'/images/'+fnameNoExtension + '.gif'
+		
+		if dataset == 3:
+			createPrecipPlot(np.squeeze(file_variable, axis=0), LATDATA[:,0], LONDATA[0,:],  plotTitle,imgFilename)
+		else:
+			plotter.draw_contour_map(file_variable, LATDATA[:,0], LONDATA[0,:], imgFilename, ptitle=plotTitle)
+	
+	return
 #******************************************************************	
 def drawGraph (thisGraph, graphTitle, edgeWeight=None):
 	'''
@@ -2426,41 +2157,6 @@ def drawGraph (thisGraph, graphTitle, edgeWeight=None):
 	#do some clean up...and ensuring that we are in the right dir
 	os.chdir((MAINDIRECTORY+'/'))
 	subprocess.call('rm test.dot', shell=True)
-#******************************************************************
-def tempMaskedImages(imgFilename):
-	'''
-	Purpose:: 
-		To generate temperature-masked images for a first pass verification
-
-	Input::
-		imgFilename: filename for the gif file
-		
-	Output::
-		None - Gif images for each file of T_bb less than 250K are generated in folder called mergImgs
-
-	Assumptions::
-	   Same as for preprocessingMERG
-	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
-		 have been installed on the system and the user can access 
-	   2 User can write files in location where script is being called
-	   3 the files havent been unzipped	
-	'''
-	
-	subprocess.call('rm tempMaskedImages.gs', shell=True)
-	subprocess.call('touch tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'open merg.ctl''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'set mpdset hires''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'set lat -5 30''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'set lon -40 30''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'set cint 10''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'set clevs 190 200 210 220 230 240 250''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'d ch4+75''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'draw title Masked Temp @ '+imgFilename +'\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800''\'" >> tempMaskedImages.gs', shell=True)
-	subprocess.call('echo "''\'quit''\'" >> tempMaskedImages.gs', shell=True)
-	gradscmd = 'grads -blc ' + '\'run tempMaskedImages.gs''\'' 
-	subprocess.call(gradscmd, shell=True)
-	return
 #******************************************************************
 def getModelTimes(xtimes, timeVarName):
     '''
@@ -3158,18 +2854,18 @@ def displayPrecip(finalMCCList):
 			firstTime = True
 	return 
 #******************************************************************
-def plotPrecipHistograms(finalMCCList):
+def plotPrecipHistograms(finalMCCList, num_bins=5):
 	'''
 	Purpose:: 
 		To create plots (histograms) of the each TRMMnetcdfCEs files
 
 	Input:: 
 		finalMCCList: a list of dictionaries representing a list of nodes representing a MCC
-
+		num_bins: an integer representing the number of bins 
 	Output:: 
 		plots
 	'''
-	num_bins = 5
+	
 	precip =[]
 	imgFilename = " "
 	lastTime =" "
@@ -3199,28 +2895,30 @@ def plotPrecipHistograms(finalMCCList):
 
 				if eachNode['cloudElementArea'] >= 2400.0:
 					if (str(thisTime) != lastTime and lastTime != " ") or thisCount == MCSlen:	
-						plt.close('all')
-						title = 'TRMM precipitation distribution for '+ str(thisTime)
+						# plt.close('all')
+						# title = 'TRMM precipitation distribution for '+ str(thisTime)
 						
-						fig,ax = plt.subplots(1, facecolor='white', figsize=(7,5))
+						# fig,ax = plt.subplots(1, facecolor='white', figsize=(7,5))
 					
-						n,binsdg = np.histogram(precip, num_bins)
-						wid = binsdg[1:] - binsdg[:-1]
-						plt.bar(binsdg[:-1], n/float(len(precip)), width=wid)
+						# n,binsdg = np.histogram(precip, num_bins)
+						# wid = binsdg[1:] - binsdg[:-1]
+						# plt.bar(binsdg[:-1], n/float(len(precip)), width=wid)
 
-						#make percentage plot
-						formatter = FuncFormatter(to_percent)
-						plt.xlim(min(binsdg), max(binsdg))
-						ax.set_xticks(binsdg)
-						ax.set_xlabel('Precipitation [mm]', fontsize=12)
-						ax.set_ylabel('Area', fontsize=12)
-						ax.set_title(title)
-						# Set the formatter
-						plt.gca().yaxis.set_major_formatter(formatter)
-						plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
-						imgFilename = MAINDIRECTORY+'/images/'+str(thisTime)+eachNode['uniqueID']+'TRMMMCS.gif'
+						# #make percentage plot
+						# formatter = FuncFormatter(to_percent)
+						# plt.xlim(min(binsdg), max(binsdg))
+						# ax.set_xticks(binsdg)
+						# ax.set_xlabel('Precipitation [mm]', fontsize=12)
+						# ax.set_ylabel('Area', fontsize=12)
+						# ax.set_title(title)
+						# # Set the formatter
+						# plt.gca().yaxis.set_major_formatter(formatter)
+						# plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
+						# imgFilename = MAINDIRECTORY+'/images/'+str(thisTime)+eachNode['uniqueID']+'TRMMMCS.gif'
 						
-						plt.savefig(imgFilename, transparent=True)
+						# plt.savefig(imgFilename, transparent=True)
+						data_names =['Precipitation [mm]','Area']
+						plotter.draw_histogram(precip,data_names,imgFilename, num_bins)
 						precip =[]
 						
 					# ------ NETCDF File get info ------------------------------------
@@ -3245,57 +2943,6 @@ def plotPrecipHistograms(finalMCCList):
 					firstTime = False  	
 	return 
 #******************************************************************
-def plotHistogram(aList, aTitle, aLabel):
-	'''
-	Purpose:: 
-		To create plots (histograms) of the data entered in aList
-
-	Input:: 
-		aList: the list of floating points representing values for e.g. averageArea, averageDuration, etc.
-		aTitle: a string representing the title and the name of the plot e.g. "Average area [km^2]"
-		aLabel: a string representing the x axis info i.e. the data that is being passed and the units e.g. "Area km^2"
-
-	Output:: 
-		plots (gif files)
-	'''
-	num_bins = 10
-	precip =[]
-	imgFilename = " "
-	lastTime =" "
-	firstTime = True
-	MCScount = 0
-	MSClen =0
-	thisCount = 0
-	
-	#TODO: use try except block instead
-	if aList:
-		
-		fig,ax = plt.subplots(1, facecolor='white', figsize=(7,5))
-	
-		n,binsdg = np.histogram(aList, num_bins, density=True)
-		wid = binsdg[1:] - binsdg[:-1]
-		#plt.bar(binsdg[:-1], n/float(len(aList)), width=wid)
-		plt.bar(binsdg[:-1], n, width=wid)
-		# plt.hist(aList, num_bins, width=wid )
-
-
-		#make percentage plot
-		#formatter = FuncFormatter(to_percent)
-		plt.xlim(min(binsdg), max(binsdg))
-		ax.set_xticks(binsdg)#, rotation=45)
-		ax.set_xlabel(aLabel, fontsize=12)
-		ax.set_title(aTitle)
-
-		plt.xticks(rotation =45)
-		# Set the formatter
-		plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
-		plt.subplots_adjust(bottom=0.2)
-
-		imgFilename = MAINDIRECTORY+'/images/'+aTitle.replace(" ","_")+'.gif'
-		plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)
-				
-	return 
-#******************************************************************
 def plotAccTRMM (finalMCCList):
 	'''
 	Purpose:: 
@@ -3309,7 +2956,7 @@ def plotAccTRMM (finalMCCList):
   
 	Output:: 
 		a netcdf file containing the accumulated precip 
-		a gif (generated in Grads)
+		a 2D matlablibplot
 	'''
 	os.chdir((MAINDIRECTORY+'/TRMMnetcdfCEs'))
 	fname =''
@@ -3318,9 +2965,6 @@ def plotAccTRMM (finalMCCList):
 	firstTime = True
 	replaceExpXDef = ''
 	
-	#Just incase the X11 server is giving problems
-	subprocess.call('export DISPLAY=:0.0', shell=True)
-
 	#generate the file name using MCCTimes
 	#if the file name exists, add it to the accTRMM file
 	for path in finalMCCList:
@@ -3349,85 +2993,44 @@ def plotAccTRMM (finalMCCList):
 				accuPrecipRate += precipRate
 
 		imgFilename = MAINDIRECTORY+'/images/MCSaccu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.gif'
-		#create new netCDF file
-		accuTRMMFile = MAINDIRECTORY+'/TRMMnetcdfCEs/accu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.nc'
-		#write the file
-		accuTRMMData = Dataset(accuTRMMFile, 'w', format='NETCDF4')
-		accuTRMMData.description =  'Accumulated precipitation data'
-		accuTRMMData.calendar = 'standard'
-		accuTRMMData.conventions = 'COARDS'
-		# dimensions
-		accuTRMMData.createDimension('time', None)
-		accuTRMMData.createDimension('lat', nygrdTRMM)
-		accuTRMMData.createDimension('lon', nxgrdTRMM)
 		
-		# variables
-		TRMMprecip = ('time','lat', 'lon',)
-		times = accuTRMMData.createVariable('time', 'f8', ('time',))
-		times.units = 'hours since '+ str(thisNode['cloudElementTime']).replace(" ", "_")[:-6]
-		latitude = accuTRMMData.createVariable('latitude', 'f8', ('lat',))
-		longitude = accuTRMMData.createVariable('longitude', 'f8', ('lon',))
-		rainFallacc = accuTRMMData.createVariable('precipitation_Accumulation', 'f8',TRMMprecip)
-		rainFallacc.units = 'mm'
-
-		longitude[:] = LONTRMM[0,:]
-		longitude.units = "degrees_east" 
-		longitude.long_name = "Longitude" 
-
-		latitude[:] =  LATTRMM[:,0]
-		latitude.units = "degrees_north"
-		latitude.long_name ="Latitude"
-
-		rainFallacc[:] = accuPrecipRate[:]
-
-		accuTRMMData.close()
-
-		#generate the image with GrADS
-		#print "ny,nx ", nygrdTRMM, nxgrdTRMM, min(lats), max(lats)
-		#the ctl file
-		subprocess.call('rm acc.ctl', shell=True)
-		subprocess.call('touch acc.ctl', shell=True)
-		replaceExpDset = 'echo DSET ' + accuTRMMFile +' >> acc.ctl'
-		subprocess.call(replaceExpDset, shell=True)  
-		subprocess.call('echo "OPTIONS yrev little_endian template" >> acc.ctl', shell=True)
-		subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
-		subprocess.call('echo "UNDEF  0" >> acc.ctl', shell=True)
-		subprocess.call('echo "TITLE  TRMM MCS accumulated precipitation" >> acc.ctl', shell=True)
-		replaceExpXDef = 'echo XDEF '+ str(nxgrdTRMM) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrdTRMM) +' >> acc.ctl'
-		subprocess.call(replaceExpXDef, shell=True)
-		#subprocess.call('echo "XDEF 413 LINEAR  -9.984375 0.036378335 " >> acc.ctl', shell=True)
-		#subprocess.call('echo "YDEF 412 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
-		replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
-		subprocess.call(replaceExpYDef, shell=True)
-		subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
-		subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
-		#subprocess.call(replaceExpTdef, shell=True)
-		subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
-		subprocess.call('echo "precipitation_Accumulation=>precipAcc	 1  t,y,x	precipAccu" >> acc.ctl', shell=True)
-		subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
-
-		#generate GrADS script
-		subprocess.call('rm accuTRMM1.gs', shell=True)
-		subprocess.call('touch accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'reinit''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'open acc.ctl ''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'set grads off''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'set mpdset hires''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'set gxout shaded''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'set datawarn off''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'d precipacc''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'draw title TRMM Accumulated Precipitation [mm]''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'run cbarn''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800 white''\'" >> accuTRMM1.gs', shell=True)
-		subprocess.call('echo "''\'quit''\'" >> accuTRMM1.gs', shell=True)
-		gradscmd = 'grads -blc ' + '\'run accuTRMM1.gs''\''
-		subprocess.call(gradscmd, shell=True)
-		sys.exit()
-
-		#clean up
-		subprocess.call('rm accuTRMM1.gs', shell=True)
-		subprocess.call('rm acc.ctl', shell=True)
+	#create new netCDF file
+	accuTRMMFile = MAINDIRECTORY+'/TRMMnetcdfCEs/accu'+firstPartName+str(thisNode['cloudElementTime']).replace(" ", "_")+'.nc'
+	#write the file
+	accuTRMMData = Dataset(accuTRMMFile, 'w', format='NETCDF4')
+	accuTRMMData.description =  'Accumulated precipitation data'
+	accuTRMMData.calendar = 'standard'
+	accuTRMMData.conventions = 'COARDS'
+	# dimensions
+	accuTRMMData.createDimension('time', None)
+	accuTRMMData.createDimension('lat', nygrdTRMM)
+	accuTRMMData.createDimension('lon', nxgrdTRMM)
 	
+	# variables
+	TRMMprecip = ('time','lat', 'lon',)
+	times = accuTRMMData.createVariable('time', 'f8', ('time',))
+	times.units = 'hours since '+ str(thisNode['cloudElementTime']).replace(" ", "_")[:-6]
+	latitude = accuTRMMData.createVariable('latitude', 'f8', ('lat',))
+	longitude = accuTRMMData.createVariable('longitude', 'f8', ('lon',))
+	rainFallacc = accuTRMMData.createVariable('precipitation_Accumulation', 'f8',TRMMprecip)
+	rainFallacc.units = 'mm'
+
+	longitude[:] = LONTRMM[0,:]
+	longitude.units = "degrees_east" 
+	longitude.long_name = "Longitude" 
+
+	latitude[:] =  LATTRMM[:,0]
+	latitude.units = "degrees_north"
+	latitude.long_name ="Latitude"
+
+	rainFallacc[:] = accuPrecipRate[:]
+
+	accuTRMMData.close()
+
+	#do plot
+	plotTitle = 'TRMM Accumulated [mm]'
+	createPrecipPlot(np.squeeze(accuPrecipRate, axis=0), LATTRMM[:,0], LONTRMM[0,:], plotTitle,imgFilename)
+	    			
 	return	
 #******************************************************************
 def plotAccuInTimeRange(starttime, endtime):
@@ -3441,15 +3044,12 @@ def plotAccuInTimeRange(starttime, endtime):
 
 	Output:: 
 		a netcdf file containing the accumulated precip for specified times
-		a gif (generated in Grads)
+		a 2D matlablibplot
 
-	TODO: pass of pick up from the NETCDF file the  lat, lon and resolution for generating the ctl file
 	'''
 
 	os.chdir((MAINDIRECTORY+'/TRMMnetcdfCEs/'))
-	#Just incase the X11 server is giving problems
-	subprocess.call('export DISPLAY=:0.0', shell=True)
-
+	
 	imgFilename = ''
 	firstPartName = ''
 	firstTime = True
@@ -3515,49 +3115,63 @@ def plotAccuInTimeRange(starttime, endtime):
 
 	accuTRMMData.close()
 
-	#generate the image with GrADS
-	#the ctl file
-	subprocess.call('rm acc.ctl', shell=True)
-	subprocess.call('touch acc.ctl', shell=True)
-	replaceExpDset = 'echo DSET ' + accuTRMMFile +' >> acc.ctl'
-	subprocess.call(replaceExpDset, shell=True)  
-	subprocess.call('echo "OPTIONS yrev little_endian template" >> acc.ctl', shell=True)
-	subprocess.call('echo "DTYPE netcdf" >> acc.ctl', shell=True)
-	subprocess.call('echo "UNDEF  0" >> acc.ctl', shell=True)
-	subprocess.call('echo "TITLE  TRMM MCS accumulated precipitation" >> acc.ctl', shell=True)
-	replaceExpXDef = 'echo XDEF '+ str(nxgrdTRMM) + ' LINEAR ' + str(min(lons)) +' '+ str((max(lons)-min(lons))/nxgrdTRMM) +' >> acc.ctl'
-	subprocess.call(replaceExpXDef, shell=True)
-	replaceExpYDef = 'echo YDEF '+str(nygrdTRMM)+' LINEAR '+str(min(lats))+ ' '+str((max(lats)-min(lats))/nygrdTRMM)+' >>acc.ctl'
-	subprocess.call(replaceExpYDef, shell=True)
-	#subprocess.call('echo "XDEF 384 LINEAR  -8.96875 0.036378335 " >> acc.ctl', shell=True)
-	#subprocess.call('echo "YDEF 384 LINEAR 5.03515625 0.036378335 " >> acc.ctl', shell=True)
-	subprocess.call('echo "ZDEF   01 LEVELS 1" >> acc.ctl', shell=True)
-	subprocess.call('echo "TDEF 99999 linear 31aug2009 1hr" >> acc.ctl', shell=True)
-	subprocess.call('echo "VARS 1" >> acc.ctl', shell=True)
-	subprocess.call('echo "precipitation_Accumulation=>precipAcc	 1  t,y,x	precipAccu" >> acc.ctl', shell=True)
-	subprocess.call('echo "ENDVARS" >> acc.ctl', shell=True)
-	#generate GrADS script
-	imgFilename = MAINDIRECTORY+'/images/accu'+starttime+'-'+endtime+'.gif'
-	subprocess.call('rm accuTRMM1.gs', shell=True)
-	subprocess.call('touch accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'reinit''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'open acc.ctl ''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'set grads off''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'set mpdset hires''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'set gxout shaded''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'set datawarn off''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'d precipacc''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'draw title TRMM Accumulated Precipitation [mm]''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'run cbarn''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'printim '+imgFilename +' x1000 y800 white''\'" >> accuTRMM1.gs', shell=True)
-	subprocess.call('echo "''\'quit''\'" >> accuTRMM1.gs', shell=True)
-	gradscmd = 'grads -blc ' + '\'run accuTRMM1.gs''\''
-	subprocess.call(gradscmd, shell=True)
+	#plot the stuff
+	imgFilename = MAINDIRECTORY+'/images/accu'+starttime+'-'+endtime+'.gif'	
+	plotTitle = "TRMM Accumulated Precipitation [mm] "+starttime+'-'+endtime
+	createPrecipPlot(np.squeeze(accuPrecipRate, axis=0), LATTRMM[:,0], LONTRMM[0,:], plotTitle,imgFilename)
 
-	#clean up
-	subprocess.call('rm accuTRMM1.gs', shell=True)
-	subprocess.call('rm acc.ctl', shell=True)
+	return	
+#******************************************************************
+def createPrecipPlot(dataset, lats, lons, plotTitle,imgFilename):
+	'''
+	Purpose:: 
+		To create the actual plots for precip data only
 
+	Input::
+		dataset: a 2d numpy (lon,lat) dataset of the precip data to be plotted
+		domainDict: a dictionary with the domain (lons and lats) details required
+		plotTitle: a string representing the title for the plot 
+		imgFilename: a string representing the string (including path) of where the plot is to be showed
+
+	Output::
+		A 2D plot with precipitation using the NWS precipitation colormap (from matlplotlib Basemap)
+
+	'''
+
+	fig,ax = plt.subplots(1, facecolor='white', figsize=(8.5,11.)) #, dpi=300)
+	latmin = np.min(lats)
+	latmax = np.max(lats)
+	lonmin = np.min(lons)
+	lonmax = np.max(lons)
+	
+	m = Basemap(projection = 'merc', llcrnrlon = lonmin, urcrnrlon = lonmax, llcrnrlat = latmin, urcrnrlat = latmax, resolution = 'l', ax=ax)
+	m.drawcoastlines(linewidth = 1)
+	m.drawcountries(linewidth = 0.75)
+	#draw meridians
+	meridians = np.arange(180.,360.,5.)
+	m.drawmeridians(meridians, labels=[0,0,0,1], linewidth=0.75, fontsize=10)
+	#draw parallels
+	parallels = np.arange(0.,90,5.)
+	m.drawparallels(parallels, labels=[1,0,0,0], linewidth=0.75, fontsize=10)
+
+
+	#projecting on to the correct map grid
+	longitudes, latitudes = m.makegrid(lons.shape[0],lats.shape[0])
+	x,y = m(longitudes, latitudes)
+	
+	# draw filled contours.
+	clevs = [0,1,2.5,5,7.5,10,15,20,30,40,50,70,100,150,200,250,300,400,500,600,750]
+	
+	#actually print the map
+	cs = m.contourf(x,y,dataset,clevs,cmap=cmbm.s3pcpn)
+
+	#add colorbar
+	cbar = m.colorbar(cs, location = 'bottom', pad = "10%")
+	cbar.set_label('mm')
+	
+	plt.title(plotTitle)
+	
+	plt.savefig(imgFilename, facecolor=fig.get_facecolor(), transparent=True)	
 	return	
 #******************************************************************
 def createTextFile(finalMCCList, identifier):
@@ -3827,15 +3441,17 @@ def createTextFile(finalMCCList, identifier):
 		areaAvg = sum(averageAreas)/ len(finalMCCList)
 	#create histogram plot here
 	if len(averageAreas) > 1:
-		plotHistogram(averageAreas, "Average Area [km^2]", "Area [km^2]")
+		imgFilename = MAINDIRECTORY+'/images/averageAreas.gif'
+		plotter.draw_histogram(averageAreas, ["Average Area [km^2]", "Area [km^2]"],imgFilename,10)
 
 	#Amax: average maximum area
 	if maxAreaCounter > 0.0: #and avgMaxArea > 0.0 : 
 		amax = sum(avgMaxArea)/ maxAreaCounter
 		#create histogram plot here
 		if len(avgMaxArea) > 1:
-			plotHistogram(avgMaxArea, "Maximum Area [km^2]", "Area [km^2]")
-
+			imgFilename = MAINDIRECTORY+'/images/avgMaxArea.gif'
+			plotter.draw_histogram(avgMaxArea, ["Maximum Area [km^2]", "Area [km^2]"], imgFilename,10)
+			
 	#v_avg: calculate the average propagation speed 
 	if speedCounter > 0 :  # and averagePropagationSpeed > 0.0
 		averagePropagationSpeed /= speedCounter
@@ -3864,7 +3480,8 @@ def createTextFile(finalMCCList, identifier):
 	if len(avgPrecipArea) > 0:
 		precipAreaAvg = sum(avgPrecipArea)/len(avgPrecipArea)
 		if len(avgPrecipArea) > 1:
-			plotHistogram(avgPrecipArea, "Average Rainfall Area [km^2]", "Area [km^2]")
+			imgFilename = MAINDIRECTORY+'/images/avgPrecipArea.gif'
+			plotter.draw_histogram(avgPrecipArea, ["Average Rainfall Area [km^2]", "Area [km^2]"],imgFilename,10)
 		
 
 	sTime = str(averageTime(startTimes))
@@ -3947,6 +3564,111 @@ def cmap_discretize(cmap, N):
 	# Return colormap object.
 	return mcolors.LinearSegmentedColormap(cmap.name + "_%d"%N, cdict, 1024)
 #******************************************************************
+# def preprocessingMERG(MERGdirname):
+# 	'''
+# 	Purpose::
+# 		Utility script for unzipping and converting the merg*.Z files from Mirador to 
+# 		NETCDF format. The files end up in a folder called mergNETCDF in the directory
+# 		where the raw MERG data is
+# 		NOTE: VERY RAW AND DIRTY 
 
+# 	Input::
+# 		Directory to the location of the raw MERG files, preferably zipped
+		
+# 	Output::
+# 	   none
+
+# 	Assumptions::
+# 	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
+# 		 have been installed on the system and the user can access 
+# 	   2 User can write files in location where script is being called
+# 	   3 the files havent been unzipped	
+# 	'''
+
+# 	os.chdir((MERGdirname+'/'))
+# 	imgFilename = ''
+
+# 	#Just incase the X11 server is giving problems
+# 	subprocess.call('export DISPLAY=:0.0', shell=True)
+
+# 	for files in glob.glob("*-pixel"):
+# 	#for files in glob.glob("*.Z"):
+# 		fname = os.path.splitext(files)[0]
+
+# 		#unzip it
+# 		bash_cmd = 'gunzip ' + files
+# 		subprocess.call(bash_cmd, shell=True)
+
+# 		#determine the time from the filename
+# 		ftime = re.search('\_(.*)\_',fname).group(1)
+
+# 		yy = ftime[0:4]
+# 		mm = ftime[4:6]
+# 		day = ftime[6:8]
+# 		hr = ftime [8:10]
+
+# 		#TODO: must be something more efficient!
+
+# 		if mm=='01':
+# 			mth = 'Jan'
+# 		if mm == '02':
+# 			mth = 'Feb'
+# 		if mm == '03':
+# 			mth = 'Mar'
+# 		if mm == '04':
+# 			mth = 'Apr'
+# 		if mm == '05':
+# 			mth = 'May'
+# 		if mm == '06':
+# 			mth = 'Jun'
+# 		if mm == '07':
+# 			mth = 'Jul'
+# 		if mm == '08':
+# 			mth = 'Aug'
+# 		if mm == '09':
+# 			mth = 'Sep'
+# 		if mm == '10':
+# 			mth = 'Oct'
+# 		if mm == '11':
+# 			mth = 'Nov'
+# 		if mm == '12':
+# 			mth = 'Dec'
+
+
+# 		subprocess.call('rm merg.ctl', shell=True)
+# 		subprocess.call('touch merg.ctl', shell=True)
+# 		replaceExpDset = 'echo DSET ' + fname +' >> merg.ctl'
+# 		replaceExpTdef = 'echo TDEF 99999 LINEAR '+hr+'z'+day+mth+yy +' 30mn' +' >> merg.ctl'
+# 		subprocess.call(replaceExpDset, shell=True) 
+# 		subprocess.call('echo "OPTIONS yrev little_endian template" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "UNDEF  330" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "TITLE  globally merged IR data" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "XDEF 9896 LINEAR   0.0182 0.036378335" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "YDEF 3298 LINEAR   -59.982 0.036383683" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "ZDEF   01 LEVELS 1" >> merg.ctl', shell=True)
+# 		subprocess.call(replaceExpTdef, shell=True)
+# 		subprocess.call('echo "VARS 1" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "ch4  1  -1,40,1,-1 IR BT  (add  "75" to this value)" >> merg.ctl', shell=True)
+# 		subprocess.call('echo "ENDVARS" >> merg.ctl', shell=True)
+
+# 		#generate the lats4D command for GrADS
+# 		lats4D = 'lats4d -v -q -lat '+LATMIN + ' ' +LATMAX +' -lon ' +LONMIN +' ' +LONMAX +' -time '+hr+'Z'+day+mth+yy + ' -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
+		
+# 		#lats4D = 'lats4d -v -q -lat -40 -15 -lon 10 40 -time '+hr+'Z'+day+mth+yy + ' -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
+# 		#lats4D = 'lats4d -v -q -lat -5 40 -lon -90 60 -func @+75 ' + '-i merg.ctl' + ' -o ' + fname
+
+# 		gradscmd = 'grads -blc ' + '\'' +lats4D + '\''
+# 		#run grads and lats4d command
+# 		subprocess.call(gradscmd, shell=True)
+# 		imgFilename = hr+'Z'+day+mth+yy+'.gif'
+# 		tempMaskedImages(imgFilename)
+
+# 	#when all the files have benn converted, mv the netcdf files
+# 	subprocess.call('mkdir mergNETCDF', shell=True)
+# 	subprocess.call('mv *.nc mergNETCDF', shell=True)
+# 	#mv all images
+# 	subprocess.call('mkdir mergImgs', shell=True)
+# 	subprocess.call('mv *.gif mergImgs', shell=True)
+# 	return
 
 			
