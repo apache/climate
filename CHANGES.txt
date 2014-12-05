@@ -2,6 +2,61 @@ Apache Open Climate Workbench Change Log
 ============================================
 
 
+Release Notes - Apache Open Climate Workbench - Version 0.5
+
+** Sub-task
+    * [CLIMATE-43] - Update evaluation running code to use new re-grid options
+    * [CLIMATE-44] - Update backend with ability to handle user-specified re-grid calls.
+    * [CLIMATE-341] - Refactor "calcAnnualCycleMeans" metric from metrics_kyo.py
+    * [CLIMATE-497] - Update OCW release management process documentation
+    * [CLIMATE-519] - Fix ESGF directory structuring
+    * [CLIMATE-520] - Add ESGF wrapper to setup.py
+    * [CLIMATE-540] - Port 'calcBiasAveragedOverTimeAndDomain' method over to ocw/metrics.py module
+    * [CLIMATE-541] - Port 'calcRootMeanSquareDifferenceAveragedOverTimeAndDomain' method over to ocw/metrics.py module
+    * [CLIMATE-542] - Port 'calcTemporalCorrelation' method over to ocw/metrics.py module
+    * [CLIMATE-543] - Port 'calcNashSutcliff' method over to ocw/metrics.py module
+    * [CLIMATE-544] - Port 'calc_temporal_anom_cor' method to ocw/metrics.py
+    * [CLIMATE-545] - Port 'calc_spatial_anom_cor' method over to ocw/metrics.py module
+    * [CLIMATE-546] - Refactor 'calcPdf' method from metrics_kyo.py
+    * [CLIMATE-549] - Minor updates to the SpatialMeanOfTemporalMeanBias and RMSError metrics
+
+** Bug
+    * [CLIMATE-487] - data_source.local returns bad error when incorrect file path is provided
+    * [CLIMATE-530] - Include license acknowledgment for all mccsearch dependencies
+    * [CLIMATE-548] - Vagrant references should not exist in easy-ocw ubuntu script
+    * [CLIMATE-554] - Changed metric names break Sphinx build
+
+** Improvement
+    * [CLIMATE-265] -  Model Ensemble to RCMED Evaluation
+    * [CLIMATE-340] - Transfer metrics from the original codebase over to ocw/metrics.py
+    * [CLIMATE-371] - local.load_file should accept lat/lon/time variable names
+    * [CLIMATE-372] - Data_sources should allow dataset naming
+    * [CLIMATE-496] - Address discrepancies within 0.4 RC#1
+    * [CLIMATE-533] - Revisit mccsearch README making updates as required
+    * [CLIMATE-552] - Cleanup local.py data source
+    * [CLIMATE-558] - Add better links to external documentation
+
+** New Feature
+    * [CLIMATE-38] - Add regrid options
+    * [CLIMATE-39] - Add ability for user to select spatial re-grid options
+    * [CLIMATE-523] - Integrate mccsearch module into master branch
+    * [CLIMATE-538] - Allow selection of elevation level on dataset load
+
+** Task
+    * [CLIMATE-373] - Publish documentation build to Read The Docs
+    * [CLIMATE-411] - Create Pyhton lib documentation
+    * [CLIMATE-518] - Add ESGF data source
+    * [CLIMATE-534] - Make sure everyone on OCW PMC has PMC permissions in Jira
+    * [CLIMATE-535] - Update mccsearch files.py to use current replacement of toolkit.process function
+    * [CLIMATE-536] - Update mccsearch files.py to use current replacement of utils.fortran function
+    * [CLIMATE-537] - Update mccsearch files.py to use current replacement of utils.misc function
+    * [CLIMATE-550] - Drop bottlemet.py from OCW UI Backend
+    * [CLIMATE-551] - Drop old RCMET toolkit from code base
+    * [CLIMATE-553] - Add an example for the ESGF datasource
+    * [CLIMATE-555] - Update Sphinx documentation version number
+
+
+
 Release Notes - Apache Open Climate Workbench - Version 0.4
 
 ** Sub-task
