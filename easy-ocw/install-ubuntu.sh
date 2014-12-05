@@ -21,17 +21,20 @@ help()
 {
 cat << ENDHELP
 
-Easy OCW assists with the building of the Apache Open Climate Workbench and its dependencies
+Easy OCW assists with the building of the Apache Open Climate Workbench and 
+its dependencies.
 
 Flags:
     -h  Display this help message.
     -e  Install and configure a virtualenv environment before installation.
     -q  Quiet install. User prompts are removed (when possible).
 
-It is recommended that you pass -e when running this script. If you don't, parts
-of this installation will pollute your global Python install. If you're unsure,
-pass -e just to be safe!
+It is recommended that you pass -e when running this script. If you don't, 
+parts of this installation will pollute your global Python install. 
+If you're unsure, pass -e just to be safe!
 
+N.B. This install script has been tested against Ubuntu 12.04 and 14.04.
+Please report problems with this script to dev@climate.apache.org
 ENDHELP
 }
 
@@ -102,6 +105,8 @@ VIRTUALENV_WARNING
 fi
 
 read -p "Press [ENTER] to begin installation ..."
+echo -n "Please specify a full path to where your OCW download is then press [ENTER] ..."
+read ocw_path
 fi
 
 header "Checking for pip ..."
@@ -145,7 +150,7 @@ subtask "done"
 
 task "Installing ..."
 bash Anaconda-1.9.2-Linux-x86_64.sh
-export PATH="/home/vagrant/anaconda/bin:$PATH"
+export PATH="${HOME}/anaconda/bin:$PATH"
 subtask "done"
 
 # Install Basemap. Conda cannot be used for this install since
@@ -184,6 +189,6 @@ header "Installing additional Python packages"
 pip install -r ocw-pip-dependencies.txt >> install_log
 
 # Ensure that the climate code is included in the Python Path
-header "Updating PYTHONPATH ..."
-echo "export PYTHONPATH=/home/vagrant/climate:/home/vagrant/climate/ocw/:/home/vagrant/climate/rcmet/src/main/python/rcmes" >> /home/vagrant/.bashrc
+header "Updating PYTHONPATH with ocw executables ..."
+echo "export PYTHONPATH=${ocw_path}:${ocw_path}/ocw" >> ${HOME}/.bashrc
 subtask "done"
