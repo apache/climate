@@ -107,7 +107,7 @@ read -p "Press [ENTER] to begin installation ..."
 fi
 
 header "Checking for pip ..."
-if [ ! command -v pip >/dev/null 2>&1 ]; then
+command -v pip >/dev/null 2>&1 || { 
     task "Unable to locate pip."
     task "Installing Distribute"
     curl http://python-distribute.org/distribute_setup.py | python >> install_log
@@ -119,17 +119,17 @@ if [ ! command -v pip >/dev/null 2>&1 ]; then
     cd pip-1.2.1/
     python setup.py install >> install_log
     subtask "done"
-fi
+}
 
 if [ $WITH_VIRTUAL_ENV == 1 ]; then
     header "Setting up a virtualenv ..."
 
     # Check if virtualenv is installed. If it's not, we'll install it for the user.
-    if ! command -v virtualenv >/dev/null 2>&1; then
+    command -v virtualenv >/dev/null 2>&1 || { 
         task "Installing virtualenv ..."
         pip install virtualenv >> install_log
         subtask "done"
-    fi
+    }
 
     header "Checking for previously installed  ocw virtual environment..."
     if [ -e ~/ocw/bin/python ]; then
