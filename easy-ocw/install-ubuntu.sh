@@ -145,7 +145,7 @@ read -p "Press [ENTER] to continue ..."
 
 cd
 task "Downloading Anaconda ..."
-wget -O Anaconda-1.9.2-Linux-x86_64.sh "http://repo.continuum.io/archive/Anaconda-1.9.2-Linux-x86_64.sh" 2> install_log
+wget -O Anaconda-1.9.2-Linux-x86_64.sh "http://repo.continuum.io/archive/Anaconda-1.9.2-Linux-x86_64.sh" 2>> install_log
 subtask "done"
 
 task "Installing ..."
@@ -161,7 +161,7 @@ header "Handling Basemap install ..."
 
 cd
 task "Downloading basemap ..."
-wget -O basemap-1.0.7.tar.gz "http://sourceforge.net/projects/matplotlib/files/matplotlib-toolkits/basemap-1.0.7/basemap-1.0.7.tar.gz/download" 2> install_log
+wget -O basemap-1.0.7.tar.gz "http://sourceforge.net/projects/matplotlib/files/matplotlib-toolkits/basemap-1.0.7/basemap-1.0.7.tar.gz/download" 2>> install_log
 tar xzf basemap-1.0.7.tar.gz >> install_log
 subtask "done"
 
