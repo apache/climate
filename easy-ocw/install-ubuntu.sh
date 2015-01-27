@@ -110,22 +110,22 @@ read ocw_path
 fi
 
 header "Checking for pip ..."
-if [ ! command -v pip >/dev/null 2>&1 ]; then
+command -v pip >/dev/null 2>&1 || { 
     task "Unable to locate pip."
     task "Installing Pip"
     sudo apt-get install python-pip >> install_log
     subtask "done"
-fi
+}
 
 if [ $WITH_VIRTUAL_ENV == 1 ]; then
     header "Setting up a virtualenv ..."
 
     # Check if virtualenv is installed. If it's not, we'll install it for the user.
-    if ! command -v virtualenv >/dev/null 2>&1; then
+    command -v virtualenv >/dev/null 2>&1 || { 
         task "Installing virtualenv ..."
         sudo apt-get install -y python-virtualenv >> install_log
         subtask "done"
-    fi
+    }
 
     # Create a new environment for OCW work
     task "Creating a new environment ..."
