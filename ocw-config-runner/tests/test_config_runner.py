@@ -25,7 +25,7 @@ import yaml
 
 class TestMetricLoad(unittest.TestCase):
     def test_valid_metric_load(self):
-        config = yaml.safe_load("""
+        config = yaml.load("""
             metrics:
                 - Bias
         """)
@@ -35,7 +35,7 @@ class TestMetricLoad(unittest.TestCase):
 
     @patch('ocw_evaluation_from_config.logger')
     def test_invalid_metric_load(self, mock_logger):
-        config = yaml.safe_load("""
+        config = yaml.load("""
             metrics:
                 - ocw.metrics.Bias
         """)
@@ -75,7 +75,7 @@ class TestRCMEDDatasetConfig(unittest.TestCase):
 
             - data_source: rcmed
         """
-        conf = yaml.safe_load(example_config_yaml)
+        conf = yaml.load(example_config_yaml)
         self.valid_rcmed = conf[0]
         self.invalid_rcmed = conf[1]
 
@@ -126,7 +126,7 @@ class TestLocalDatasetConfig(unittest.TestCase):
               path: /a/fake/path
         """
 
-        conf = yaml.safe_load(example_config_yaml)
+        conf = yaml.load(example_config_yaml)
         self.valid_local_single = conf[0]
         self.invalid_local_single = conf[1]
         self.valid_local_multi = conf[2]
@@ -203,7 +203,7 @@ class TestESGFDatasetConfig(unittest.TestCase):
 
            - data_source: esgf
         """
-        conf = yaml.safe_load(example_config_yaml)
+        conf = yaml.load(example_config_yaml)
         self.valid_esgf = conf[0]
         self.invalid_esgf = conf[1]
 
@@ -237,7 +237,7 @@ class TestDAPDatasetConfig(unittest.TestCase):
 
            - data_source: dap
         """
-        conf = yaml.safe_load(example_config_yaml)
+        conf = yaml.load(example_config_yaml)
         self.valid_dap = conf[0]
         self.invalid_dap = conf[1]
 
@@ -270,7 +270,7 @@ class InvalidDatasetConfig(unittest.TestCase):
 
             - data_source: invalid_location_identifier
         """
-        conf = yaml.safe_load(example_config_yaml)
+        conf = yaml.load(example_config_yaml)
         self.missing_data_source = conf[0]
         self.invalid_data_source = conf[1]
 
@@ -301,8 +301,8 @@ class MetricFetchTest(unittest.TestCase):
             metrics:
                 - TemporalStdDev
         """
-        self.unary_conf = yaml.safe_load(unary_config)
-        self.binary_conf = yaml.safe_load(binary_config)
+        self.unary_conf = yaml.load(unary_config)
+        self.binary_conf = yaml.load(binary_config)
 
     def test_contains_binary_metric(self):
         ret = config_runner._contains_binary_metrics(self.binary_conf['metrics'])
@@ -321,6 +321,98 @@ class MetricFetchTest(unittest.TestCase):
         self.assertFalse(ret)
 
 
+class ContourMapConfig(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        valid_contour_config = """
+            type: contour
+            results_indeces:
+                - !!python/tuple [0, 0]
+            lats:
+                range_min: -20
+                range_max: 20
+                range_step: 1
+            lons:
+                range_min: -20
+                range_max: 20
+                range_step: 1
+            output_name: wrf_bias_compared_to_knmi
+        """
+        self.valid_contour = yaml.load(valid_contour_config)
+
+        missing_keys_contour_config = """
+            type: contour
+        """
+        self.missing_keys_contour = yaml.load(missing_keys_contour_config)
+
+        self.required_contour_keys = set([
+            'results_indeces',
+            'lats',
+            'lons',
+            'output_name'
+        ])
+
+    def test_valid_contour(self):
+        ret = config_runner._valid_plot_config_data(self.valid_contour)
+        self.assertTrue(ret)
+
+    @patch('ocw_evaluation_from_config.logger')
+    def test_missing_keys_contour(self, mock_logger):
+        ret = config_runner._valid_plot_config_data(self.missing_keys_contour)
+
+        present_keys = set(self.missing_keys_contour.keys())
+        missing_keys = self.required_contour_keys - present_keys
+        missing = sorted(list(missing_keys))
+
+        err = (
+            'Plot config does not contain required keys. '
+            'The following keys are missing: {}'
+        ).format(', '.join(missing))
+        mock_logger.error.assert_called_with(err)
+
+
+class TestInvalidPlotConfig(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        bad_plot_type_config = """
+            type: NotAPlotType
+        """
+        self.bad_plot_type = yaml.load(bad_plot_type_config)
+
+        missing_plot_type_config = """
+            results_indeces:
+                - !!python/tuple [0, 0]
+            lats:
+                range_min: -20
+                range_max: 20
+                range_step: 1
+            lons:
+                range_min: -20
+                range_max: 20
+                range_step: 1
+            output_name: wrf_bias_compared_to_knmi
+        """
+        self.missing_plot_type = yaml.load(missing_plot_type_config)
+
+    @patch('ocw_evaluation_from_config.logger')
+    def test_invalid_plot_type(self, mock_logger):
+        ret = config_runner._valid_plot_config_data(self.bad_plot_type)
+        self.assertFalse(ret)
+
+        mock_logger.error.assert_called_with(
+            'Invalid plot type specified.'
+        )
+
+    @patch('ocw_evaluation_from_config.logger')
+    def test_missing_plot_type(self, mock_logger):
+        ret = config_runner._valid_plot_config_data(self.missing_plot_type)
+        self.assertFalse(ret)
+
+        mock_logger.error.assert_called_with(
+            'Plot config does not include a type attribute.'
+        )
+
+
 class TestValidMinimalConfig(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -328,7 +420,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - Bias
         """
-        self.no_datasets = yaml.safe_load(no_datasets_config)
+        self.no_datasets = yaml.load(no_datasets_config)
 
         no_metrics_config = """
         datasets:
@@ -337,7 +429,7 @@ class TestValidMinimalConfig(unittest.TestCase):
                 url: afakeurl.com
                 variable: pr
         """
-        self.no_metrics = yaml.safe_load(no_metrics_config)
+        self.no_metrics = yaml.load(no_metrics_config)
 
         unary_with_reference_config = """
         datasets:
@@ -349,7 +441,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - TemporalStdDev
         """
-        self.unary_with_reference = yaml.safe_load(unary_with_reference_config)
+        self.unary_with_reference = yaml.load(unary_with_reference_config)
 
         unary_with_target_config = """
         datasets:
@@ -361,7 +453,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - TemporalStdDev
         """
-        self.unary_with_target = yaml.safe_load(unary_with_target_config)
+        self.unary_with_target = yaml.load(unary_with_target_config)
 
         unary_no_reference_or_target = """
         datasets:
@@ -373,7 +465,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - TemporalStdDev
         """
-        self.unary_no_ref_or_target = yaml.safe_load(unary_no_reference_or_target)
+        self.unary_no_ref_or_target = yaml.load(unary_no_reference_or_target)
 
         binary_valid_config = """
         datasets:
@@ -389,7 +481,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - Bias
         """
-        self.binary_valid = yaml.safe_load(binary_valid_config)
+        self.binary_valid = yaml.load(binary_valid_config)
 
         binary_no_reference_config = """
         datasets:
@@ -400,7 +492,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - Bias
         """
-        self.binary_no_reference = yaml.safe_load(binary_no_reference_config)
+        self.binary_no_reference = yaml.load(binary_no_reference_config)
 
         binary_no_target_config = """
         datasets:
@@ -412,7 +504,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         metrics:
             - Bias
         """
-        self.binary_no_target = yaml.safe_load(binary_no_target_config)
+        self.binary_no_target = yaml.load(binary_no_target_config)
 
     @patch('ocw_evaluation_from_config.logger')
     def test_no_datasets(self, mock_logger):
@@ -484,7 +576,7 @@ class TestIsConfigValid(unittest.TestCase):
         not_minimal_config = """
             datasets:
         """
-        self.not_minimal = yaml.safe_load(not_minimal_config)
+        self.not_minimal = yaml.load(not_minimal_config)
 
         not_well_formed_config = """
         datasets:
@@ -512,7 +604,7 @@ class TestIsConfigValid(unittest.TestCase):
             - Bias
             - TemporalStdDev
         """
-        self.not_well_formed = yaml.safe_load(not_well_formed_config)
+        self.not_well_formed = yaml.load(not_well_formed_config)
 
     @patch('ocw_evaluation_from_config.logger')
     def test_not_minimal_config(self, mock_logger):
@@ -544,7 +636,7 @@ class TestConfigIsWellFormed(unittest.TestCase):
             metrics:
                 - Bias
         """
-        self.malformed_reference_conf = yaml.safe_load(malformed_reference_config)
+        self.malformed_reference_conf = yaml.load(malformed_reference_config)
 
         malformed_target_list_config = """
             datasets:
@@ -558,7 +650,7 @@ class TestConfigIsWellFormed(unittest.TestCase):
             metrics:
                 - Bias
         """
-        self.malformed_target_list = yaml.safe_load(malformed_target_list_config)
+        self.malformed_target_list = yaml.load(malformed_target_list_config)
 
         missing_metric_name_config = """
             datasets:
@@ -570,7 +662,22 @@ class TestConfigIsWellFormed(unittest.TestCase):
             metrics:
                 - NotABuiltInMetric
         """
-        self.missing_metric_name = yaml.safe_load(missing_metric_name_config)
+        self.missing_metric_name = yaml.load(missing_metric_name_config)
+
+        bad_plot_config = """
+            datasets:
+                reference:
+                    data_source: dap
+                    url: afakeurl.com
+                    variable: pr
+
+            metrics:
+                - Bias
+
+            plots:
+                - type: NotARealPlotName
+        """
+        bad_plot = yaml.load(bad_plot_config)
 
     def test_malformed_reference_config(self):
         ret = config_runner._config_is_well_formed(self.malformed_reference_conf)
@@ -598,3 +705,7 @@ class TestConfigIsWellFormed(unittest.TestCase):
             'metrics. If this is not a user defined metric then please check '
             'for potential misspellings.'
         )
+
+    def test_bad_plot_config(self):
+        ret = config_runner._config_is_well_formed(self.missing_metric_name)
+        self.assertFalse(ret)

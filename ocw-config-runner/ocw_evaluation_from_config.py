@@ -287,7 +287,7 @@ def _valid_dataset_config_data(dataset_config_data):
 def _valid_plot_config_data(plot_config_data):
     """"""
     try:
-        plot_type = dataset_config_data['type']
+        plot_type = plot_config_data['type']
     except KeyError:
         logger.error('Plot config does not include a type attribute.')
         return False
