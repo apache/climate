@@ -7,3 +7,4 @@ nose-exclude==0.2.0
 pylint==1.2.1
 sphinx==1.2.1
 sphinxcontrib-httpdomain==1.2.1
+esgf-pyclient==0.1.2
