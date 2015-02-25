@@ -214,8 +214,6 @@ def _contains_unary_metrics(config_metric_data):
     unarys = [cls.__name__ for cls in metrics.UnaryMetric.__subclasses__()]
     return any(metric in unarys for metric in config_metric_data)
 
-    return True
-
 def _contains_binary_metrics(config_metric_data):
     """"""
     binarys = [cls.__name__ for cls in metrics.BinaryMetric.__subclasses__()]
