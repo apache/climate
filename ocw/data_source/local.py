@@ -111,6 +111,7 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
 
 def load_file(file_path,
               variable_name,
+              variable_unit = None,
               elevation_index=0,
               name='',
               lat_name=None,
@@ -123,6 +124,9 @@ def load_file(file_path,
 
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
+
+    :param variable_unit: (Optional) The variable unit to load from the NetCDF file.
+    :type variable_unit: :mod:`string`
 
     :param elevation_index: (Optional) The elevation index for which data should
         be returned. Climate data is often times 4 dimensional data. Some
@@ -182,6 +186,7 @@ def load_file(file_path,
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
+    variable_unit = netcdf.variables[variable_name].units
 
     # If the values are 4D then we need to strip out the elevation index
     if len(values.shape) == 4:
@@ -214,5 +219,5 @@ def load_file(file_path,
     }
     if elevation_index != 0: origin['elevation_index'] = elevation_index
 
-    return Dataset(lats, lons, times, values, variable_name,
-                   name=name, origin=origin)
+    return Dataset(lats, lons, times, values, variable=variable_name,
+                   units=variable_unit, name=name, origin=origin)

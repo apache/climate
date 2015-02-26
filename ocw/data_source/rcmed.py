@@ -347,7 +347,7 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     '''
     
     parameters_metadata = get_parameters_metadata()
-    parameter_name, time_step, _, _, _, _, _= _get_parameter_info(parameters_metadata, parameter_id)
+    parameter_name, time_step, _, _, _, _, parameter_units = _get_parameter_info(parameters_metadata, parameter_id)
     url = _generate_query_url(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time, time_step)
     lats, lons, times, values = _get_data(url)
 
@@ -365,6 +365,7 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
                    unique_lats_lons_times[1],
                    unique_times,
                    values,
-                   parameter_name,
+                   variable=parameter_name,
+                   units=parameter_units,
                    name=name,
                    origin=origin)

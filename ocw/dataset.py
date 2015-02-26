@@ -207,7 +207,7 @@ Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
             "lat-range: {}, "
             "lon-range: {}, "
             "time_range: {}, "
-            "var: {}>"
+            "var: {}, "
             "units: {}>"
         )
 
