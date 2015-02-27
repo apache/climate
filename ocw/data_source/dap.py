@@ -59,7 +59,10 @@ def load(url, variable, name=''):
     lons = np.array(dataset[lon][:])
     values = np.array(dataset[:])
 
-    return Dataset(lats, lons, times, values, variable, name=name)
+    origin = {'url': url}
+
+    return Dataset(lats, lons, times, values, variable,
+                   name=name, origin=origin)
 
 def _convert_times_to_datetime(time):
     '''Convert the OpenDAP time object's values to datetime objects
