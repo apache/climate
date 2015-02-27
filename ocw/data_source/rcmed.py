@@ -355,5 +355,16 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     unique_times = _calculate_time(unique_lats_lons_times[2], time_step)
     values = _reshape_values(values, unique_lats_lons_times)
     values = _make_mask_array(values, parameter_id, parameters_metadata)
+
+    origin = {
+        'dataset_id': dataset_id,
+        'parameter_id': parameter_id
+    }
     
-    return Dataset(unique_lats_lons_times[0], unique_lats_lons_times[1], unique_times, values, parameter_name, name=name)
+    return Dataset(unique_lats_lons_times[0],
+                   unique_lats_lons_times[1],
+                   unique_times,
+                   values,
+                   parameter_name,
+                   name=name,
+                   origin=origin)

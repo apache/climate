@@ -108,5 +108,19 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
         ds = rcmed.parameter_dataset(self.dataset_id, self.parameter_id, self.min_lat, self.max_lat, self.min_lon, self.max_lon, self.start_time, self.end_time, name='foo')
         self.assertEquals(ds.name, 'foo')
 
+    def test_dataset_origin(self):
+        rcmed.urllib2.urlopen = self.return_text
+        ds = rcmed.parameter_dataset(self.dataset_id,
+                                     self.parameter_id,
+                                     self.min_lat,
+                                     self.max_lat,
+                                     self.min_lon,
+                                     self.max_lon,
+                                     self.start_time,
+                                     self.end_time,
+                                     name='foo')
+        self.assertEquals(ds.origin['dataset_id'], self.dataset_id)
+        self.assertEquals(ds.origin['parameter_id'], self.parameter_id)
+
 if __name__ == '__main__':
     unittest.main()
