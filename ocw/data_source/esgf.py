@@ -84,6 +84,10 @@ def load_dataset(dataset_id,
                                         name=name,
                                         elevation_index=elevation_index))
 
+    origin = {'dataset_id': dataset_id, 'variable': variable}
+    for ds in datasets:
+        ds.origin = origin
+
     return datasets
 
 def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
