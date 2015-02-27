@@ -206,4 +206,13 @@ def load_file(file_path,
         else:
             values = values [:,:,:,elevation_index]
 
-    return Dataset(lats, lons, times, values, variable_name, name=name)
+    origin = {
+        'path': file_path,
+        'lat_name': lat_name,
+        'lon_name': lon_name,
+        'time_name': time_name
+    }
+    if elevation_index != 0: origin['elevation_index'] = elevation_index
+
+    return Dataset(lats, lons, times, values, variable_name,
+                   name=name, origin=origin)
