@@ -35,7 +35,8 @@ logger = logging.getLogger(__name__)
 class Dataset:
     '''Container for a dataset's attributes and data.'''
 
-    def __init__(self, lats, lons, times, values, variable=None, name=""):
+    def __init__(self, lats, lons, times, values, variable=None, name="",
+                 origin=None):
         '''Default Dataset constructor
 
         :param lats: One dimensional numpy array of unique latitude values.
@@ -58,6 +59,10 @@ class Dataset:
         :param name: An optional string name for the Dataset.
         :type name: :mod:`string`
 
+        :param origin: An optional object used to specify information on where
+            this dataset was loaded from.
+        :type origin: :class:`dict`
+
         :raises: ValueError
         '''
         self._validate_inputs(lats, lons, times, values)
@@ -69,6 +74,7 @@ class Dataset:
         self.values = values
         self.variable = variable
         self.name = name
+        self.origin = origin
 
     def spatial_boundaries(self):
         '''Calculate the spatial boundaries.

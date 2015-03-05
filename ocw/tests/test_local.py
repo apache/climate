@@ -69,6 +69,13 @@ class test_load_file(unittest.TestCase):
         ds = local.load_file(self.file_path, 'value', name='foo')
         self.assertEqual(ds.name, 'foo')
 
+    def test_dataset_origin(self):
+        ds = local.load_file(self.file_path, 'value', elevation_index=1)
+        expected_keys = set(['path', 'lat_name', 'lon_name',
+                         'time_name', 'elevation_index' ])
+        self.assertEqual(set(ds.origin.keys()), expected_keys)
+
+
 class test_get_netcdf_variable_names(unittest.TestCase):
     file_path = "http://zipper.jpl.nasa.gov/dist/"
     test_model = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
