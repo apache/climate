@@ -61,8 +61,10 @@ def temporal_rebin(target_dataset, temporal_resolution):
                              target_dataset.lons, 
                              binned_dates, 
                              binned_values,
-                             target_dataset.variable,
-                             target_dataset.name)
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name,
+                             origin=target_dataset.origin)
     
     return new_dataset
 
@@ -116,13 +118,18 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                                    new_longitudes, 
                                    target_dataset.times, 
                                    new_values,
-                                   target_dataset.variable,
-                                   target_dataset.name)
+                                   variable=target_dataset.variable,
+                                   units=target_dataset.units,
+                                   name=target_dataset.name,
+                                   origin=target_dataset.origin)
     return regridded_dataset
 
 def ensemble(datasets):
     """
     Generate a single dataset which is the mean of the input datasets
+
+    An ensemble datasets combines input datasets assuming the all have
+    similar shape, dimensions, and units. 
     
     :param datasets: Datasets to be used to compose the ensemble dataset from.
         All Datasets must be the same shape.
@@ -140,6 +147,7 @@ def ensemble(datasets):
                                   datasets[0].lons, 
                                   datasets[0].times,
                                   ensemble_values,
+                                  units=datasets[0].units,
                                   name="Dataset Ensemble")
     
     return ensemble_dataset
@@ -181,8 +189,10 @@ def subset(subregion, target_dataset):
             dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
             dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
             dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1],
-        target_dataset.variable,
-        target_dataset.name
+        variable=target_dataset.variable,
+        units=target_dataset.units,
+        name=target_dataset.name,
+        origin=target_dataset.origin
     )
 
 def safe_subset(subregion, target_dataset):
@@ -247,8 +257,10 @@ def normalize_dataset_datetimes(dataset, timestep):
         dataset.lons,
         np.array(new_times),
         dataset.values,
-        dataset.variable,
-        dataset.name
+        variable=dataset.variable,
+        units=dataset.units,
+        name=dataset.name,
+        origin=dataset.origin
     )
 
 def write_netcdf(dataset, path, compress=True):
@@ -295,8 +307,38 @@ def write_netcdf(dataset, path, compress=True):
     lons[:] = dataset.lons
     times[:] = netCDF4.date2num(dataset.times, times.units)
     values[:] = dataset.values
+    values.units = dataset.units
 
     out_file.close()
+
+def water_flux_unit_conversion(dataset):
+    ''' Convert water flux variables units as necessary
+
+    Convert full SI units water flux units to more common units.
+
+    :param dataset: The dataset to convert.
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: A Dataset with values converted to new units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+    waterFluxVariables = ['pr', 'evspsbl', 'mrro', 'swe']
+    variable = dataset.variable.lower()
+
+    if any(subString in variable for subString in waterFluxVariables):
+        dataset_units = dataset.units.lower()
+        if variable in 'swe':
+            if any(unit in dataset_units for unit in ['m', 'meter']):
+                dataset.values = 1.e3 * dataset.values
+                dataset.units = 'km'
+        else:
+            if any(unit in dataset_units 
+                for unit in ['kg m-2 s-1', 'mm s-1', 'mm/sec']):
+                dataset.values = 86400. * dataset.values
+                dataset.units = 'mm/day'
+
+    return dataset
+
 
 def _rcmes_normalize_datetimes(datetimes, timestep):
     """ Normalize Dataset datetime values.

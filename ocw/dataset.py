@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 class Dataset:
     '''Container for a dataset's attributes and data.'''
 
-    def __init__(self, lats, lons, times, values, variable=None, name="",
-                 origin=None):
+    def __init__(self, lats, lons, times, values, variable=None, units=None,
+                 origin=None, name=""):
         '''Default Dataset constructor
 
         :param lats: One dimensional numpy array of unique latitude values.
@@ -56,6 +56,9 @@ class Dataset:
         :param variable: Name of the value variable.
         :type variable: :mod:`string`
 
+        :param units: Name of the value units
+        :type units: :mod:`string`
+
         :param name: An optional string name for the Dataset.
         :type name: :mod:`string`
 
@@ -73,6 +76,7 @@ class Dataset:
         self.times = times
         self.values = values
         self.variable = variable
+        self.units = units
         self.name = name
         self.origin = origin
 
@@ -203,7 +207,8 @@ Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
             "lat-range: {}, "
             "lon-range: {}, "
             "time_range: {}, "
-            "var: {}>"
+            "var: {}, "
+            "units: {}>"
         )
 
         return formatted_repr.format(
@@ -211,7 +216,8 @@ Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
             lat_range,
             lon_range,
             time_range,
-            self.variable
+            self.variable,
+            self.units
         )
 
 
