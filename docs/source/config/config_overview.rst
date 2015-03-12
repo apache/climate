@@ -67,3 +67,14 @@ Plots Settings
 --------------
 
 This is where you specify what plots to make after running the evaluation. The :doc:`Plots Settings <plots_settings>` page provides examples for the supported plot types.
+
+Example Run
+-----------
+
+If you have tried the **simple_model_to_model_bias.py** example in the primary toolkit examples you can run the same evaluation but use a config file to do so instead of direct API scripting. From the **climate/ocw-config-runner/** directory run the following command to run the example::
+
+    python ocw_evaluation_from_config.py example/simple_model_to_model_bias.yaml
+
+.. note::
+
+    If you haven't run the previous example which downloads the necessary datasets this evaluation will fail. The necessary local files will not have been downloaded!
