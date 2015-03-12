@@ -61,9 +61,10 @@ def temporal_rebin(target_dataset, temporal_resolution):
                              target_dataset.lons, 
                              binned_dates, 
                              binned_values,
-                             target_dataset.variable,
-                             target_dataset.units,
-                             target_dataset.name)
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name,
+                             origin=target_dataset.origin)
     
     return new_dataset
 
@@ -117,9 +118,10 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                                    new_longitudes, 
                                    target_dataset.times, 
                                    new_values,
-                                   target_dataset.variable,
-                                   target_dataset.units,
-                                   target_dataset.name)
+                                   variable=target_dataset.variable,
+                                   units=target_dataset.units,
+                                   name=target_dataset.name,
+                                   origin=target_dataset.origin)
     return regridded_dataset
 
 def ensemble(datasets):
@@ -145,7 +147,7 @@ def ensemble(datasets):
                                   datasets[0].lons, 
                                   datasets[0].times,
                                   ensemble_values,
-                                  datasets[0].units,
+                                  units=datasets[0].units,
                                   name="Dataset Ensemble")
     
     return ensemble_dataset
@@ -187,9 +189,10 @@ def subset(subregion, target_dataset):
             dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
             dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
             dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1],
-        target_dataset.variable,
-        target_dataset.units,
-        target_dataset.name
+        variable=target_dataset.variable,
+        units=target_dataset.units,
+        name=target_dataset.name,
+        origin=target_dataset.origin
     )
 
 def safe_subset(subregion, target_dataset):
@@ -254,9 +257,10 @@ def normalize_dataset_datetimes(dataset, timestep):
         dataset.lons,
         np.array(new_times),
         dataset.values,
-        dataset.variable,
-        dataset.units,
-        dataset.name
+        variable=dataset.variable,
+        units=dataset.units,
+        name=dataset.name,
+        origin=dataset.origin
     )
 
 def write_netcdf(dataset, path, compress=True):

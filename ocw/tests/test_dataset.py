@@ -32,9 +32,13 @@ class TestDatasetAttributes(unittest.TestCase):
         self.variable = 'prec'
         self.name = 'foo'
         self.origin = {'path': '/a/fake/file/path'}
-        self.test_dataset = Dataset(self.lat, self.lon, self.time, 
-                                    self.value, self.variable,
-                                    self.name, self.origin)
+        self.test_dataset = Dataset(self.lat,
+                                    self.lon,
+                                    self.time,
+                                    self.value,
+                                    variable=self.variable,
+                                    name=self.name,
+                                    origin=self.origin)
 
     def test_lats(self):
         self.assertItemsEqual(self.test_dataset.lats, self.lat)
