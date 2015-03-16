@@ -54,8 +54,6 @@ def plot_from_config(evaluation, config_data):
 
 def _draw_contour_plot(evaluation, plot_config):
     """"""
-    row, col = plot_config['results_indeces'][0]
-
     lats = plot_config['lats']
     if type(lats) != type(list):
         lats = range(lats['range_min'], lats['range_max'], lats['range_step'])
@@ -64,8 +62,11 @@ def _draw_contour_plot(evaluation, plot_config):
     if type(lons) != type(list):
         lons = range(lons['range_min'], lons['range_max'], lons['range_step'])
 
-    plots.draw_contour_map(evaluation.results[row][col],
-                            np.array(lats),
-                            np.array(lons),
-                            plot_config['output_name'],
-                            **plot_config.get('optional_args', {}))
+
+    for i, (row, col) in enumerate(plot_config['results_indeces']):
+        plot_name = plot_config['output_name'] + '_{}'.format(i)
+        plots.draw_contour_map(evaluation.results[row][col],
+                                np.array(lats),
+                                np.array(lons),
+                                    plot_name,
+                                    **plot_config.get('optional_args', {}))
