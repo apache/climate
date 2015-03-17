@@ -238,7 +238,7 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
     ''' Draw subregion domain(s) on a map.
 
     :param subregions: The subregion objects to plot on the map.
-    :type subregions: :class:`list` of subregion objects
+    :type subregions: :class:`list` of subregion objects (Bounds objects)
 
     :param lats: Array of latitudes values.
     :type lats: :class:`numpy.ndarray`
@@ -322,8 +322,8 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         nlats, nlons = domain.shape
         domain = ma.masked_equal(domain, 0)
-        reglats = np.linspace(reg.latmin, reg.latmax, nlats)
-        reglons = np.linspace(reg.lonmin, reg.lonmax, nlons)
+        reglats = np.linspace(reg.lat_min, reg.lat_max, nlats)
+        reglons = np.linspace(reg.lon_min, reg.lon_max, nlons)
         reglons, reglats = np.meshgrid(reglons, reglats)
 
         # Convert to to projection coordinates. Not really necessary
@@ -336,7 +336,7 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         # Label the subregion
         xm, ym = x.mean(), y.mean()
-        m.plot(xm, ym, marker='$%s$' %(reg.name), markersize=12, color='k')
+        m.plot(xm, ym, marker='$%s$' %("R"+str(i+1)), markersize=12, color='k')
 
     # Add the title
     ax.set_title(ptitle)
