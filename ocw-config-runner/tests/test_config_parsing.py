@@ -500,12 +500,12 @@ class TestRCMEDDatasetConfig(unittest.TestCase):
         self.invalid_rcmed = conf[1]
 
     def test_valid_rcmed_config(self):
-        ret = config_runner._valid_dataset_config_data(self.valid_rcmed)
+        ret = parser._valid_dataset_config_data(self.valid_rcmed)
         self.assertTrue(ret)
 
-    @patch('ocw_evaluation_from_config.logger')
+    @patch('configuration_parsing.logger')
     def test_invalid_rcmed_config(self, mock_logger):
-        config_runner._valid_dataset_config_data(self.invalid_rcmed)
+        parser._valid_dataset_config_data(self.invalid_rcmed)
 
         present_keys = set(self.invalid_rcmed.keys())
         missing_keys = self.required_rcmed_keys - present_keys
