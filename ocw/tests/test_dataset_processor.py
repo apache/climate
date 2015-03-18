@@ -174,6 +174,7 @@ class TestNormalizeDatasetDatetimes(unittest.TestCase):
 class TestSubset(unittest.TestCase):
     def setUp(self):
         self.target_dataset = ten_year_monthly_dataset()
+        self.name = 'foo'
 
         self.subregion = ds.Bounds(
             -81, 81, 
@@ -202,7 +203,16 @@ class TestSubset(unittest.TestCase):
         self.assertEqual(subset.lons.shape[0], 162)
         self.assertEqual(subset.times.shape[0], 37)
         self.assertEqual(subset.values.shape, (37, 82, 162))
-    
+
+    def test_subset_name(self):
+        subset = dp.subset(self.subregion, self.target_dataset)
+        self.assertEqual(subset.name, self.name)
+
+    def test_subset_name_propagation(self):
+        subset_name = 'foo_subset_name'
+        subset = dp.subset(self.subregion, self.target_dataset,subset_name)
+        self.assertEqual(subset.name, subset_name)
+
     def test_subset_using_non_exact_spatial_bounds(self):
         index_slices = dp._get_subregion_slice_indices(self.non_exact_spatial_subregion,  self.target_dataset)
         control_index_slices = {"lat_start"  : 5,

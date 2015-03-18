@@ -152,7 +152,7 @@ def ensemble(datasets):
     
     return ensemble_dataset
 
-def subset(subregion, target_dataset):
+def subset(subregion, target_dataset, subregion_name=None):
     '''Subset given dataset(s) with subregion information
 
     :param subregion: The Bounds with which to subset the target Dataset. 
@@ -160,6 +160,9 @@ def subset(subregion, target_dataset):
 
     :param target_dataset: The Dataset object to subset.
     :type target_dataset: :class:`dataset.Dataset`
+
+    :param subregion_name: The subset-ed Dataset name
+    :type subregion_name: :mod:`string`
 
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
@@ -172,6 +175,9 @@ def subset(subregion, target_dataset):
 
     # Get subregion indices into subregion data
     dataset_slices = _get_subregion_slice_indices(subregion, target_dataset)
+
+    if not subregion_name:
+        subregion_name = target_dataset.name
 
     # Build new dataset with subset information
     return ds.Dataset(
@@ -191,11 +197,11 @@ def subset(subregion, target_dataset):
             dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1],
         variable=target_dataset.variable,
         units=target_dataset.units,
-        name=target_dataset.name,
+        name=subregion_name,
         origin=target_dataset.origin
     )
 
-def safe_subset(subregion, target_dataset):
+def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
 
     A standard subset requires that the provided subregion be entirely contained
@@ -207,6 +213,9 @@ def safe_subset(subregion, target_dataset):
 
     :param target_dataset: The Dataset object to subset.
     :type target_dataset: :class:`dataset.Dataset`
+
+    :param subregion_name: The subset-ed Dataset name
+    :type subregion_name: :mod:`string`
 
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
@@ -233,7 +242,7 @@ def safe_subset(subregion, target_dataset):
     if subregion.end > end:
         subregion.end = end
 
-    return subset(subregion, target_dataset)
+    return subset(subregion, target_dataset, subregion_name)
 
 def normalize_dataset_datetimes(dataset, timestep):
     ''' Normalize Dataset datetime values.
