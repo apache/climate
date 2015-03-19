@@ -212,6 +212,7 @@ def load_file(file_path,
             values = values [:,:,:,elevation_index]
 
     origin = {
+        'source': 'local',
         'path': file_path,
         'lat_name': lat_name,
         'lon_name': lon_name,

@@ -357,6 +357,7 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     values = _make_mask_array(values, parameter_id, parameters_metadata)
 
     origin = {
+        'source': 'rcmed',
         'dataset_id': dataset_id,
         'parameter_id': parameter_id
     }

@@ -47,6 +47,7 @@ class TestDap(unittest.TestCase):
         self.assertEquals(self.dataset.name, self.name)
 
     def test_dataset_origin(self):
+        self.assertEquals(self.dataset.origin['source'], 'dap')
         self.assertEquals(self.dataset.origin['url'], self.url)
 
 if __name__ == '__main__':
