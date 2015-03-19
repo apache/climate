@@ -84,7 +84,11 @@ def load_dataset(dataset_id,
                                         name=name,
                                         elevation_index=elevation_index))
 
-    origin = {'dataset_id': dataset_id, 'variable': variable}
+    origin = {
+        'source': 'esgf',
+        'dataset_id': dataset_id,
+        'variable': variable
+    }
     for ds in datasets:
         ds.origin = origin
 

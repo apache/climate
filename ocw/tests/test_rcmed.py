@@ -119,6 +119,8 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
                                      self.start_time,
                                      self.end_time,
                                      name='foo')
+
+        self.assertEquals(ds.origin['source'], 'rcmed')
         self.assertEquals(ds.origin['dataset_id'], self.dataset_id)
         self.assertEquals(ds.origin['parameter_id'], self.parameter_id)
 

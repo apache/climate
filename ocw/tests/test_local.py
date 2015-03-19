@@ -71,9 +71,10 @@ class test_load_file(unittest.TestCase):
 
     def test_dataset_origin(self):
         ds = local.load_file(self.file_path, 'value', elevation_index=1)
-        expected_keys = set(['path', 'lat_name', 'lon_name',
-                         'time_name', 'elevation_index' ])
+        expected_keys = set(['source', 'path', 'lat_name', 'lon_name',
+                             'time_name', 'elevation_index' ])
         self.assertEqual(set(ds.origin.keys()), expected_keys)
+        self.assertEqual(ds.origin['source'], 'local')
 
 
 class test_get_netcdf_variable_names(unittest.TestCase):
