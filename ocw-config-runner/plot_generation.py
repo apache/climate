@@ -63,7 +63,7 @@ def _draw_contour_plot(evaluation, plot_config):
         lons = range(lons['range_min'], lons['range_max'], lons['range_step'])
 
 
-    for i, (row, col) in enumerate(plot_config['results_indeces']):
+    for i, (row, col) in enumerate(plot_config['results_indices']):
         plot_name = plot_config['output_name'] + '_{}'.format(i)
         plots.draw_contour_map(evaluation.results[row][col],
                                 np.array(lats),

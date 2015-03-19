@@ -20,7 +20,7 @@ metrics:
 
 plots:
     - type: contour
-      results_indeces:
+      results_indices:
           - !!python/tuple [0, 0]
       lats:
           range_min: -20

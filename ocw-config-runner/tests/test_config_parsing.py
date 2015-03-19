@@ -599,7 +599,7 @@ class ContourMapConfig(unittest.TestCase):
     def setUpClass(self):
         valid_contour_config = """
             type: contour
-            results_indeces:
+            results_indices:
                 - !!python/tuple [0, 0]
             lats:
                 range_min: -20
@@ -619,7 +619,7 @@ class ContourMapConfig(unittest.TestCase):
         self.missing_keys_contour = yaml.load(missing_keys_contour_config)
 
         self.required_contour_keys = set([
-            'results_indeces',
+            'results_indices',
             'lats',
             'lons',
             'output_name'
@@ -653,7 +653,7 @@ class TestInvalidPlotConfig(unittest.TestCase):
         self.bad_plot_type = yaml.load(bad_plot_type_config)
 
         missing_plot_type_config = """
-            results_indeces:
+            results_indices:
                 - !!python/tuple [0, 0]
             lats:
                 range_min: -20

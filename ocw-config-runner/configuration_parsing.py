@@ -202,7 +202,7 @@ def _valid_plot_config_data(plot_config_data):
 
     if plot_type == 'contour':
         required_keys = set([
-                'results_indeces',
+                'results_indices',
                 'lats',
                 'lons',
                 'output_name'
