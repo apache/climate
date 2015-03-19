@@ -494,7 +494,7 @@ def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
                      extend='neither', aspect=8.5/2.5):
     ''' Draw a multiple panel contour map plot.
 
-    :param dataset: 3D array of data to be plotted with shape (nT, nLon, nLat).
+    :param dataset: 3D array of data to be plotted with shape (nT, nLat, nLon).
     :type dataset: :class:`numpy.ndarray`
 
     :param lats: Array of latitudes values.
