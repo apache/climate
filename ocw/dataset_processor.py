@@ -31,8 +31,9 @@ logger = logging.getLogger(__name__)
 
 def temporal_subset(target_dataset, month_index):
     """ Temporally subset data between month_begin and month_end in each year.
-       For example, to extract DJF time series, monthBegin = 12, monthEnd =2
-       This can handle monthBegin=monthEnd i.e. for time series of a specific month
+
+    For example, to extract DJF time series, monthBegin = 12, monthEnd =2
+    This can handle monthBegin=monthEnd i.e. for time series of a specific month
 
     :param target_dataset: Dataset object that needs temporal subsetting 
     :type target_dataset: Open Climate Workbench Dataset Object
@@ -44,10 +45,7 @@ def temporal_subset(target_dataset, month_index):
     """
 
     dates = target_dataset.times
-    months = []
-    for date in dates:
-        months.append(date.month) 
-    months = np.array(months)
+    months = np.array([d.month for d in dates])
     time_index = []
     for m_value in month_index:
         time_index = np.append(time_index, np.where(months == m_value)[0]) 
@@ -117,11 +115,11 @@ def spatial_aggregation(target_dataset, lon_min, lon_max, lat_min, lat_max):
     :param lon_min: minimum longitude (western boundary)
     :type lon_min: float
     :param lon_max: maximum longitude (eastern boundary)
-    :type lon_min: float
+    :type lon_max: float
     :param lat_min: minimum latitude (southern boundary) 
     :type lat_min: float
     :param lat_min: maximum latitude (northern boundary) 
-    :type lat_min: float
+    :type lat_max: float
 
     :returns: A new spatially subset Dataset
     :rtype: Open Climate Workbench Dataset Object
