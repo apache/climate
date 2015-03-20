@@ -29,6 +29,47 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def temporal_subset(target_dataset, month_index):
+    """ Temporally subset data between month_begin and month_end in each year.
+       For example, to extract DJF time series, monthBegin = 12, monthEnd =2
+       This can handle monthBegin=monthEnd i.e. for time series of a specific month
+
+    :param target_dataset: Dataset object that needs temporal subsetting 
+    :type target_dataset: Open Climate Workbench Dataset Object
+    :param month_index: an integer array of subset months (December ~ February: [12,1,2])
+    :type temporal_resolution: interger array
+
+    :returns: A temporal subset OCW Dataset
+    :rtype: Open Climate Workbench Dataset Object
+    """
+
+    dates = target_dataset.times
+    months = []
+    for date in dates:
+        months.append(date.month) 
+    months = np.array(months)
+    time_index = []
+    for m_value in month_index:
+        time_index = np.append(time_index, np.where(months == m_value)[0]) 
+        if m_value == month_index[0]:
+            time_index_first = np.min(np.where(months == m_value)[0])
+        if m_value == month_index[-1]:
+            time_index_last = np.max(np.where(months == m_value)[0])
+
+    time_index = np.sort(time_index)
+  
+    time_index = time_index[np.where((time_index >= time_index_first) & (time_index <= time_index_last))]
+
+    time_index = list(time_index)
+    
+    new_dataset = ds.Dataset(target_dataset.lats,
+                             target_dataset.lons,
+                             target_dataset.times[time_index],
+                             target_dataset.values[time_index,:],
+                             target_dataset.variable,
+                             target_dataset.name) 
+    return new_dataset
+    
 def temporal_rebin(target_dataset, temporal_resolution):
     """ Rebin a Dataset to a new temporal resolution
     
@@ -67,6 +108,37 @@ def temporal_rebin(target_dataset, temporal_resolution):
                              origin=target_dataset.origin)
     
     return new_dataset
+
+def spatial_aggregation(target_dataset, lon_min, lon_max, lat_min, lat_max):
+    """ Spatially subset a dataset within the given longitude and latitude boundaryd_lon-grid_space, grid_lon+grid_space
+
+    :param target_dataset: Dataset object that needs spatial subsetting
+    :type target_dataset: Open Climate Workbench Dataset Object
+    :param lon_min: minimum longitude (western boundary)
+    :type lon_min: float
+    :param lon_max: maximum longitude (eastern boundary)
+    :type lon_min: float
+    :param lat_min: minimum latitude (southern boundary) 
+    :type lat_min: float
+    :param lat_min: maximum latitude (northern boundary) 
+    :type lat_min: float
+
+    :returns: A new spatially subset Dataset
+    :rtype: Open Climate Workbench Dataset Object
+    """
+
+    new_lon, new_lat = np.meshgrid(target_dataset.lons, target_dataset.lats)
+    y_index, x_index = np.where((new_lon >= lon_min) & (new_lon <= lon_max) & (new_lat >= lat_min) & (new_lat <= lat_max))[0:2]
+
+    new_dataset = ds.Dataset(target_dataset.lats[y_index.min():y_index.max()+1],
+                             target_dataset.lons[x_index.min():x_index.max()+1],
+                             target_dataset.times,
+                             target_dataset.values[:,y_index.min():y_index.max()+1,x_index.min():x_index.max()+1],
+                             target_dataset.variable,
+                             target_dataset.name) 
+    return new_dataset 
+     
+
 
 def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     """ Regrid a Dataset using the new latitudes and longitudes
