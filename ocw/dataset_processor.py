@@ -118,7 +118,7 @@ def spatial_aggregation(target_dataset, lon_min, lon_max, lat_min, lat_max):
     :type lon_max: float
     :param lat_min: minimum latitude (southern boundary) 
     :type lat_min: float
-    :param lat_min: maximum latitude (northern boundary) 
+    :param lat_max: maximum latitude (northern boundary) 
     :type lat_max: float
 
     :returns: A new spatially subset Dataset
