@@ -23,7 +23,9 @@ import datetime as dt
 class TestDap(unittest.TestCase):
     @classmethod
     def setup_class(self):
-        self.dataset = dap.load('http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz', 'sst', name='foo')
+        self.url = 'http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz'
+        self.name = 'foo'
+        self.dataset = dap.load(self.url, 'sst', name=self.name)
 
     def test_dataset_is_returned(self):
         self.assertTrue(isinstance(self.dataset, Dataset))
@@ -42,7 +44,11 @@ class TestDap(unittest.TestCase):
         self.assertTrue(start == self.dataset.times[0])
 
     def test_custom_dataset_name(self):
-        self.assertEquals(self.dataset.name, 'foo')
+        self.assertEquals(self.dataset.name, self.name)
+
+    def test_dataset_origin(self):
+        self.assertEquals(self.dataset.origin['source'], 'dap')
+        self.assertEquals(self.dataset.origin['url'], self.url)
 
 if __name__ == '__main__':
     unittest.main()

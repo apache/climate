@@ -110,22 +110,22 @@ read ocw_path
 fi
 
 header "Checking for pip ..."
-if [ ! command -v pip >/dev/null 2>&1 ]; then
+command -v pip >/dev/null 2>&1 || { 
     task "Unable to locate pip."
     task "Installing Pip"
     sudo apt-get install python-pip >> install_log
     subtask "done"
-fi
+}
 
 if [ $WITH_VIRTUAL_ENV == 1 ]; then
     header "Setting up a virtualenv ..."
 
     # Check if virtualenv is installed. If it's not, we'll install it for the user.
-    if ! command -v virtualenv >/dev/null 2>&1; then
+    command -v virtualenv >/dev/null 2>&1 || { 
         task "Installing virtualenv ..."
         sudo apt-get install -y python-virtualenv >> install_log
         subtask "done"
-    fi
+    }
 
     # Create a new environment for OCW work
     task "Creating a new environment ..."
@@ -145,7 +145,7 @@ read -p "Press [ENTER] to continue ..."
 
 cd
 task "Downloading Anaconda ..."
-wget -O Anaconda-1.9.2-Linux-x86_64.sh "http://repo.continuum.io/archive/Anaconda-1.9.2-Linux-x86_64.sh" 2> install_log
+wget -O Anaconda-1.9.2-Linux-x86_64.sh "http://repo.continuum.io/archive/Anaconda-1.9.2-Linux-x86_64.sh" 2>> install_log
 subtask "done"
 
 task "Installing ..."
@@ -161,7 +161,7 @@ header "Handling Basemap install ..."
 
 cd
 task "Downloading basemap ..."
-wget -O basemap-1.0.7.tar.gz "http://sourceforge.net/projects/matplotlib/files/matplotlib-toolkits/basemap-1.0.7/basemap-1.0.7.tar.gz/download" 2> install_log
+wget -O basemap-1.0.7.tar.gz "http://sourceforge.net/projects/matplotlib/files/matplotlib-toolkits/basemap-1.0.7/basemap-1.0.7.tar.gz/download" 2>> install_log
 tar xzf basemap-1.0.7.tar.gz >> install_log
 subtask "done"
 

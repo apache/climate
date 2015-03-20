@@ -54,7 +54,7 @@ class TestBias(unittest.TestCase):
         '''Test bias function between reference dataset and target dataset.'''
         expected_result = np.zeros((12, 5, 5), dtype=np.int)
         expected_result.fill(-300)
-        np.testing.assert_array_equal(self.bias.run(self.reference_dataset, self.target_dataset), expected_result)
+        np.testing.assert_array_equal(self.bias.run(self.target_dataset, self.reference_dataset), expected_result)
 
 
 class TestTemporalStdDev(unittest.TestCase):
@@ -206,7 +206,7 @@ class TestTemporalMeanBias(unittest.TestCase):
         '''Test mean bias function between reference dataset and target dataset.'''
         expected_result = np.zeros((5, 5), dtype=np.int)
         expected_result.fill(-300)
-        np.testing.assert_array_equal(self.mean_bias.run(self.reference_dataset, self.target_dataset), expected_result)
+        np.testing.assert_array_equal(self.mean_bias.run(self.target_dataset,self.reference_dataset), expected_result)
 
     def test_function_run_abs(self):
         '''Test mean bias function between reference dataset and target dataset with abs as True.'''

@@ -30,8 +30,15 @@ class TestDatasetAttributes(unittest.TestCase):
         flat_array = np.array(range(300))
         self.value = flat_array.reshape(12, 5, 5)
         self.variable = 'prec'
-        self.test_dataset = Dataset(self.lat, self.lon, self.time, 
-                                    self.value, self.variable)
+        self.name = 'foo'
+        self.origin = {'path': '/a/fake/file/path'}
+        self.test_dataset = Dataset(self.lat,
+                                    self.lon,
+                                    self.time,
+                                    self.value,
+                                    variable=self.variable,
+                                    name=self.name,
+                                    origin=self.origin)
 
     def test_lats(self):
         self.assertItemsEqual(self.test_dataset.lats, self.lat)
@@ -47,6 +54,12 @@ class TestDatasetAttributes(unittest.TestCase):
 
     def test_variable(self):
         self.assertEqual(self.test_dataset.variable, self.variable)
+
+    def test_name(self):
+        self.assertEqual(self.test_dataset.name, self.name)
+
+    def test_origin(self):
+        self.assertEqual(self.test_dataset.origin, self.origin)
 
 class TestInvalidDatasetInit(unittest.TestCase):
     def setUp(self):
