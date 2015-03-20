@@ -289,7 +289,6 @@ def calc_climatology_year(dataset):
 
     return annually_mean, total_mean
 
-<<<<<<< HEAD
 def calc_climatology_season(month_start, month_end, dataset):
     ''' Calculate seasonal mean and time series for given months.
 
@@ -345,6 +344,3 @@ def calc_climatology_monthly(dataset):
         raise ValueError(error)
     else:
         return reshape_monthly_to_annually(dataset).mean(axis=0)
-
-=======
->>>>>>> cfb120e5eaea004e850b884e49d41f8a0c269b75
