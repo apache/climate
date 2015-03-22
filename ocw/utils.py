@@ -20,6 +20,7 @@
 import sys
 import datetime as dt
 import numpy as np
+import datetime 
 
 from mpl_toolkits.basemap import shiftgrid
 from dateutil.relativedelta import relativedelta
@@ -235,7 +236,6 @@ def reshape_monthly_to_annually(dataset):
     :type dataset: :class:`dataset.Dataset`
 
     :returns: Dataset values array with shape (num_year, 12, num_lat, num_lon)
-    :rtype: :class:`numpy.ndarray`
     '''
 
     values = dataset.values[:]
@@ -254,14 +254,13 @@ def reshape_monthly_to_annually(dataset):
 
 def calc_climatology_year(dataset):
     ''' Calculate climatology of dataset's values for each year
-
+    
     :param dataset: Monthly binned Dataset object with an evenly divisible
         number of months.
     :type dataset: :class:`dataset.Dataset`
 
     :returns: Mean values for each year (annual_mean) and mean values for all
         years (total_mean)
-    :rtype: A :func:`tuple` of two :class:`numpy.ndarray`
 
     :raise ValueError: If the number of monthly bins is not evenly divisible
         by 12.
@@ -283,7 +282,7 @@ def calc_climatology_year(dataset):
 
 def calc_climatology_season(month_start, month_end, dataset):
     ''' Calculate seasonal mean and time series for given months.
-
+    
     :param month_start: An integer for beginning month (Jan=1)
     :type month_start: :class:`int`
 
@@ -293,10 +292,9 @@ def calc_climatology_season(month_start, month_end, dataset):
     :param dataset: Dataset object with full-year format
     :type dataset: :class:`dataset.Dataset`
 
-    :returns:  
-        t_series - monthly average over the given season
+    :returns: t_series - monthly average over the given season
         means - mean over the entire season
-    :rtype: A :func:`tuple` of two :class:`numpy.ndarray`
+        
     '''
 
     if month_start > month_end:
@@ -312,19 +310,23 @@ def calc_climatology_season(month_start, month_end, dataset):
     
     t_series = reshape_data[:, month_index].mean(axis=1)
     means = t_series.mean(axis=0)
+    
     return t_series, means
 
 
 def calc_climatology_monthly(dataset):
     ''' Calculate monthly mean values for a dataset.
+    Follow COARDS climo stats calculation, the year can be given as 0 
+    but the min year allowed in Python is 1
+    http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#climatology
 
     :param dataset: Monthly binned Dataset object with the number of months
         divisible by 12
     :type dataset: :class:`dataset.Dataset`
 
-    :returns: Mean values for each month of the year
-    :rtype: A 3D :class:`numpy.ndarray` of shape (12, num_lats, num_lons)
-
+    :returns: Mean values for each month of the year of shape (12, num_lats, num_lons)
+              and times array of datetime objects of length 12
+    
     :raise ValueError: If the number of monthly bins is not divisible by 12
     '''
 
@@ -335,5 +337,11 @@ def calc_climatology_monthly(dataset):
         )
         raise ValueError(error)
     else:
-        return reshape_monthly_to_annually(dataset).mean(axis=0)
+        values = reshape_monthly_to_annually(dataset).mean(axis=0)
+        
+        # A year can commence from any month
+        first_month = dataset.times[0].month
+        times = np.array([datetime.datetime(1, first_month, 1) + relativedelta(months = x) 
+                for x in range(12)])
+        return values, times
 
