@@ -213,8 +213,10 @@ class TestCalcClimatologyMonthly(unittest.TestCase):
 
     def test_calc_climatology_monthly(self):
         expected_result = np.ones(300).reshape(12, 5, 5)
-        actual_result = utils.calc_climatology_monthly(self.dataset)
+        expected_times = np.array([datetime.datetime(1, 1, 1) + relativedelta(months = x) for x in range(12)])
+        actual_result, actual_times = utils.calc_climatology_monthly(self.dataset)
         np.testing.assert_array_equal(actual_result, expected_result)
+        np.testing.assert_array_equal(actual_times, expected_times)
 
 
 if __name__ == '__main__':
