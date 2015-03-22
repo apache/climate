@@ -273,7 +273,7 @@ def calc_climatology_year(dataset):
     else:
         # Get values reshaped to (num_year, 12, num_lats, num_lons)
         values = reshape_monthly_to_annually(dataset)
-        # Calculate mean values over year (num_year, num_lats, num_lons)
+       # Calculate mean values over year (num_year, num_lats, num_lons)
         annually_mean = values.mean(axis=1)
         # Calculate mean values over all years (num_lats, num_lons)
         total_mean = annually_mean.mean(axis=0)
@@ -345,3 +345,17 @@ def calc_climatology_monthly(dataset):
                 for x in range(12)])
         return values, times
 
+def calc_time_series(dataset):
+    ''' Calculate time series mean values for a dataset
+
+    :param dataset: Dataset object 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: time series for the dataset of shape (nT)
+    '''
+
+    t_series =[]
+    for t in xrange(dataset.values.shape[0]):
+        t_series.append(dataset.values[t,:,:].mean())
+    
+    return t_series
