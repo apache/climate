@@ -19,6 +19,8 @@ from mock import patch
 import unittest
 
 from ocw.dataset import Dataset
+from ocw.evaluation import Evaluation
+import ocw.metrics as metrics
 import configuration_writer as writer
 
 import datetime as dt
@@ -268,3 +270,34 @@ class TestDAPDatasetExportGeneration(unittest.TestCase):
     def test_proper_units_name_export(self):
         self.assertEqual(self.exported_info['optional_args']['units'],
                          self.units)
+
+
+class TestMetricExportGeneration(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.bias = metrics.Bias()
+        self.tmp_std_dev = metrics.TemporalStdDev()
+        loaded_metrics = [self.bias, self.tmp_std_dev]
+
+        self.evaluation = Evaluation(None, [], loaded_metrics)
+
+    def test_proper_export_format(self):
+        out = writer.generate_metric_information(self.evaluation)
+
+        self.assertTrue(type(out) == type(list()))
+
+        for name in out:
+            self.assertTrue(type(name) == type(str()))
+
+    def test_proper_metric_name_export(self):
+        out = writer.generate_metric_information(self.evaluation)
+
+        self.assertTrue(self.bias.__class__.__name__ in out)
+        self.assertTrue(self.tmp_std_dev.__class__.__name__ in out)
+
+    def test_empty_metrics_in_evaluation(self):
+        new_eval = Evaluation(None, [], [])
+        out = writer.generate_metric_information(new_eval)
+
+        self.assertTrue(type(out) == type(list()))
+        self.assertTrue(len(out) == 0)
