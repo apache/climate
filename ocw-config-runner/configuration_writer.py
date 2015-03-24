@@ -55,6 +55,21 @@ def generate_dataset_information(dataset):
 
     return info
 
+def generate_metric_information(evaluation):
+    ''' Generate metric config file output from a given Evaluation object.
+
+    :param evaluation: The evaluation object from which to extract metrics.
+    :type evaluation: :class:`evaluation.Evaluation`
+
+    :returns: A :func:`list` of :mod:`metrics` object names for output into
+        a configuration file.
+    :rtype: :func:`list` of :mod:`metrics`
+    '''
+    unary_metrics = [x.__class__.__name__ for x in evaluation.unary_metrics]
+    binary_metrics = [x.__class__.__name__ for x in evaluation.metrics]
+
+    return unary_metrics + binary_metrics
+
 def _extract_local_dataset_info(dataset):
     ''''''
     dataset_info = {'optional_args': {}}
