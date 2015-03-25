@@ -18,8 +18,27 @@
 import datetime as dt
 import logging
 
+import yaml
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+
+def export_evaluation_to_config(evaluation, file_path='./exported_eval.yaml'):
+    ''' Export an evaluation to a config file
+    
+    :param evaluation: The evaluation object to export.
+    :type evaluation: :class:`evaluation.Evaluation`
+
+    :param file_path: Optional file path where the config file should be saved.
+    :type file_path: :mod:`string`
+    '''
+    config = {}
+
+    config['evaluation'] = generate_evaluation_information(evaluation)
+    config['datasets'] = generate_dataset_information(evaluation)
+    config['metrics'] = generate_metric_information(evaluation)
+
+    yaml.dump(config, file(file_path, 'w'))
 
 def generate_dataset_information(evaluation):
     ''' Generate dataset config file output for a given Evaluation object.
@@ -219,8 +238,11 @@ def _calc_spatial_lat_lon_grid(datasets):
 
     lats = datasets[0].lats
     lons = datasets[0].lons
-    lat_step = abs(lats[1] - lats[0])
-    lon_step = abs(lons[1] - lons[0])
+    # These explicit float casts are needed to ensure that the type of the
+    # lat/lon steps are not numpy values. PyYAML will choke on export if it
+    # encounters a Numpy value.
+    lat_step = float(abs(lats[1] - lats[0]))
+    lon_step = float(abs(lons[1] - lons[0]))
 
     # We need to add an extra step value onto the end so when we generate a
     # range with these values we don't lose one that we're expecting.
