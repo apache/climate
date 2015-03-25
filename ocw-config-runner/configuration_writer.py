@@ -21,8 +21,31 @@ import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
-def generate_dataset_information(dataset):
-    ''' Generates a dict of dataset information for export.
+def generate_dataset_information(evaluation):
+    ''' Generate dataset config file output for a given Evaluation object.
+    
+    :param evaluation: The evaluation object from which to extract metrics.
+    :type evaluation: :class:`evaluation.Evaluation`
+
+    :returns: A :func:`dict` of dataset configuration information for export
+        to a configuration file.
+    :rtype: :func:`dict`
+    '''
+    datasets = {}
+
+    if evaluation.ref_dataset:
+        datasets['reference'] = generate_dataset_config(evaluation.ref_dataset)
+
+    if len(evaluation.target_datasets) > 0:
+        datasets['targets'] = [
+            generate_dataset_config(target)
+            for target in evaluation.target_datasets
+        ]
+
+    return datasets
+
+def generate_dataset_config(dataset):
+    ''' Generate dataset config file output for a given Dataset object.
 
     :param dataset: The dataset from which to extract configuration
         information.

@@ -59,7 +59,7 @@ class TestLocalDatasetExportGeneration(unittest.TestCase):
             name=self.name
         )
 
-        self.exported_info = writer.generate_dataset_information(self.dataset)
+        self.exported_info = writer.generate_dataset_config(self.dataset)
 
     def test_proper_data_source_export(self):
         self.assertTrue('data_source' in self.exported_info)
@@ -125,7 +125,7 @@ class TestRCMEDDatasetExportGeneration(unittest.TestCase):
             name=self.name
         )
 
-        self.exported_info = writer.generate_dataset_information(self.dataset)
+        self.exported_info = writer.generate_dataset_config(self.dataset)
 
     def test_proper_data_source_export(self):
         self.assertTrue('data_source' in self.exported_info)
@@ -195,7 +195,7 @@ class TestESGFDatasetExportGeneration(unittest.TestCase):
             name=self.name
         )
 
-        self.exported_info = writer.generate_dataset_information(self.dataset)
+        self.exported_info = writer.generate_dataset_config(self.dataset)
 
     def test_proper_data_source_export(self):
         self.assertTrue('data_source' in self.exported_info)
@@ -252,7 +252,7 @@ class TestDAPDatasetExportGeneration(unittest.TestCase):
             name=self.name
         )
 
-        self.exported_info = writer.generate_dataset_information(self.dataset)
+        self.exported_info = writer.generate_dataset_config(self.dataset)
 
     def test_proper_data_source_export(self):
         self.assertTrue('data_source' in self.exported_info)
@@ -270,6 +270,122 @@ class TestDAPDatasetExportGeneration(unittest.TestCase):
     def test_proper_units_name_export(self):
         self.assertEqual(self.exported_info['optional_args']['units'],
                          self.units)
+
+
+class TestDatasetExportFromEvaluation(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.lats = np.array([10, 12, 14, 16, 18])
+        self.lons = np.array([100, 102, 104, 106, 108])
+        self.times = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        self.values = flat_array.reshape(12, 5, 5)
+        self.variable = 'var'
+        self.units = 'units'
+        self.name = 'name'
+
+        self.local_origin = {
+            'source': 'local',
+            'path': '/a/fake/path.nc',
+            'lat_name': 'a lat name',
+            'lon_name': 'a lon name',
+            'time_name': 'a time name',
+            'elevation_index': 2
+        }
+        
+        self.rcmed_origin = {
+            'source': 'rcmed',
+            'dataset_id': 4,
+            'parameter_id': 14
+        }
+
+        self.esgf_origin = {
+            'source': 'esgf',
+            'dataset_id': 'esgf dataset id',
+            'variable': 'var'
+        }
+
+        self.dap_origin = {
+            'source': 'dap',
+            'url': 'a fake url',
+        }
+
+        self.local_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.local_origin
+        )
+
+        self.rcmed_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.rcmed_origin
+        )
+        
+        self.esgf_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.esgf_origin
+        )
+
+        self.dap_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.dap_origin
+        )
+
+        self.evaluation = Evaluation(
+            self.local_ds,
+            [self.rcmed_ds, self.esgf_ds, self.dap_ds],
+            []
+        )
+
+    def test_contains_only_reference_dataset(self):
+        new_eval = Evaluation(self.local_ds, [], [])
+        out = writer.generate_dataset_information(new_eval)
+
+        self.assertTrue('reference' in out)
+        self.assertTrue('targets' not in out)
+
+    def test_contains_only_target_datasets(self):
+        new_eval = Evaluation(None, [self.local_ds], [])
+        out = writer.generate_dataset_information(new_eval)
+
+        self.assertTrue('reference' not in out)
+        self.assertTrue('targets' in out)
+
+    def test_proper_reference_dataset_export(self):
+        out = writer.generate_dataset_information(self.evaluation)
+
+        self.assertTrue('reference' in out)
+        self.assertTrue(out['reference']['data_source'] == 'local')
+
+    def test_proper_target_datasets_export(self):
+        out = writer.generate_dataset_information(self.evaluation)
+
+        self.assertTrue('targets' in out)
+        self.assertTrue(type(out['targets']) == type(list()))
+        self.assertTrue(len(out['targets']) == 3)
 
 
 class TestMetricExportGeneration(unittest.TestCase):
@@ -450,3 +566,12 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
         self.assertEqual(ds_lon_max, subset[3])
         self.assertEquals(str(start), subset[4])
         self.assertEquals(str(end), subset[5])
+
+
+class FullExportTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        pass
+
+    def test_full_export(self):
+        pass
