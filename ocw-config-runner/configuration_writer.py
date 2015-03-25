@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import datetime as dt
 import logging
 
 logging.basicConfig()
@@ -69,6 +70,51 @@ def generate_metric_information(evaluation):
     binary_metrics = [x.__class__.__name__ for x in evaluation.metrics]
 
     return unary_metrics + binary_metrics
+
+def generate_evaluation_information(evaluation):
+    ''' Generate evaluation-related config file output.
+
+    Attempts to parse out temporal and spatial rebinning/regridding information
+    from the supplied evaluation object. If no datasets can be found, values
+    are defaulted to sane defaults or (potentially) excluded entirely.
+
+    It's important to note that this function does its best to extrapolate the
+    configuration information. It's possible that you will encounter a scenario
+    where the guessed values are not what you want/expect. Please double
+    check the output before blinding trusting what this generates.
+    
+    :param evaluation: The evaluation object from which to extract metrics.
+    :type evaluation: :class:`evaluation.Evaluation`
+
+    :returns: A dictionary of valid `evaluation` section settings for export
+        to a configuration file.
+    :rtype: :func:`dict`
+    '''
+    eval_config = {
+        'temporal_time_delta': 999,
+        'spatial_regrid_lats': (-90, 90, 1),
+        'spatial_regrid_lons': (-180, 180, 1),
+        'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
+    }
+
+    datasets = []
+
+    if evaluation.ref_dataset:
+        datasets.append(evaluation.ref_dataset)
+
+    if evaluation.target_datasets:
+        datasets += evaluation.target_datasets
+
+    if len(datasets) > 0:
+        eval_config['temporal_time_delta'] = _calc_temporal_bin_size(datasets)
+
+        lats, lons = _calc_spatial_lat_lon_grid(datasets)
+        eval_config['spatial_regrid_lats'] = lats
+        eval_config['spatial_regrid_lons'] = lons
+
+        eval_config['subset'] = _calc_subset_config(datasets)
+
+    return eval_config
 
 def _extract_local_dataset_info(dataset):
     ''''''
@@ -129,3 +175,66 @@ def _extract_dap_dataset_info(dataset):
     dataset_info['variable'] = dataset.variable
 
     return dataset_info
+
+def _calc_temporal_bin_size(datasets):
+    ''''''
+    times = datasets[0].times
+    time_delta = times[1] - times[0]
+
+    if time_delta.days == 0:
+        return 1
+    elif time_delta.days <= 31:
+        return 31
+    elif time_delta.days <= 366:
+        return 366
+    else:
+        return 999
+
+def _calc_spatial_lat_lon_grid(datasets):
+    ''''''
+    lat_min, lat_max, lon_min, lon_max = datasets[0].spatial_boundaries()
+
+    lats = datasets[0].lats
+    lons = datasets[0].lons
+    lat_step = abs(lats[1] - lats[0])
+    lon_step = abs(lons[1] - lons[0])
+
+    # We need to add an extra step value onto the end so when we generate a
+    # range with these values we don't lose one that we're expecting.
+    if lat_max != 90: lat_max += lat_step
+    if lon_max != 180: lon_max += lon_step
+
+    return ((lat_min, lat_max, lat_step), (lon_min, lon_max, lon_step))
+
+def _calc_subset_config(datasets):
+    ''''''
+    lat_min = 90
+    lat_max = -90
+    lon_min = 180
+    lon_max = -180
+    start = dt.datetime(2500, 1, 1)
+    end = dt.datetime(1500, 1, 1)
+
+    for ds in datasets:
+        ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = ds.spatial_boundaries()
+        ds_start, ds_end = ds.time_range()
+
+        if ds_lat_min < lat_min:
+            lat_min = ds_lat_min
+
+        if ds_lat_max > lat_max:
+            lat_max = ds_lat_max
+
+        if ds_lon_min < lon_min:
+            lon_min = ds_lon_min
+
+        if ds_lon_max > lon_max:
+            lon_max = ds_lon_max
+
+        if ds_start < start:
+            start = ds_start
+
+        if ds_end > end:
+            end = ds_end
+
+    return [lat_min, lat_max, lon_min, lon_max, str(start), str(end)]
