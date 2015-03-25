@@ -301,3 +301,152 @@ class TestMetricExportGeneration(unittest.TestCase):
 
         self.assertTrue(type(out) == type(list()))
         self.assertTrue(len(out) == 0)
+
+
+class TestEvaluationSettingsGeneration(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.lats = np.array(range(-10, 10, 1))
+        self.lons = np.array(range(-20, 20, 1))
+        self.times = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(9600))
+        self.values = flat_array.reshape(12, 20, 40)
+
+        self.dataset = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+        )
+
+        self.evaluation = Evaluation(self.dataset, [], [])
+
+    def test_default_data_return(self):
+        new_eval = Evaluation(None, [], [])
+        default_output = {
+            'temporal_time_delta': 999,
+            'spatial_regrid_lats': (-90, 90, 1),
+            'spatial_regrid_lons': (-180, 180, 1),
+            'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
+        } 
+
+        out = writer.generate_evaluation_information(new_eval)
+
+        self.assertEquals(default_output, out)
+
+    def test_handles_only_reference_dataset(self):
+        new_eval = Evaluation(self.dataset, [], [])
+
+        default_output = {
+            'temporal_time_delta': 999,
+            'spatial_regrid_lats': (-90, 90, 1),
+            'spatial_regrid_lons': (-180, 180, 1),
+            'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
+        } 
+
+        out = writer.generate_evaluation_information(new_eval)
+
+        self.assertNotEquals(default_output, out)
+
+    def test_handles_only_target_dataset(self):
+        new_eval = Evaluation(None, [self.dataset], [])
+
+        default_output = {
+            'temporal_time_delta': 999,
+            'spatial_regrid_lats': (-90, 90, 1),
+            'spatial_regrid_lons': (-180, 180, 1),
+            'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
+        } 
+
+        out = writer.generate_evaluation_information(new_eval)
+
+        self.assertNotEquals(default_output, out)
+
+    def test_daily_temporal_bin(self):
+        new_times = np.array([dt.datetime(2000, 1, 1, x) for x in range(1, 13)])
+
+        dataset = Dataset(
+            self.lats,
+            self.lons,
+            new_times,
+            self.values,
+        )
+        new_eval = Evaluation(dataset, [], [])
+
+        out = writer.generate_evaluation_information(new_eval)
+
+        self.assertEquals(out['temporal_time_delta'], 1)
+
+    def test_monthly_temporal_bin(self):
+        out = writer.generate_evaluation_information(self.evaluation)
+
+        self.assertEquals(out['temporal_time_delta'], 31)
+
+    def test_yearly_temporal_bin(self):
+        new_times = np.array([dt.datetime(2000 + x, 1, 1) for x in range(1, 13)])
+
+        dataset = Dataset(
+            self.lats,
+            self.lons,
+            new_times,
+            self.values,
+        )
+        new_eval = Evaluation(dataset, [], [])
+
+        out = writer.generate_evaluation_information(new_eval)
+
+        self.assertEquals(out['temporal_time_delta'], 366)
+
+    def test_spatial_regrid_lats(self):
+        out = writer.generate_evaluation_information(self.evaluation)
+
+        lats = out['spatial_regrid_lats']
+        lat_range = np.arange(lats[0], lats[1], lats[2])
+
+        self.assertTrue(np.array_equal(lat_range, self.lats))
+
+    def test_spatial_regrid_lons(self):
+        out = writer.generate_evaluation_information(self.evaluation)
+
+        lons = out['spatial_regrid_lons']
+        lat_range = np.arange(lons[0], lons[1], lons[2])
+
+        self.assertTrue(np.array_equal(lat_range, self.lons))
+
+    def test_subset_with_single_dataset(self):
+        out = writer.generate_evaluation_information(self.evaluation)
+        subset = out['subset']
+
+        ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = self.dataset.spatial_boundaries()
+        start, end = self.dataset.time_range()
+
+        self.assertEqual(ds_lat_min, subset[0])
+        self.assertEqual(ds_lat_max, subset[1])
+        self.assertEqual(ds_lon_min, subset[2])
+        self.assertEqual(ds_lon_max, subset[3])
+        self.assertEquals(str(start), subset[4])
+        self.assertEquals(str(end), subset[5])
+
+    def test_subset_with_multiple_datasets(self):
+        new_ds = Dataset(
+            np.arange(0, 20, 1),
+            self.lons,
+            self.times,
+            self.values
+        )
+        new_eval = Evaluation(self.dataset, [new_ds], [])
+
+        out = writer.generate_evaluation_information(new_eval)
+        subset = out['subset']
+
+        ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = self.dataset.spatial_boundaries()
+        start, end = self.dataset.time_range()
+
+        self.assertEqual(ds_lat_min, subset[0])
+        # Check that we actually used the different max lat value that we
+        # created by adding 'new_ds'.
+        self.assertEqual(max(new_ds.lats), subset[1])
+        self.assertEqual(ds_lon_min, subset[2])
+        self.assertEqual(ds_lon_max, subset[3])
+        self.assertEquals(str(start), subset[4])
+        self.assertEquals(str(end), subset[5])
