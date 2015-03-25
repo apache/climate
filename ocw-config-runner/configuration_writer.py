@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def export_evaluation_to_config(evaluation, file_path='./exported_eval.yaml'):
     ''' Export an evaluation to a config file
-    
+
     :param evaluation: The evaluation object to export.
     :type evaluation: :class:`evaluation.Evaluation`
 
@@ -42,7 +42,7 @@ def export_evaluation_to_config(evaluation, file_path='./exported_eval.yaml'):
 
 def generate_dataset_information(evaluation):
     ''' Generate dataset config file output for a given Evaluation object.
-    
+
     :param evaluation: The evaluation object from which to extract metrics.
     :type evaluation: :class:`evaluation.Evaluation`
 
@@ -124,7 +124,7 @@ def generate_evaluation_information(evaluation):
     configuration information. It's possible that you will encounter a scenario
     where the guessed values are not what you want/expect. Please double
     check the output before blinding trusting what this generates.
-    
+
     :param evaluation: The evaluation object from which to extract metrics.
     :type evaluation: :class:`evaluation.Evaluation`
 

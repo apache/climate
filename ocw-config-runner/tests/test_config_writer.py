@@ -293,7 +293,7 @@ class TestDatasetExportFromEvaluation(unittest.TestCase):
             'time_name': 'a time name',
             'elevation_index': 2
         }
-        
+
         self.rcmed_origin = {
             'source': 'rcmed',
             'dataset_id': 4,
@@ -332,7 +332,7 @@ class TestDatasetExportFromEvaluation(unittest.TestCase):
             name=self.name,
             origin=self.rcmed_origin
         )
-        
+
         self.esgf_ds = Dataset(
             self.lats,
             self.lons,
@@ -589,7 +589,7 @@ class FullExportTest(unittest.TestCase):
             'time_name': 'a time name',
             'elevation_index': 2
         }
-        
+
         self.rcmed_origin = {
             'source': 'rcmed',
             'dataset_id': 4,
@@ -628,7 +628,7 @@ class FullExportTest(unittest.TestCase):
             name=self.name,
             origin=self.rcmed_origin
         )
-        
+
         self.esgf_ds = Dataset(
             self.lats,
             self.lons,
@@ -690,7 +690,7 @@ class FullExportTest(unittest.TestCase):
             self.assertTrue(metric.__class__.__name__ in data['metrics'])
 
         total_eval_metrics = (
-            len(self.evaluation.metrics) + 
+            len(self.evaluation.metrics) +
             len(self.evaluation.unary_metrics)
         )
 
@@ -710,7 +710,7 @@ class FullExportTest(unittest.TestCase):
         self.assertTrue('targets' in data['datasets'])
 
         self.assertAlmostEqual(
-            writer.generate_dataset_information(self.evaluation), 
+            writer.generate_dataset_information(self.evaluation),
             data['datasets']
         )
 
