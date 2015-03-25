@@ -328,7 +328,7 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
             'spatial_regrid_lats': (-90, 90, 1),
             'spatial_regrid_lons': (-180, 180, 1),
             'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
-        } 
+        }
 
         out = writer.generate_evaluation_information(new_eval)
 
@@ -342,7 +342,7 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
             'spatial_regrid_lats': (-90, 90, 1),
             'spatial_regrid_lons': (-180, 180, 1),
             'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
-        } 
+        }
 
         out = writer.generate_evaluation_information(new_eval)
 
@@ -356,7 +356,7 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
             'spatial_regrid_lats': (-90, 90, 1),
             'spatial_regrid_lons': (-180, 180, 1),
             'subset': [-90, 90, -180, 180, "1500-01-01", "2500-01-01"],
-        } 
+        }
 
         out = writer.generate_evaluation_information(new_eval)
 
