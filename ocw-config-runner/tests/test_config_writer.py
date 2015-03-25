@@ -16,6 +16,7 @@
 # under the License.
 
 from mock import patch
+import os
 import unittest
 
 from ocw.dataset import Dataset
@@ -571,7 +572,164 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
 class FullExportTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        pass
+        self.lats = np.array([10, 12, 14, 16, 18])
+        self.lons = np.array([100, 102, 104, 106, 108])
+        self.times = np.array([dt.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        self.values = flat_array.reshape(12, 5, 5)
+        self.variable = 'var'
+        self.units = 'units'
+        self.name = 'name'
+
+        self.local_origin = {
+            'source': 'local',
+            'path': '/a/fake/path.nc',
+            'lat_name': 'a lat name',
+            'lon_name': 'a lon name',
+            'time_name': 'a time name',
+            'elevation_index': 2
+        }
+        
+        self.rcmed_origin = {
+            'source': 'rcmed',
+            'dataset_id': 4,
+            'parameter_id': 14
+        }
+
+        self.esgf_origin = {
+            'source': 'esgf',
+            'dataset_id': 'esgf dataset id',
+            'variable': 'var'
+        }
+
+        self.dap_origin = {
+            'source': 'dap',
+            'url': 'a fake url',
+        }
+
+        self.local_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.local_origin
+        )
+
+        self.rcmed_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.rcmed_origin
+        )
+        
+        self.esgf_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.esgf_origin
+        )
+
+        self.dap_ds = Dataset(
+            self.lats,
+            self.lons,
+            self.times,
+            self.values,
+            variable=self.variable,
+            units=self.units,
+            name=self.name,
+            origin=self.dap_origin
+        )
+
+        self.evaluation = Evaluation(
+            self.local_ds,
+            [self.rcmed_ds, self.esgf_ds, self.dap_ds],
+            [metrics.Bias(), metrics.TemporalStdDev()]
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        if os.path.isfile('/tmp/test_config.yaml'):
+            os.remove('/tmp/test_config.yaml')
 
     def test_full_export(self):
-        pass
+        file_path = '/tmp/test_config.yaml'
+        writer.export_evaluation_to_config(
+            self.evaluation,
+            file_path=file_path
+        )
+
+        self.assertTrue(os.path.isfile(file_path))
+
+    def test_proper_metric_export(self):
+        file_path = '/tmp/test_config.yaml'
+        writer.export_evaluation_to_config(
+            self.evaluation,
+            file_path=file_path
+        )
+
+        data = yaml.load(open(file_path, 'r'))
+
+        self.assertTrue('metrics' in data)
+        self.assertTrue(type(data['metrics']) == type(list()))
+
+        for metric in self.evaluation.metrics:
+            self.assertTrue(metric.__class__.__name__ in data['metrics'])
+
+        for metric in self.evaluation.unary_metrics:
+            self.assertTrue(metric.__class__.__name__ in data['metrics'])
+
+        total_eval_metrics = (
+            len(self.evaluation.metrics) + 
+            len(self.evaluation.unary_metrics)
+        )
+
+        self.assertTrue(total_eval_metrics, len(data['metrics']))
+
+    def test_proper_dataset_export(self):
+        file_path = '/tmp/test_config.yaml'
+        writer.export_evaluation_to_config(
+            self.evaluation,
+            file_path=file_path
+        )
+
+        data = yaml.load(open(file_path, 'r'))
+
+        self.assertTrue('datasets' in data)
+        self.assertTrue('reference' in data['datasets'])
+        self.assertTrue('targets' in data['datasets'])
+
+        self.assertAlmostEqual(
+            writer.generate_dataset_information(self.evaluation), 
+            data['datasets']
+        )
+
+    def test_proper_evaluation_setting_export(self):
+        file_path = '/tmp/test_config.yaml'
+        writer.export_evaluation_to_config(
+            self.evaluation,
+            file_path=file_path
+        )
+
+        data = yaml.load(open(file_path, 'r'))
+
+        self.assertTrue('evaluation' in data)
+        self.assertTrue('temporal_time_delta' in data['evaluation'])
+        self.assertTrue('spatial_regrid_lats' in data['evaluation'])
+        self.assertTrue('spatial_regrid_lons' in data['evaluation'])
+        self.assertTrue('subset' in data['evaluation'])
+
+        self.assertAlmostEqual(
+            writer.generate_evaluation_information(self.evaluation),
+            data['evaluation']
+        )
