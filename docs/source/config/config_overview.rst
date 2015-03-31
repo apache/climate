@@ -78,3 +78,8 @@ If you have tried the **simple_model_to_model_bias.py** example in the primary t
 .. note::
 
     If you haven't run the previous example which downloads the necessary datasets this evaluation will fail. The necessary local files will not have been downloaded!
+
+Writing a Config File
+---------------------
+
+You can export an :class:`evaluation.Evaluation` object to a configuration file for easily repeatable evaluations. Checkout the documentation on the :doc:`configuration file writer API <config_writer>` for additional information.
