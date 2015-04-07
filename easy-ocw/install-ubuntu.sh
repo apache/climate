@@ -63,6 +63,7 @@ echo
 WITH_VIRTUAL_ENV=0
 WITH_HOMEBREW=0
 WITH_INTERACT=1
+ocw_path="${HOME}/climate"
 
 while getopts ":h :e :q" FLAG
 do
