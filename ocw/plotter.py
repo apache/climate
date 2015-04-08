@@ -373,7 +373,7 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     :param xlabel: (Optional) x-axis title.
     :type xlabel: :mod:`string`
     
-    :param ylabel: (Optional) y-ayis title.
+    :param ylabel: (Optional) y-axis title.
     :type ylabel: :mod:`string`
 
     :param ptitle: (Optional) plot title.
@@ -487,6 +487,57 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     # Save the figure
     fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
     fig.clf()
+
+def draw_barchart(results, yvalues, fname, ptitle='', fmt='png', 
+                     xlabel='', ylabel=''):
+    ''' Draw a barchart.
+
+    :param results: 1D array of  data.
+    :type results: :class:`numpy.ndarray`
+
+    :param yvalues: List of y-axis labels
+    :type times: :class:`list` 
+
+    :param fname: Filename of the plot.
+    :type fname: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param xlabel: (Optional) x-axis title.
+    :type xlabel: :mod:`string`
+    
+    :param ylabel: (Optional) y-axis title.
+    :type ylabel: :mod:`string`
+
+    '''
+
+    y_pos = list(range(len(yvalues))) 
+    fig = plt.figure() 
+    fig.set_size_inches((11., 8.5))
+    fig.dpi = 300
+    ax = plt.subplot(111)
+    plt.barh(y_pos, results, align="center", height=0.8, linewidth=0)
+    plt.yticks(y_pos, yvalues)
+    plt.tick_params(axis="both", which="both", bottom="on", top="off",labelbottom="on", left="off", right="off", labelleft="on")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    ymin = min(y_pos) 
+    ymax = max(y_pos)
+    ymin = min((ymin - ((ymax - ymin) * 0.1)/2),0.5) 
+    ymax = ymax + ((ymax - ymin) * 0.1)
+    ax.set_ylim((ymin, ymax))
+    plt.xlabel(xlabel)
+    plt.tight_layout()
+       
+    # Save the figure
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()
+
 
 def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
                      clabel='', ptitle='', subtitles=None, cmap=None,
