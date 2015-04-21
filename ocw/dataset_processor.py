@@ -170,6 +170,10 @@ def subset(subregion, target_dataset, subregion_name=None):
     :raises: ValueError
     '''
 
+    if not subregion.start:
+        subregion.start = target_dataset.times[0] 
+        subregion.end = target_dataset.times[-1]
+        
     # Ensure that the subregion information is well formed
     _are_bounds_contained_by_dataset(subregion, target_dataset)
 
@@ -236,11 +240,13 @@ def safe_subset(subregion, target_dataset, subregion_name=None):
     if subregion.lon_max > lon_max:
         subregion.lon_max = lon_max
 
-    if subregion.start < start:
-        subregion.start = start
+    if subregion.start: 
+        if subregion.start < start:
+            subregion.start = start
 
-    if subregion.end > end:
-        subregion.end = end
+    if subregion.end:
+        if subregion.end > end:
+            subregion.end = end
 
     return subset(subregion, target_dataset, subregion_name)
 
