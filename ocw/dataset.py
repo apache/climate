@@ -180,17 +180,23 @@ class Dataset:
             err_msg = "Longitude Array should be 1 dimensional. %s dimensions found." % lon_dim
         elif time_dim != 1:
             err_msg = "Time Array should be 1 dimensional.  %s dimensions found." % time_dim
-        elif value_dim != 3:
-            err_msg = "Value Array should be 3 dimensional.  %s dimensions found." % value_dim
+        elif value_dim < 2:
+            err_msg = "Value Array should be at least 2 dimensional.  %s dimensions found." % value_dim
         # Finally check that the Values array conforms to the proper shape
-        elif values.shape != (time_count, lat_count, lon_count):
+        if value_dim == 2 and values.shape != (lat_count, lon_count):
             err_msg = """Value Array must be of shape (times, lats, lons).
-Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
-                                                            lat_count,
-                                                            lon_count,
-                                                            values.shape[0],
-                                                            values.shape[1],
-                                                            values.shape[2])
+    Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (lat_count,
+                                                                lon_count,
+                                                                values.shape[0],
+                                                                values.shape[1])
+        if value_dim == 3 and values.shape != (time_count, lat_count, lon_count):
+            err_msg = """Value Array must be of shape (times, lats, lons).
+    Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
+                                                                lat_count,
+                                                                lon_count,
+                                                                values.shape[0],
+                                                                values.shape[1],
+                                                                values.shape[2])
         if err_msg:
             logger.error(err_msg)
             raise ValueError(err_msg)
