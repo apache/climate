@@ -62,17 +62,17 @@ print("Working with the rcmed interface to get CRU3.1 Daily Precipitation")
 CRU31 = rcmed.parameter_dataset(10, 37, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
 
 
-""" Step 3: Regrid datasets ... """
+""" Step 3: Processing datasets so they are the same shape ... """
+print("Processing datasets so they are the same shape")
 CRU31 = dsp.water_flux_unit_conversion(CRU31)
-CRU31 = dsp.temporal_rebin(CRU31, datetime.timedelta(days=30))
+CRU31 = dsp.normalize_dataset_datetimes(CRU31, 'monthly')
 
 for member, each_target_dataset in enumerate(target_datasets):
 	target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])
 	target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
-	target_datasets[member] = dsp.temporal_rebin(target_datasets[member], datetime.timedelta(days=30)) 		
+	target_datasets[member] = dsp.normalize_dataset_datetimes(target_datasets[member], 'monthly')  		
 	
-#Regrid
-print("... spatial regrid")
+print("... spatial regridding")
 new_lats = np.arange(LAT_MIN, LAT_MAX, gridLatStep)
 new_lons = np.arange(LON_MIN, LON_MAX, gridLonStep)
 CRU31 = dsp.spatial_regrid(CRU31, new_lats, new_lons)
@@ -95,25 +95,20 @@ target_datasets_ensemble.name="ENS"
 target_datasets.append(target_datasets_ensemble)
 
 """ Step 4: Subregion stuff """
-#update what times are for the subregion
-#get time bounds from existing datasets
-START_SUB = CRU31.times[0]
-END_SUB = CRU31.times[-1]
-
 list_of_regions = [
- Bounds(-10.0, 0.0, 29.0, 36.5, START_SUB, END_SUB), 
- Bounds(0.0, 10.0,  29.0, 37.5, START_SUB, END_SUB),
- Bounds(10.0, 20.0, 25.0, 32.5, START_SUB, END_SUB),
- Bounds(20.0, 33.0, 25.0, 32.5, START_SUB, END_SUB),
- Bounds(-19.3,-10.2,12.0, 20.0, START_SUB, END_SUB),
- Bounds( 15.0, 30.0, 15.0, 25.0,START_SUB, END_SUB),
- Bounds(-10.0, 10.0, 7.3, 15.0, START_SUB, END_SUB),
- Bounds(-10.9, 10.0, 5.0, 7.3,  START_SUB, END_SUB),
- Bounds(33.9, 40.0,  6.9, 15.0, START_SUB, END_SUB),
- Bounds(10.0, 25.0,  0.0, 10.0, START_SUB, END_SUB),
- Bounds(10.0, 25.0,-10.0,  0.0, START_SUB, END_SUB),
- Bounds(30.0, 40.0,-15.0,  0.0, START_SUB, END_SUB),
- Bounds(33.0, 40.0, 25.0, 35.0, START_SUB, END_SUB)]
+ Bounds(-10.0, 0.0, 29.0, 36.5), 
+ Bounds(0.0, 10.0,  29.0, 37.5), 
+ Bounds(10.0, 20.0, 25.0, 32.5),
+ Bounds(20.0, 33.0, 25.0, 32.5), 
+ Bounds(-19.3,-10.2,12.0, 20.0), 
+ Bounds( 15.0, 30.0, 15.0, 25.0),
+ Bounds(-10.0, 10.0, 7.3, 15.0), 
+ Bounds(-10.9, 10.0, 5.0, 7.3),  
+ Bounds(33.9, 40.0,  6.9, 15.0),
+ Bounds(10.0, 25.0,  0.0, 10.0), 
+ Bounds(10.0, 25.0,-10.0,  0.0), 
+ Bounds(30.0, 40.0,-15.0,  0.0), 
+ Bounds(33.0, 40.0, 25.0, 35.0)]
 
 region_list=[["R"+str(i+1)] for i in xrange(13)]
 
