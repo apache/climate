@@ -185,7 +185,7 @@ class Dataset:
         # Finally check that the Values array conforms to the proper shape
         if value_dim == 2 and values.shape != (lat_count, lon_count):
             err_msg = """Value Array must be of shape (times, lats, lons).
-    Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (lat_count,
+    Expected shape (%s, %s) but received (%s, %s)""" % (lat_count,
                                                                 lon_count,
                                                                 values.shape[0],
                                                                 values.shape[1])
@@ -270,16 +270,16 @@ class Bounds(object):
         self._lon_min = float(lon_min)
         self._lon_max = float(lon_max)
 
-        if not start:
-            self._start = None 
-        else:
+        if start:
             self._start = start
-
-        if not end:
-            self._end = None 
         else:
-            self._end = end
+            self._start = None
 
+        if end:
+            self._end = end
+        else:
+            self._end = None
+       
     @property
     def lat_min(self):
         return self._lat_min
