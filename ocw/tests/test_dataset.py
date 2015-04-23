@@ -86,7 +86,7 @@ class TestInvalidDatasetInit(unittest.TestCase):
             Dataset(self.lat, self.lon, self.time, self.value, 'prec')
 
     def test_bad_values_shape(self):
-        self.value = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
+        self.value = np.array([1, 2, 3, 4, 5])
         with self.assertRaises(ValueError):
             Dataset(self.lat, self.lon, self.time, self.value, 'prec')
 
