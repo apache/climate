@@ -179,42 +179,45 @@ def normalize_lat_lon_values(lats, lons, values):
 
     :raises ValueError: If the lat/lon values are not sorted.
     '''
-    # Avoid unnecessary shifting if all lons are higher than 180
-    if lons.min() > 180:
-        lons -= 360
+    if lats.ndim ==1 and lons.ndim ==1:
+        # Avoid unnecessary shifting if all lons are higher than 180
+        if lons.min() > 180:
+            lons -= 360
 
-    # Make sure lats and lons are monotonically increasing
-    lats_decreasing = np.diff(lats) < 0
-    lons_decreasing = np.diff(lons) < 0
+    	# Make sure lats and lons are monotonically increasing
+    	lats_decreasing = np.diff(lats) < 0
+    	lons_decreasing = np.diff(lons) < 0
 
-    # If all values are decreasing then they just need to be reversed
-    lats_reversed, lons_reversed = lats_decreasing.all(), lons_decreasing.all()
+    	# If all values are decreasing then they just need to be reversed
+    	lats_reversed, lons_reversed = lats_decreasing.all(), lons_decreasing.all()
 
-    # If the lat values are unsorted then raise an exception
-    if not lats_reversed and lats_decreasing.any():
-        raise ValueError('Latitudes must be sorted.')
+    	# If the lat values are unsorted then raise an exception
+    	if not lats_reversed and lats_decreasing.any():
+            raise ValueError('Latitudes must be sorted.')
 
-    # Perform same checks now for lons
-    if not lons_reversed and lons_decreasing.any():
-        raise ValueError('Longitudes must be sorted.')
+    	# Perform same checks now for lons
+    	if not lons_reversed and lons_decreasing.any():
+            raise ValueError('Longitudes must be sorted.')
 
-    # Also check if lons go from [0, 360), and convert to [-180, 180)
-    # if necessary
-    lons_shifted = lons.max() > 180
-    lats_out, lons_out, data_out = lats[:], lons[:], values[:]
-    # Now correct data if latlon grid needs to be shifted
-    if lats_reversed:
-        lats_out = lats_out[::-1]
-        data_out = data_out[..., ::-1, :]
+    	# Also check if lons go from [0, 360), and convert to [-180, 180)
+    	# if necessary
+    	lons_shifted = lons.max() > 180
+    	lats_out, lons_out, data_out = lats[:], lons[:], values[:]
+    	# Now correct data if latlon grid needs to be shifted
+    	if lats_reversed:
+            lats_out = lats_out[::-1]
+            data_out = data_out[..., ::-1, :]
 
-    if lons_reversed:
-        lons_out = lons_out[::-1]
-        data_out = data_out[..., ::-1]
+    	if lons_reversed:
+            lons_out = lons_out[::-1]
+            data_out = data_out[..., ::-1]
 
-    if lons_shifted:
-        data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
+    	if lons_shifted:
+            data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
 
-    return lats_out, lons_out, data_out
+        return lats_out, lons_out, data_out
+    else:
+        return lats, lons, values
 
 
 def reshape_monthly_to_annually(dataset):
