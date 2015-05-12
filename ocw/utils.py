@@ -257,7 +257,7 @@ def reshape_monthly_to_annually(dataset):
     return values
 
 def calc_temporal_mean(dataset):
-    ''' Calculate climatology of dataset's values for each year
+    ''' Calculate temporal mean of dataset's values 
 
     :param dataset: OCW Dataset whose first dimension is time 
     :type dataset: :class:`dataset.Dataset`
