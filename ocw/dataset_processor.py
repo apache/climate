@@ -29,6 +29,41 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def temporal_subset(target_dataset, month_index):
+    """ Temporally subset data given month_index.
+
+    :param target_dataset: Dataset object that needs temporal subsetting
+    :type target_dataset: Open Climate Workbench Dataset Object
+    :param month_index: an integer array of subset months (June ~ August: [6, 7, 8])
+
+    :returns: A temporal subset OCW Dataset
+    :rtype: Open Climate Workbench Dataset Object
+    """
+
+    dates = target_dataset.times
+    months = np.array([d.month for d in dates])
+    time_index = []
+    for m_value in month_index:
+        time_index = np.append(time_index, np.where(months == m_value)[0])
+        if m_value == month_index[0]:
+            time_index_first = np.min(np.where(months == m_value)[0])
+        if m_value == month_index[-1]:
+            time_index_last = np.max(np.where(months == m_value)[0])
+
+    time_index = np.sort(time_index)
+
+    time_index = time_index[np.where((time_index >= time_index_first) & (time_index <= time_index_last))]
+
+    time_index = list(time_index)
+
+    new_dataset = ds.Dataset(target_dataset.lats,
+                             target_dataset.lons,
+                             target_dataset.times[time_index],
+                             target_dataset.values[time_index,:],
+                             target_dataset.variable,
+                             target_dataset.name)
+    return new_dataset
+
 def temporal_rebin(target_dataset, temporal_resolution):
     """ Rebin a Dataset to a new temporal resolution
     

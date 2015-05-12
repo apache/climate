@@ -24,6 +24,7 @@ import datetime
 
 from mpl_toolkits.basemap import shiftgrid
 from dateutil.relativedelta import relativedelta
+import ocw.dataset_processor as dsp
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -292,7 +293,7 @@ def calc_climatology_season(month_start, month_end, dataset):
     :param month_end: An integer for ending month (Jan=1)
     :type month_end: :class:`int`
 
-    :param dataset: Dataset object with full-year format
+    :param dataset: OCW dataset object with full-year format
     :type dataset: :class:`dataset.Dataset`
 
     :returns: t_series - monthly average over the given season
@@ -301,17 +302,14 @@ def calc_climatology_season(month_start, month_end, dataset):
     '''
 
     if month_start > month_end:
-        # Offset the original array so that the the first month
-        # becomes month_start, note that this cuts off the first year of data
-        offset = slice(month_start - 1, month_start - 13)
-        reshape_data = reshape_monthly_to_annually(dataset[offset])
-        month_index = slice(0, 13 - month_start + month_end)
+        month_index = range(month_start,13)
+	month_index.extend(range(1, month_end+1))
     else:
-        # Since month_start <= month_end, just take a slice containing those months
-        reshape_data = reshape_monthly_to_annually(dataset)
-        month_index = slice(month_start - 1, month_end)
-    
-    t_series = reshape_data[:, month_index].mean(axis=1)
+        month_index = range(month_start, month_end+1)
+   
+    # t_series only includes data of months in month_index
+    t_series = dsp.temporal_subset(dataset, month_index).values  
+    print dsp.temporal_subset(dataset, month_index).times
     means = t_series.mean(axis=0)
     
     return t_series, means
