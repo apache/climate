@@ -55,10 +55,10 @@ print("WRF_Dataset.values shape: (times, lats, lons) - %s \n" % (wrf_dataset.val
 
 """ Step 2: Calculate seasonal average """
 print("Calculate seasonal average")
-knmi_DJF, knmi_DJF_mean = dsp.calc_climatology_season(month_start=12, month_end=2, dataset=knmi_dataset)
-wrf_DJF, wrf_DJF_mean = dsp.calc_climatology_season(month_start=12, month_end=2, dataset=wrf_dataset)
-print("Seasonally averaged KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_DJF.values.shape,))
-print("Seasonally averaged wrf_Dataset.values shape: (times, lats, lons) - %s \n" % (wrf_DJF.values.shape,))
-knmi_JJA, knmi_JJA_mean = dsp.calc_climatology_season(month_start=6, month_end=8, dataset=knmi_dataset)
-wrf_JJA, wrf_JJA_mean = dsp.calc_climatology_season(month_start=6, month_end=8, dataset=wrf_dataset)
+knmi_DJF_mean = utils.calc_temporal_mean(dsp.temporal_subset(month_start=12, month_end=2, target_dataset=knmi_dataset))
+wrf_DJF_mean = utils.calc_temporal_mean(dsp.temporal_subset(month_start=12, month_end=2, target_dataset=wrf_dataset))
+print("Seasonally averaged KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_DJF_mean.shape,))
+print("Seasonally averaged wrf_Dataset.values shape: (times, lats, lons) - %s \n" % (wrf_DJF_mean.shape,))
+knmi_JJA_mean = utils.calc_temporal_mean(dsp.temporal_subset(month_start=6, month_end=8, target_dataset=knmi_dataset))
+wrf_JJA_mean = utils.calc_temporal_mean(dsp.temporal_subset(month_start=6, month_end=8, target_dataset=wrf_dataset))
 

@@ -20,6 +20,7 @@
 import sys
 import datetime as dt
 import numpy as np
+import numpy.ma as ma
 import datetime 
 
 from mpl_toolkits.basemap import shiftgrid
@@ -254,6 +255,16 @@ def reshape_monthly_to_annually(dataset):
     values.shape = new_shape
 
     return values
+
+def calc_temporal_mean(dataset):
+    ''' Calculate climatology of dataset's values for each year
+
+    :param dataset: OCW Dataset whose first dimension is time 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: Mean values averaged for the first dimension (time)
+    '''
+    return ma.mean(dataset.values, axis=0)
 
 def calc_climatology_year(dataset):
     ''' Calculate climatology of dataset's values for each year
