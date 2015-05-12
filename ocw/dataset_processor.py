@@ -64,7 +64,36 @@ def temporal_subset(target_dataset, month_index):
                              target_dataset.name)
     return new_dataset
 
-def temporal_rebin(target_dataset, temporal_resolution):
+def calc_climatology_season(month_start, month_end, dataset):
+    ''' Calculate seasonal mean and time series for given months.
+
+    :param month_start: An integer for beginning month (Jan=1)
+    :type month_start: :class:`int`
+
+    :param month_end: An integer for ending month (Jan=1)
+    :type month_end: :class:`int`
+
+    :param dataset: OCW dataset object with full-year format
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: t_series - monthly average over the given season
+              means - mean over the entire season
+
+    '''
+
+    if month_start > month_end:
+        month_index = range(month_start,13)
+        month_index.extend(range(1, month_end+1))
+    else:
+        month_index = range(month_start, month_end+1)
+
+    # t_series only includes data of months in month_index
+    t_series = temporal_subset(dataset, month_index)
+    means = ma.mean(t_series.values, axis=0)
+
+    return t_series, means
+
+def temporal_rebin(target_dataset, temporal_resolution):     
     """ Rebin a Dataset to a new temporal resolution
     
     :param target_dataset: Dataset object that needs temporal rebinned
