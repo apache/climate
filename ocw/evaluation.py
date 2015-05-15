@@ -260,7 +260,7 @@ class Evaluation(object):
         elif run_unary:
             return unary_valid
         else:
-            return false
+            return False
 
     def _should_run_regular_metrics(self):
         return len(self.metrics) > 0

@@ -38,19 +38,14 @@ def plot_from_config(evaluation, config_data):
             _draw_contour_plot(evaluation, plot)
         elif plot['type'] == 'subregion':
             logger.warn('Subregion plots are currently unsupported. Skipping ...')
-            continue
         elif plot['type'] == 'taylor':
-            logger.warn('Taylor diagrams are currently unsupported. Skipping ...')
-            continue
+            _draw_taylor_diagram(evaluation, plot)
         elif plot['type'] == 'time_series':
             logger.warn('Time series plots are currently unsupported. Skipping ...')
-            continue
         elif plot['type'] == 'portrait':
             logger.warn('Portrait diagrams are currently unsupported. Skipping ...')
-            continue
         else:
             logger.error('Unrecognized plot type requested: {}'.format(plot['type']))
-            continue
 
 def _draw_contour_plot(evaluation, plot_config):
     """"""
@@ -70,3 +65,27 @@ def _draw_contour_plot(evaluation, plot_config):
                                 np.array(lons),
                                     plot_name,
                                     **plot_config.get('optional_args', {}))
+
+def _draw_taylor_diagram(evaluation, plot_config):
+    """"""
+    plot_name = plot_config['output_name']
+    ref_dataset_name = evaluation.ref_dataset.name
+    target_dataset_names = [t.name for t in evaluation.target_datasets]
+
+    stddev_results = [
+        evaluation.results[row][col]
+        for (row, col) in plot_config['stddev_results_indices']
+    ]
+
+    pattern_corr_results = [
+        evaluation.results[row][col]
+        for (row, col) in plot_config['pattern_corr_results_indices']
+    ]
+
+    plot_data = np.array([stddev_results, pattern_corr_results]).transpose()
+
+    plots.draw_taylor_diagram(plot_data,
+                              target_dataset_names,
+                              ref_dataset_name,
+                              fname=plot_name,
+                              **plot_config.get('optional_args', {}))

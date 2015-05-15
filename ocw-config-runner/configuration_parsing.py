@@ -207,13 +207,17 @@ def _valid_plot_config_data(plot_config_data):
 
     if plot_type == 'contour':
         required_keys = set([
-                'results_indices',
-                'lats',
-                'lons',
-                'output_name'
+            'results_indices',
+            'lats',
+            'lons',
+            'output_name'
         ])
     elif plot_type == 'taylor':
-        logger.warn('Taylor diagrams are currently unsupported. Skipping validation')
+        required_keys = set([
+            'stddev_results_indices',
+            'pattern_corr_results_indices',
+            'output_name'
+        ])
     elif plot_type == 'subregion':
         logger.warn('Subregion plots are currently unsupported. Skipping validation')
     elif plot_type == 'time_series':

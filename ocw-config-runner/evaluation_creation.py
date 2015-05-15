@@ -106,6 +106,20 @@ def _prepare_datasets_for_evaluation(reference, targets, config_data):
     spatial_regrid_lats = config_data['evaluation'].get('spatial_regrid_lats', None)
     spatial_regrid_lons = config_data['evaluation'].get('spatial_regrid_lons', None)
 
+    # If we have a temporal time delta and it's daily (i.e., 1) we will
+    # normalize the data as daily data (which means we adjust the start times
+    # for each bucket of data to be consistent). By default we will normalize
+    # the data as monthly. Note that this will not break yearly data so it's
+    # safer to do this no matter what. This keeps us from ending up with 1-off
+    # errors in the resulting dataset shape post-temporal/spatial adjustments
+    # that break evaluations.
+    string_time_delta = 'monthly'
+    if temporal_time_delta and temporal_time_delta == 1:
+        string_time_delta = 'daily'
+
+    reference = dsp.normalize_dataset_datetimes(reference, string_time_delta)
+    targets = [dsp.normalize_dataset_datetimes(t, string_time_delta) for t in targets]
+
     if subset:
         start = dateutil.parser.parse(subset[4])
         end = dateutil.parser.parse(subset[5])
