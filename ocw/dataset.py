@@ -360,8 +360,8 @@ class Bounds(object):
         self._end = value
 
     def __str__(self):
-        lat_range = "({}, {})".format(self._lat_min, self._lon_min)
-        lon_range = "({}, {})".format(self._lon_min, self._lon_min)
+        lat_range = "({}, {})".format(self._lat_min, self._lat_max)
+        lon_range = "({}, {})".format(self._lon_min, self._lon_max)
         time_range = "({}, {})".format(self._start, self._end)
 
         formatted_repr = (
