@@ -106,7 +106,7 @@ def load_dataset(dataset_id,
 
 def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     ''''''
-    url += '?distrib=false&type=File&dataset_id={}&variable={}'
+    url += '?type=File&dataset_id={}&variable={}'
     url = url.format(dataset_id, variable)
 
     r = requests.get(url)
