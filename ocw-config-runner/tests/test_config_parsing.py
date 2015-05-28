@@ -290,6 +290,36 @@ class TestConfigIsWellFormed(unittest.TestCase):
         """
         bad_plot = yaml.load(bad_plot_config)
 
+        bad_subregion_config_type = """
+            datasets:
+                reference:
+                    data_source: dap
+                    url: afakeurl.com
+                    variable: pr
+
+            metrics:
+                - Bias
+
+            subregions:
+                - this is a string instead of a list
+        """
+        self.bad_subregion_type = yaml.load(bad_subregion_config_type)
+
+        bad_subregion_config_length = """
+            datasets:
+                reference:
+                    data_source: dap
+                    url: afakeurl.com
+                    variable: pr
+
+            metrics:
+                - Bias
+
+            subregions:
+                - [1, 2, 3, 4, 5]
+        """
+        self.bad_subregion_length = yaml.load(bad_subregion_config_length)
+
     def test_malformed_reference_config(self):
         ret = parser._config_is_well_formed(self.malformed_reference_conf)
         self.assertFalse(ret)
@@ -319,6 +349,14 @@ class TestConfigIsWellFormed(unittest.TestCase):
 
     def test_bad_plot_config(self):
         ret = parser._config_is_well_formed(self.missing_metric_name)
+        self.assertFalse(ret)
+    
+    def test_bad_subregion_type(self):
+        ret = parser._config_is_well_formed(self.bad_subregion_type)
+        self.assertFalse(ret)
+
+    def test_bad_subregion_length(self):
+        ret = parser._config_is_well_formed(self.bad_subregion_length)
         self.assertFalse(ret)
 
 
