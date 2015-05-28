@@ -37,6 +37,7 @@ def export_evaluation_to_config(evaluation, file_path='./exported_eval.yaml'):
     config['evaluation'] = generate_evaluation_information(evaluation)
     config['datasets'] = generate_dataset_information(evaluation)
     config['metrics'] = generate_metric_information(evaluation)
+    config['subregions'] = generate_subregion_information(evaluation)
 
     yaml.dump(config, file(file_path, 'w'))
 
@@ -157,6 +158,22 @@ def generate_evaluation_information(evaluation):
         eval_config['subset'] = _calc_subset_config(datasets)
 
     return eval_config
+
+def generate_subregion_information(evaluation):
+    ''' Generate subregion config file output from a given Evaluation object.
+
+    :param evaluation: The evaluation object from which to extract metrics.
+    :type evaluation: :class:`evaluation.Evaluation`
+
+    :returns: A :func:`list` of :func:`list` objects containing bounding
+        box info for export into a configuration file
+    :rtype: :func:`list` of :func:`list`
+    '''
+    subregions = []
+    for s in evaluation.subregions:
+        subregions.append([s.lat_min, s.lat_max, s.lon_min, s.lon_max])
+
+    return subregions
 
 def _extract_local_dataset_info(dataset):
     ''''''
