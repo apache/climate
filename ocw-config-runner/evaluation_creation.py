@@ -45,18 +45,21 @@ def generate_evaluation_from_config(config_data):
     """
     # Load datasets
     reference = None
-    targets = None
-    if 'reference' in config_data['datasets']:
-        reference = _load_dataset(config_data['datasets']['reference'])
+    targets = []
+    if config_data['datasets']:
+        if 'reference' in config_data['datasets']:
+            reference = _load_dataset(config_data['datasets']['reference'])
 
-    if 'targets' in config_data['datasets']:
-        targets = [_load_dataset(t) for t in config_data['datasets']['targets']]
+        if 'targets' in config_data['datasets']:
+            targets = [_load_dataset(t) for t in config_data['datasets']['targets']]
 
-    reference, targets = _prepare_datasets_for_evaluation(reference,
-                                                          targets,
-                                                          config_data)
+        reference, targets = _prepare_datasets_for_evaluation(reference,
+                                                              targets,
+                                                              config_data)
     # Load metrics
-    eval_metrics = [_load_metric(m)() for m in config_data['metrics']]
+    eval_metrics = []
+    if config_data['metrics']:
+        eval_metrics = [_load_metric(m)() for m in config_data['metrics']]
 
     # Load Subregions (if present)
     subregions = None
