@@ -234,7 +234,10 @@ class Evaluation(object):
                 self.results = self._run_no_subregion_evaluation()
 
         if self._should_run_unary_metrics():
-            self.unary_results = self._run_unary_metric_evaluation()
+            if self.subregions:
+                self.unary_results = self._run_subregion_unary_evaluation()
+            else:
+                self.unary_results = self._run_unary_metric_evaluation()
 
     def _evaluation_is_valid(self):
         '''Check if the evaluation is well-formed.
@@ -267,15 +270,18 @@ class Evaluation(object):
 
     def _run_subregion_evaluation(self):
         results = []
+        new_refs = [DSP.subset(s, self.ref_dataset) for s in self.subregions]
+
         for target in self.target_datasets:
             results.append([])
+            new_targets = [DSP.subset(s, target) for s in self.subregions]
+
             for metric in self.metrics:
                 results[-1].append([])
-                for subregion in self.subregions:
-                    # Subset the reference and target dataset with the 
-                    # subregion information.
-                    new_ref = DSP.subset(subregion, self.ref_dataset)
-                    new_tar = DSP.subset(subregion, target)
+
+                for i in range(len(self.subregions)):
+                    new_ref = new_refs[i]
+                    new_tar = new_targets[i]
 
                     run_result = metric.run(new_ref, new_tar)
                     results[-1][-1].append(run_result)
@@ -300,6 +306,30 @@ class Evaluation(object):
 
             for target in self.target_datasets:
                 unary_results[-1].append(metric.run(target))
+        return unary_results
+
+    def _run_subregion_unary_evaluation(self):
+        unary_results = []
+        if self.ref_dataset:
+            new_refs = [DSP.subset(s, self.ref_dataset) for s in self.subregions]
+
+        new_targets = [
+            [DSP.subset(s, t) for s in self.subregions]
+            for t in self.target_datasets
+        ]
+
+        for metric in self.unary_metrics:
+            unary_results.append([])
+
+            for i in range(len(self.subregions)):
+                unary_results[-1].append([])
+
+                if self.ref_dataset:
+                    unary_results[-1][-1].append(metric.run(new_refs[i]))
+
+                for t in range(len(self.target_datasets)):
+                    unary_results[-1][-1].append(metric.run(new_targets[t][i]))
+
         return unary_results
 
     def __str__(self):

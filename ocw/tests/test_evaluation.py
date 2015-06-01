@@ -125,5 +125,112 @@ class TestEvaluation(unittest.TestCase):
         bias_results_shape = tuple(bias_eval.results[0][0].shape)
         self.assertEqual(input_shape, bias_results_shape)
 
+    def test_result_shape(self):
+        bias_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [Bias()]
+        )
+        bias_eval.run()
+
+        # Expected result shape is
+        # [
+        #   [
+        #       bias.run(reference, target1)
+        #   ],
+        #   [
+        #       bias.run(reference, target2)
+        #   ]
+        # ]
+        self.assertTrue(len(bias_eval.results) == 2)
+        self.assertTrue(len(bias_eval.results[0]) == 1)
+        self.assertTrue(len(bias_eval.results[1]) == 1)
+
+    def test_unary_result_shape(self):
+        new_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [TemporalStdDev()]
+        )
+        new_eval.run()
+
+        # Expected result shape is
+        # [
+        #   temporalstddev.run(reference),
+        #   temporalstddev.run(target1),
+        #   temporalstddev.run(target2)
+        # ]
+        self.assertTrue(len(new_eval.unary_results) == 1)
+        self.assertTrue(len(new_eval.unary_results[0]) == 3)
+
+    def test_subregion_result_shape(self):
+        bound = Bounds(
+                10, 18, 
+                100, 108, 
+                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+
+        bias_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [Bias()],
+            [bound]
+        )
+        bias_eval.run()
+
+        # Expected result shape is
+        # [
+        #   [
+        #       [   # Subregions cause this extra layer
+        #           bias.run(reference, target1)
+        #       ]
+        #   ],
+        #   [
+        #       [
+        #           bias.run(reference, target2)
+        #       ]
+        #   ]
+        # ]
+        self.assertTrue(len(bias_eval.results) == 2)
+
+        self.assertTrue(len(bias_eval.results[0]) == 1)
+        self.assertTrue(type(bias_eval.results[0]) == type([]))
+        self.assertTrue(len(bias_eval.results[1]) == 1)
+        self.assertTrue(type(bias_eval.results[1]) == type([]))
+
+        self.assertTrue(len(bias_eval.results[0][0]) == 1)
+        self.assertTrue(len(bias_eval.results[1][0]) == 1)
+
+    def test_subregion_unary_result_shape(self):
+        bound = Bounds(
+                10, 18, 
+                100, 108, 
+                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+
+        new_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [TemporalStdDev()],
+            [bound]
+        )
+        new_eval.run()
+
+        # Expected result shape is
+        # [
+        #   [   
+        #       [   # Subregions cause this extra layer
+        #           temporalstddev.run(reference),
+        #           temporalstddev.run(target1),
+        #           temporalstddev.run(target2)
+        #       ]
+        #   ]
+        # ]
+        self.assertTrue(len(new_eval.unary_results) == 1)
+        self.assertTrue(type(new_eval.unary_results) == type([]))
+
+        self.assertTrue(len(new_eval.unary_results[0]) == 1)
+
+        self.assertTrue(len(new_eval.unary_results[0][0]) == 3)
+
+
 if __name__  == '__main__':
     unittest.main()
