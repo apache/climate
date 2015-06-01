@@ -37,7 +37,7 @@ def plot_from_config(evaluation, config_data):
         if plot['type'] == 'contour':
             _draw_contour_plot(evaluation, plot)
         elif plot['type'] == 'subregion':
-            logger.warn('Subregion plots are currently unsupported. Skipping ...')
+            _draw_subregion_diagram(evaluation, plot)
         elif plot['type'] == 'taylor':
             _draw_taylor_diagram(evaluation, plot)
         elif plot['type'] == 'time_series':
@@ -51,12 +51,11 @@ def _draw_contour_plot(evaluation, plot_config):
     """"""
     lats = plot_config['lats']
     if type(lats) != type(list):
-        lats = range(lats['range_min'], lats['range_max'], lats['range_step'])
+        lats = np.arange(lats['range_min'], lats['range_max'], lats['range_step'])
 
     lons = plot_config['lons']
     if type(lons) != type(list):
-        lons = range(lons['range_min'], lons['range_max'], lons['range_step'])
-
+        lons = np.arange(lons['range_min'], lons['range_max'], lons['range_step'])
 
     for i, (row, col) in enumerate(plot_config['results_indices']):
         plot_name = plot_config['output_name'] + '_{}'.format(i)
@@ -89,3 +88,19 @@ def _draw_taylor_diagram(evaluation, plot_config):
                               ref_dataset_name,
                               fname=plot_name,
                               **plot_config.get('optional_args', {}))
+
+def _draw_subregion_diagram(evaluation, plot_config):
+    """"""
+    lats = plot_config['lats']
+    if type(lats) != type(list):
+        lats = np.arange(lats['range_min'], lats['range_max'], lats['range_step'])
+
+    lons = plot_config['lons']
+    if type(lons) != type(list):
+        lons = np.arange(lons['range_min'], lons['range_max'], lons['range_step'])
+
+    plots.draw_subregions(evaluation.subregions,
+                          lats,
+                          lons,
+                          plot_config['output_name'],
+                          **plot_config.get('optional_args', {}))

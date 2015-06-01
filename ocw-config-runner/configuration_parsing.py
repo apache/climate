@@ -112,15 +112,28 @@ def _config_is_well_formed(config_data):
             logger.warn(warning)
             is_well_formed = False
 
-    if 'plots' in config_data:
-        for plot in config_data['plots']:
-            if not _valid_plot_config_data(plot):
-                is_well_formed = False
-
     if 'subregions' in config_data:
         for subregion in config_data['subregions']:
             if not _valid_subregion_config_data(subregion):
                 is_well_formed = False
+
+    if 'plots' in config_data:
+        for plot in config_data['plots']:
+            if not _valid_plot_config_data(plot):
+                is_well_formed = False
+            # Ensure that if we're trying to make a plot that require
+            # subregion info that the config has this present.
+            elif plot['type'] in ['subregion']:
+                if ('subregions' not in config_data or
+                    len(config_data['subregions'] < 1)):
+                    logger.error(
+                        'Plot config that requires subregion information is present '
+                        'in a config file without adequate subregion information '
+                        'provided. Please ensure that you have properly supplied 1 or '
+                        'more subregion config values.'
+                    )
+                    is_well_formed = False
+
 
     return is_well_formed
 
@@ -219,7 +232,11 @@ def _valid_plot_config_data(plot_config_data):
             'output_name'
         ])
     elif plot_type == 'subregion':
-        logger.warn('Subregion plots are currently unsupported. Skipping validation')
+        required_keys = set([
+            'lats',
+            'lons',
+            'output_name'
+        ])
     elif plot_type == 'time_series':
         logger.warn('Time series plots are currently unsupported. Skipping validation')
     elif plot_type == 'portrait':
