@@ -117,6 +117,11 @@ def _config_is_well_formed(config_data):
             if not _valid_plot_config_data(plot):
                 is_well_formed = False
 
+    if 'subregions' in config_data:
+        for subregion in config_data['subregions']:
+            if not _valid_subregion_config_data(subregion):
+                is_well_formed = False
+
     return is_well_formed
 
 def _contains_unary_metrics(config_metric_data):
@@ -233,3 +238,22 @@ def _valid_plot_config_data(plot_config_data):
 
     return True
 
+def _valid_subregion_config_data(subregion_config_data):
+    """"""
+    if type(subregion_config_data) != type([]):
+        logger.error(
+            'Subregions should be passed as a list of lists where '
+            'each sub-list contains a bounding box of the form: '
+            '[lat_min, lat_max, lon_min, lon_max].'
+        )
+        return False
+
+    if len(subregion_config_data) != 4:
+        logger.error(
+            'Subregions should be passed as a list of lists where '
+            'each sub-list contains a bounding box of the form: '
+            '[lat_min, lat_max, lon_min, lon_max].'
+        )
+        return False
+
+    return True

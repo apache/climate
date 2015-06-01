@@ -19,7 +19,7 @@ from mock import patch
 import os
 import unittest
 
-from ocw.dataset import Dataset
+from ocw.dataset import Dataset, Bounds
 from ocw.evaluation import Evaluation
 import ocw.metrics as metrics
 import configuration_writer as writer
@@ -651,10 +651,16 @@ class FullExportTest(unittest.TestCase):
             origin=self.dap_origin
         )
 
+        self.subregions = [
+            Bounds(-10, 10, -20, 20),
+            Bounds(-5, 5, -15, 15)
+        ]
+
         self.evaluation = Evaluation(
             self.local_ds,
             [self.rcmed_ds, self.esgf_ds, self.dap_ds],
-            [metrics.Bias(), metrics.TemporalStdDev()]
+            [metrics.Bias(), metrics.TemporalStdDev()],
+            subregions=self.subregions
         )
 
     @classmethod
@@ -733,3 +739,30 @@ class FullExportTest(unittest.TestCase):
             writer.generate_evaluation_information(self.evaluation),
             data['evaluation']
         )
+
+    def test_proper_subregion_export(self):
+        file_path = '/tmp/test_config.yaml'
+        writer.export_evaluation_to_config(
+            self.evaluation,
+            file_path=file_path
+        )
+
+        data = yaml.load(open(file_path, 'r'))
+
+        self.assertTrue('subregions' in data)
+
+        first_bounds = [
+            self.subregions[0].lat_min,
+            self.subregions[0].lat_max,
+            self.subregions[0].lon_min,
+            self.subregions[0].lon_max,
+        ]
+        second_bounds = [
+            self.subregions[1].lat_min,
+            self.subregions[1].lat_max,
+            self.subregions[1].lon_min,
+            self.subregions[1].lon_max,
+        ]
+
+        self.assertEqual(first_bounds, data['subregions'][0])
+        self.assertEqual(second_bounds, data['subregions'][1])

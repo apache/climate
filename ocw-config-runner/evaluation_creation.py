@@ -58,7 +58,12 @@ def generate_evaluation_from_config(config_data):
     # Load metrics
     eval_metrics = [_load_metric(m)() for m in config_data['metrics']]
 
-    return Evaluation(reference, targets, eval_metrics)
+    # Load Subregions (if present)
+    subregions = None
+    if 'subregions' in config_data:
+        subregions = [_load_subregion(s) for s in config_data['subregions']]
+
+    return Evaluation(reference, targets, eval_metrics, subregions=subregions)
 
 def _load_dataset(dataset_config_data):
     """"""
@@ -147,3 +152,10 @@ def _load_metric(metric_config_data):
         return None
 
     return getattr(metrics, metric_config_data)
+
+def _load_subregion(subregion_config_data):
+    """"""
+    return Bounds(float(subregion_config_data[0]),
+                  float(subregion_config_data[1]),
+                  float(subregion_config_data[2]),
+                  float(subregion_config_data[3]))
