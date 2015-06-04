@@ -238,7 +238,9 @@ def _valid_plot_config_data(plot_config_data):
             'output_name'
         ])
     elif plot_type == 'time_series':
-        logger.warn('Time series plots are currently unsupported. Skipping validation')
+        required_keys = set([
+            'time_range'
+        ])
     elif plot_type == 'portrait':
         required_keys = set([
             'metric_index',
