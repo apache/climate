@@ -123,9 +123,9 @@ def _config_is_well_formed(config_data):
                 is_well_formed = False
             # Ensure that if we're trying to make a plot that require
             # subregion info that the config has this present.
-            elif plot['type'] in ['subregion']:
+            elif plot['type'] in ['subregion', 'portrait']:
                 if ('subregions' not in config_data or
-                    len(config_data['subregions'] < 1)):
+                    len(config_data['subregions']) < 1):
                     logger.error(
                         'Plot config that requires subregion information is present '
                         'in a config file without adequate subregion information '
@@ -240,7 +240,10 @@ def _valid_plot_config_data(plot_config_data):
     elif plot_type == 'time_series':
         logger.warn('Time series plots are currently unsupported. Skipping validation')
     elif plot_type == 'portrait':
-        logger.warn('Portrait diagrams are currently unsupported. Skipping validation')
+        required_keys = set([
+            'metric_index',
+            'output_name'
+        ])
     else:
         logger.error('Invalid plot type specified.')
         return False

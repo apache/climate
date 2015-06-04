@@ -43,7 +43,7 @@ def plot_from_config(evaluation, config_data):
         elif plot['type'] == 'time_series':
             logger.warn('Time series plots are currently unsupported. Skipping ...')
         elif plot['type'] == 'portrait':
-            logger.warn('Portrait diagrams are currently unsupported. Skipping ...')
+            _draw_portrait_diagram(evaluation, plot)
         else:
             logger.error('Unrecognized plot type requested: {}'.format(plot['type']))
 
@@ -104,3 +104,17 @@ def _draw_subregion_diagram(evaluation, plot_config):
                           lons,
                           plot_config['output_name'],
                           **plot_config.get('optional_args', {}))
+
+def _draw_portrait_diagram(evaluation, plot_config):
+    """"""
+    metric_index = plot_config['metric_index']
+
+    diagram_data = np.array(evaluation.results[:][metric_index][:])
+    subregion_names = ["R{}".format(i) for i in range(len(evaluation.subregions))]
+    target_names = [t.name for t in evaluation.target_datasets]
+
+    plots.draw_portrait_diagram(diagram_data,
+                                target_names,
+                                subregion_names,
+                                fname=plot_config['output_name'],
+                                **plot_config.get('optional_args', {}))
