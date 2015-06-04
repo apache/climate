@@ -13,6 +13,7 @@ import numpy as np
 import numpy.ma as ma
 
 from os import path
+import urllib
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -36,28 +37,22 @@ EVAL_BOUNDS = Bounds(LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
 varName = 'pr' 
 
 #regridding parameters
-gridLonStep=0.5
-gridLatStep=0.5
+gridLonStep = 0.5
+gridLatStep = 0.5
 
 #some vars for this evaluation
-target_datasets_ensemble=[]
-target_datasets =[]
-allNames =[]
+target_datasets_ensemble = []
+target_datasets = []
+allNames = []
 
 # Download necessary NetCDF file if not present
-if path.exists(FILE_1):
-    pass
-else:
+if not path.exists(FILE_1):
     urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
-if path.exists(FILE_2):
-    pass
-else:
+if not path.exists(FILE_2):
     urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
-if path.exists(FILE_3):
-    pass
-else:
+if not path.exists(FILE_3):
     urllib.urlretrieve(FILE_LEADER + FILE_3, FILE_3)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects and store in list"""
