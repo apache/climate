@@ -28,6 +28,8 @@ LON_MAX = 60.0
 START = datetime.datetime(2000, 01, 1)
 END = datetime.datetime(2007, 12, 31)
 
+EVAL_BOUNDS = Bounds(LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
+
 varName = 'pr' 
 gridLonStep=0.44
 gridLatStep=0.44
