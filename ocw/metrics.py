@@ -23,7 +23,8 @@ Classes:
 from abc import ABCMeta, abstractmethod
 import ocw.utils as utils
 import numpy
-from scipy import stats
+import numpy.ma as ma
+from scipy.stats import mstats
 
 class Metric(object):
     '''Base Metric Class'''
@@ -105,7 +106,7 @@ class TemporalStdDev(UnaryMetric):
         :returns: The temporal standard deviation of the target dataset
         :rtype: :class:`ndarray`
         '''
-        return target_dataset.values.std(axis=0, ddof=1)
+        return ma.std(target_dataset.values.std, axis=0)
 
 
 class StdDevRatio(BinaryMetric):
@@ -150,7 +151,7 @@ class PatternCorrelation(BinaryMetric):
         # stats.pearsonr returns correlation_coefficient, 2-tailed p-value
         # We only care about the correlation coefficient
         # Docs at http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
-        return stats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
+        return mstats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
 
 
 class TemporalCorrelation(BinaryMetric):
@@ -177,12 +178,12 @@ class TemporalCorrelation(BinaryMetric):
             coefficients
         '''
         num_times, num_lats, num_lons = reference_dataset.values.shape
-        coefficients = numpy.zeros([num_lats, num_lons])
-        levels = numpy.zeros([num_lats, num_lons])
+        coefficients = ma.zeros([num_lats, num_lons])
+        levels = ma.zeros([num_lats, num_lons])
         for i in numpy.arange(num_lats):
             for j in numpy.arange(num_lons):
                 coefficients[i, j], levels[i, j] = (
-                    stats.pearsonr(
+                    mstats.pearsonr(
                         reference_dataset.values[:, i, j],
                         target_dataset.values[:, i, j]
                     )
@@ -213,7 +214,7 @@ class TemporalMeanBias(BinaryMetric):
         diff = target_dataset.values - ref_dataset.values 
         if absolute:
             diff = abs(diff)
-        mean_bias = diff.mean(axis=0)
+        mean_bias = ma.mean(diff, axis=0)
 
         return mean_bias
 
@@ -239,7 +240,7 @@ class SpatialMeanOfTemporalMeanBias(BinaryMetric):
         '''
 
         bias = target_dataset.values - reference_dataset.values 
-        return bias.mean()
+        return ma.mean(bias)
 
 
 class RMSError(BinaryMetric):
@@ -265,5 +266,5 @@ class RMSError(BinaryMetric):
         '''
 
         sqdiff = (reference_dataset.values - target_dataset.values) ** 2
-        return numpy.sqrt(sqdiff.mean())
+        return (ma.mean(sqdiff))**0.5
 
