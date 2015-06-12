@@ -106,7 +106,7 @@ class TemporalStdDev(UnaryMetric):
         :returns: The temporal standard deviation of the target dataset
         :rtype: :class:`ndarray`
         '''
-        return ma.std(target_dataset.values.std, axis=0)
+        return ma.std(target_dataset.values, axis=0, ddof=1)
 
 
 class StdDevRatio(BinaryMetric):
@@ -127,7 +127,7 @@ class StdDevRatio(BinaryMetric):
 
         :returns: The standard deviation ratio of the reference and target
         '''
-        return target_dataset.values.std() / ref_dataset.values.std()
+        return ma.std(target_dataset.values)/ma.std(ref_dataset.values)
 
 
 class PatternCorrelation(BinaryMetric):
