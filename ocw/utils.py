@@ -20,6 +20,7 @@
 import sys
 import datetime as dt
 import numpy as np
+import numpy.ma as ma
 import datetime 
 
 from mpl_toolkits.basemap import shiftgrid
@@ -256,6 +257,16 @@ def reshape_monthly_to_annually(dataset):
 
     return values
 
+def calc_temporal_mean(dataset):
+    ''' Calculate temporal mean of dataset's values 
+
+    :param dataset: OCW Dataset whose first dimension is time 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: Mean values averaged for the first dimension (time)
+    '''
+    return ma.mean(dataset.values, axis=0)
+
 def calc_climatology_year(dataset):
     ''' Calculate climatology of dataset's values for each year
     
@@ -283,40 +294,6 @@ def calc_climatology_year(dataset):
         total_mean = annually_mean.mean(axis=0)
 
     return annually_mean, total_mean
-
-def calc_climatology_season(month_start, month_end, dataset):
-    ''' Calculate seasonal mean and time series for given months.
-    
-    :param month_start: An integer for beginning month (Jan=1)
-    :type month_start: :class:`int`
-
-    :param month_end: An integer for ending month (Jan=1)
-    :type month_end: :class:`int`
-
-    :param dataset: Dataset object with full-year format
-    :type dataset: :class:`dataset.Dataset`
-
-    :returns: t_series - monthly average over the given season
-        means - mean over the entire season
-        
-    '''
-
-    if month_start > month_end:
-        # Offset the original array so that the the first month
-        # becomes month_start, note that this cuts off the first year of data
-        offset = slice(month_start - 1, month_start - 13)
-        reshape_data = reshape_monthly_to_annually(dataset[offset])
-        month_index = slice(0, 13 - month_start + month_end)
-    else:
-        # Since month_start <= month_end, just take a slice containing those months
-        reshape_data = reshape_monthly_to_annually(dataset)
-        month_index = slice(month_start - 1, month_end)
-    
-    t_series = reshape_data[:, month_index].mean(axis=1)
-    means = t_series.mean(axis=0)
-    
-    return t_series, means
-
 
 def calc_climatology_monthly(dataset):
     ''' Calculate monthly mean values for a dataset.
