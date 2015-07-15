@@ -25,6 +25,7 @@ import datetime
 
 from mpl_toolkits.basemap import shiftgrid
 from dateutil.relativedelta import relativedelta
+from netCDF4 import num2date
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -54,10 +55,12 @@ def decode_time_values(dataset, time_var_name):
         for time_val in time_data:
             times.append(time_base + relativedelta(months=int(time_val)))
     else:
-        for time_val in time_data:
-            arg[time_units] = time_val
-            times.append(time_base + dt.timedelta(**arg))
+        try:
+            times_calendar = time_data.calendar
+        except:
+            times_calendar = 'standard'
 
+        times = num2date(time_data[:], units=time_format, calendar=times_calendar)
     return times
 
 def parse_time_units(time_format):
@@ -318,6 +321,7 @@ def calc_climatology_monthly(dataset):
         )
         raise ValueError(error)
     else:
+<<<<<<< HEAD
         values = reshape_monthly_to_annually(dataset).mean(axis=0)
         
         # A year can commence from any month
@@ -340,3 +344,6 @@ def calc_time_series(dataset):
         t_series.append(dataset.values[t,:,:].mean())
     
     return t_series
+=======
+        return reshape_monthly_to_annually(dataset).mean(axis=0)
+>>>>>>> 1340036ff488decfcefd6cd46c0c17bf2dfe13a8
