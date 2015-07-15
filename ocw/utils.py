@@ -321,7 +321,6 @@ def calc_climatology_monthly(dataset):
         )
         raise ValueError(error)
     else:
-<<<<<<< HEAD
         values = reshape_monthly_to_annually(dataset).mean(axis=0)
         
         # A year can commence from any month
@@ -344,6 +343,3 @@ def calc_time_series(dataset):
         t_series.append(dataset.values[t,:,:].mean())
     
     return t_series
-=======
-        return reshape_monthly_to_annually(dataset).mean(axis=0)
->>>>>>> 1340036ff488decfcefd6cd46c0c17bf2dfe13a8
