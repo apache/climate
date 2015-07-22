@@ -35,6 +35,7 @@ from ocw.dataset import Bounds
 from ocw.data_source.local import load_file
 import ocw.utils as utils
 import ocw.data_source.esgf as esgf
+from ocw_config_runner.configuration_writer import export_evaluation_to_config
 
 import ssl
 if hasattr(ssl, '_create_unverified_context'):
@@ -645,6 +646,7 @@ def run_screen(model_datasets, models_info, observations_info,
                             targets.append(new_model_datasets[int(target[-1])])
 
                   evaluation_result = evaluation.Evaluation(reference, targets, [mean_bias])
+                  export_evaluation_to_config(evaluation_result)
                   evaluation_result.run()
                   screen.addstr(8, 4, "--> Evaluation Finished.")
                   screen.refresh()
@@ -697,6 +699,7 @@ def run_screen(model_datasets, models_info, observations_info,
                             targets.append(new_model_datasets[int(target[-1])])
 
                   evaluation_result = evaluation.Evaluation(reference, targets, [spatial_std_dev])
+                  export_evaluation_to_config(evaluation_result)
                   evaluation_result.run()
 
                   rcm_std_dev = evaluation_result.results
