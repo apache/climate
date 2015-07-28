@@ -114,6 +114,20 @@ def temporal_rebin(target_dataset, temporal_resolution):
     
     return new_dataset
 
+def get_temporal_overlap(dataset_array):
+    ''' Find the maximum temporal overlap across the observation and model datasets
+
+    :param dataset_array: an array of OCW datasets
+    '''
+    start_time =[]
+    end_time =[]
+    for dataset in dataset_array:
+        start_time.append(dataset.time_range()[0])
+        end_time.append(dataset.time_range()[1])
+
+    return np.max(start_time), np.min(end_time)
+
+
 def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     """ Regrid a Dataset using the new latitudes and longitudes
 
