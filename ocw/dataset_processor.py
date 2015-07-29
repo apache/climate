@@ -29,7 +29,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def temporal_subset(month_start, month_end, target_dataset, average_each_year = False):
+def temporal_subset(month_start, month_end, target_dataset, average_each_year=False):
     """ Temporally subset data given month_index.
 
     :param month_start: An integer for beginning month (Jan=1)
