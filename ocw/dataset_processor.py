@@ -458,6 +458,24 @@ def _rcmes_normalize_datetimes(datetimes, timestep):
 
     return normalDatetimes
 
+def mask_missing_data(dataset_array):
+    ''' Check missing values in observation and model datasets.
+    If any of dataset in dataset_array has missing values at a grid point,
+    the values at the grid point in all other datasets are masked.
+    :param dataset_array: an array of OCW datasets
+    '''
+    mask_array = np.zeros(dataset_array[0].values.shape)
+    for dataset in dataset_array:
+        index = np.where(dataset.values.mask == True)
+        if index[0].size >0:
+            mask_array[index] = 1
+    masked_array = []
+    for dataset in dataset_array:
+        dataset.values = ma.array(dataset.values, mask=mask_array)
+        masked_array.append(dataset)
+    return [masked_dataset for masked_dataset in masked_array]
+
+
 def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
     '''
     Spatial regrid from one set of lat,lon values onto a new set (lat2,lon2)
