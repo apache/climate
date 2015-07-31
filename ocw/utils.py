@@ -343,3 +343,29 @@ def calc_time_series(dataset):
         t_series.append(dataset.values[t,:,:].mean())
     
     return t_series
+
+def calc_area_weighted_spatial_average(dataset, area_weight=False):
+    '''Calculate area weighted average of the values in OCW dataset
+
+    :param dataset: Dataset object 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: time series for the dataset of shape (nT)
+    '''
+
+    if dataset.lats.ndim ==1:
+        lons, lats = np.meshgrid(dataset.lons, dataset.lats)
+    else:
+        lons = dataset.lons
+        lats = dataset.lats
+    weights = np.cos(lats*np.pi/180.) 
+
+    nt, ny, nx = dataset.values.shape
+    spatial_average = ma.zeros(nt)
+    for it in np.arange(nt):
+        if area_weight:
+            spatial_average[it] = ma.average(dataset.values[it,:], weights = weights)
+        else:
+            spatial_average[it] = ma.average(dataset.values[it,:])
+
+    return spatial_average
