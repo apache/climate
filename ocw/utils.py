@@ -343,3 +343,38 @@ def calc_time_series(dataset):
         t_series.append(dataset.values[t,:,:].mean())
     
     return t_series
+
+def calc_subregion_area_mean_and_std(dataset_array, subregions):
+    ''' Calculate area mean and standard deviation values for a given subregions using datasets on common grid points
+    :param dataset_array: An array of OCW Dataset Objects
+    :type list:  
+    :param subregions: list of subregions
+    :type subregions: :class:`numpy.ma.array`
+    :returns: area averaged time series for the dataset of shape (ntime, nsubregion)
+    '''
+
+    ndata = len(dataset_array)
+    dataset0 = dataset_array[0]
+    if dataset0.lons.ndim == 1:
+       lons, lats = np.meshgrid(dataset0.lons, dataset0.lats)
+    else:
+       lons = dataset0.lons
+       lats = dataset0.lats
+    subregion_array = np.zeros(lons.shape)
+    mask_array = dataset_array[0].values[0,:].mask
+    # dataset0.values.shsape[0]: length of the time dimension
+    # spatial average
+    t_series =ma.zeros([ndata, dataset0.values.shape[0], len(subregions)])
+    # spatial standard deviation
+    spatial_std =ma.zeros([ndata, dataset0.values.shape[0], len(subregions)])
+
+    for iregion, subregion in enumerate(subregions):
+        lat_min, lat_max, lon_min, lon_max = subregion[1]
+        y_index,x_index = np.where((lats >= lat_min) & (lats <= lat_max) & (lons >= lon_min) & (lons <= lon_max))
+        subregion_array[y_index,x_index] = iregion+1
+        for idata in np.arange(ndata):
+            t_series[idata, :, iregion] = ma.mean(dataset_array[idata].values[:,y_index, x_index], axis=1)
+            spatial_std[idata, :, iregion] = ma.std(dataset_array[idata].values[:,y_index, x_index], axis=1)
+    subregion_array = ma.array(subregion_array, mask=mask_array) 
+    return t_series, spatial_std, subregion_array
+
