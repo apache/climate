@@ -29,7 +29,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def temporal_subset(month_start, month_end, target_dataset):
+def temporal_subset(month_start, month_end, target_dataset, average_each_year=False):
     """ Temporally subset data given month_index.
 
     :param month_start: An integer for beginning month (Jan=1)
@@ -40,6 +40,9 @@ def temporal_subset(month_start, month_end, target_dataset):
 
     :param target_dataset: Dataset object that needs temporal subsetting
     :type target_dataset: Open Climate Workbench Dataset Object
+
+    :param average_each_year: If True, output dataset is averaged for each year
+    :type average_each_year: :class:'boolean'
 
     :returns: A temporal subset OCW Dataset
     :rtype: Open Climate Workbench Dataset Object
@@ -71,8 +74,32 @@ def temporal_subset(month_start, month_end, target_dataset):
                              target_dataset.lons,
                              target_dataset.times[time_index],
                              target_dataset.values[time_index,:],
-                             target_dataset.variable,
-                             target_dataset.name)
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name)
+
+    if average_each_year:
+        nmonth = len(month_index)
+        ntime  = new_dataset.times.size
+        nyear = ntime/nmonth
+        averaged_time = []              
+        ny, nx = target_dataset.values.shape[1:]
+        averaged_values =ma.zeros([nyear, ny, nx])
+        for iyear in np.arange(nyear):
+            # centered time index of the season between month_start and month_end in each year
+            center_index = int(nmonth/2)+iyear*nmonth   
+            if nmonth == 1:
+                center_index = iyear
+            averaged_time.append(new_dataset.times[center_index]) 
+            averaged_values[iyear,:] = ma.average(new_dataset.values[nmonth*iyear:nmonth*iyear+nmonth,:], axis=0)
+        new_dataset = ds.Dataset(target_dataset.lats,
+                                 target_dataset.lons,
+                                 np.array(averaged_time),
+                                 averaged_values,
+                                 variable=target_dataset.variable,
+                                 units=target_dataset.units,
+                                 name=target_dataset.name)
+    
     return new_dataset
 
 def temporal_rebin(target_dataset, temporal_resolution):     
