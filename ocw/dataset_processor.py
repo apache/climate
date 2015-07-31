@@ -186,7 +186,7 @@ def ensemble(datasets):
     """
     _check_dataset_shapes(datasets)
     dataset_values = [dataset.values for dataset in datasets]
-    ensemble_values = np.mean(dataset_values, axis=0)
+    ensemble_values = ma.mean(dataset_values, axis=0)
     
     # Build new dataset object from the input datasets and the ensemble values and return it
     ensemble_dataset = ds.Dataset(datasets[0].lats, 
