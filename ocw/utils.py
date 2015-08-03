@@ -391,4 +391,28 @@ def calc_subregion_area_mean_and_std(dataset_array, subregions):
     subregion_array = ma.array(subregion_array, mask=mask_array) 
     return t_series, spatial_std, subregion_array
 
->>>>>>> CLIMATE-651
+def calc_area_weighted_spatial_average(dataset, area_weight=False):
+    '''Calculate area weighted average of the values in OCW dataset
+
+    :param dataset: Dataset object 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: time series for the dataset of shape (nT)
+    '''
+
+    if dataset.lats.ndim ==1:
+        lons, lats = np.meshgrid(dataset.lons, dataset.lats)
+    else:
+        lons = dataset.lons
+        lats = dataset.lats
+    weights = np.cos(lats*np.pi/180.) 
+
+    nt, ny, nx = dataset.values.shape
+    spatial_average = ma.zeros(nt)
+    for it in np.arange(nt):
+        if area_weight:
+            spatial_average[it] = ma.average(dataset.values[it,:], weights = weights)
+        else:
+            spatial_average[it] = ma.average(dataset.values[it,:])
+
+    return spatial_average
