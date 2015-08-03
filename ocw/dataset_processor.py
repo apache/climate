@@ -516,7 +516,42 @@ def water_flux_unit_conversion(dataset):
                 dataset.units = 'mm/day'
 
     return dataset
+def variable_unit_conversion(dataset):
+    ''' Convert water flux or temperature variables units as necessary
+    
+    For water flux variables, convert full SI units water flux units to more common units.
+    For temperature, convert Celcius to Kelvin.
 
+    :param dataset: The dataset to convert.
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: A Dataset with values converted to new units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+
+    water_flux_variables = ['pr', 'prec','evspsbl', 'mrro', 'swe']
+    temperature_variables = ['temp','tas','tasmax','taxmin','T']
+    variable = dataset.variable.lower()
+
+    if any(subString in variable for subString in water_flux_variables):
+        dataset_units = dataset.units.lower()
+        if variable in 'swe':
+            if any(unit in dataset_units for unit in ['m', 'meter']):
+                dataset.values = 1.e3 * dataset.values
+                dataset.units = 'km'
+        else:
+            if any(unit in dataset_units
+                for unit in ['kg m-2 s-1', 'mm s-1', 'mm/sec']):
+                    dataset.values = 86400. * dataset.values
+                    dataset.units = 'mm/day'
+
+    if any(subString in variable for subString in temperature_variables):
+        dataset_units = dataset.units.lower()
+        if dataset_units == 'c':
+            dataset.values = 273.15+dataset.values
+            dataset.units = 'K'
+
+    return dataset
 
 def _rcmes_normalize_datetimes(datetimes, timestep):
     """ Normalize Dataset datetime values.
