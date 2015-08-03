@@ -343,3 +343,16 @@ def calc_time_series(dataset):
         t_series.append(dataset.values[t,:,:].mean())
     
     return t_series
+
+def get_temporal_overlap(dataset_array):
+    ''' Find the maximum temporal overlap across the observation and model datasets
+
+    :param dataset_array: an array of OCW datasets
+    '''
+    start_time =[]
+    end_time =[]
+    for dataset in dataset_array:
+        start_time.append(dataset.time_range()[0])
+        end_time.append(dataset.time_range()[1])
+
+    return np.max(start_time), np.min(end_time)
