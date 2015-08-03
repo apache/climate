@@ -500,10 +500,10 @@ def water_flux_unit_conversion(dataset):
     :returns: A Dataset with values converted to new units.
     :rtype: :class:`dataset.Dataset`
     '''
-    waterFluxVariables = ['pr', 'evspsbl', 'mrro', 'swe']
+    water_flux_variables = ['pr', 'prec','evspsbl', 'mrro', 'swe']
     variable = dataset.variable.lower()
 
-    if any(subString in variable for subString in waterFluxVariables):
+    if any(sub_string in variable for sub_string in water_flux_variables):
         dataset_units = dataset.units.lower()
         if variable in 'swe':
             if any(unit in dataset_units for unit in ['m', 'meter']):
@@ -516,6 +516,29 @@ def water_flux_unit_conversion(dataset):
                 dataset.units = 'mm/day'
 
     return dataset
+
+def temperature_unit_conversion(dataset):
+    ''' Convert temperature units as necessary
+
+    Automatically convert Celcius to Kelvin in the given dataset.
+
+    :param dataset: The dataset for which units should be updated.
+    :type dataset; :class:`dataset.Dataset`
+
+    :returns: The dataset with (potentially) updated units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+    temperature_variables = ['temp','tas','tasmax','taxmin','T']
+    variable = dataset.variable.lower()
+
+    if any(sub_string in variable for sub_string in temperature_variables):
+        dataset_units = dataset.units.lower()
+        if dataset_units == 'c':
+            dataset.values = 273.15 + dataset.values
+            dataset.units = 'K'
+
+    return dataset
+
 def variable_unit_conversion(dataset):
     ''' Convert water flux or temperature variables units as necessary
     
@@ -529,28 +552,9 @@ def variable_unit_conversion(dataset):
     :rtype: :class:`dataset.Dataset`
     '''
 
-    water_flux_variables = ['pr', 'prec','evspsbl', 'mrro', 'swe']
-    temperature_variables = ['temp','tas','tasmax','taxmin','T']
-    variable = dataset.variable.lower()
-
-    if any(subString in variable for subString in water_flux_variables):
-        dataset_units = dataset.units.lower()
-        if variable in 'swe':
-            if any(unit in dataset_units for unit in ['m', 'meter']):
-                dataset.values = 1.e3 * dataset.values
-                dataset.units = 'km'
-        else:
-            if any(unit in dataset_units
-                for unit in ['kg m-2 s-1', 'mm s-1', 'mm/sec']):
-                    dataset.values = 86400. * dataset.values
-                    dataset.units = 'mm/day'
-
-    if any(subString in variable for subString in temperature_variables):
-        dataset_units = dataset.units.lower()
-        if dataset_units == 'c':
-            dataset.values = 273.15+dataset.values
-            dataset.units = 'K'
-
+    dataset = water_flux_unit_conversion(dataset)
+    dataset = temperature_unit_conversion(dataset)
+    
     return dataset
 
 def _rcmes_normalize_datetimes(datetimes, timestep):
