@@ -421,6 +421,74 @@ def write_netcdf(dataset, path, compress=True):
 
     out_file.close()
 
+def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, 
+                                                   model_dataset_array, model_names,
+                                                   path,
+                                                   subregions = None, subregion_array = None,
+                                                   ref_subregion_mean = None, ref_subregion_std = None, 
+                                                   model_subregion_mean = None, model_subregion_std = None):
+    #Write multiple reference and model datasets and their subregional means and standard deivations in a NetCDF file.
+
+    #:To be updated 
+    #
+    out_file = netCDF4.Dataset(path, 'w', format='NETCDF4')
+
+    dataset = ref_dataset
+    # Set attribute lenghts
+    nobs = 1
+    nmodel = len(model_dataset_array)
+    lat_len = len(dataset.lats)
+    lon_len = len(dataset.lons)
+    time_len = len(dataset.times)
+
+    if not subregions == None:
+        nsubregion = len(subregions)
+                 
+    # Create attribute dimensions
+    lat_dim = out_file.createDimension('y', lat_len)
+    lon_dim = out_file.createDimension('x', lon_len)
+    time_dim = out_file.createDimension('time', time_len)
+
+    # Create variables and store the values
+    lats = out_file.createVariable('lat', 'f8', ('y'))
+    lats[:] = dataset.lats
+    lons = out_file.createVariable('lon', 'f8', ('x'))
+    lons[:] = dataset.lons
+    times = out_file.createVariable('time', 'f8', ('time',))
+    times.units = "days since %s" % dataset.times[0]
+    times[:] = netCDF4.date2num(dataset.times, times.units)
+
+    #mask_array = np.zeros([time_len, lat_len, lon_len])
+    #for iobs in np.arange(nobs):
+    #    index = np.where(ref_dataset_array[iobs].values.mask[:] == True)
+    #    mask_array[index] = 1
+    out_file.createVariable(ref_name, 'f8', ('time','y','x'))
+    out_file.variables[ref_name][:] = ref_dataset.values
+    out_file.variables[ref_name].units = ref_dataset.units
+    for imodel in np.arange(nmodel):
+        out_file.createVariable(model_names[imodel], 'f8', ('time','y','x'))
+        #out_file.variables[model_names[imodel]][:] = ma.array(model_dataset_array[imodel].values, mask = mask_array)
+        out_file.variables[model_names[imodel]][:] = model_dataset_array[imodel].values
+        out_file.variables[model_names[imodel]].units = model_dataset_array[imodel].units
+
+    if not subregions == None:
+        out_file.createVariable('subregion_array', 'i4', ('y','x'))
+        out_file.variables['subregion_array'][:] = subregion_array[:]
+        nsubregion = len(subregions)
+        out_file.createDimension('nsubregion', nsubregion)
+        out_file.createDimension('nobs', nobs)
+        out_file.createDimension('nmodel', nmodel)
+        out_file.createVariable('obs_subregion_mean', 'f8', ('nobs','time','nsubregion'))
+        out_file.variables['obs_subregion_mean'][:] = ref_subregion_mean[:]
+        out_file.createVariable('obs_subregion_std', 'f8', ('nobs','time','nsubregion'))
+        out_file.variables['obs_subregion_std'][:] = ref_subregion_std[:]
+        out_file.createVariable('model_subregion_mean', 'f8', ('nmodel','time','nsubregion'))
+        out_file.variables['model_subregion_mean'][:] = model_subregion_mean[:]
+        out_file.createVariable('model_subregion_std', 'f8', ('nmodel','time','nsubregion'))
+        out_file.variables['model_subregion_std'][:] = model_subregion_std[:]
+
+    out_file.close()
+
 def water_flux_unit_conversion(dataset):
     ''' Convert water flux variables units as necessary
 
