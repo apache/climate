@@ -84,9 +84,6 @@ class Bias(BinaryMetric):
             reference dataset in this metric run.
         :type target_dataset: :class:`dataset.Dataset`
 
-        :param average_over_time: if True, calculated bias is averaged for the axis=0
-        :type average_over_time: 'bool'
-
         :returns: The difference between the reference and target datasets.
         :rtype: :class:`numpy.ndarray`
         '''
