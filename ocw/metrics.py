@@ -84,10 +84,37 @@ class Bias(BinaryMetric):
             reference dataset in this metric run.
         :type target_dataset: :class:`dataset.Dataset`
 
+        :param average_over_time: if True, calculated bias is averaged for the axis=0
+        :type average_over_time: 'bool'
+
         :returns: The difference between the reference and target datasets.
         :rtype: :class:`numpy.ndarray`
         '''
-        return target_dataset.values - ref_dataset.values  
+        return calc_bias(target_dataset.values,ref_dataset.values) 
+
+class SpatialPatternTaylorDiagram(BinaryMetric):
+    ''' Calculate the target to reference ratio of spatial standard deviation and pattern correlation'''
+
+    def run(self, ref_dataset, target_dataset):
+        '''Calculate two metrics to plot a Taylor diagram to compare spatial patterns      
+
+        .. note::
+           Overrides BinaryMetric.run() 
+        
+        :param ref_dataset: The reference dataset to use in this metric run.
+        :type ref_dataset: :class:`dataset.Dataset`
+
+        :param target_dataset: The target dataset to evaluate against the
+            reference dataset in this metric run.
+        :type target_dataset: :class:`dataset.Dataset`
+
+        :returns: standard deviation ratio, pattern correlation coefficient
+        :rtype: :float:'float','float' 
+        '''
+        if ref_dataset.values.ndim >= 3 and target_dataset.values.ndim >= 3:
+            return calc_stddev_ratio(ref_dataset.values, target_dataset.values), calc_correlation(ref_dataset.values, target_dataset.values)
+        else:
+            print 'Please check if both reference and target datasets have time dimensions' 
 
 
 class TemporalStdDev(UnaryMetric):
@@ -106,7 +133,7 @@ class TemporalStdDev(UnaryMetric):
         :returns: The temporal standard deviation of the target dataset
         :rtype: :class:`ndarray`
         '''
-        return ma.std(target_dataset.values, axis=0, ddof=1)
+        return calc_stddev(target_dataset.values, axis=0)
 
 
 class StdDevRatio(BinaryMetric):
@@ -127,7 +154,8 @@ class StdDevRatio(BinaryMetric):
 
         :returns: The standard deviation ratio of the reference and target
         '''
-        return ma.std(target_dataset.values)/ma.std(ref_dataset.values)
+       
+        return calc_stddev_ratio(ref_dataset.values, target_dataset.values)
 
 
 class PatternCorrelation(BinaryMetric):
@@ -151,7 +179,8 @@ class PatternCorrelation(BinaryMetric):
         # stats.pearsonr returns correlation_coefficient, 2-tailed p-value
         # We only care about the correlation coefficient
         # Docs at http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
-        return mstats.pearsonr(ref_dataset.values.flatten(), target_dataset.values.flatten())[0]
+
+        return calc_correlation(ref_dataset.values, target_dataset.values)
 
 
 class TemporalCorrelation(BinaryMetric):
@@ -179,23 +208,18 @@ class TemporalCorrelation(BinaryMetric):
         '''
         num_times, num_lats, num_lons = reference_dataset.values.shape
         coefficients = ma.zeros([num_lats, num_lons])
-        levels = ma.zeros([num_lats, num_lons])
         for i in numpy.arange(num_lats):
             for j in numpy.arange(num_lons):
-                coefficients[i, j], levels[i, j] = (
-                    mstats.pearsonr(
+                coefficients[i, j] = calc_correlation(
                         reference_dataset.values[:, i, j],
-                        target_dataset.values[:, i, j]
-                    )
-                )
-                levels[i, j] = 1 - levels[i, j]
-        return coefficients, levels 
+                        target_dataset.values[:, i, j])
+        return coefficients 
 
 
 class TemporalMeanBias(BinaryMetric):
     '''Calculate the bias averaged over time.'''
 
-    def run(self, ref_dataset, target_dataset, absolute=False):
+    def run(self, ref_dataset, target_dataset):
         '''Calculate the bias averaged over time.
 
         .. note::
@@ -211,36 +235,8 @@ class TemporalMeanBias(BinaryMetric):
         :returns: The mean bias between a reference and target dataset over time.
         '''
 
-        diff = target_dataset.values - ref_dataset.values 
-        if absolute:
-            diff = abs(diff)
-        mean_bias = ma.mean(diff, axis=0)
+        return calc_bias(target_dataset.values,ref_dataset.values, average_over_time=True) 
 
-        return mean_bias
-
-
-class SpatialMeanOfTemporalMeanBias(BinaryMetric):
-    '''Calculate the bias averaged over time and domain.'''
-
-    def run(self, reference_dataset, target_dataset):
-        '''Calculate the bias averaged over time and domain.
-
-        .. note::
-           Overrides BinaryMetric.run()
-
-        :param reference_dataset: The reference dataset to use in this metric
-            run
-        :type reference_dataset: :class:`dataset.Dataset`
-
-        :param target_dataset: The target dataset to evaluate against the
-            reference dataset in this metric run
-        :type target_dataset: :class:`dataset.Dataset`
-
-        :returns: The bias averaged over time and domain
-        '''
-
-        bias = target_dataset.values - reference_dataset.values 
-        return ma.mean(bias)
 
 
 class RMSError(BinaryMetric):
@@ -265,6 +261,96 @@ class RMSError(BinaryMetric):
         :returns: The RMS error, with the mean calculated over time and space
         '''
 
-        sqdiff = (reference_dataset.values - target_dataset.values) ** 2
-        return (ma.mean(sqdiff))**0.5
+        return calc_rmse(target_dataset.values, reference_dataset.values)
 
+def calc_bias(target_array, reference_array, average_over_time = False):
+    ''' Calculate difference between two arrays
+
+    :param target_array: an array to be evaluated, as model output
+    :type target_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param reference_array: an array of reference dataset
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param average_over_time: if True, calculated bias is averaged for the axis=0
+    :type average_over_time: 'bool'
+
+    :returns: Biases array of the target dataset
+    :rtype: :class:'numpy.ma.core.MaskedArray'
+    '''
+    
+    bias = target_array - reference_array
+    if average_over_time:
+        return ma.average(bias, axis=0)
+    else:
+        return bias
+
+def calc_stddev(array, axis=None):
+    ''' Calculate a sample standard deviation of an array along the array
+
+    :param array: an array to calculate sample standard deviation
+    :type array: :class:'numpy.ma.core.MaskedArray'
+    
+    :param axis: Axis along which the sample standard deviation is computed.
+    :type axis: 'int'
+
+    :returns: sample standard deviation of array
+    :rtype: :class:'numpy.ma.core.MaskedArray'
+    '''
+
+    if isinstance(axis, int):
+        return ma.std(array, axis=axis, ddof=1)
+    else:
+        return ma.std(array, ddof=1)
+        
+
+def calc_stddev_ratio(target_array, reference_array):
+    ''' Calculate ratio of standard deivations of the two arrays
+
+    :param target_array: an array to be evaluated, as model output
+    :type target_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param reference_array: an array of reference dataset
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param average_over_time: if True, calculated bias is averaged for the axis=0
+    :type average_over_time: 'bool'
+
+    :returns: (standard deviation of target_array)/(standard deviation of reference array)
+    :rtype: :class:'numpy.ma.core.MaskedArray'
+    '''
+
+    return calc_stddev(target_array)/calc_stddev(reference_array)
+
+def calc_correlation(target_array, reference_array):
+    '''Calculate the correlation coefficient between two arrays.
+
+    :param target_array: an array to be evaluated, as model output
+    :type target_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param reference_array: an array of reference dataset
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :returns: pearson's correlation coefficient between the two input arrays
+    :rtype: :class:'numpy.ma.core.MaskedArray'
+    '''
+
+    return mstats.pearsonr(reference_array.flatten(), target_array.flatten())[0]  
+       
+def calc_rmse(target_array, reference_array):
+    ''' Calculate ratio of standard deivations of the two arrays
+
+    :param target_array: an array to be evaluated, as model output
+    :type target_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param reference_array: an array of reference dataset
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param average_over_time: if True, calculated bias is averaged for the axis=0
+    :type average_over_time: 'bool'
+
+    :returns: root mean square error
+    :rtype: :class:'float'
+    '''
+
+    return (ma.mean((calc_bias(target_array, reference_array))**2))**0.5 
