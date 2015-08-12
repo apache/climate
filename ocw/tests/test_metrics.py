@@ -24,6 +24,7 @@ from ocw.dataset import Dataset
 import ocw.metrics as metrics
 
 import numpy as np
+import numpy.ma as ma
 import numpy.testing as npt
 
 class TestBias(unittest.TestCase):
@@ -79,7 +80,7 @@ class TestSpatialPatternTaylorDiagram(unittest.TestCase):
         )
 
     def test_function_run(self):
-        self.assertTrue(self.taylor_diagram.run(self.ref_dataset, self.tar_dataset), [2.5,1.0])
+        np.testing.assert_array_equal(self.taylor_diagram.run(self.ref_dataset, self.tar_dataset), ma.array([0.4,1.0]))
 
 class TestTemporalStdDev(unittest.TestCase):
     '''Test the metrics.TemporalStdDev metric.'''
@@ -126,7 +127,7 @@ class TestStdDevRatio(unittest.TestCase):
         )
 
     def test_function_run(self):
-        self.assertTrue(self.std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
+        self.assertTrue(self.std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 0.4)
 
 
 class TestPatternCorrelation(unittest.TestCase):

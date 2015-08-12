@@ -108,10 +108,7 @@ class SpatialPatternTaylorDiagram(BinaryMetric):
         :returns: standard deviation ratio, pattern correlation coefficient
         :rtype: :float:'float','float' 
         '''
-        if ref_dataset.values.ndim >= 3 and target_dataset.values.ndim >= 3:
-            return calc_stddev_ratio(ref_dataset.values, target_dataset.values), calc_correlation(ref_dataset.values, target_dataset.values)
-        else:
-            print 'Please check if both reference and target datasets have time dimensions' 
+        return ma.array([calc_stddev_ratio(target_dataset.values, ref_dataset.values), calc_correlation(target_dataset.values, ref_dataset.values)])
 
 
 class TemporalStdDev(UnaryMetric):
@@ -152,7 +149,7 @@ class StdDevRatio(BinaryMetric):
         :returns: The standard deviation ratio of the reference and target
         '''
        
-        return calc_stddev_ratio(ref_dataset.values, target_dataset.values)
+        return calc_stddev_ratio(target_dataset.values, ref_dataset.values)
 
 
 class PatternCorrelation(BinaryMetric):
@@ -177,7 +174,7 @@ class PatternCorrelation(BinaryMetric):
         # We only care about the correlation coefficient
         # Docs at http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
 
-        return calc_correlation(ref_dataset.values, target_dataset.values)
+        return calc_correlation(target_dataset.values, ref_dataset.values)
 
 
 class TemporalCorrelation(BinaryMetric):
@@ -208,8 +205,8 @@ class TemporalCorrelation(BinaryMetric):
         for i in numpy.arange(num_lats):
             for j in numpy.arange(num_lons):
                 coefficients[i, j] = calc_correlation(
-                        reference_dataset.values[:, i, j],
-                        target_dataset.values[:, i, j])
+                        target_dataset.values[:, i, j],
+                        reference_dataset.values[:, i, j])
         return coefficients 
 
 
@@ -314,7 +311,7 @@ def calc_stddev_ratio(target_array, reference_array):
     :type average_over_time: 'bool'
 
     :returns: (standard deviation of target_array)/(standard deviation of reference array)
-    :rtype: :class:'numpy.ma.core.MaskedArray'
+    :rtype: :class:'float'
     '''
 
     return calc_stddev(target_array)/calc_stddev(reference_array)
