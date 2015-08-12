@@ -25,6 +25,8 @@ from metrics import Metric, UnaryMetric, BinaryMetric
 from dataset import Dataset, Bounds
 import ocw.dataset_processor as DSP
 
+import numpy.ma as ma
+
 logger = logging.getLogger(__name__)
 
 class Evaluation(object):
@@ -289,23 +291,30 @@ class Evaluation(object):
 
     def _run_no_subregion_evaluation(self):
         results = []
-        for target in self.target_datasets:
-            results.append([])
-            for metric in self.metrics:
-                run_result = metric.run(self.ref_dataset, target)
-                results[-1].append(run_result)
+        for metric in self.metrics:
+            run_result_shape = list((metric.run(self.ref_dataset, self.target_datasets[0])).shape)
+            run_result_shape.insert(0, len(self.target_datasets))
+            run_result = ma.zeros(run_result_shape)
+            
+            for itarget, target in enumerate(self.target_datasets):
+                run_result[itarget,:] = metric.run(self.ref_dataset, target)
+            results.append(run_result)
         return results
 
     def _run_unary_metric_evaluation(self):
         unary_results = []
         for metric in self.unary_metrics:
-            unary_results.append([])
             # Unary metrics should be run over the reference Dataset also
             if self.ref_dataset:
-                unary_results[-1].append(metric.run(self.ref_dataset))
+                unary_results.append(metric.run(self.ref_dataset))
 
-            for target in self.target_datasets:
-                unary_results[-1].append(metric.run(target))
+            unary_result_shape = list((metric.run(self.target_datasets[0])).shape)
+            unary_result_shape.insert(0, len(self.target_datasets))
+            unary_result = ma.zeros(unary_result_shape)
+            for itarget, target in enumerate(self.target_datasets):
+                unary_result[itarget,:] = metric.run(target)
+            unary_results.append(unary_result)
+                     
         return unary_results
 
     def _run_subregion_unary_evaluation(self):

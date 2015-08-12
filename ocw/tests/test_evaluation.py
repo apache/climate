@@ -128,40 +128,29 @@ class TestEvaluation(unittest.TestCase):
     def test_result_shape(self):
         bias_eval = Evaluation(
             self.test_dataset,
-            [self.another_test_dataset, self.another_test_dataset],
-            [Bias()]
+            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
+            [Bias(), Bias()]
         )
         bias_eval.run()
 
         # Expected result shape is
-        # [
-        #   [
-        #       bias.run(reference, target1)
-        #   ],
-        #   [
-        #       bias.run(reference, target2)
-        #   ]
-        # ]
+        # [bias, bias] where bias.shape[0] = number of datasets
         self.assertTrue(len(bias_eval.results) == 2)
-        self.assertTrue(len(bias_eval.results[0]) == 1)
-        self.assertTrue(len(bias_eval.results[1]) == 1)
+        self.assertTrue(bias_eval.results[0].shape[0] == 3)
 
     def test_unary_result_shape(self):
         new_eval = Evaluation(
             self.test_dataset,
-            [self.another_test_dataset, self.another_test_dataset],
+            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
             [TemporalStdDev()]
         )
         new_eval.run()
 
         # Expected result shape is
-        # [
-        #   temporalstddev.run(reference),
-        #   temporalstddev.run(target1),
-        #   temporalstddev.run(target2)
-        # ]
-        self.assertTrue(len(new_eval.unary_results) == 1)
-        self.assertTrue(len(new_eval.unary_results[0]) == 3)
+        # [stddev] where stddev.shape[0] = number of datasets
+        
+        self.assertTrue(len(new_eval.unary_results) == 2)
+        self.assertTrue(new_eval.unary_results[1].shape[0] == 4)
 
     def test_subregion_result_shape(self):
         bound = Bounds(
