@@ -95,8 +95,10 @@ class Evaluation(object):
         self._subregions = subregions
 
         #: A list containing the results of running regular metric evaluations. 
-        #: The shape of results is ``(num_target_datasets, num_metrics)`` if
-        #: the user doesn't specify subregion information. Otherwise the shape
+        #: The shape of results list is ``len(results_list) = num_metrics``.
+        #: Each element of the list is a numpy.Masked array whose first dimension 
+        #: is num_target_datasets.  
+        #: If the user specify subregion information, the shape
         #: is ``(num_target_datasets, num_metrics, num_subregions)``.
         self.results = []
         #: A list containing the results of running the unary metric 
