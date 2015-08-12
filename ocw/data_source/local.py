@@ -268,3 +268,38 @@ def load_file(file_path,
 
     return Dataset(lats, lons, times, values, variable=variable_name,
                    units=variable_unit, name=name, origin=origin)
+
+def load_multiple_files(data_info):
+    ''' load files from multiple datasets and return an array of OCW datasets
+   
+    :param data_path: ['datasets']['targets'] in a configuration yaml file.
+    :type data_path: :class:`list`
+
+    :returns: An array of OCW Dataset objects, an array of dataset names
+    :rtype: :class:`list`
+    '''
+
+    data_filenames = glob(data_info['path'])
+    data_filenames.sort()
+    # number of files
+    ndata = len(data_filenames)
+    if ndata == 1:
+        try:
+            data_name = [data_info['data_name']]
+        except:
+            data_name =['ref']
+    else:
+        data_name = []
+        data_filenames_reversed = []
+        for element in data_filenames:
+            data_filenames_reversed.append(element[::-1])
+        prefix = os.path.commonprefix(data_filenames)
+        postfix = os.path.commonprefix(data_filenames_reversed)[::-1]
+        for element in data_filenames:
+            data_name.append(element.replace(prefix,'').replace(postfix,''))
+
+    datasets = []
+    for filename in data_filenames:
+        datasets.append(load_file(filename, data_info['variable'])) 
+    
+    return datasets, data_name
