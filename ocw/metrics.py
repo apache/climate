@@ -219,30 +219,6 @@ class TemporalMeanBias(BinaryMetric):
         return mean_bias
 
 
-class SpatialMeanOfTemporalMeanBias(BinaryMetric):
-    '''Calculate the bias averaged over time and domain.'''
-
-    def run(self, reference_dataset, target_dataset):
-        '''Calculate the bias averaged over time and domain.
-
-        .. note::
-           Overrides BinaryMetric.run()
-
-        :param reference_dataset: The reference dataset to use in this metric
-            run
-        :type reference_dataset: :class:`dataset.Dataset`
-
-        :param target_dataset: The target dataset to evaluate against the
-            reference dataset in this metric run
-        :type target_dataset: :class:`dataset.Dataset`
-
-        :returns: The bias averaged over time and domain
-        '''
-
-        bias = target_dataset.values - reference_dataset.values 
-        return ma.mean(bias)
-
-
 class RMSError(BinaryMetric):
     '''Calculate the Root Mean Square Difference (RMS Error), with the mean
        calculated over time and space.'''
