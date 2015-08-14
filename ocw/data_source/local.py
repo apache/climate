@@ -21,6 +21,7 @@ from time import strptime
 from glob import glob
 import re
 import string
+import os
 
 from ocw.dataset import Dataset
 import ocw.utils as utils
@@ -269,25 +270,54 @@ def load_file(file_path,
     return Dataset(lats, lons, times, values, variable=variable_name,
                    units=variable_unit, name=name, origin=origin)
 
-def load_multiple_files(data_info):
-    ''' load files from multiple datasets and return an array of OCW datasets
-   
-    :param data_path: ['datasets']['targets'] in a configuration yaml file.
-    :type data_path: :class:`list`
+def load_multiple_files(file_path,
+                        filename_pattern,
+                        variable_name,
+                        dataset_name='ref',
+                        variable_unit=None,
+                        lat_name=None,
+                        lon_name=None,
+                        time_name=None):
+    ''' load multiple netcdf files with common filename pattern and return an array of OCW datasets
 
+    :param file_path: directory name where the NetCDF files to load are stored.
+    :type file_path: :mod:`string`
+    :param filename_pattern: common file name patterns
+    :type filename_pattern: :list:`string`
+    :param dataset_name: a name of dataset when reading a single file 
+    :type dataset_name: :mod:'string'
+    :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+    :param variable_unit: (Optional) The variable unit to load from the NetCDF file.
+    :type variable_unit: :mod:`string`
+    :param elevation_index: (Optional) The elevation index for which data should
+        be returned. Climate data is often times 4 dimensional data. Some
+        datasets will have readins at different height/elevation levels. OCW
+        expects 3D data so a single layer needs to be stripped out when loading.
+        By default, the first elevation layer is used. If desired you may
+        specify the elevation value to use.
+    :param lat_name: (Optional) The latitude variable name to extract from the
+        dataset.
+    :type lat_name: :mod:`string`
+    :param lon_name: (Optional) The longitude variable name to extract from the
+        dataset.
+    :type lon_name: :mod:`string`
+    :param time_name: (Optional) The time variable name to extract from the
+        dataset.
+    :type time_name: :mod:`string`
     :returns: An array of OCW Dataset objects, an array of dataset names
     :rtype: :class:`list`
     '''
 
-    data_filenames = glob(data_info['path'])
+    data_filenames = []
+    for pattern in filename_pattern:
+        data_filenames.extend(glob(file_path + pattern))
     data_filenames.sort()
+
     # number of files
     ndata = len(data_filenames)
     if ndata == 1:
-        try:
-            data_name = [data_info['data_name']]
-        except:
-            data_name =['ref']
+        data_name = [dataset_name]
     else:
         data_name = []
         data_filenames_reversed = []
@@ -299,7 +329,8 @@ def load_multiple_files(data_info):
             data_name.append(element.replace(prefix,'').replace(postfix,''))
 
     datasets = []
-    for filename in data_filenames:
-        datasets.append(load_file(filename, data_info['variable'])) 
+    for ifile,filename in enumerate(data_filenames):
+        datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
+                        lat_name=lat_name, lon_name=lon_name, time_name=time_name))
     
-    return datasets, data_name
+    return datasets
