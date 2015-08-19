@@ -24,6 +24,7 @@ from ocw.dataset import Dataset
 import ocw.metrics as metrics
 
 import numpy as np
+import numpy.ma as ma
 import numpy.testing as npt
 
 class TestBias(unittest.TestCase):
@@ -56,6 +57,30 @@ class TestBias(unittest.TestCase):
         expected_result.fill(-300)
         np.testing.assert_array_equal(self.bias.run(self.target_dataset, self.reference_dataset), expected_result)
 
+class TestSpatialPatternTaylorDiagram(unittest.TestCase):
+    '''Test the metrics.SpatialPatternTaylorDiagram'''
+    def setUp(self):
+        self.taylor_diagram = metrics.SpatialPatternTaylorDiagram()
+        self.ref_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 5
+            np.arange(0, 1500, 5).reshape(12, 5, 5),
+            'ds1'
+        )
+
+        self.tar_dataset = Dataset(
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([1., 1., 1., 1., 1.]),
+            np.array([dt.datetime(2000, x, 1) for x in range(1, 13)]),
+            # Reshapped array with 300 values incremented by 2
+            np.arange(0, 600, 2).reshape(12, 5, 5),
+            'ds2'
+        )
+
+    def test_function_run(self):
+        np.testing.assert_array_equal(self.taylor_diagram.run(self.ref_dataset, self.tar_dataset), ma.array([0.4,1.0]))
 
 class TestTemporalStdDev(unittest.TestCase):
     '''Test the metrics.TemporalStdDev metric.'''
@@ -102,7 +127,7 @@ class TestStdDevRatio(unittest.TestCase):
         )
 
     def test_function_run(self):
-        self.assertTrue(self.std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 2.5)
+        self.assertTrue(self.std_dev_ratio.run(self.ref_dataset, self.tar_dataset), 0.4)
 
 
 class TestPatternCorrelation(unittest.TestCase):
@@ -161,22 +186,18 @@ class TestTemporalCorrelation(unittest.TestCase):
 
     def test_identical_inputs(self):
         expected = np.ones(25).reshape(5, 5)
-        tc, cl = self.metric.run(self.ref_dataset, self.ref_dataset)
+        tc = self.metric.run(self.ref_dataset, self.ref_dataset)
         np.testing.assert_array_equal(tc, expected)
-        np.testing.assert_array_equal(cl, expected)
 
     def test_positive_correlation(self):
         expected = np.ones(25).reshape(5, 5)
-        tc, cl = self.metric.run(self.ref_dataset, self.tgt_dataset_inc)
+        tc = self.metric.run(self.ref_dataset, self.tgt_dataset_inc)
         np.testing.assert_array_equal(tc, expected)
-        np.testing.assert_array_equal(cl, expected)
 
     def test_negative_correlation(self):
         expected_tc = np.array([-1] * 25).reshape(5, 5)
-        expected_cl = np.ones(25).reshape(5, 5)
-        tc, cl = self.metric.run(self.ref_dataset, self.tgt_dataset_dec)
+        tc = self.metric.run(self.ref_dataset, self.tgt_dataset_dec)
         np.testing.assert_array_equal(tc, expected_tc)
-        np.testing.assert_array_equal(cl, expected_cl)
 
 
 class TestTemporalMeanBias(unittest.TestCase):
@@ -208,13 +229,6 @@ class TestTemporalMeanBias(unittest.TestCase):
         expected_result.fill(-300)
         np.testing.assert_array_equal(self.mean_bias.run(self.target_dataset,self.reference_dataset), expected_result)
 
-    def test_function_run_abs(self):
-        '''Test mean bias function between reference dataset and target dataset with abs as True.'''
-        expected_result = np.zeros((5, 5), dtype=np.int)
-        expected_result.fill(300)
-        np.testing.assert_array_equal(self.mean_bias.run(self.reference_dataset, self.target_dataset, True), expected_result)
-
-
 class TestSpatialMeanOfTemporalMeanBias(unittest.TestCase):
     '''Test the metrics.SpatialMeanOfTemporalMeanBias metric.'''
     def setUp(self):
@@ -242,7 +256,6 @@ class TestSpatialMeanOfTemporalMeanBias(unittest.TestCase):
     def test_function_run(self):
         result = self.metric.run(self.ref_dataset, self.tgt_dataset)
         self.assertEqual(result, 0.0)
-
 
 class TestRMSError(unittest.TestCase):
     '''Test the metrics.RMSError metric.'''
