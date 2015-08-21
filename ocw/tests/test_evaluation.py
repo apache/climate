@@ -149,8 +149,8 @@ class TestEvaluation(unittest.TestCase):
         # Expected result shape is
         # [stddev] where stddev.shape[0] = number of datasets
         
-        self.assertTrue(len(new_eval.unary_results) == 2)
-        self.assertTrue(new_eval.unary_results[1].shape[0] == 4)
+        self.assertTrue(len(new_eval.unary_results) == 1)
+        self.assertTrue(new_eval.unary_results[0].shape[0] == 5)
 
     def test_subregion_result_shape(self):
         bound = Bounds(
@@ -186,8 +186,8 @@ class TestEvaluation(unittest.TestCase):
         new_eval = Evaluation(
             self.test_dataset,
             [self.another_test_dataset, self.another_test_dataset],
-            [TemporalStdDev()],
-            [bound]
+            [TemporalStdDev(), TemporalStdDev()],
+            [bound, bound, bound, bound, bound]
         )
         new_eval.run()
 
@@ -197,9 +197,10 @@ class TestEvaluation(unittest.TestCase):
         #           [3, temporalstddev.run(reference).shape],
         #       ]
         # ]
-        self.assertTrue(len(new_eval.unary_results) == 1)
+        self.assertTrue(len(new_eval.unary_results) == 5)  # number of subregions
+        self.assertTrue(len(new_eval.unary_results[0]) == 2) # number of metrics
         self.assertTrue(type(new_eval.unary_results) == type([]))
-        self.assertTrue(new_eval.unary_results[0][0].shape[0] == 3)
+        self.assertTrue(new_eval.unary_results[0][0].shape[0] == 3) # number of datasets (ref + target)
 
 
 if __name__  == '__main__':
