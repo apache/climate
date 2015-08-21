@@ -28,9 +28,6 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
-import ssl
-if hasattr(ssl, '_create_unverified_context'):
-  ssl._create_default_https_context = ssl._create_unverified_context
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
 # This way we can easily adjust the time span of the retrievals
