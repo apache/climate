@@ -25,6 +25,8 @@ from metrics import Metric, UnaryMetric, BinaryMetric
 from dataset import Dataset, Bounds
 import ocw.dataset_processor as DSP
 
+import numpy.ma as ma
+
 logger = logging.getLogger(__name__)
 
 class Evaluation(object):
@@ -285,7 +287,7 @@ class Evaluation(object):
 
                     run_result = metric.run(new_ref, new_tar)
                     results[-1][-1].append(run_result)
-        return results
+        return convert_evaluation_result(results, subregion=True)
 
     def _run_no_subregion_evaluation(self):
         results = []
@@ -294,7 +296,7 @@ class Evaluation(object):
             for metric in self.metrics:
                 run_result = metric.run(self.ref_dataset, target)
                 results[-1].append(run_result)
-        return results
+        return convert_evaluation_result(results)
 
     def _run_unary_metric_evaluation(self):
         unary_results = []
@@ -306,7 +308,7 @@ class Evaluation(object):
 
             for target in self.target_datasets:
                 unary_results[-1].append(metric.run(target))
-        return unary_results
+        return convert_unary_evaluation_result(unary_results)
 
     def _run_subregion_unary_evaluation(self):
         unary_results = []
@@ -330,7 +332,7 @@ class Evaluation(object):
                 for t in range(len(self.target_datasets)):
                     unary_results[-1][-1].append(metric.run(new_targets[t][i]))
 
-        return unary_results
+        return convert_unary_evaluation_result(unary_results, subregion = True)
 
     def __str__(self):
         formatted_repr = (
@@ -348,4 +350,66 @@ class Evaluation(object):
             [str(m) for m in self.unary_metrics],
             str(self.subregions)
         )
+
+def convert_evaluation_result(evaluation_result, subregion = False):
+    if not subregion:
+        nmodel = len(evaluation_result)
+        nmetric = len(evaluation_result[0])
+        results = [] 
+        for imetric in range(nmetric):
+            result_shape = list(evaluation_result[0][imetric].shape)
+            result_shape.insert(0, nmodel)
+            result = ma.zeros(result_shape)
+            for imodel in range(nmodel):
+                result[imodel,:] = evaluation_result[imodel][imetric]
+            results.append(result)
+        return results
+    else:
+        nmodel = len(evaluation_result)
+        nmetric = len(evaluation_result[0])
+        nsubregion = len(evaluation_result[0][0])
+
+        results = []
+        for isubregion in range(nsubregion):
+            subregion_results = []
+            for imetric in range(nmetric):
+                result_shape = list(evaluation_result[0][imetric][isubregion].shape)
+                result_shape.insert(0, nmodel)
+                result = ma.zeros(result_shape)
+                for imodel in range(nmodel):
+                    result[imodel,:] = evaluation_result[imodel][imetric][isubregion]
+                subregion_results.append(result)
+            results.append(subregion_results)
+        return results
+             
+def convert_unary_evaluation_result(evaluation_result, subregion = False):
+    if not subregion:
+        nmetric = len(evaluation_result)
+        nmodel = len(evaluation_result[0])
+        results = []
+        for imetric in range(nmetric):
+            result_shape = list(evaluation_result[imetric][0].shape)
+            result_shape.insert(0, nmodel)
+            result = ma.zeros(result_shape)
+            for imodel in range(nmodel):
+                result[imodel,:] = evaluation_result[imetric][imodel]
+            results.append(result)
+        return results
+    else:
+        nmetric = len(evaluation_result)
+        nsubregion = len(evaluation_result[0])
+        nmodel = len(evaluation_result[0][0])
+
+        results = []
+        for isubregion in range(nsubregion):
+            subregion_results = []
+            for imetric in range(nmetric):
+                result_shape = list(evaluation_result[imetric][isubregion][0].shape)
+                result_shape.insert(0, nmodel)
+                result = ma.zeros(result_shape)
+                for imodel in range(nmodel):
+                    result[imodel,:] = evaluation_result[imetric][isubregion][imodel]
+                subregion_results.append(result)
+            results.append(subregion_results)
+        return results
 
