@@ -288,22 +288,28 @@ def select_obs_screen(header):   #TODO: if the observation is already selected, 
     screen.addstr(8, 2, "|D-ID| - |P-ID| - |Database")
     screen.addstr(9, 2, "|----| - |----| - |--------")
     all_obs_info = rcmed.get_parameters_metadata()
+    new_all_obs_info = []
+    for each in all_obs_info:
+        if not each['parameter_id'] in ['72', '73', '74', '75', '80', '42', '81', '84', '85', '86', '89', '90', '91', '94', '95', '96', '97', '98', '99', '100', '101', '103', '106']:
+            new_all_obs_info.append(each)
+    all_obs_info = new_all_obs_info
+    del new_all_obs_info
     try:
          for position, obs_info in enumerate(all_obs_info):
-              dataset_id = obs_info['dataset_id']
-              parameter_id = obs_info['parameter_id']
-              database = obs_info['database']
-              line = "|{0:>4}| - |{1:>4}| - |{2}".format(dataset_id, parameter_id, database)
-              if position <= 25:
-                   screen.addstr(10 + position, 2, line)
-              elif position > 25 and position <= 50:
-                   screen.addstr(8, 50, "|D-ID| - |P-ID| - |Database")
-                   screen.addstr(9, 50, "|----| - |----| - |--------")
-                   screen.addstr(10 + position - 26, 50, line)
-              else:
-                   screen.addstr(8, 100, "|D-ID| - |P-ID| - |Database")
-                   screen.addstr(9, 100, "|----| - |----| - |--------")
-                   screen.addstr(10 + position - 51, 100, line)
+            dataset_id = obs_info['dataset_id']
+            parameter_id = obs_info['parameter_id']
+            database = obs_info['database']
+            line = "|{0:>4}| - |{1:>4}| - |{2}".format(dataset_id, parameter_id, database)
+            if position <= 25:
+                 screen.addstr(10 + position, 2, line)
+            elif position > 25 and position <= 50:
+                 screen.addstr(8, 50, "|D-ID| - |P-ID| - |Database")
+                 screen.addstr(9, 50, "|----| - |----| - |--------")
+                 screen.addstr(10 + position - 26, 50, line)
+            else:
+                 screen.addstr(8, 100, "|D-ID| - |P-ID| - |Database")
+                 screen.addstr(9, 100, "|----| - |----| - |--------")
+                 screen.addstr(10 + position - 51, 100, line)
     except:
          ready_screen("select_obs_screen")
          screen.addstr(1, 1, header + " > Select Observation ")
