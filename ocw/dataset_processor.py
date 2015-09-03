@@ -29,7 +29,80 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def temporal_rebin(target_dataset, temporal_resolution):
+def temporal_subset(month_start, month_end, target_dataset, average_each_year=False):
+    """ Temporally subset data given month_index.
+
+    :param month_start: An integer for beginning month (Jan=1)
+    :type month_start: :class:`int`
+
+    :param month_end: An integer for ending month (Jan=1)
+    :type month_end: :class:`int`
+
+    :param target_dataset: Dataset object that needs temporal subsetting
+    :type target_dataset: Open Climate Workbench Dataset Object
+
+    :param average_each_year: If True, output dataset is averaged for each year
+    :type average_each_year: :class:'boolean'
+
+    :returns: A temporal subset OCW Dataset
+    :rtype: Open Climate Workbench Dataset Object
+    """
+
+    if month_start > month_end:
+        month_index = range(month_start,13)
+        month_index.extend(range(1, month_end+1))
+    else:
+        month_index = range(month_start, month_end+1)
+
+    dates = target_dataset.times
+    months = np.array([d.month for d in dates])
+    time_index = []
+    for m_value in month_index:
+        time_index = np.append(time_index, np.where(months == m_value)[0])
+        if m_value == month_index[0]:
+            time_index_first = np.min(np.where(months == m_value)[0])
+        if m_value == month_index[-1]:
+            time_index_last = np.max(np.where(months == m_value)[0])
+
+    time_index = np.sort(time_index)
+
+    time_index = time_index[np.where((time_index >= time_index_first) & (time_index <= time_index_last))]
+
+    time_index = list(time_index)
+
+    new_dataset = ds.Dataset(target_dataset.lats,
+                             target_dataset.lons,
+                             target_dataset.times[time_index],
+                             target_dataset.values[time_index,:],
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name)
+
+    if average_each_year:
+        nmonth = len(month_index)
+        ntime  = new_dataset.times.size
+        nyear = ntime/nmonth
+        averaged_time = []              
+        ny, nx = target_dataset.values.shape[1:]
+        averaged_values =ma.zeros([nyear, ny, nx])
+        for iyear in np.arange(nyear):
+            # centered time index of the season between month_start and month_end in each year
+            center_index = int(nmonth/2)+iyear*nmonth   
+            if nmonth == 1:
+                center_index = iyear
+            averaged_time.append(new_dataset.times[center_index]) 
+            averaged_values[iyear,:] = ma.average(new_dataset.values[nmonth*iyear:nmonth*iyear+nmonth,:], axis=0)
+        new_dataset = ds.Dataset(target_dataset.lats,
+                                 target_dataset.lons,
+                                 np.array(averaged_time),
+                                 averaged_values,
+                                 variable=target_dataset.variable,
+                                 units=target_dataset.units,
+                                 name=target_dataset.name)
+    
+    return new_dataset
+
+def temporal_rebin(target_dataset, temporal_resolution):     
     """ Rebin a Dataset to a new temporal resolution
     
     :param target_dataset: Dataset object that needs temporal rebinned
@@ -61,8 +134,10 @@ def temporal_rebin(target_dataset, temporal_resolution):
                              target_dataset.lons, 
                              binned_dates, 
                              binned_values,
-                             target_dataset.variable,
-                             target_dataset.name)
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name,
+                             origin=target_dataset.origin)
     
     return new_dataset
 
@@ -116,13 +191,18 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                                    new_longitudes, 
                                    target_dataset.times, 
                                    new_values,
-                                   target_dataset.variable,
-                                   target_dataset.name)
+                                   variable=target_dataset.variable,
+                                   units=target_dataset.units,
+                                   name=target_dataset.name,
+                                   origin=target_dataset.origin)
     return regridded_dataset
 
 def ensemble(datasets):
     """
     Generate a single dataset which is the mean of the input datasets
+
+    An ensemble datasets combines input datasets assuming the all have
+    similar shape, dimensions, and units. 
     
     :param datasets: Datasets to be used to compose the ensemble dataset from.
         All Datasets must be the same shape.
@@ -133,18 +213,19 @@ def ensemble(datasets):
     """
     _check_dataset_shapes(datasets)
     dataset_values = [dataset.values for dataset in datasets]
-    ensemble_values = np.mean(dataset_values, axis=0)
+    ensemble_values = ma.mean(dataset_values, axis=0)
     
     # Build new dataset object from the input datasets and the ensemble values and return it
     ensemble_dataset = ds.Dataset(datasets[0].lats, 
                                   datasets[0].lons, 
                                   datasets[0].times,
                                   ensemble_values,
+                                  units=datasets[0].units,
                                   name="Dataset Ensemble")
     
     return ensemble_dataset
 
-def subset(subregion, target_dataset):
+def subset(subregion, target_dataset, subregion_name=None):
     '''Subset given dataset(s) with subregion information
 
     :param subregion: The Bounds with which to subset the target Dataset. 
@@ -153,18 +234,52 @@ def subset(subregion, target_dataset):
     :param target_dataset: The Dataset object to subset.
     :type target_dataset: :class:`dataset.Dataset`
 
+    :param subregion_name: The subset-ed Dataset name
+    :type subregion_name: :mod:`string`
+
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
 
     :raises: ValueError
     '''
 
+    if not subregion.start:
+        subregion.start = target_dataset.times[0] 
+        subregion.end = target_dataset.times[-1]
+        
     # Ensure that the subregion information is well formed
     _are_bounds_contained_by_dataset(subregion, target_dataset)
 
     # Get subregion indices into subregion data
     dataset_slices = _get_subregion_slice_indices(subregion, target_dataset)
 
+    if not subregion_name:
+        subregion_name = target_dataset.name
+
+   # Slice the values array with our calculated slice indices
+    if target_dataset.values.ndim == 2:
+        subset_values = ma.zeros([len(target_dataset.values[
+            dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
+            len(target_dataset.values[
+                dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+
+        subset_values = target_dataset.values[
+            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+
+    elif target_dataset.values.ndim == 3:
+        subset_values = ma.zeros([len(target_dataset.values[
+            dataset_slices["time_start"]:dataset_slices["time_end"]]),
+            len(target_dataset.values[
+                dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
+            len(target_dataset.values[
+                dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+        
+        subset_values = target_dataset.values[
+            dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
+            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+            
     # Build new dataset with subset information
     return ds.Dataset(
         # Slice the lats array with our calculated slice indices
@@ -177,15 +292,15 @@ def subset(subregion, target_dataset):
         target_dataset.times[dataset_slices["time_start"]: 
                             dataset_slices["time_end"]+ 1],
         # Slice the values array with our calculated slice indices
-        target_dataset.values[
-            dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
-            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1],
-        target_dataset.variable,
-        target_dataset.name
+        subset_values,
+        variable=target_dataset.variable,
+        units=target_dataset.units,
+        name=subregion_name,
+        origin=target_dataset.origin
     )
 
-def safe_subset(subregion, target_dataset):
+
+def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
 
     A standard subset requires that the provided subregion be entirely contained
@@ -197,6 +312,9 @@ def safe_subset(subregion, target_dataset):
 
     :param target_dataset: The Dataset object to subset.
     :type target_dataset: :class:`dataset.Dataset`
+
+    :param subregion_name: The subset-ed Dataset name
+    :type subregion_name: :mod:`string`
 
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
@@ -217,13 +335,15 @@ def safe_subset(subregion, target_dataset):
     if subregion.lon_max > lon_max:
         subregion.lon_max = lon_max
 
-    if subregion.start < start:
-        subregion.start = start
+    if subregion.start: 
+        if subregion.start < start:
+            subregion.start = start
 
-    if subregion.end > end:
-        subregion.end = end
+    if subregion.end:
+        if subregion.end > end:
+            subregion.end = end
 
-    return subset(subregion, target_dataset)
+    return subset(subregion, target_dataset, subregion_name)
 
 def normalize_dataset_datetimes(dataset, timestep):
     ''' Normalize Dataset datetime values.
@@ -247,8 +367,10 @@ def normalize_dataset_datetimes(dataset, timestep):
         dataset.lons,
         np.array(new_times),
         dataset.values,
-        dataset.variable,
-        dataset.name
+        variable=dataset.variable,
+        units=dataset.units,
+        name=dataset.name,
+        origin=dataset.origin
     )
 
 def write_netcdf(dataset, path, compress=True):
@@ -295,8 +417,145 @@ def write_netcdf(dataset, path, compress=True):
     lons[:] = dataset.lons
     times[:] = netCDF4.date2num(dataset.times, times.units)
     values[:] = dataset.values
+    values.units = dataset.units
 
     out_file.close()
+
+def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, 
+                                                   model_dataset_array, model_names,
+                                                   path,
+                                                   subregions = None, subregion_array = None,
+                                                   ref_subregion_mean = None, ref_subregion_std = None, 
+                                                   model_subregion_mean = None, model_subregion_std = None):
+    #Write multiple reference and model datasets and their subregional means and standard deivations in a NetCDF file.
+
+    #:To be updated 
+    #
+    out_file = netCDF4.Dataset(path, 'w', format='NETCDF4')
+
+    dataset = ref_dataset
+    # Set attribute lenghts
+    nobs = 1
+    nmodel = len(model_dataset_array)
+    lat_len = len(dataset.lats)
+    lon_len = len(dataset.lons)
+    time_len = len(dataset.times)
+
+    if not subregions == None:
+        nsubregion = len(subregions)
+                 
+    # Create attribute dimensions
+    lat_dim = out_file.createDimension('y', lat_len)
+    lon_dim = out_file.createDimension('x', lon_len)
+    time_dim = out_file.createDimension('time', time_len)
+
+    # Create variables and store the values
+    lats = out_file.createVariable('lat', 'f8', ('y'))
+    lats[:] = dataset.lats
+    lons = out_file.createVariable('lon', 'f8', ('x'))
+    lons[:] = dataset.lons
+    times = out_file.createVariable('time', 'f8', ('time',))
+    times.units = "days since %s" % dataset.times[0]
+    times[:] = netCDF4.date2num(dataset.times, times.units)
+
+    #mask_array = np.zeros([time_len, lat_len, lon_len])
+    #for iobs in np.arange(nobs):
+    #    index = np.where(ref_dataset_array[iobs].values.mask[:] == True)
+    #    mask_array[index] = 1
+    out_file.createVariable(ref_name, 'f8', ('time','y','x'))
+    out_file.variables[ref_name][:] = ref_dataset.values
+    out_file.variables[ref_name].units = ref_dataset.units
+    for imodel in np.arange(nmodel):
+        out_file.createVariable(model_names[imodel], 'f8', ('time','y','x'))
+        #out_file.variables[model_names[imodel]][:] = ma.array(model_dataset_array[imodel].values, mask = mask_array)
+        out_file.variables[model_names[imodel]][:] = model_dataset_array[imodel].values
+        out_file.variables[model_names[imodel]].units = model_dataset_array[imodel].units
+
+    if not subregions == None:
+        out_file.createVariable('subregion_array', 'i4', ('y','x'))
+        out_file.variables['subregion_array'][:] = subregion_array[:]
+        nsubregion = len(subregions)
+        out_file.createDimension('nsubregion', nsubregion)
+        out_file.createDimension('nobs', nobs)
+        out_file.createDimension('nmodel', nmodel)
+        out_file.createVariable('obs_subregion_mean', 'f8', ('nobs','time','nsubregion'))
+        out_file.variables['obs_subregion_mean'][:] = ref_subregion_mean[:]
+        out_file.createVariable('obs_subregion_std', 'f8', ('nobs','time','nsubregion'))
+        out_file.variables['obs_subregion_std'][:] = ref_subregion_std[:]
+        out_file.createVariable('model_subregion_mean', 'f8', ('nmodel','time','nsubregion'))
+        out_file.variables['model_subregion_mean'][:] = model_subregion_mean[:]
+        out_file.createVariable('model_subregion_std', 'f8', ('nmodel','time','nsubregion'))
+        out_file.variables['model_subregion_std'][:] = model_subregion_std[:]
+
+    out_file.close()
+
+def water_flux_unit_conversion(dataset):
+    ''' Convert water flux variables units as necessary
+
+    Convert full SI units water flux units to more common units.
+
+    :param dataset: The dataset to convert.
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: A Dataset with values converted to new units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+    water_flux_variables = ['pr', 'prec','evspsbl', 'mrro', 'swe']
+    variable = dataset.variable.lower()
+
+    if any(sub_string in variable for sub_string in water_flux_variables):
+        dataset_units = dataset.units.lower()
+        if variable in 'swe':
+            if any(unit in dataset_units for unit in ['m', 'meter']):
+                dataset.values = 1.e3 * dataset.values
+                dataset.units = 'km'
+        else:
+            if any(unit in dataset_units 
+                for unit in ['kg m-2 s-1', 'mm s-1', 'mm/sec']):
+                dataset.values = 86400. * dataset.values
+                dataset.units = 'mm/day'
+
+    return dataset
+
+def temperature_unit_conversion(dataset):
+    ''' Convert temperature units as necessary
+
+    Automatically convert Celcius to Kelvin in the given dataset.
+
+    :param dataset: The dataset for which units should be updated.
+    :type dataset; :class:`dataset.Dataset`
+
+    :returns: The dataset with (potentially) updated units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+    temperature_variables = ['temp','tas','tasmax','taxmin','T']
+    variable = dataset.variable.lower()
+
+    if any(sub_string in variable for sub_string in temperature_variables):
+        dataset_units = dataset.units.lower()
+        if dataset_units == 'c':
+            dataset.values = 273.15 + dataset.values
+            dataset.units = 'K'
+
+    return dataset
+
+def variable_unit_conversion(dataset):
+    ''' Convert water flux or temperature variables units as necessary
+    
+    For water flux variables, convert full SI units water flux units to more common units.
+    For temperature, convert Celcius to Kelvin.
+
+    :param dataset: The dataset to convert.
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: A Dataset with values converted to new units.
+    :rtype: :class:`dataset.Dataset`
+    '''
+
+    dataset = water_flux_unit_conversion(dataset)
+    dataset = temperature_unit_conversion(dataset)
+    
+    return dataset
 
 def _rcmes_normalize_datetimes(datetimes, timestep):
     """ Normalize Dataset datetime values.
@@ -332,6 +591,24 @@ def _rcmes_normalize_datetimes(datetimes, timestep):
 
 
     return normalDatetimes
+
+def mask_missing_data(dataset_array):
+    ''' Check missing values in observation and model datasets.
+    If any of dataset in dataset_array has missing values at a grid point,
+    the values at the grid point in all other datasets are masked.
+    :param dataset_array: an array of OCW datasets
+    '''
+    mask_array = np.zeros(dataset_array[0].values.shape)
+    for dataset in dataset_array:
+        index = np.where(dataset.values.mask == True)
+        if index[0].size >0:
+            mask_array[index] = 1
+    masked_array = []
+    for dataset in dataset_array:
+        dataset.values = ma.array(dataset.values, mask=mask_array)
+        masked_array.append(dataset)
+    return [masked_dataset for masked_dataset in masked_array]
+
 
 def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
     '''

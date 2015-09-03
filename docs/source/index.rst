@@ -20,6 +20,7 @@ Contents:
    ocw/utils
    data_source/data_sources
    ui-backend/backend.rst
+   config/config_overview
 
 
 Indices and tables

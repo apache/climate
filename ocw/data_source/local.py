@@ -17,8 +17,11 @@
 
 import calendar
 from datetime import timedelta ,datetime
+from time import strptime
+from glob import glob
 import re
 import string
+import os
 
 from ocw.dataset import Dataset
 import ocw.utils as utils
@@ -109,8 +112,53 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     )
     raise ValueError(error)
 
+def load_WRF_2d_files(file_path,
+                      filename_pattern,
+                      variable_name,
+                      name=''):
+    ''' Load multiple WRF (or nuWRF) original output files containing 2D fields such as precipitation and surface variables into a Dataset.
+    The dataset can be spatially subset.
+    :param file_path: Directory to the NetCDF file to load.
+    :type file_path: :mod:`string`
+    :param filename_pattern: Path to the NetCDF file to load.
+    :type filename_pattern: :list:`string`
+    :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+    :returns: An OCW Dataset object with the requested variable's data from
+        the NetCDF file.
+    :rtype: :class:`dataset.Dataset`
+    :raises ValueError: 
+    '''                  
+    
+    WRF_files = []
+    for pattern in filename_pattern:
+        WRF_files.extend(glob(file_path + pattern))
+    WRF_files.sort()
+  
+    file_object_first = netCDF4.Dataset(WRF_files[0])
+    lats = file_object_first.variables['XLAT'][0,:]
+    lons = file_object_first.variables['XLONG'][0,:]
+
+    times = []
+    for ifile, file in enumerate(WRF_files):
+        file_object = netCDF4.Dataset(file)
+        time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")     
+        for ihour in numpy.arange(24):
+            times.append(datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
+        values0= file_object.variables[variable_name][:]
+        if ifile == 0:
+            values = file_object.variables[variable_name][:]
+        else:
+            values = numpy.concatenate((values, file_object.variables[variable_name][:])) 
+        file_object.close()
+    times = numpy.array(times)
+    return Dataset(lats, lons, times, values, variable_name, name=name)
+
 def load_file(file_path,
               variable_name,
+              variable_unit = None,
               elevation_index=0,
               name='',
               lat_name=None,
@@ -123,6 +171,9 @@ def load_file(file_path,
 
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
+
+    :param variable_unit: (Optional) The variable unit to load from the NetCDF file.
+    :type variable_unit: :mod:`string`
 
     :param elevation_index: (Optional) The elevation index for which data should
         be returned. Climate data is often times 4 dimensional data. Some
@@ -182,6 +233,7 @@ def load_file(file_path,
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
+    variable_unit = netcdf.variables[variable_name].units
 
     # If the values are 4D then we need to strip out the elevation index
     if len(values.shape) == 4:
@@ -206,4 +258,79 @@ def load_file(file_path,
         else:
             values = values [:,:,:,elevation_index]
 
-    return Dataset(lats, lons, times, values, variable_name, name=name)
+    origin = {
+        'source': 'local',
+        'path': file_path,
+        'lat_name': lat_name,
+        'lon_name': lon_name,
+        'time_name': time_name
+    }
+    if elevation_index != 0: origin['elevation_index'] = elevation_index
+
+    return Dataset(lats, lons, times, values, variable=variable_name,
+                   units=variable_unit, name=name, origin=origin)
+
+def load_multiple_files(file_path,
+                        filename_pattern,
+                        variable_name,
+                        dataset_name='ref',
+                        variable_unit=None,
+                        lat_name=None,
+                        lon_name=None,
+                        time_name=None):
+    ''' load multiple netcdf files with common filename pattern and return an array of OCW datasets
+
+    :param file_path: directory name where the NetCDF files to load are stored.
+    :type file_path: :mod:`string`
+    :param filename_pattern: common file name patterns
+    :type filename_pattern: :list:`string`
+    :param dataset_name: a name of dataset when reading a single file 
+    :type dataset_name: :mod:'string'
+    :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+    :param variable_unit: (Optional) The variable unit to load from the NetCDF file.
+    :type variable_unit: :mod:`string`
+    :param elevation_index: (Optional) The elevation index for which data should
+        be returned. Climate data is often times 4 dimensional data. Some
+        datasets will have readins at different height/elevation levels. OCW
+        expects 3D data so a single layer needs to be stripped out when loading.
+        By default, the first elevation layer is used. If desired you may
+        specify the elevation value to use.
+    :param lat_name: (Optional) The latitude variable name to extract from the
+        dataset.
+    :type lat_name: :mod:`string`
+    :param lon_name: (Optional) The longitude variable name to extract from the
+        dataset.
+    :type lon_name: :mod:`string`
+    :param time_name: (Optional) The time variable name to extract from the
+        dataset.
+    :type time_name: :mod:`string`
+    :returns: An array of OCW Dataset objects, an array of dataset names
+    :rtype: :class:`list`
+    '''
+
+    data_filenames = []
+    for pattern in filename_pattern:
+        data_filenames.extend(glob(file_path + pattern))
+    data_filenames.sort()
+
+    # number of files
+    ndata = len(data_filenames)
+    if ndata == 1:
+        data_name = [dataset_name]
+    else:
+        data_name = []
+        data_filenames_reversed = []
+        for element in data_filenames:
+            data_filenames_reversed.append(element[::-1])
+        prefix = os.path.commonprefix(data_filenames)
+        postfix = os.path.commonprefix(data_filenames_reversed)[::-1]
+        for element in data_filenames:
+            data_name.append(element.replace(prefix,'').replace(postfix,''))
+
+    datasets = []
+    for ifile,filename in enumerate(data_filenames):
+        datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
+                        lat_name=lat_name, lon_name=lon_name, time_name=time_name))
+    
+    return datasets

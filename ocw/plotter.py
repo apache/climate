@@ -238,7 +238,7 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
     ''' Draw subregion domain(s) on a map.
 
     :param subregions: The subregion objects to plot on the map.
-    :type subregions: :class:`list` of subregion objects
+    :type subregions: :class:`list` of subregion objects (Bounds objects)
 
     :param lats: Array of latitudes values.
     :type lats: :class:`numpy.ndarray`
@@ -322,8 +322,8 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         nlats, nlons = domain.shape
         domain = ma.masked_equal(domain, 0)
-        reglats = np.linspace(reg.latmin, reg.latmax, nlats)
-        reglons = np.linspace(reg.lonmin, reg.lonmax, nlons)
+        reglats = np.linspace(reg.lat_min, reg.lat_max, nlats)
+        reglons = np.linspace(reg.lon_min, reg.lon_max, nlons)
         reglons, reglats = np.meshgrid(reglons, reglats)
 
         # Convert to to projection coordinates. Not really necessary
@@ -336,7 +336,7 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         # Label the subregion
         xm, ym = x.mean(), y.mean()
-        m.plot(xm, ym, marker='$%s$' %(reg.name), markersize=12, color='k')
+        m.plot(xm, ym, marker='$%s$' %("R"+str(i+1)), markersize=12, color='k')
 
     # Add the title
     ax.set_title(ptitle)
@@ -373,7 +373,7 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     :param xlabel: (Optional) x-axis title.
     :type xlabel: :mod:`string`
     
-    :param ylabel: (Optional) y-ayis title.
+    :param ylabel: (Optional) y-axis title.
     :type ylabel: :mod:`string`
 
     :param ptitle: (Optional) plot title.
@@ -488,13 +488,93 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
     fig.clf()
 
+def draw_barchart(results, yvalues, fname, ptitle='', fmt='png', 
+                     xlabel='', ylabel=''):
+    ''' Draw a barchart.
+
+    :param results: 1D array of  data.
+    :type results: :class:`numpy.ndarray`
+
+    :param yvalues: List of y-axis labels
+    :type times: :class:`list` 
+
+    :param fname: Filename of the plot.
+    :type fname: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param xlabel: (Optional) x-axis title.
+    :type xlabel: :mod:`string`
+    
+    :param ylabel: (Optional) y-axis title.
+    :type ylabel: :mod:`string`
+
+    '''
+
+    y_pos = list(range(len(yvalues))) 
+    fig = plt.figure() 
+    fig.set_size_inches((11., 8.5))
+    fig.dpi = 300
+    ax = plt.subplot(111)
+    plt.barh(y_pos, results, align="center", height=0.8, linewidth=0)
+    plt.yticks(y_pos, yvalues)
+    plt.tick_params(axis="both", which="both", bottom="on", top="off",labelbottom="on", left="off", right="off", labelleft="on")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    ymin = min(y_pos) 
+    ymax = max(y_pos)
+    ymin = min((ymin - ((ymax - ymin) * 0.1)/2),0.5) 
+    ymax = ymax + ((ymax - ymin) * 0.1)
+    ax.set_ylim((ymin, ymax))
+    plt.xlabel(xlabel)
+    plt.tight_layout()
+       
+    # Save the figure
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()
+
+def draw_marker_on_map(lat, lon, fname, fmt='png', location_name=' ',gridshape=(1,1)):
+    '''
+    Purpose::
+        Draw a marker on a map
+
+    Input::
+        lat - latitude for plotting a marker
+        lon - longitude for plotting a marker
+        fname  - a string specifying the filename of the plot
+    '''   
+    fig = plt.figure()
+    fig.dpi = 300
+    ax = fig.add_subplot(111)
+    
+    m = Basemap(projection='cyl', resolution = 'c', llcrnrlat =lat-30, urcrnrlat = lat+30, llcrnrlon = lon-60, urcrnrlon = lon+60)
+    m.drawcoastlines(linewidth=1)
+    m.drawcountries(linewidth=1)
+    m.drawmapboundary(fill_color='aqua')
+    m.fillcontinents(color='coral',lake_color='aqua')
+    m.ax = ax
+   
+    xpt,ypt = m(lon,lat)
+    m.plot(xpt,ypt,'bo')  # plot a blue dot there
+    # put some text next to the dot, offset a little bit
+    # (the offset is in map projection coordinates)
+    plt.text(xpt+0.5, ypt+1.5,location_name+'\n(lon: %5.1f, lat: %3.1f)' % (lon, lat)) 
+                       
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()
+
 def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
                      clabel='', ptitle='', subtitles=None, cmap=None,
                      clevs=None, nlevs=10, parallels=None, meridians=None,
                      extend='neither', aspect=8.5/2.5):
     ''' Draw a multiple panel contour map plot.
 
-    :param dataset: 3D array of data to be plotted with shape (nT, nLon, nLat).
+    :param dataset: 3D array of data to be plotted with shape (nT, nLat, nLon).
     :type dataset: :class:`numpy.ndarray`
 
     :param lats: Array of latitudes values.
@@ -941,3 +1021,36 @@ class TaylorDiagram(object):
         r = np.linspace(std1, std2)
 
         return self.ax.plot(t,r,'red',linewidth=2)
+
+def draw_histogram(dataset_array, data_names, fname, fmt='png', nbins=10):
+    '''
+    Purpose::
+        Draw histograms
+
+    Input::
+        dataset_array - a list of data values [data1, data2, ....]
+        data_names    - a list of data names  ['name1','name2',....]
+        fname  - a string specifying the filename of the plot
+        bins - number of bins
+    '''    
+    fig = plt.figure()
+    fig.dpi = 300
+    ndata = len(dataset_array)
+   
+    data_min = 500.
+    data_max = 0.
+ 
+    for data in dataset_array:
+        data_min = np.min([data_min,data.min()]) 
+        data_max = np.max([data_max,data.max()]) 
+
+    bins = np.linspace(np.round(data_min), np.round(data_max+1), nbins)
+    for idata,data in enumerate(dataset_array):
+        ax = fig.add_subplot(ndata, 1, idata+1)
+        ax.hist(data, bins, alpha = 0.5, label=data_names[idata], normed = True)
+        leg = ax.legend()
+        leg.get_frame().set_alpha(0.5)
+        ax.set_xlim([data_min-(data_max-data_min)*0.15, data_max+(data_max-data_min)*0.15])
+        
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+ 

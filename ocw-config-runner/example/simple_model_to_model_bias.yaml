@@ -1,0 +1,35 @@
+evaluation:
+    temporal_time_delta: 365
+    spatial_regrid_lats: !!python/tuple [-20, 20, 1]
+    spatial_regrid_lons: !!python/tuple [-20, 20, 1]
+
+datasets:
+    reference:
+        data_source: local
+        file_count: 1
+        path: /tmp/AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+        variable: tasmax
+
+    targets:
+        - data_source: local
+          file_count: 1
+          path: /tmp/AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc
+          variable: tasmax
+metrics:
+    - Bias
+
+plots:
+    - type: contour
+      results_indices:
+          - !!python/tuple [0, 0]
+      lats:
+          range_min: -20
+          range_max: 20
+          range_step: 1
+      lons:
+          range_min: -20
+          range_max: 20
+          range_step: 1
+      output_name: wrf_bias_compared_to_knmi
+      optional_args:
+          gridshape: !!python/tuple [6, 6]

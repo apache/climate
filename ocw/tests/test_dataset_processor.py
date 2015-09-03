@@ -174,6 +174,7 @@ class TestNormalizeDatasetDatetimes(unittest.TestCase):
 class TestSubset(unittest.TestCase):
     def setUp(self):
         self.target_dataset = ten_year_monthly_dataset()
+        self.name = 'foo'
 
         self.subregion = ds.Bounds(
             -81, 81, 
@@ -202,7 +203,16 @@ class TestSubset(unittest.TestCase):
         self.assertEqual(subset.lons.shape[0], 162)
         self.assertEqual(subset.times.shape[0], 37)
         self.assertEqual(subset.values.shape, (37, 82, 162))
-    
+
+    def test_subset_name(self):
+        subset = dp.subset(self.subregion, self.target_dataset)
+        self.assertEqual(subset.name, self.name)
+
+    def test_subset_name_propagation(self):
+        subset_name = 'foo_subset_name'
+        subset = dp.subset(self.subregion, self.target_dataset,subset_name)
+        self.assertEqual(subset.name, subset_name)
+
     def test_subset_using_non_exact_spatial_bounds(self):
         index_slices = dp._get_subregion_slice_indices(self.non_exact_spatial_subregion,  self.target_dataset)
         control_index_slices = {"lat_start"  : 5,
@@ -236,6 +246,7 @@ class TestSafeSubset(unittest.TestCase):
                                          times,
                                          values,
                                          variable="test variable name",
+                                         units='test variable units',
                                          name='foo')
 
         self.spatial_out_of_bounds = ds.Bounds(
@@ -364,7 +375,7 @@ def ten_year_monthly_dataset():
     # Ten Years of monthly data
     times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
-    input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name", name='foo')
+    input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name", units='test variable units', name='foo')
     return input_dataset
 
 def ten_year_monthly_15th_dataset():
@@ -373,7 +384,7 @@ def ten_year_monthly_15th_dataset():
     # Ten Years of monthly data
     times = np.array([datetime.datetime(year, month, 15) for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
-    input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name")
+    input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name", units='test variable units')
     return input_dataset
 
 def two_year_daily_dataset():
@@ -381,7 +392,7 @@ def two_year_daily_dataset():
     lons = np.array(range(-179, 180, 2))
     times = np.array([datetime.datetime(2001, 1, 1) + datetime.timedelta(days=d) for d in range(730)])
     values = np.ones([len(times), len(lats), len(lons)])
-    dataset = ds.Dataset(lats, lons, times, values, variable='random data')
+    dataset = ds.Dataset(lats, lons, times, values, variable='random data',units='test variable units')
     return dataset    
 
 def two_year_daily_2hr_dataset():
@@ -389,7 +400,7 @@ def two_year_daily_2hr_dataset():
     lons = np.array(range(-179, 180, 2))
     times = np.array([datetime.datetime(2001, 1, 1) + datetime.timedelta(days=d, hours=2) for d in range(730)])
     values = np.ones([len(times), len(lats), len(lons)])
-    dataset = ds.Dataset(lats, lons, times, values, variable='random data')
+    dataset = ds.Dataset(lats, lons, times, values, variable='random data', units='test variable units')
     return dataset    
 
 def build_ten_cube_dataset(value):

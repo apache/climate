@@ -35,24 +35,21 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "wrf_bias_compared_to_knmi"
 
-# Download necessary NetCDF files if not present
-if path.exists(FILE_1):
-    pass
-else:
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+FILE_1_PATH = path.join('/tmp', FILE_1)
+FILE_2_PATH = path.join('/tmp', FILE_2)
 
-if path.exists(FILE_2):
-    pass
-else:
-    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+if not path.exists(FILE_1_PATH):
+    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1_PATH)
+if not path.exists(FILE_2_PATH):
+    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2_PATH)
 
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
-print("Loading %s into an OCW Dataset Object" % (FILE_1,))
-knmi_dataset = local.load_file(FILE_1, "tasmax")
+print("Loading %s into an OCW Dataset Object" % (FILE_1_PATH,))
+knmi_dataset = local.load_file(FILE_1_PATH, "tasmax")
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.values.shape,))
 
-print("Loading %s into an OCW Dataset Object" % (FILE_2,))
-wrf_dataset = local.load_file(FILE_2, "tasmax")
+print("Loading %s into an OCW Dataset Object" % (FILE_2_PATH,))
+wrf_dataset = local.load_file(FILE_2_PATH, "tasmax")
 print("WRF_Dataset.values shape: (times, lats, lons) - %s \n" % (wrf_dataset.values.shape,))
 
 """ Step 2: Temporally Rebin the Data into an Annual Timestep """

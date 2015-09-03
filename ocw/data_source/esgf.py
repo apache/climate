@@ -17,6 +17,7 @@
 # under the License.
 #
 
+import os
 import urllib2
 
 from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
@@ -35,6 +36,7 @@ def load_dataset(dataset_id,
                  search_url=DEFAULT_ESGF_SEARCH,
                  elevation_index=0,
                  name='',
+                 save_path='/tmp',
                  **additional_constraints):
     ''' Load an ESGF dataset.
 
@@ -61,6 +63,9 @@ def load_dataset(dataset_id,
     :param name: (Optional) A name for the loaded dataset.
     :type name: :mod:`string`
 
+    :param save_path: (Optional) Path to where downloaded files should be saved.
+    :type save_path: :mod:`string`
+
     :param additional_constraints: (Optional) Additional key,value pairs to
         pass as constraints to the search wrapper. These can be anything found
         on the ESGF metadata page for a dataset.
@@ -78,17 +83,30 @@ def load_dataset(dataset_id,
 
     datasets = []
     for url, var in download_data:
-        _download_files([url], esgf_username, esgf_password)
-        datasets.append(local.load_file('/tmp/' + url.split('/')[-1],
+        _download_files([url],
+                        esgf_username,
+                        esgf_password,
+                        download_directory=save_path)
+
+        file_save_path = os.path.join(save_path, url.split('/')[-1])
+        datasets.append(local.load_file(file_save_path,
                                         var,
                                         name=name,
                                         elevation_index=elevation_index))
+
+    origin = {
+        'source': 'esgf',
+        'dataset_id': dataset_id,
+        'variable': variable
+    }
+    for ds in datasets:
+        ds.origin = origin
 
     return datasets
 
 def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     ''''''
-    url += '?distrib=false&type=File&dataset_id={}&variable={}'
+    url += '?type=File&dataset_id={}&variable={}'
     url = url.format(dataset_id, variable)
 
     r = requests.get(url)
