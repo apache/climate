@@ -38,7 +38,7 @@
         <Version>
             <name>Apache Open Climate Workbench 1.0</name>
             <created>2015-09-03</created>
-            <revision>1.0</revision>
+            <revision>1.0.0</revision>
         </Version>
     </release>
     <release>
