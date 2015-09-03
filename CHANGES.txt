@@ -1,6 +1,63 @@
 Apache Open Climate Workbench Change Log
 ============================================
 
+Release Notes - Apache Open Climate Workbench - Version 1.0.0
+
+** Sub-task
+    * [CLIMATE-578] - Update release docs to include documentation version bumps
+    * [CLIMATE-585] - change the bias calculations in the metrics class
+    * [CLIMATE-586] - add barchart as a plotter option
+    * [CLIMATE-587] - Unit conversion
+
+** Bug
+    * [CLIMATE-566] - Output redirects in Easy-OCW clobber install log
+    * [CLIMATE-571] - Easy-OCW checks for installed applications can fail
+    * [CLIMATE-595] - Dateutil package is not included in pip install requirements
+    * [CLIMATE-596] - Dataset variables are not propagated correctly through dataset_processor functions
+    * [CLIMATE-605] - Typo in plotter.draw_contour_map docstring
+    * [CLIMATE-607] - Config Parser tests are breaking
+    * [CLIMATE-618] - VM Build is using an old easy-ocw install script reference
+    * [CLIMATE-619] - Ubuntu easy-ocw install script issues in quiet mode
+    * [CLIMATE-636] - Bounds __str__ function doesn't return correct data format
+    * [CLIMATE-638] - Subregion_portrait example doesn't run
+    * [CLIMATE-640] - Time series with subregions example doesn't run
+    * [CLIMATE-641] - missing data handling in OCW metrics
+    * [CLIMATE-650] - Fix the ensemble calculation
+
+** Improvement
+    * [CLIMATE-467] - Handling various calendar types
+    * [CLIMATE-508] - Adding statistical downscaling capability
+    * [CLIMATE-563] - Add ESGF module to documentation 
+    * [CLIMATE-577] - Bump docs version up to 1.0.0
+    * [CLIMATE-580] - Config Based Evaluation Improvements
+    * [CLIMATE-581] - Export an evaluation to a config file
+    * [CLIMATE-582] - Add config based evaluation documentation to sphinx docs
+    * [CLIMATE-583] - Add better plot support to config based evaluations
+    * [CLIMATE-588] - Refactor config based evaluation layout
+    * [CLIMATE-594] - Add Dataset location tracking to data sources
+    * [CLIMATE-599] - Add example config based evaluation run to sphinx docs
+    * [CLIMATE-600] - Add a pylint RC file for code linting
+    * [CLIMATE-602] - Add support for multiple plot indices to config based contour map generation
+    * [CLIMATE-603] - Move simple_model_to_model_bias *.nc download to /tmp
+    * [CLIMATE-606] - Spell "indices" properly in the config parser
+    * [CLIMATE-608] - Add mailmap file to repo
+    * [CLIMATE-609] - Add source flag to dataset origin information
+    * [CLIMATE-621] - Make ESGF data source save folder configurable
+    * [CLIMATE-633] - Adding a loader to handle WRF output stored on a local disk
+    * [CLIMATE-637] - Subregion Clean up and Improvements
+    * [CLIMATE-639] - Add subregion support to config runner
+    * [CLIMATE-648] - Propagation of missing data information from each dataset
+    * [CLIMATE-651] - A new module to calculate area mean and standard deviation with given subregion information
+
+** Task
+    * [CLIMATE-567] - Update DOAP for 0.5
+    * [CLIMATE-574] - Remove .DS_Store from repo
+    * [CLIMATE-575] - Implement initial config based execution of an evaluation
+    * [CLIMATE-593] - Add ASF headers to config parser
+
+** Wish
+    * [CLIMATE-30] - Apache Open Climate Workbench Logo 
+
 
 Release Notes - Apache Open Climate Workbench - Version 0.5
 

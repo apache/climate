@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name='Apache Open Climate Workbench',
-    version='0.4',
+    version='1.0.0',
     url='http://climate.apache.org/index.html',
     author='Apache Open Climate Workbench',
     author_email='dev@climate.apache.org',
