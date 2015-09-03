@@ -1412,8 +1412,8 @@ def main_menu(model_datasets, models_info, observation_datasets, observations_in
 
 
 if __name__ == '__main__':
-     TITLE = "Project Name"
-     ORGANIZATION = "Organization Name"
+     TITLE = "RCMES CLI"
+     ORGANIZATION = "JPL/NASA - JIFRESSE/UCLA"
      screen = curses.initscr()
      model_datasets = []           #list of model dataset objects
      models_info = []              #list of dictionaries that contain information for each model
