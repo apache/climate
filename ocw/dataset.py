@@ -89,8 +89,8 @@ class Dataset:
             :class:`float`, :class:`float`).
 
         '''
-        return (float(numpy.min(self.lats)), float(numpy.max(self.lats)),
-                float(numpy.min(self.lons)), float(numpy.max(self.lons)))
+        return (float(min(self.lats)), float(max(self.lats)),
+                float(min(self.lons)), float(max(self.lons)))
 
 
     def time_range(self):
