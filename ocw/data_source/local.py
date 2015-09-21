@@ -271,19 +271,16 @@ def load_file(file_path,
                    units=variable_unit, name=name, origin=origin)
 
 def load_multiple_files(file_path,
-                        filename_pattern,
                         variable_name,
-                        dataset_name='ref',
+                        dataset_name='model',
                         variable_unit=None,
                         lat_name=None,
                         lon_name=None,
                         time_name=None):
     ''' load multiple netcdf files with common filename pattern and return an array of OCW datasets
 
-    :param file_path: directory name where the NetCDF files to load are stored.
+    :param file_path: directory name and common file name patterns where the NetCDF files to load are stored.
     :type file_path: :mod:`string`
-    :param filename_pattern: common file name patterns
-    :type filename_pattern: :list:`string`
     :param dataset_name: a name of dataset when reading a single file 
     :type dataset_name: :mod:'string'
     :param variable_name: The variable name to load from the NetCDF file.
@@ -310,8 +307,7 @@ def load_multiple_files(file_path,
     '''
 
     data_filenames = []
-    for pattern in filename_pattern:
-        data_filenames.extend(glob(file_path + pattern))
+    data_filenames.extend(glob(file_path))
     data_filenames.sort()
 
     # number of files
@@ -333,4 +329,4 @@ def load_multiple_files(file_path,
         datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
                         lat_name=lat_name, lon_name=lon_name, time_name=time_name))
     
-    return datasets
+    return datasets, data_name
