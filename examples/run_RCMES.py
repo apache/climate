@@ -86,9 +86,12 @@ if ref_data_info['data_source'] == 'rcmed':
     min_lon = np.max([min_lon, ref_dataset.lons.min()])
     max_lon = np.min([max_lon, ref_dataset.lons.max()])
 bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
-ref_dataset = dsp.subset(bounds,ref_dataset)
+
+if ref_dataset.lats.ndim !=2 and ref_dataset.lons.ndim !=2:
+    ref_dataset = dsp.subset(bounds,ref_dataset)
 for idata,dataset in enumerate(model_datasets):
-    model_datasets[idata] = dsp.subset(bounds,dataset)
+    if dataset.lats.ndim !=2 and dataset.lons.ndim !=2:
+        model_datasets[idata] = dsp.subset(bounds,dataset)
 
 # Temporaly subset both observation and model datasets for the user specified season
 month_start = time_info['month_start']
