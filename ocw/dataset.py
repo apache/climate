@@ -182,15 +182,16 @@ class Dataset:
         elif value_dim < 2:
             err_msg = "Value Array should be at least 2 dimensional.  %s dimensions found." % value_dim
         # Finally check that the Values array conforms to the proper shape
-        if value_dim == 2 and values.shape != (lat_count, lon_count):
-            err_msg = """Value Array must be of shape (times, lats, lons).
-    Expected shape (%s, %s) but received (%s, %s)""" % (lat_count,
+        if value_dim == 2:
+            if values.shape[0] != time_count and values.shape != (lat_count, lon_count):
+                err_msg = """Value Array must be of shape (lats, lons) or (times, locations).
+                Expected shape (%s, %s) but received (%s, %s)""" % (lat_count,
                                                                 lon_count,
                                                                 values.shape[0],
                                                                 values.shape[1])
         if value_dim == 3 and values.shape != (time_count, lat_count, lon_count):
             err_msg = """Value Array must be of shape (times, lats, lons).
-    Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
+            Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
                                                                 lat_count,
                                                                 lon_count,
                                                                 values.shape[0],
