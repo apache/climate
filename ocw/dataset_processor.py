@@ -156,17 +156,27 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     :returns: A new spatially regridded Dataset
     :rtype: :class:`dataset.Dataset`
     """
-    # Make masked array of shape (times, new_latitudes,new_longitudes)
-    new_values = ma.zeros([len(target_dataset.times), 
-                           len(new_latitudes), 
-                           len(new_longitudes)])
-
+    
     # Create grids of the given lats and lons for the underlying API
-    # NOTE: np.meshgrid() requires inputs (x, y) and returns data 
+    # NOTE: np.meshgrid() requires inputs (x, y) and returns data
     #       of shape(y|lat|rows, x|lon|columns).  So we pass in lons, lats
     #       and get back data.shape(lats, lons)
-    lons, lats = np.meshgrid(target_dataset.lons, target_dataset.lats)
-    new_lons, new_lats = np.meshgrid(new_longitudes, new_latitudes)
+    if target_dataset.lons.ndim ==1 and target_dataset.lats.ndim ==1:
+        lons, lats = np.meshgrid(target_dataset.lons, target_dataset.lats)
+    else:
+        lons = target_dataset.lons
+        lats = target_dataset.lats
+    if new_longitudes.ndim ==1 and new_latitudes.ndim ==1:
+        new_lons, new_lats = np.meshgrid(new_longitudes, new_latitudes)
+    else:
+        new_lons = new_longitudes
+        new_lats = new_latitudes
+
+    # Make masked array of shape (times, new_latitudes,new_longitudes)
+    new_values = ma.zeros([len(target_dataset.times), 
+                           new_lats.shape[0],  
+                           new_lons.shape[1]])
+
     # Convert all lats and lons into Numpy Masked Arrays
     lats = ma.array(lats)
     lons = ma.array(lons)
