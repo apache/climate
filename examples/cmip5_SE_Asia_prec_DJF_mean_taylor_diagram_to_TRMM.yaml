@@ -1,0 +1,45 @@
+workdir: ./
+output_netcdf_filename: cmip5_SE_Asia_prec_DJF_1998-2010.nc
+
+# (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
+time:
+    maximum_overlap_period: True  
+    start_time: 1981-01-01
+    end_time: 2010-12-31
+    temporal_resolution: monthly
+    month_start: 12
+    month_end: 2
+    average_each_year: False  
+
+space:
+    min_lat: -15.14
+    max_lat: 27.26
+    min_lon: 89.26  
+    max_lon: 146.96
+
+regrid:
+    regrid_on_reference: True  
+    regrid_dlat: 0.50
+    regrid_dlon: 0.50
+
+datasets:
+    reference:
+        data_source: rcmed
+        data_name: TRMM
+        dataset_id: 3
+        parameter_id: 36
+
+    targets:
+        data_source: local
+        path: ./data/pr_Amon*                                   
+        variable: pr    
+
+number_of_metrics_and_plots: 1
+
+metrics1: Taylor_diagram_spatial_pattern_of_multiyear_climatology
+
+plots1:
+    file_name: cmip5_SE_ASIA_prec_DJF_mean_taylor_diagram_to_TRMM
+
+use_subregions: False
+
