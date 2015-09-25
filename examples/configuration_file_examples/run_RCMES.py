@@ -18,7 +18,7 @@ from datetime import datetime
 import os
 import sys
 
-from example_package import *
+from metrics_and_plots import *
 
 import ssl
 if hasattr(ssl, '_create_unverified_context'):
