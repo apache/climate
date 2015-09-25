@@ -257,48 +257,75 @@ def subset(subregion, target_dataset, subregion_name=None):
         subregion_name = target_dataset.name
 
    # Slice the values array with our calculated slice indices
-    if target_dataset.values.ndim == 2:
-        subset_values = ma.zeros([len(target_dataset.values[
-            dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
-            len(target_dataset.values[
-                dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
-
-        subset_values = target_dataset.values[
-            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
-
-    elif target_dataset.values.ndim == 3:
-        subset_values = ma.zeros([len(target_dataset.values[
-            dataset_slices["time_start"]:dataset_slices["time_end"]]),
-            len(target_dataset.values[
+    if target_dataset.lats.ndim ==1 and target_dataset.lons.ndim ==1:
+        if target_dataset.values.ndim == 2:
+            subset_values = ma.zeros([len(target_dataset.values[
                 dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
-            len(target_dataset.values[
-                dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
-        
-        subset_values = target_dataset.values[
-            dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
-            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
-            
-    # Build new dataset with subset information
-    return ds.Dataset(
-        # Slice the lats array with our calculated slice indices
-        target_dataset.lats[dataset_slices["lat_start"]: 
-                            dataset_slices["lat_end"] + 1],
-        # Slice the lons array with our calculated slice indices
-        target_dataset.lons[dataset_slices["lon_start"]: 
-                            dataset_slices["lon_end"] + 1],
-        # Slice the times array with our calculated slice indices
-        target_dataset.times[dataset_slices["time_start"]: 
-                            dataset_slices["time_end"]+ 1],
-        # Slice the values array with our calculated slice indices
-        subset_values,
-        variable=target_dataset.variable,
-        units=target_dataset.units,
-        name=subregion_name,
-        origin=target_dataset.origin
-    )
+                len(target_dataset.values[
+                    dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
 
+            subset_values = target_dataset.values[
+                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+
+        elif target_dataset.values.ndim == 3:
+            subset_values = ma.zeros([len(target_dataset.values[
+                dataset_slices["time_start"]:dataset_slices["time_end"]]),
+                len(target_dataset.values[
+                    dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
+                len(target_dataset.values[
+                    dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+        
+            subset_values = target_dataset.values[
+                dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
+                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+            
+        # Build new dataset with subset information
+        return ds.Dataset(
+            # Slice the lats array with our calculated slice indices
+            target_dataset.lats[dataset_slices["lat_start"]: 
+                                dataset_slices["lat_end"] + 1],
+            # Slice the lons array with our calculated slice indices
+            target_dataset.lons[dataset_slices["lon_start"]: 
+                                dataset_slices["lon_end"] + 1],
+            # Slice the times array with our calculated slice indices
+            target_dataset.times[dataset_slices["time_start"]: 
+                                dataset_slices["time_end"]+ 1],
+            # Slice the values array with our calculated slice indices
+            subset_values,
+            variable=target_dataset.variable,
+            units=target_dataset.units,
+            name=subregion_name,
+            origin=target_dataset.origin
+        )
+    elif target_dataset.lats.ndim ==2 and target_dataset.lons.ndim ==2:        
+        y_index = dataset_slices["y_index"]
+        x_index = dataset_slices["x_index"]
+        if target_dataset.values.ndim == 2:
+            subset_values = target_dataset.values[y_index, x_index]
+        
+        elif target_dataset.values.ndim == 3:
+            nt = dataset_slices["time_end"] - dataset_slices["time_start"] +1
+            subset_values = ma.zeros([nt, len(y_index)])
+            for it in np.arange(nt):
+                subset_values[it,:] = target_dataset.values[dataset_slices["time_start"]+it, y_index, x_index]
+        return ds.Dataset(
+            # Slice the lats array with our calculated slice indices
+            target_dataset.lats[y_index, x_index],
+            # Slice the lons array with our calculated slice indices
+            target_dataset.lons[y_index, x_index],
+            # Slice the times array with our calculated slice indices
+            target_dataset.times[dataset_slices["time_start"]:
+                                dataset_slices["time_end"]+ 1],
+            # Slice the values array with our calculated slice indices
+            subset_values,
+            variable=target_dataset.variable,
+            units=target_dataset.units,
+            name=subregion_name,
+            origin=target_dataset.origin
+        )    
+            
 
 def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
@@ -1092,22 +1119,34 @@ def _get_subregion_slice_indices(subregion, target_dataset):
 
     :returns: The indices to slice the Datasets arrays as a Dictionary.
     '''
-    latStart = min(np.nonzero(target_dataset.lats >= subregion.lat_min)[0])
-    latEnd = max(np.nonzero(target_dataset.lats <= subregion.lat_max)[0])
-
-    lonStart = min(np.nonzero(target_dataset.lons >= subregion.lon_min)[0])
-    lonEnd = max(np.nonzero(target_dataset.lons <= subregion.lon_max)[0])
-
-
     timeStart = min(np.nonzero(target_dataset.times >= subregion.start)[0])
     timeEnd = max(np.nonzero(target_dataset.times <= subregion.end)[0])
 
-    return {
-        "lat_start"  : latStart,
-        "lat_end"    : latEnd,
-        "lon_start"  : lonStart,
-        "lon_end"    : lonEnd,
-        "time_start" : timeStart,
-        "time_end"   : timeEnd
-    }
+    if target_dataset.lats.ndim ==1 and target_dataset.lons.ndim ==1:
+        latStart = min(np.nonzero(target_dataset.lats >= subregion.lat_min)[0])
+        latEnd = max(np.nonzero(target_dataset.lats <= subregion.lat_max)[0])
+
+        lonStart = min(np.nonzero(target_dataset.lons >= subregion.lon_min)[0])
+        lonEnd = max(np.nonzero(target_dataset.lons <= subregion.lon_max)[0])
+
+
+        return {
+            "lat_start"  : latStart,
+            "lat_end"    : latEnd,
+            "lon_start"  : lonStart,
+            "lon_end"    : lonEnd,
+            "time_start" : timeStart,
+            "time_end"   : timeEnd
+        }
+    elif target_dataset.lats.ndim ==2 and target_dataset.lons.ndim ==2:    
+        y_index, x_index = np.where((target_dataset.lats >= subregion.lat_min) & 
+                                    (target_dataset.lats <= subregion.lat_max) &
+                                    (target_dataset.lons >= subregion.lon_min) &
+                                    (target_dataset.lons <= subregion.lon_max))
+        return {
+            "y_index"    : y_index,
+            "x_index"    : x_index,
+            "time_start" : timeStart,
+            "time_end"   : timeEnd
+        }
 
