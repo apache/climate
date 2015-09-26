@@ -17,6 +17,7 @@
 # under the License.
 #
 
+import os
 import urllib2
 
 from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
@@ -34,29 +35,44 @@ def load_dataset(dataset_id,
                  esgf_password,
                  search_url=DEFAULT_ESGF_SEARCH,
                  elevation_index=0,
+                 name='',
+                 save_path='/tmp',
                  **additional_constraints):
     ''' Load an ESGF dataset.
 
     :param dataset_id: The ESGF ID of the dataset to load.
-    :type dataset_id: String
+    :type dataset_id: :mod:`string`
+
     :param variable: The variable to load.
-    :type variable: String
+    :type variable: :mod:`string`
+
     :param esgf_username: ESGF OpenID value to use for authentication.
-    :type esgf_username: String
+    :type esgf_username: :mod:`string`
+
     :param esgf_password: ESGF Password to use for authentication.
-    :type esgf_password: String
+    :type esgf_password: :mod:`string`
+
     :param search_url: (Optional) The ESGF node to use for searching. Defaults
         to the Jet Propulsion Laboratory node.
-    :type search_url: String
+    :type search_url: :mod:`string`
+
     :param elevation_index: (Optional) The elevation level to strip out when
         loading the dataset using ocw.data_source.local.
+    :type elevation_index: :class:`int`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+
+    :param save_path: (Optional) Path to where downloaded files should be saved.
+    :type save_path: :mod:`string`
+
     :param additional_constraints: (Optional) Additional key,value pairs to
         pass as constraints to the search wrapper. These can be anything found
         on the ESGF metadata page for a dataset.
 
-    :returns: A list of ocw.dataset.Dataset objects contained the requested
-        dataset. If the dataset is stored in multiple files each will be loaded
-        into a separate ocw.dataset.Dataset object.
+    :returns: A :class:`list` of :class:`dataset.Dataset` contained the
+        requested dataset. If the dataset is stored in multiple files each will
+        be loaded into a separate :class:`dataset.Dataset`.
 
     :raises ValueError: If no dataset can be found for the supplied ID and
         variable, or if the requested dataset is a multi-file dataset.
@@ -67,16 +83,30 @@ def load_dataset(dataset_id,
 
     datasets = []
     for url, var in download_data:
-        _download_files([url], esgf_username, esgf_password)
-        datasets.append(local.load_file('/tmp/' + url.split('/')[-1],
+        _download_files([url],
+                        esgf_username,
+                        esgf_password,
+                        download_directory=save_path)
+
+        file_save_path = os.path.join(save_path, url.split('/')[-1])
+        datasets.append(local.load_file(file_save_path,
                                         var,
+                                        name=name,
                                         elevation_index=elevation_index))
+
+    origin = {
+        'source': 'esgf',
+        'dataset_id': dataset_id,
+        'variable': variable
+    }
+    for ds in datasets:
+        ds.origin = origin
 
     return datasets
 
 def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     ''''''
-    url += '?distrib=false&type=File&dataset_id={}&variable={}'
+    url += '?type=File&dataset_id={}&variable={}'
     url = url.format(dataset_id, variable)
 
     r = requests.get(url)

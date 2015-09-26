@@ -1,6 +1,118 @@
 Apache Open Climate Workbench Change Log
 ============================================
 
+Release Notes - Apache Open Climate Workbench - Version 1.0.0
+
+** Sub-task
+    * [CLIMATE-578] - Update release docs to include documentation version bumps
+    * [CLIMATE-585] - change the bias calculations in the metrics class
+    * [CLIMATE-586] - add barchart as a plotter option
+    * [CLIMATE-587] - Unit conversion
+
+** Bug
+    * [CLIMATE-566] - Output redirects in Easy-OCW clobber install log
+    * [CLIMATE-571] - Easy-OCW checks for installed applications can fail
+    * [CLIMATE-595] - Dateutil package is not included in pip install requirements
+    * [CLIMATE-596] - Dataset variables are not propagated correctly through dataset_processor functions
+    * [CLIMATE-605] - Typo in plotter.draw_contour_map docstring
+    * [CLIMATE-607] - Config Parser tests are breaking
+    * [CLIMATE-618] - VM Build is using an old easy-ocw install script reference
+    * [CLIMATE-619] - Ubuntu easy-ocw install script issues in quiet mode
+    * [CLIMATE-636] - Bounds __str__ function doesn't return correct data format
+    * [CLIMATE-638] - Subregion_portrait example doesn't run
+    * [CLIMATE-640] - Time series with subregions example doesn't run
+    * [CLIMATE-641] - missing data handling in OCW metrics
+    * [CLIMATE-650] - Fix the ensemble calculation
+
+** Improvement
+    * [CLIMATE-467] - Handling various calendar types
+    * [CLIMATE-508] - Adding statistical downscaling capability
+    * [CLIMATE-563] - Add ESGF module to documentation 
+    * [CLIMATE-577] - Bump docs version up to 1.0.0
+    * [CLIMATE-580] - Config Based Evaluation Improvements
+    * [CLIMATE-581] - Export an evaluation to a config file
+    * [CLIMATE-582] - Add config based evaluation documentation to sphinx docs
+    * [CLIMATE-583] - Add better plot support to config based evaluations
+    * [CLIMATE-588] - Refactor config based evaluation layout
+    * [CLIMATE-594] - Add Dataset location tracking to data sources
+    * [CLIMATE-599] - Add example config based evaluation run to sphinx docs
+    * [CLIMATE-600] - Add a pylint RC file for code linting
+    * [CLIMATE-602] - Add support for multiple plot indices to config based contour map generation
+    * [CLIMATE-603] - Move simple_model_to_model_bias *.nc download to /tmp
+    * [CLIMATE-606] - Spell "indices" properly in the config parser
+    * [CLIMATE-608] - Add mailmap file to repo
+    * [CLIMATE-609] - Add source flag to dataset origin information
+    * [CLIMATE-621] - Make ESGF data source save folder configurable
+    * [CLIMATE-633] - Adding a loader to handle WRF output stored on a local disk
+    * [CLIMATE-637] - Subregion Clean up and Improvements
+    * [CLIMATE-639] - Add subregion support to config runner
+    * [CLIMATE-648] - Propagation of missing data information from each dataset
+    * [CLIMATE-651] - A new module to calculate area mean and standard deviation with given subregion information
+
+** Task
+    * [CLIMATE-567] - Update DOAP for 0.5
+    * [CLIMATE-574] - Remove .DS_Store from repo
+    * [CLIMATE-575] - Implement initial config based execution of an evaluation
+    * [CLIMATE-593] - Add ASF headers to config parser
+
+** Wish
+    * [CLIMATE-30] - Apache Open Climate Workbench Logo 
+
+
+Release Notes - Apache Open Climate Workbench - Version 0.5
+
+** Sub-task
+    * [CLIMATE-43] - Update evaluation running code to use new re-grid options
+    * [CLIMATE-44] - Update backend with ability to handle user-specified re-grid calls.
+    * [CLIMATE-341] - Refactor "calcAnnualCycleMeans" metric from metrics_kyo.py
+    * [CLIMATE-497] - Update OCW release management process documentation
+    * [CLIMATE-519] - Fix ESGF directory structuring
+    * [CLIMATE-520] - Add ESGF wrapper to setup.py
+    * [CLIMATE-540] - Port 'calcBiasAveragedOverTimeAndDomain' method over to ocw/metrics.py module
+    * [CLIMATE-541] - Port 'calcRootMeanSquareDifferenceAveragedOverTimeAndDomain' method over to ocw/metrics.py module
+    * [CLIMATE-542] - Port 'calcTemporalCorrelation' method over to ocw/metrics.py module
+    * [CLIMATE-543] - Port 'calcNashSutcliff' method over to ocw/metrics.py module
+    * [CLIMATE-544] - Port 'calc_temporal_anom_cor' method to ocw/metrics.py
+    * [CLIMATE-545] - Port 'calc_spatial_anom_cor' method over to ocw/metrics.py module
+    * [CLIMATE-546] - Refactor 'calcPdf' method from metrics_kyo.py
+    * [CLIMATE-549] - Minor updates to the SpatialMeanOfTemporalMeanBias and RMSError metrics
+
+** Bug
+    * [CLIMATE-487] - data_source.local returns bad error when incorrect file path is provided
+    * [CLIMATE-530] - Include license acknowledgment for all mccsearch dependencies
+    * [CLIMATE-548] - Vagrant references should not exist in easy-ocw ubuntu script
+    * [CLIMATE-554] - Changed metric names break Sphinx build
+
+** Improvement
+    * [CLIMATE-265] -  Model Ensemble to RCMED Evaluation
+    * [CLIMATE-340] - Transfer metrics from the original codebase over to ocw/metrics.py
+    * [CLIMATE-371] - local.load_file should accept lat/lon/time variable names
+    * [CLIMATE-372] - Data_sources should allow dataset naming
+    * [CLIMATE-496] - Address discrepancies within 0.4 RC#1
+    * [CLIMATE-533] - Revisit mccsearch README making updates as required
+    * [CLIMATE-552] - Cleanup local.py data source
+    * [CLIMATE-558] - Add better links to external documentation
+
+** New Feature
+    * [CLIMATE-38] - Add regrid options
+    * [CLIMATE-39] - Add ability for user to select spatial re-grid options
+    * [CLIMATE-523] - Integrate mccsearch module into master branch
+    * [CLIMATE-538] - Allow selection of elevation level on dataset load
+
+** Task
+    * [CLIMATE-373] - Publish documentation build to Read The Docs
+    * [CLIMATE-411] - Create Pyhton lib documentation
+    * [CLIMATE-518] - Add ESGF data source
+    * [CLIMATE-534] - Make sure everyone on OCW PMC has PMC permissions in Jira
+    * [CLIMATE-535] - Update mccsearch files.py to use current replacement of toolkit.process function
+    * [CLIMATE-536] - Update mccsearch files.py to use current replacement of utils.fortran function
+    * [CLIMATE-537] - Update mccsearch files.py to use current replacement of utils.misc function
+    * [CLIMATE-550] - Drop bottlemet.py from OCW UI Backend
+    * [CLIMATE-551] - Drop old RCMET toolkit from code base
+    * [CLIMATE-553] - Add an example for the ESGF datasource
+    * [CLIMATE-555] - Update Sphinx documentation version number
+
+
 
 Release Notes - Apache Open Climate Workbench - Version 0.4
 

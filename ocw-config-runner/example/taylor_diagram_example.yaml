@@ -1,0 +1,36 @@
+evaluation:
+    temporal_time_delta: 30
+    spatial_regrid_lats: !!python/tuple [-45, 42, 1]
+    spatial_regrid_lons: !!python/tuple [-24, 60, 1]
+    subset: [-45, 42, -24, 60, "1989-01-01", "1989-12-01"]
+
+datasets:
+    reference:
+        data_source: local
+        file_count: 1
+        path: /tmp/AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+        variable: tasmax
+        optional_args:
+            name: dataset1
+
+    targets:
+        - data_source: local
+          file_count: 1
+          path: /tmp/AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc
+          variable: tasmax
+          optional_args:
+              name: dataset2
+metrics:
+    - StdDevRatio
+    - PatternCorrelation
+
+plots:
+    - type: taylor
+      stddev_results_indices:
+          - !!python/tuple [0, 0]
+      pattern_corr_results_indices:
+          - !!python/tuple [0, 1]
+      output_name: taylor_plot
+      optional_args:
+          fmt: png
+          frameon: False

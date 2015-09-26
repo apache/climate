@@ -11,13 +11,16 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
+   ocw/overview
    ocw/dataset
    ocw/dataset_processor
    ocw/evaluation
    ocw/metrics
    ocw/plotter
+   ocw/utils
    data_source/data_sources
    ui-backend/backend.rst
+   config/config_overview
 
 
 Indices and tables

@@ -125,5 +125,83 @@ class TestEvaluation(unittest.TestCase):
         bias_results_shape = tuple(bias_eval.results[0][0].shape)
         self.assertEqual(input_shape, bias_results_shape)
 
+    def test_result_shape(self):
+        bias_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
+            [Bias(), Bias()]
+        )
+        bias_eval.run()
+
+        # Expected result shape is
+        # [bias, bias] where bias.shape[0] = number of datasets
+        self.assertTrue(len(bias_eval.results) == 2)
+        self.assertTrue(bias_eval.results[0].shape[0] == 3)
+
+    def test_unary_result_shape(self):
+        new_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
+            [TemporalStdDev()]
+        )
+        new_eval.run()
+
+        # Expected result shape is
+        # [stddev] where stddev.shape[0] = number of datasets
+        
+        self.assertTrue(len(new_eval.unary_results) == 1)
+        self.assertTrue(new_eval.unary_results[0].shape[0] == 5)
+
+    def test_subregion_result_shape(self):
+        bound = Bounds(
+                10, 18, 
+                100, 108, 
+                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+
+        bias_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [Bias()],
+            [bound]
+        )
+        bias_eval.run()
+
+        # Expected result shape is
+        # [
+        #       [   # Subregions cause this extra layer
+        #           [number of targets, bias.run(reference, target1).shape]
+        #       ]
+        #   ],
+        self.assertTrue(len(bias_eval.results) == 1)
+        self.assertTrue(len(bias_eval.results[0]) == 1)
+        self.assertTrue(bias_eval.results[0][0].shape[0] == 2)
+        self.assertTrue(type(bias_eval.results) == type([]))
+
+    def test_subregion_unary_result_shape(self):
+        bound = Bounds(
+                10, 18, 
+                100, 108, 
+                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+
+        new_eval = Evaluation(
+            self.test_dataset,
+            [self.another_test_dataset, self.another_test_dataset],
+            [TemporalStdDev(), TemporalStdDev()],
+            [bound, bound, bound, bound, bound]
+        )
+        new_eval.run()
+
+        # Expected result shape is
+        # [
+        #       [   # Subregions cause this extra layer
+        #           [3, temporalstddev.run(reference).shape],
+        #       ]
+        # ]
+        self.assertTrue(len(new_eval.unary_results) == 5)  # number of subregions
+        self.assertTrue(len(new_eval.unary_results[0]) == 2) # number of metrics
+        self.assertTrue(type(new_eval.unary_results) == type([]))
+        self.assertTrue(new_eval.unary_results[0][0].shape[0] == 3) # number of datasets (ref + target)
+
+
 if __name__  == '__main__':
     unittest.main()

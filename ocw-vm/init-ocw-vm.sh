@@ -46,11 +46,11 @@ sudo apt-get install -y ubuntu-desktop
 git clone http://git-wip-us.apache.org/repos/asf/climate.git
 
 # Copy the Easy-OCW install script for Ubuntu
-cp climate/easy-ocw/install-ubuntu-12_04.sh .
+cp climate/easy-ocw/install-ubuntu.sh .
 # Copy the requirements files for conda and pip used by Easy-OCW
 cp climate/easy-ocw/*.txt .
 
-bash install-ubuntu-12_04.sh -q
+bash install-ubuntu.sh -q
 
 # Set symlink for the UI frontend code
 cd climate/ocw-ui/backend

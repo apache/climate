@@ -21,16 +21,20 @@ import requests
 import numpy as np
 from ocw.dataset import Dataset
 
-def load(url, variable):
+def load(url, variable, name=''):
     '''Load a Dataset from an OpenDAP URL
 
     :param url: The OpenDAP URL for the dataset of interest.
-    :type url: String
-    :param variable: The name of the variable to read from the dataset.
-    :type variable: String
+    :type url: :mod:`string`
 
-    :returns: A Dataset object containing the dataset pointed to by the 
-        OpenDAP URL.
+    :param variable: The name of the variable to read from the dataset.
+    :type variable: :mod:`string`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+
+    :returns: A :class:`dataset.Dataset` containing the dataset pointed to by
+        the OpenDAP URL.
 
     :raises: ServerError
     '''
@@ -55,7 +59,13 @@ def load(url, variable):
     lons = np.array(dataset[lon][:])
     values = np.array(dataset[:])
 
-    return Dataset(lats, lons, times, values, variable)
+    origin = {
+        'source': 'dap',
+        'url': url
+    }
+
+    return Dataset(lats, lons, times, values, variable,
+                   name=name, origin=origin)
 
 def _convert_times_to_datetime(time):
     '''Convert the OpenDAP time object's values to datetime objects

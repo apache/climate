@@ -20,9 +20,12 @@
 import sys
 import datetime as dt
 import numpy as np
+import numpy.ma as ma
+import datetime 
 
 from mpl_toolkits.basemap import shiftgrid
 from dateutil.relativedelta import relativedelta
+from netCDF4 import num2date
 
 def decode_time_values(dataset, time_var_name):
     ''' Decode NetCDF time values into Python datetime objects.
@@ -30,7 +33,7 @@ def decode_time_values(dataset, time_var_name):
     :param dataset: The dataset from which time values should be extracted.
     :type dataset: netCDF4.Dataset
     :param time_var_name: The name of the time variable in dataset.
-    :type time_var_name: String
+    :type time_var_name: :mod:`string`
 
     :returns: The list of converted datetime values.
 
@@ -52,10 +55,12 @@ def decode_time_values(dataset, time_var_name):
         for time_val in time_data:
             times.append(time_base + relativedelta(months=int(time_val)))
     else:
-        for time_val in time_data:
-            arg[time_units] = time_val
-            times.append(time_base + dt.timedelta(**arg))
+        try:
+            times_calendar = time_data.calendar
+        except:
+            times_calendar = 'standard'
 
+        times = num2date(time_data[:], units=time_format, calendar=times_calendar)
     return times
 
 def parse_time_units(time_format):
@@ -67,7 +72,7 @@ def parse_time_units(time_format):
     :param time_format: The time data units string from the dataset
         being processed. The string should be of the format
         '<units> since <base time date>'
-    :type time_format: String
+    :type time_format: :mod:`string`
 
     :returns: The unit substring from the time units string
 
@@ -92,7 +97,7 @@ def parse_time_base(time_format):
     :param time_format: The time data units string from the dataset
         being processed. The string should be of the format
         '<units> since <base time date>'
-    :type time_format: String
+    :type time_format: :mod:`string`
 
     :returns: The base time as a datetime object.
 
@@ -112,6 +117,7 @@ def parse_time_base(time_format):
         '%Y/%m/%d%H:%M:%S', '%Y-%m-%d %H:%M', '%Y/%m/%d %H:%M',
         '%Y:%m:%d %H:%M', '%Y%m%d %H:%M', '%Y-%m-%d', '%Y/%m/%d',
         '%Y:%m:%d', '%Y%m%d', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H',
+	'%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ'
     ]
 
     # Attempt to match the base time string with a possible format parsing string.
@@ -143,7 +149,7 @@ def parse_base_time_string(time_format):
     :param time_format: The time data units string from the dataset
         being processed. The string should be of the format
         '<units> since <base time date>'
-    :type time_format: String
+    :type time_format: :mod:`string`
 
     :returns: The base time string split out of the time units information.
 
@@ -169,51 +175,54 @@ def normalize_lat_lon_values(lats, lons, values):
     expected range.
 
     :param lats: A 1D numpy array of sorted lat values.
-    :type lats: Numpy Array
+    :type lats: :class:`numpy.ndarray`
     :param lons: A 1D numpy array of sorted lon values.
-    :type lons: Numpy Array
+    :type lons: :class:`numpy.ndarray`
     :param values: A 3D array of data values.
 
-    :returns: A tuple of the form (adjust_lats, adjusted_lons, adjusted_values)
+    :returns: A :func:`tuple` of the form (adjust_lats, adjusted_lons, adjusted_values)
 
     :raises ValueError: If the lat/lon values are not sorted.
     '''
-    # Avoid unnecessary shifting if all lons are higher than 180
-    if lons.min() > 180:
-        lons -= 360
+    if lats.ndim ==1 and lons.ndim ==1:
+        # Avoid unnecessary shifting if all lons are higher than 180
+        if lons.min() > 180:
+            lons -= 360
 
-    # Make sure lats and lons are monotonically increasing
-    lats_decreasing = np.diff(lats) < 0
-    lons_decreasing = np.diff(lons) < 0
+    	# Make sure lats and lons are monotonically increasing
+    	lats_decreasing = np.diff(lats) < 0
+    	lons_decreasing = np.diff(lons) < 0
 
-    # If all values are decreasing then they just need to be reversed
-    lats_reversed, lons_reversed = lats_decreasing.all(), lons_decreasing.all()
+    	# If all values are decreasing then they just need to be reversed
+    	lats_reversed, lons_reversed = lats_decreasing.all(), lons_decreasing.all()
 
-    # If the lat values are unsorted then raise an exception
-    if not lats_reversed and lats_decreasing.any():
-        raise ValueError('Latitudes must be sorted.')
+    	# If the lat values are unsorted then raise an exception
+    	if not lats_reversed and lats_decreasing.any():
+            raise ValueError('Latitudes must be sorted.')
 
-    # Perform same checks now for lons
-    if not lons_reversed and lons_decreasing.any():
-        raise ValueError('Longitudes must be sorted.')
+    	# Perform same checks now for lons
+    	if not lons_reversed and lons_decreasing.any():
+            raise ValueError('Longitudes must be sorted.')
 
-    # Also check if lons go from [0, 360), and convert to [-180, 180)
-    # if necessary
-    lons_shifted = lons.max() > 180
-    lats_out, lons_out, data_out = lats[:], lons[:], values[:]
-    # Now correct data if latlon grid needs to be shifted
-    if lats_reversed:
-        lats_out = lats_out[::-1]
-        data_out = data_out[..., ::-1, :]
+    	# Also check if lons go from [0, 360), and convert to [-180, 180)
+    	# if necessary
+    	lons_shifted = lons.max() > 180
+    	lats_out, lons_out, data_out = lats[:], lons[:], values[:]
+    	# Now correct data if latlon grid needs to be shifted
+    	if lats_reversed:
+            lats_out = lats_out[::-1]
+            data_out = data_out[..., ::-1, :]
 
-    if lons_reversed:
-        lons_out = lons_out[::-1]
-        data_out = data_out[..., ::-1]
+    	if lons_reversed:
+            lons_out = lons_out[::-1]
+            data_out = data_out[..., ::-1]
 
-    if lons_shifted:
-        data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
+    	if lons_shifted:
+            data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
 
-    return lats_out, lons_out, data_out
+        return lats_out, lons_out, data_out
+    else:
+        return lats, lons, values
 
 
 def reshape_monthly_to_annually(dataset):
@@ -232,10 +241,9 @@ def reshape_monthly_to_annually(dataset):
     (24, 90, 180) -> (2, 12, 90, 180)
 
     :param dataset: Dataset object with full-year format
-    :type dataset: ocw.dataset.Dataset object
+    :type dataset: :class:`dataset.Dataset`
 
     :returns: Dataset values array with shape (num_year, 12, num_lat, num_lon)
-    :rtype: Numpy array
     '''
 
     values = dataset.values[:]
@@ -252,16 +260,25 @@ def reshape_monthly_to_annually(dataset):
 
     return values
 
+def calc_temporal_mean(dataset):
+    ''' Calculate temporal mean of dataset's values 
+
+    :param dataset: OCW Dataset whose first dimension is time 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: Mean values averaged for the first dimension (time)
+    '''
+    return ma.mean(dataset.values, axis=0)
+
 def calc_climatology_year(dataset):
     ''' Calculate climatology of dataset's values for each year
-
+    
     :param dataset: Monthly binned Dataset object with an evenly divisible
         number of months.
-    :type dataset: ocw.dataset.Dataset object
+    :type dataset: :class:`dataset.Dataset`
 
     :returns: Mean values for each year (annual_mean) and mean values for all
         years (total_mean)
-    :rtype: A tuple of two numpy arrays
 
     :raise ValueError: If the number of monthly bins is not evenly divisible
         by 12.
@@ -274,55 +291,26 @@ def calc_climatology_year(dataset):
     else:
         # Get values reshaped to (num_year, 12, num_lats, num_lons)
         values = reshape_monthly_to_annually(dataset)
-        # Calculate mean values over year (num_year, num_lats, num_lons)
+       # Calculate mean values over year (num_year, num_lats, num_lons)
         annually_mean = values.mean(axis=1)
         # Calculate mean values over all years (num_lats, num_lons)
         total_mean = annually_mean.mean(axis=0)
 
     return annually_mean, total_mean
 
-def calc_climatology_season(month_start, month_end, dataset):
-    ''' Calculate seasonal mean and time series for given months.
-
-    :param month_start: An integer for beginning month (Jan=1)
-    :type month_start: Integer
-    :param month_end: An integer for ending month (Jan=1)
-    :type month_end: Integer
-    :param dataset: Dataset object with full-year format
-    :type dataset: ocw.dataset.Dataset object
-
-    :returns:  
-        t_series - monthly average over the given season
-        means - mean over the entire season
-    :rtype: A tuple of two numpy arrays
-    '''
-
-    if month_start > month_end:
-        # Offset the original array so that the the first month
-        # becomes month_start, note that this cuts off the first year of data
-        offset = slice(month_start - 1, month_start - 13)
-        reshape_data = reshape_monthly_to_annually(dataset[offset])
-        month_index = slice(0, 13 - month_start + month_end)
-    else:
-        # Since month_start <= month_end, just take a slice containing those months
-        reshape_data = reshape_monthly_to_annually(dataset)
-        month_index = slice(month_start - 1, month_end)
-    
-    t_series = reshape_data[:, month_index].mean(axis=1)
-    means = t_series.mean(axis=0)
-    return t_series, means
-
-
 def calc_climatology_monthly(dataset):
     ''' Calculate monthly mean values for a dataset.
+    Follow COARDS climo stats calculation, the year can be given as 0 
+    but the min year allowed in Python is 1
+    http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#climatology
 
     :param dataset: Monthly binned Dataset object with the number of months
         divisible by 12
-    :type dataset: ocw.dataset.Dataset object
+    :type dataset: :class:`dataset.Dataset`
 
-    :returns: Mean values for each month of the year
-    :rtype: A 3D numpy array of shape (12, num_lats, num_lons)
-
+    :returns: Mean values for each month of the year of shape (12, num_lats, num_lons)
+              and times array of datetime objects of length 12
+    
     :raise ValueError: If the number of monthly bins is not divisible by 12
     '''
 
@@ -333,5 +321,98 @@ def calc_climatology_monthly(dataset):
         )
         raise ValueError(error)
     else:
-        return reshape_monthly_to_annually(dataset).mean(axis=0)
+        values = reshape_monthly_to_annually(dataset).mean(axis=0)
+        
+        # A year can commence from any month
+        first_month = dataset.times[0].month
+        times = np.array([datetime.datetime(1, first_month, 1) + relativedelta(months = x) 
+                for x in range(12)])
+        return values, times
 
+def calc_time_series(dataset):
+    ''' Calculate time series mean values for a dataset
+
+    :param dataset: Dataset object 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: time series for the dataset of shape (nT)
+    '''
+
+    t_series =[]
+    for t in xrange(dataset.values.shape[0]):
+        t_series.append(dataset.values[t,:,:].mean())
+    
+    return t_series
+
+def get_temporal_overlap(dataset_array):
+    ''' Find the maximum temporal overlap across the observation and model datasets
+
+    :param dataset_array: an array of OCW datasets
+    '''
+    start_time =[]
+    end_time =[]
+    for dataset in dataset_array:
+        start_time.append(dataset.time_range()[0])
+        end_time.append(dataset.time_range()[1])
+
+    return np.max(start_time), np.min(end_time)
+
+def calc_subregion_area_mean_and_std(dataset_array, subregions):
+    ''' Calculate area mean and standard deviation values for a given subregions using datasets on common grid points
+    :param dataset_array: An array of OCW Dataset Objects
+    :type list:  
+    :param subregions: list of subregions
+    :type subregions: :class:`numpy.ma.array`
+    :returns: area averaged time series for the dataset of shape (ntime, nsubregion)
+    '''
+
+    ndata = len(dataset_array)
+    dataset0 = dataset_array[0]
+    if dataset0.lons.ndim == 1:
+       lons, lats = np.meshgrid(dataset0.lons, dataset0.lats)
+    else:
+       lons = dataset0.lons
+       lats = dataset0.lats
+    subregion_array = np.zeros(lons.shape)
+    mask_array = dataset_array[0].values[0,:].mask
+    # dataset0.values.shsape[0]: length of the time dimension
+    # spatial average
+    t_series =ma.zeros([ndata, dataset0.values.shape[0], len(subregions)])
+    # spatial standard deviation
+    spatial_std =ma.zeros([ndata, dataset0.values.shape[0], len(subregions)])
+
+    for iregion, subregion in enumerate(subregions):
+        lat_min, lat_max, lon_min, lon_max = subregion[1]
+        y_index,x_index = np.where((lats >= lat_min) & (lats <= lat_max) & (lons >= lon_min) & (lons <= lon_max))
+        subregion_array[y_index,x_index] = iregion+1
+        for idata in np.arange(ndata):
+            t_series[idata, :, iregion] = ma.mean(dataset_array[idata].values[:,y_index, x_index], axis=1)
+            spatial_std[idata, :, iregion] = ma.std(dataset_array[idata].values[:,y_index, x_index], axis=1)
+    subregion_array = ma.array(subregion_array, mask=mask_array) 
+    return t_series, spatial_std, subregion_array
+
+def calc_area_weighted_spatial_average(dataset, area_weight=False):
+    '''Calculate area weighted average of the values in OCW dataset
+
+    :param dataset: Dataset object 
+    :type dataset: :class:`dataset.Dataset`
+
+    :returns: time series for the dataset of shape (nT)
+    '''
+
+    if dataset.lats.ndim ==1:
+        lons, lats = np.meshgrid(dataset.lons, dataset.lats)
+    else:
+        lons = dataset.lons
+        lats = dataset.lats
+    weights = np.cos(lats*np.pi/180.) 
+
+    nt, ny, nx = dataset.values.shape
+    spatial_average = ma.zeros(nt)
+    for it in np.arange(nt):
+        if area_weight:
+            spatial_average[it] = ma.average(dataset.values[it,:], weights = weights)
+        else:
+            spatial_average[it] = ma.average(dataset.values[it,:])
+
+    return spatial_average

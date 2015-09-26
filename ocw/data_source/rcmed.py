@@ -37,7 +37,7 @@ def get_parameters_metadata():
     '''Get the metadata of all parameter from RCMED.
 
     :returns: Dictionary of information for each parameter stored in one list
-    :rtype: List of dictionaries
+    :rtype: :class:`list` of :class:`dict`
     '''
 
     param_info_list = []
@@ -312,32 +312,42 @@ def _get_parameter_info(parameters_metadata, parameter_id):
     return (database, time_step, realm, instrument, start_date, end_date, unit)
 
 
-def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time):
+def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time, name=''):
     '''Get data from one database(parameter).
 
     :param dataset_id: Dataset id.
-    :type dataset_id: Integer
+    :type dataset_id: :class:`int`
+
     :param parameter_id: Parameter id
-    :type parameter_id: Integer
+    :type parameter_id: :class:`int`
+
     :param min_lat: Minimum latitude
-    :type min_lat: Float
+    :type min_lat: :class:`float`
+
     :param max_lat: Maximum latitude
-    :type max_lat: Float
+    :type max_lat: :class:`float`
+
     :param min_lon: Minimum longitude
-    :type min_lon: Float
+    :type min_lon: :class:`float`
+    
     :param max_lon: Maximum longitude
-    :type max_lon: Float
+    :type max_lon: :class:`float`
+
     :param start_time: Start time
-    :type start_time: Datetime
+    :type start_time: :class:`datetime.datetime`
+
     :param end_time: End time 
-    :type end_time: Datetime
+    :type end_time: :class:`datetime.datetime`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
 
     :returns: An OCW Dataset object contained the requested data from RCMED.
-    :rtype: ocw.dataset.Dataset object
+    :rtype: :class:`dataset.Dataset`
     '''
     
     parameters_metadata = get_parameters_metadata()
-    parameter_name, time_step, _, _, _, _, _= _get_parameter_info(parameters_metadata, parameter_id)
+    parameter_name, time_step, _, _, _, _, parameter_units = _get_parameter_info(parameters_metadata, parameter_id)
     url = _generate_query_url(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time, time_step)
     lats, lons, times, values = _get_data(url)
 
@@ -345,5 +355,18 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     unique_times = _calculate_time(unique_lats_lons_times[2], time_step)
     values = _reshape_values(values, unique_lats_lons_times)
     values = _make_mask_array(values, parameter_id, parameters_metadata)
+
+    origin = {
+        'source': 'rcmed',
+        'dataset_id': dataset_id,
+        'parameter_id': parameter_id
+    }
     
-    return Dataset(unique_lats_lons_times[0], unique_lats_lons_times[1], unique_times, values, parameter_name)
+    return Dataset(unique_lats_lons_times[0],
+                   unique_lats_lons_times[1],
+                   unique_times,
+                   values,
+                   variable=parameter_name,
+                   units=parameter_units,
+                   name=name,
+                   origin=origin)

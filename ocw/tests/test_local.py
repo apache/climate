@@ -64,6 +64,19 @@ class test_load_file(unittest.TestCase):
         new_values = self.values[0,:,:,:]
         self.assertTrue(numpy.allclose(local.load_file(self.file_path, "value").values, new_values))
 
+    def test_custom_dataset_name(self):
+        '''Test adding a custom name to a dataset'''
+        ds = local.load_file(self.file_path, 'value', name='foo')
+        self.assertEqual(ds.name, 'foo')
+
+    def test_dataset_origin(self):
+        ds = local.load_file(self.file_path, 'value', elevation_index=1)
+        expected_keys = set(['source', 'path', 'lat_name', 'lon_name',
+                             'time_name', 'elevation_index' ])
+        self.assertEqual(set(ds.origin.keys()), expected_keys)
+        self.assertEqual(ds.origin['source'], 'local')
+
+
 class test_get_netcdf_variable_names(unittest.TestCase):
     file_path = "http://zipper.jpl.nasa.gov/dist/"
     test_model = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
@@ -140,6 +153,7 @@ def create_netcdf_object():
         values[:] = values
         #Assign time info to time variable
         netCDF_file.variables['time'].units = 'months since 2001-01-01 00:00:00' 
+        netCDF_file.variables['value'].units = 'foo_units'
         netCDF_file.close()
         return file_path
 
