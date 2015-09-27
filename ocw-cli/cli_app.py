@@ -288,22 +288,28 @@ def select_obs_screen(header):   #TODO: if the observation is already selected, 
     screen.addstr(8, 2, "|D-ID| - |P-ID| - |Database")
     screen.addstr(9, 2, "|----| - |----| - |--------")
     all_obs_info = rcmed.get_parameters_metadata()
+    new_all_obs_info = []
+    for each in all_obs_info:
+        if not each['parameter_id'] in ['72', '73', '74', '75', '80', '42', '81', '84', '85', '86', '89', '90', '91', '94', '95', '96', '97', '98', '99', '100', '101', '103', '106']:
+            new_all_obs_info.append(each)
+    all_obs_info = new_all_obs_info
+    del new_all_obs_info
     try:
          for position, obs_info in enumerate(all_obs_info):
-              dataset_id = obs_info['dataset_id']
-              parameter_id = obs_info['parameter_id']
-              database = obs_info['database']
-              line = "|{0:>4}| - |{1:>4}| - |{2}".format(dataset_id, parameter_id, database)
-              if position <= 25:
-                   screen.addstr(10 + position, 2, line)
-              elif position > 25 and position <= 50:
-                   screen.addstr(8, 50, "|D-ID| - |P-ID| - |Database")
-                   screen.addstr(9, 50, "|----| - |----| - |--------")
-                   screen.addstr(10 + position - 26, 50, line)
-              else:
-                   screen.addstr(8, 100, "|D-ID| - |P-ID| - |Database")
-                   screen.addstr(9, 100, "|----| - |----| - |--------")
-                   screen.addstr(10 + position - 51, 100, line)
+            dataset_id = obs_info['dataset_id']
+            parameter_id = obs_info['parameter_id']
+            database = obs_info['database']
+            line = "|{0:>4}| - |{1:>4}| - |{2}".format(dataset_id, parameter_id, database)
+            if position <= 25:
+                 screen.addstr(10 + position, 2, line)
+            elif position > 25 and position <= 50:
+                 screen.addstr(8, 50, "|D-ID| - |P-ID| - |Database")
+                 screen.addstr(9, 50, "|----| - |----| - |--------")
+                 screen.addstr(10 + position - 26, 50, line)
+            else:
+                 screen.addstr(8, 100, "|D-ID| - |P-ID| - |Database")
+                 screen.addstr(9, 100, "|----| - |----| - |--------")
+                 screen.addstr(10 + position - 51, 100, line)
     except:
          ready_screen("select_obs_screen")
          screen.addstr(1, 1, header + " > Select Observation ")
@@ -1122,13 +1128,13 @@ def settings_screen(header):
          screen.addstr(11, x/2, "6 - Change Target dataset/s")
          screen.addstr(12, x/2, "7 - Change Metric")
          screen.addstr(13, x/2, "8 - Change Working Directory")
-         screen.addstr(14, x/2, "9 - Change Plot Title [Coming Soon....]")
-         screen.addstr(15, x/2, "10 - Save the processed data [Coming Soon....]")
-         screen.addstr(16, x/2, "11 - Show Temporal Boundaries")
-         screen.addstr(17, x/2, "12 - Show Spatial Boundaries")
-         screen.addstr(18, x/2, "0 - Return to Main Menu")
-         screen.addstr(20, x/2, "r - Run Evaluation")
-         screen.addstr(22, x/2, "Select an option: ")
+         #screen.addstr(14, x/2, "9 - Change Plot Title [Coming Soon....]")
+         #screen.addstr(15, x/2, "10 - Save the processed data [Coming Soon....]")
+         screen.addstr(14, x/2, "9 - Show Temporal Boundaries")
+         screen.addstr(15, x/2, "10 - Show Spatial Boundaries")
+         screen.addstr(16, x/2, "0 - Return to Main Menu")
+         screen.addstr(18, x/2, "r - Run Evaluation")
+         screen.addstr(20, x/2, "Select an option: ")
 
          screen.refresh()
          option = screen.getstr()
@@ -1322,7 +1328,7 @@ def settings_screen(header):
          #     screen.addstr(25, x/2, "Please enter plot title:")
          #     plot_title = screen.getstr()
 
-         if option == '11':
+         if option == '9':
               models_start_time, models_end_time = get_models_temp_bound()
               line = 25
               for i, model in enumerate(model_datasets):
@@ -1340,7 +1346,7 @@ def settings_screen(header):
                    screen.addstr(line, x/2 + 3, "Start:{0} - End:{1}".format(observations_start_time[i], observations_end_time[i]))
               screen.getstr()
 
-         if option == '12':
+         if option == '10':
               models_bound = get_models_spatial_bound()
               line = 25
               for i, model in enumerate(model_datasets):
@@ -1412,8 +1418,8 @@ def main_menu(model_datasets, models_info, observation_datasets, observations_in
 
 
 if __name__ == '__main__':
-     TITLE = "Project Name"
-     ORGANIZATION = "Organization Name"
+     TITLE = "RCMES CLI"
+     ORGANIZATION = "JPL/NASA - JIFRESSE/UCLA"
      screen = curses.initscr()
      model_datasets = []           #list of model dataset objects
      models_info = []              #list of dictionaries that contain information for each model

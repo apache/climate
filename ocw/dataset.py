@@ -89,8 +89,8 @@ class Dataset:
             :class:`float`, :class:`float`).
 
         '''
-        return (float(min(self.lats)), float(max(self.lats)),
-                float(min(self.lons)), float(max(self.lons)))
+        return (float(numpy.min(self.lats)), float(numpy.max(self.lats)),
+                float(numpy.min(self.lons)), float(numpy.max(self.lons)))
 
 
     def time_range(self):
@@ -111,16 +111,20 @@ class Dataset:
     def spatial_resolution(self):
         '''Calculate the latitudinal and longitudinal spatial resolution.
 
-        .. warning:: This only works with properly gridded data.
-
+           If self.lats and self.lons are from curvilinear coordinates, 
+           the output resolutions are approximate values.
         :returns: The Dataset's latitudinal and longitudinal spatial resolution
             as a tuple of the form (lat_resolution, lon_resolution).
         :rtype: (:class:`float`, :class:`float`)
         '''
-        sorted_lats = numpy.sort(list(set(self.lats)))
-        sorted_lons = numpy.sort(list(set(self.lons)))
-        lat_resolution = sorted_lats[1] - sorted_lats[0]
-        lon_resolution = sorted_lons[1] - sorted_lons[0]
+        if self.lats.ndim == 1 and self.lons.ndim ==1:
+            sorted_lats = numpy.sort(list(set(self.lats)))
+            sorted_lons = numpy.sort(list(set(self.lons)))
+            lat_resolution = sorted_lats[1] - sorted_lats[0]
+            lon_resolution = sorted_lons[1] - sorted_lons[0]
+        if self.lats.ndim == 2 and self.lons.ndim ==2:
+            lat_resolution = self.lats[1,1] - self.lats[0,0]
+            lon_resolution = self.lons[1,1] - self.lons[0,0]
 
         return (lat_resolution, lon_resolution)
 
@@ -182,15 +186,16 @@ class Dataset:
         elif value_dim < 2:
             err_msg = "Value Array should be at least 2 dimensional.  %s dimensions found." % value_dim
         # Finally check that the Values array conforms to the proper shape
-        if value_dim == 2 and values.shape != (lat_count, lon_count):
-            err_msg = """Value Array must be of shape (times, lats, lons).
-    Expected shape (%s, %s) but received (%s, %s)""" % (lat_count,
+        if value_dim == 2:
+            if values.shape[0] != time_count and values.shape != (lat_count, lon_count):
+                err_msg = """Value Array must be of shape (lats, lons) or (times, locations).
+                Expected shape (%s, %s) but received (%s, %s)""" % (lat_count,
                                                                 lon_count,
                                                                 values.shape[0],
                                                                 values.shape[1])
         if value_dim == 3 and values.shape != (time_count, lat_count, lon_count):
             err_msg = """Value Array must be of shape (times, lats, lons).
-    Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
+            Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
                                                                 lat_count,
                                                                 lon_count,
                                                                 values.shape[0],
