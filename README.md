@@ -14,6 +14,8 @@ OCW always welcomes pull request. Please check the [Developer Area](https://cwik
 
 ## Documentation
 
+The project host the documentation built from the last release artifact on [the project website](https://climate.apache.org/api/index.html)
+
 If you would like to build the documentation for the project run the following command from the root of the repository:
 
 ```
