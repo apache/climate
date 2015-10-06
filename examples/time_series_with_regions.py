@@ -13,6 +13,10 @@ import numpy as np
 import numpy.ma as ma
 from os import path
 import urllib
+import ssl
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
+
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"

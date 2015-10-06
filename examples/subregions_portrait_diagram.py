@@ -14,6 +14,9 @@ import numpy.ma as ma
 
 from os import path
 import urllib
+import ssl
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -61,7 +64,7 @@ target_datasets.append(local.load_file(FILE_2, varName, name="REGCM"))
 target_datasets.append(local.load_file(FILE_3, varName, name="UCT"))
 
 """ Step 2: Fetch an OCW Dataset Object from the data_source.rcmed module """
-print("Working with the rcmed interface to get CRU3.1 Daily Precipitation")
+print("Working with the rcmed interface to get CRU3.1 Monthly Mean Precipitation")
 # the dataset_id and the parameter id were determined from  
 # https://rcmes.jpl.nasa.gov/content/data-rcmes-database 
 CRU31 = rcmed.parameter_dataset(10, 37, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
@@ -133,7 +136,7 @@ RCMs_to_CRU_evaluation.run()
 
 new_patcor = np.squeeze(np.array(RCMs_to_CRU_evaluation.results), axis=1)
 
-plotter.draw_portrait_diagram(new_patcor,allNames, region_list, fname=OUTPUT_PLOT, fmt='png', cmap='coolwarm_r')
+plotter.draw_portrait_diagram(np.transpose(new_patcor),allNames, region_list, fname=OUTPUT_PLOT, fmt='png', cmap='coolwarm_r')
 
                               
 
