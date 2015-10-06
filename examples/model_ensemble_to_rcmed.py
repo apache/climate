@@ -29,6 +29,10 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+import ssl
+
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -168,7 +172,7 @@ bias_evaluation.run()
 # Accessing the actual results when we have used 3 datasets and 1 metric is
 # done this way:
 print("Accessing the Results of the Evaluation run")
-results = bias_evaluation.results
+results = bias_evaluation.results[0]
  
 # From the bias output I want to make a Contour Map of the region
 print("Generating a contour map using ocw.plotter.draw_contour_map()")
@@ -178,9 +182,9 @@ lons = new_lons
 fname = OUTPUT_PLOT
 gridshape = (3, 1)  # Using a 3 x 1 since we have a 1 year of data for 3 models
 plotnames = ["KNMI", "WRF311", "ENSEMBLE"]
-for i, result in enumerate(results):
+for i in np.arange(3):
   plot_title = "TASMAX Bias of CRU 3.1 vs. %s (%s - %s)" % (plotnames[i], start_time.strftime("%Y/%d/%m"), end_time.strftime("%Y/%d/%m"))
   output_file = "%s_%s" % (fname, plotnames[i].lower())
   print "creating %s" % (output_file,)
-  plotter.draw_contour_map(result[0], lats, lons, output_file,
+  plotter.draw_contour_map(results[i,:], lats, lons, output_file,
                          gridshape=gridshape, ptitle=plot_title)

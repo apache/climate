@@ -28,6 +28,11 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+import ssl
+
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
+
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
 # This way we can easily adjust the time span of the retrievals
@@ -157,7 +162,7 @@ bias_evaluation.run()
 # Accessing the actual results when we have used 1 metric and 1 dataset is
 # done this way:
 print("Accessing the Results of the Evaluation run")
-results = bias_evaluation.results[0][0]
+results = bias_evaluation.results[0][0,:]
  
 # From the bias output I want to make a Contour Map of the region
 print("Generating a contour map using ocw.plotter.draw_contour_map()")

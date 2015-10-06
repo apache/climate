@@ -16,6 +16,7 @@
 # under the License.
 
 import datetime
+import urllib
 import numpy as np
 from os import path
 
@@ -37,8 +38,7 @@ if hasattr(ssl, '_create_unverified_context'):
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
 # Three Local Model Files 
 FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_pr.nc"
-FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_pr.nc"
-FILE_3 = "AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc"
+FILE_2 = "AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "pr_africa_bias_annual"
 #variable that we are analyzing
@@ -73,19 +73,14 @@ if path.exists(FILE_2):
 else:
     urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
-if path.exists(FILE_3):
-    pass
-else:
-    urllib.urlretrieve(FILE_LEADER + FILE_3, FILE_3)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects and store in list"""
 target_datasets.append(local.load_file(FILE_1, varName, name="KNMI"))
-target_datasets.append(local.load_file(FILE_2, varName, name="UC"))
-target_datasets.append(local.load_file(FILE_3, varName, name="UCT"))
+target_datasets.append(local.load_file(FILE_2, varName, name="UCT"))
 
 
 """ Step 2: Fetch an OCW Dataset Object from the data_source.rcmed module """
-print("Working with the rcmed interface to get CRU3.1 Daily Precipitation")
+print("Working with the rcmed interface to get CRU3.1 Monthly Mean Precipitation")
 # the dataset_id and the parameter id were determined from  
 # https://rcmes.jpl.nasa.gov/content/data-rcmes-database 
 CRU31 = rcmed.parameter_dataset(10, 37, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
@@ -121,12 +116,9 @@ target_datasets.append(target_datasets_ensemble)
 #find the mean value
 #way to get the mean. Note the function exists in util.py 
 _, CRU31.values = utils.calc_climatology_year(CRU31)
-CRU31.values = np.expand_dims(CRU31.values, axis=0)
 
 for member, each_target_dataset in enumerate(target_datasets):
   _,target_datasets[member].values = utils.calc_climatology_year(target_datasets[member])
-  target_datasets[member].values = np.expand_dims(target_datasets[member].values, axis=0)
-
 
 for target in target_datasets:
   allNames.append(target.name)
@@ -144,8 +136,7 @@ RCMs_to_CRU_evaluation.run()
 
 #extract the relevant data from RCMs_to_CRU_evaluation.results 
 #the results returns a list (num_target_datasets, num_metrics). See docs for further details
-rcm_bias = RCMs_to_CRU_evaluation.results[:][0] 
 #remove the metric dimension
-new_rcm_bias = np.squeeze(np.array(RCMs_to_CRU_evaluation.results))
+rcm_bias = RCMs_to_CRU_evaluation.results[0] 
 
-plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5),fname=OUTPUT_PLOT, subtitles=allNames, cmap='coolwarm_r')
+plotter.draw_contour_map(rcm_bias, new_lats, new_lons, gridshape=(2, 3),fname=OUTPUT_PLOT, subtitles=allNames, cmap='coolwarm_r')

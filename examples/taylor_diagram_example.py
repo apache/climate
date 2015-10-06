@@ -85,23 +85,19 @@ wrf_dataset = dsp.spatial_regrid(wrf_dataset, new_lats, new_lons)
 
 # Load the metrics that we want to use for the evaluation.
 ################################################################################
-sstdr = metrics.StdDevRatio()
-pc = metrics.PatternCorrelation()
+taylor_diagram = metrics.SpatialPatternTaylorDiagram()
 
 # Create our new evaluation object. The knmi dataset is the evaluations
 # reference dataset. We then provide a list of 1 or more target datasets
 # to use for the evaluation. In this case, we only want to use the wrf dataset.
 # Then we pass a list of all the metrics that we want to use in the evaluation.
 ################################################################################
-test_evaluation = evaluation.Evaluation(knmi_dataset, [wrf_dataset], [sstdr, pc])
+test_evaluation = evaluation.Evaluation(knmi_dataset, [wrf_dataset], [taylor_diagram])
 test_evaluation.run()
 
 # Pull our the evaluation results and prepare them for drawing a Taylor diagram.
 ################################################################################
-spatial_stddev_ratio = test_evaluation.results[0][0]
-spatial_correlation = test_evaluation.results[0][1]
-
-taylor_data = numpy.array([[spatial_stddev_ratio], [spatial_correlation]]).transpose()
+taylor_data = test_evaluation.results[0]                                                 
 
 # Draw our taylor diagram!
 ################################################################################
