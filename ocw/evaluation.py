@@ -357,7 +357,7 @@ def convert_evaluation_result(evaluation_result, subregion = False):
         nmetric = len(evaluation_result[0])
         results = [] 
         for imetric in range(nmetric):
-            if evaluation_result[0][imetric].ndim >=2:
+            if evaluation_result[0][imetric].ndim !=0:
                 result_shape = list(evaluation_result[0][imetric].shape)
                 result_shape.insert(0, nmodel)
                 result = ma.zeros(result_shape)
@@ -378,7 +378,7 @@ def convert_evaluation_result(evaluation_result, subregion = False):
         for isubregion in range(nsubregion):
             subregion_results = []
             for imetric in range(nmetric):
-                if evaluation_result[0][imetric][isubregion].ndim >=2:
+                if evaluation_result[0][imetric][isubregion].ndim !=0:
                     result_shape = list(evaluation_result[0][imetric][isubregion].shape)
                     result_shape.insert(0, nmodel)
                     result = ma.zeros(result_shape)
@@ -398,7 +398,7 @@ def convert_unary_evaluation_result(evaluation_result, subregion = False):
         nmodel = len(evaluation_result[0])
         results = []
         for imetric in range(nmetric):
-            if evaluation_result[imetric][0].ndim >=2:
+            if evaluation_result[imetric][0].ndim !=0:
                 result_shape = list(evaluation_result[imetric][0].shape)
                 result_shape.insert(0, nmodel)
                 result = ma.zeros(result_shape)
@@ -419,7 +419,7 @@ def convert_unary_evaluation_result(evaluation_result, subregion = False):
         for isubregion in range(nsubregion):
             subregion_results = []
             for imetric in range(nmetric):
-                if evaluation_result[imetric][isubregion][0].ndim >=2:
+                if evaluation_result[imetric][isubregion][0].ndim !=0:
                     result_shape = list(evaluation_result[imetric][isubregion][0].shape)
                     result_shape.insert(0, nmodel)
                     result = ma.zeros(result_shape)
