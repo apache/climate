@@ -158,10 +158,10 @@ def load_WRF_2d_files(file_path=None,
             times.append(datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
         values0= file_object.variables[variable_name][:]
         if ifile == 0:
-            values = file_object.variables[variable_name][:]
+            values = values0                                  
             variable_unit = file_object.variables[variable_name].units
         else:
-            values = numpy.concatenate((values, file_object.variables[variable_name][:])) 
+            values = numpy.concatenate((values, values0)) 
         file_object.close()
     times = numpy.array(times)
     return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
