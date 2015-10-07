@@ -364,7 +364,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     times = []
     nfile = len(WRF_files)
     for ifile, file in enumerate(WRF_files):
-        print 'NC file '+str(ifile+1)+'/'+str(nfile)
+        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")
         for ihour in range(24):
