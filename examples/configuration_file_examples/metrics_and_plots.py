@@ -51,7 +51,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     m.drawcoastlines(linewidth=1)
     m.drawcountries(linewidth=1)
     m.drawstates(linewidth=0.5, color='w')
-    max = m.contourf(x,y,obs_clim,levels = plotter._nice_intervals(obs_dataset.values, 10), extend='both',cmap='PuOr')
+    max = m.contourf(x,y,obs_clim,levels = plotter._nice_intervals(obs_dataset.values, 10), extend='both',cmap='rainbow')
     ax.annotate('(a) \n' + obs_name,xy=(lon_min, lat_min))
     cax = fig.add_axes([0.02, 1.-float(1./row), 0.01, 1./row*0.6])
     plt.colorbar(max, cax = cax) 
