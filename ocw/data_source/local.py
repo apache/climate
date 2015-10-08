@@ -367,7 +367,9 @@ def load_GPM_IMERG_files(file_path=None,
     lats = file_object_first['Grid']['lat'][:]
     lons = file_object_first['Grid']['lon'][:]
 
-    lons, lats = np.meshgrid(lons, lats)
+    lons, lats = numpy.meshgrid(lons, lats)
+            
+    variable_unit = "mm/hr"
 
     times = []
     nfile = len(GPM_files)
@@ -375,12 +377,11 @@ def load_GPM_IMERG_files(file_path=None,
         print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
         file_object = h5py.File(file)        
         time_struct_parsed = strptime(file[-39:-23],"%Y%m%d-S%H%M%S")     
-        for ihour in numpy.arange(24):
-            times.append(datetime(*time_struct_parsed[:6]))
-        values0= ma.masked_less(file_object['Grid'][variable_name][:], 0.)
+        times.append(datetime(*time_struct_parsed[:6]))
+        values0= numpy.transpose(ma.masked_less(file_object['Grid'][variable_name][:], 0.))
+        values0= numpy.expand_dims(values0, axis=0)
         if ifile == 0:
-            values = values0                                 
-            variable_unit = file_object.variables[variable_name].units
+            values = values0                                                            
         else:
             values = numpy.concatenate((values, values0)) 
         file_object.close()
