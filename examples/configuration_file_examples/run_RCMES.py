@@ -141,8 +141,9 @@ for idata,dataset in enumerate(model_datasets):
     
 
 print 'Generating multi-model ensemble'
-model_datasets.append(dsp.ensemble(model_datasets))
-model_names.append('ENS-models')
+if len(model_datasets) >= 2.:
+    model_datasets.append(dsp.ensemble(model_datasets))
+    model_names.append('ENS')
 
 """ Step 6: Generate subregion average and standard deviation """
 if config['use_subregions']:
