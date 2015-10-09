@@ -27,6 +27,7 @@ from ocw.dataset import Dataset
 import ocw.utils as utils
 
 import netCDF4
+import h5py
 import numpy
 import numpy.ma as ma
 
