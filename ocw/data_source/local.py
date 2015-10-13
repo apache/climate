@@ -112,9 +112,10 @@ def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
     )
     raise ValueError(error)
 
-def load_WRF_2d_files(file_path,
-                      filename_pattern,
-                      variable_name,
+def load_WRF_2d_files(file_path=None,
+                      filename_pattern=None,
+                      filelist=None,
+                      variable_name='T2',
                       name=''):
     ''' Load multiple WRF (or nuWRF) original output files containing 2D fields such as precipitation and surface variables into a Dataset.
     The dataset can be spatially subset.
@@ -122,6 +123,8 @@ def load_WRF_2d_files(file_path,
     :type file_path: :mod:`string`
     :param filename_pattern: Path to the NetCDF file to load.
     :type filename_pattern: :list:`string`
+    :param filelist: A list of filenames
+    :type filelist: :list:`string`
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
     :param name: (Optional) A name for the loaded dataset.
@@ -129,32 +132,39 @@ def load_WRF_2d_files(file_path,
     :returns: An OCW Dataset object with the requested variable's data from
         the NetCDF file.
     :rtype: :class:`dataset.Dataset`
-    :raises ValueError: 
-    '''                  
-    
-    WRF_files = []
-    for pattern in filename_pattern:
-        WRF_files.extend(glob(file_path + pattern))
+    :raises ValueError:
+    '''
+
+    if not filelist:
+        WRF_files = []
+        for pattern in filename_pattern:
+            WRF_files.extend(glob(file_path + pattern))
+    else:
+        WRF_files = [line.rstrip('\n') for line in open(filelist)]
+
     WRF_files.sort()
-  
+
     file_object_first = netCDF4.Dataset(WRF_files[0])
     lats = file_object_first.variables['XLAT'][0,:]
     lons = file_object_first.variables['XLONG'][0,:]
 
     times = []
+    nfile = len(WRF_files)
     for ifile, file in enumerate(WRF_files):
+        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")     
         for ihour in numpy.arange(24):
             times.append(datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
         values0= file_object.variables[variable_name][:]
         if ifile == 0:
-            values = file_object.variables[variable_name][:]
+            values = values0                                  
+            variable_unit = file_object.variables[variable_name].units
         else:
-            values = numpy.concatenate((values, file_object.variables[variable_name][:])) 
+            values = numpy.concatenate((values, values0)) 
         file_object.close()
     times = numpy.array(times)
-    return Dataset(lats, lons, times, values, variable_name, name=name)
+    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
 
 def load_file(file_path,
               variable_name,
