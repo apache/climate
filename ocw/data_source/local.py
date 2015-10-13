@@ -330,3 +330,67 @@ def load_multiple_files(file_path,
                         lat_name=lat_name, lon_name=lon_name, time_name=time_name))
     
     return datasets, data_name
+
+def load_WRF_2d_files_RAIN(file_path=None,
+                      filename_pattern=None,
+                      filelist=None,
+                      name=''):
+    ''' Load multiple WRF (or nuWRF) original output files containing 2D fields such as precipitation and surface variables into a Dataset.
+    The dataset can be spatially subset.
+    :param file_path: Directory to the NetCDF file to load.
+    :type file_path: :mod:`string`
+    :param filename_pattern: Path to the NetCDF file to load.
+    :type filename_pattern: :list:`string`
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+    :returns: An OCW Dataset object with the requested variable's data from
+        the NetCDF file.
+    :rtype: :class:`dataset.Dataset`
+    :raises ValueError:
+    '''
+
+    if not filelist:
+        WRF_files = []
+        for pattern in filename_pattern:
+            WRF_files.extend(glob(file_path + pattern))
+        WRF_files.sort()
+    else:
+        WRF_files=[line.rstrip('\n') for line in open(filelist)]
+
+    file_object_first = netCDF4.Dataset(WRF_files[0])
+    lats = file_object_first.variables['XLAT'][0,:]
+    lons = file_object_first.variables['XLONG'][0,:]
+
+    times = []
+    nfile = len(WRF_files)
+    for ifile, file in enumerate(WRF_files):
+        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        file_object = netCDF4.Dataset(file)
+        time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")
+        for ihour in range(24):
+            times.append(datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
+        if ifile == 0:
+            values0= file_object.variables['RAINC'][:]+file_object.variables['RAINNC'][:]
+        else:
+            values0= numpy.concatenate((values0, file_object.variables['RAINC'][:]+file_object.variables['RAINNC'][:]))
+        file_object.close()
+    times= numpy.array(times)
+    years = numpy.array([d.year for d in times])
+    ncycle = numpy.unique(years).size
+    print 'ncycle=',ncycle
+    nt, ny, nx = values0.shape
+    values = numpy.zeros([nt-ncycle*24, ny, nx])
+    times2 = []
+    nt2 = nt/ncycle
+    # remove the first day in each year
+    nt3 = nt2-24
+    t_index = 0
+    for icycle in numpy.arange(ncycle):
+        for it in numpy.arange(nt3)+24:
+            values[t_index,:] = values0[icycle*nt2+it,:]-values0[icycle*nt2+it-1,:]
+            times2.append(times[icycle*nt2+it])
+            t_index = t_index +1
+    variable_name = 'PREC'
+    variable_unit= 'mm/hr'
+    times2 = numpy.array(times2)
+    return Dataset(lats, lons, times2, values, variable_name, units=variable_unit, name=name)
