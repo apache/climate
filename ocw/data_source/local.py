@@ -330,3 +330,77 @@ def load_multiple_files(file_path,
                         lat_name=lat_name, lon_name=lon_name, time_name=time_name))
     
     return datasets, data_name
+
+def load_dataset_from_multiple_netcdf_files(file_list, variable_name,
+                                            lat_name=None, lon_name=None, time_name=None,
+                                            name='', file_path=None, filename_pattern=None,
+                                            mask_file=None, mask_variable=None, mask_value=0):
+    ''' Load multiple netCDF files from the same source (an observation or a model) into a Dataset.
+    The dataset can be spatially subset.
+    :param filelist: A text file including a list of filenames
+    :type filelist: :mod:`string`
+    :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+    :param lat_name: (Optional) The latitude variable name to extract from the
+        dataset.
+    :type lat_name: :mod:`string`
+
+    :param lon_name: (Optional) The longitude variable name to extract from the
+        dataset.
+    :type lon_name: :mod:`string`
+
+    :param time_name: (Optional) The time variable name to extract from the
+        dataset.
+    :type time_name: :mod:`string`
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+    :param file_path: Directory to the NetCDF file to load.
+    :type file_path: :mod:`string`
+    :param filename_pattern: Path to the NetCDF file to load.
+    :type filename_pattern: :list:`string`
+    :param mask_file: A netcdf file with two-dimensional mask indices
+    :type filelist: :mod:`string`
+    :param mask_variable: The variable name to load from the mask_file.
+    :type variable_name: :mod:`string`
+    :param mask_value: an index for spatial subsetting a dataset 
+    :type mask_value: :class:`int`
+    :returns: An OCW Dataset object with the requested variable's data from
+        the NetCDF file.
+    :rtype: :class:`dataset.Dataset`
+    :raises ValueError:
+    '''
+    nc_files = []
+    if not file_list:
+        for pattern in filename_pattern:
+            nc_files.extend(glob(file_path + pattern))
+    else:
+        nc_files = [line.rstrip('\n') for line in open(file_list)]
+
+    nc_files.sort()
+
+    dataset0 = load_file(nc_files[0], variable_name=variable_name, lat_name=lat_name, lon_name=lon_name, time_name=time_name)
+    if dataset0.lons.ndim == 1 and dataset0.lats.ndim ==1:
+        lons, lats = numpy.meshgrid(dataset0.lons, dataset0.lats)
+    elif dataset0.lons.ndim == 2 and dataset0.lats.ndim ==2:
+        lons = dataset0.lons
+        lats = dataset0.lats
+
+    if mask_file: 
+        mask_dataset = load_file(mask_file, mask_variable)
+        y_index, x_index = numpy.where(mask_dataset.values == mask_value)
+
+    times = []
+    nfile = len(nc_files)
+    for ifile, file in enumerate(nc_files):
+        print 'NC file '+str(ifile+1)+'/'+str(nfile), file
+        file_object0= load_file(file, variable_name)
+        values0= file_object0.values
+        times.extend(file_object0.times)
+        if mask_file:
+            values0 = values0[:,y_index, x_index]
+        if ifile == 0:
+            data_values = values0
+        else:
+            data_values= numpy.concatenate((data_values, values0))
+    times = numpy.array(times)
+    return Dataset(lats, lons, times, data_values, variable_name, name=name)
