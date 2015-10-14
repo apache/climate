@@ -477,3 +477,58 @@ def load_dataset_from_multiple_netcdf_files(file_list, variable_name,
     times = numpy.array(times)
     return Dataset(lats, lons, times, data_values, variable_name, name=name)
 
+def load_NLDAS_forcingA_files(file_path=None,
+                      filename_pattern=None,
+                      filelist=None,
+                      variable_name='APCPsfc_110_SFC_acc1h',
+                      name=''):
+    ''' Load multiple NLDAS2 forcingAWRF files containing 2D fields such as precipitation and surface variables into a Dataset.
+    The dataset can be spatially subset.
+    :param file_path: Directory to the NetCDF file to load.
+    :type file_path: :mod:`string`
+    :param filename_pattern: Path to the NetCDF file to load.
+    :type filename_pattern: :list:`string`
+    :param filelist: A list of filenames
+    :type filelist: :list:`string`
+    :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+    :returns: An OCW Dataset object with the requested variable's data from
+        the NetCDF file.
+    :rtype: :class:`dataset.Dataset`
+    :raises ValueError:
+    '''
+ 
+    if not filelist:
+        NLDAS_files = []
+        for pattern in filename_pattern:
+            NLDAS_files.extend(glob(file_path + pattern))
+    else:
+        NLDAS_files = [line.rstrip('\n') for line in open(filelist)]
+
+    NLDAS_files.sort()
+
+    file_object_first = netCDF4.Dataset(NLDAS_files[0])
+    lats = file_object_first.variables['lat_110'][:]
+    lons = file_object_first.variables['lon_110'][:]
+    lons, lats = numpy.meshgrid(lons, lats)
+
+    times = []
+    nfile = len(NLDAS_files)
+    for ifile, file in enumerate(NLDAS_files):
+        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        file_object = netCDF4.Dataset(file)
+        time_struct_parsed = strptime(file[-20:-7],"%Y%m%d.%H%M")
+        times.append(datetime(*time_struct_parsed[:6]))
+        
+        values0 = file_object.variables[variable_name][:]
+        values0 = numpy.expand_dims(values0, axis=0)
+        if ifile == 0:
+            values = values0
+            variable_unit = file_object.variables[variable_name].units
+        else:
+            values = numpy.concatenate((values, values0))
+        file_object.close()
+    times = numpy.array(times)
+    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
