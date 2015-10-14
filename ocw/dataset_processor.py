@@ -141,6 +141,38 @@ def temporal_rebin(target_dataset, temporal_resolution):
     
     return new_dataset
 
+def temporal_rebin_with_time_index(target_dataset, nt_average):
+    """ Rebin a Dataset to a new temporal resolution
+
+    :param target_dataset: Dataset object that needs temporal rebinned
+    :type target_dataset: :class:`dataset.Dataset`
+
+    :param nt_average: Time resolution for the output datasets. 
+     It is the same as the number of time indicies to be averaged. (length of time dimension in the rebinned dataset) = (original time dimension length/nt_average)
+    :type temporal_resolution: integer
+
+    :returns: A new temporally rebinned Dataset
+    :rtype: :class:`dataset.Dataset`
+    """
+    nt = target_dataset.times.size
+    if nt % nt_average !=0:
+        print 'Warning: length of time dimension must be a multiple of nt_average'
+    # nt2 is the length of time dimension in the rebinned dataset
+    nt2 = nt/nt_average
+    binned_dates = target_dataset.times[np.arange(nt2)*nt_average]
+    binned_values = np.zeros(np.insert(target_dataset.values.shape[1:],0,nt2))
+    for it in np.arange(nt2):
+        binned_values[it,:] = ma.average(target_dataset.values[nt_average*it:nt_average*it+nt_average,:], axis=0)
+    new_dataset = ds.Dataset(target_dataset.lats,
+                             target_dataset.lons,
+                             binned_dates,
+                             binned_values,
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name,
+                             origin=target_dataset.origin)
+    return new_dataset
+
 def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     """ Regrid a Dataset using the new latitudes and longitudes
 
