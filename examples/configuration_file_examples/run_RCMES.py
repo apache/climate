@@ -8,6 +8,7 @@ from ocw.dataset import Bounds
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from mpl_toolkits.basemap import shiftgrid
 import numpy as np
 import numpy.ma as ma
 import yaml
@@ -57,6 +58,8 @@ else:
     # TO DO: support ESGF
 
 ref_dataset =  dsp.normalize_dataset_datetimes(ref_dataset, temporal_resolution)
+if 'multiplying_factor' in ref_data_info.keys():
+    ref_dataset.values = ref_dataset.values*ref_data_info['multiplying_factor']
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
 model_data_info = config['datasets']['targets']
@@ -191,8 +194,12 @@ if nmetrics > 0:
         print 'metrics '+str(imetric)+'/'+str(nmetrics)+': ', metrics_name
         if metrics_name == 'Map_plot_bias_of_multiyear_climatology':
             row, column = plot_info['subplots_array']
-            Map_plot_bias_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
-                                      file_name, row, column)
+            if 'map_projection' in plot_info.keys():
+                Map_plot_bias_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
+                                          file_name, row, column, map_projection=plot_info['map_projection'])
+            else:
+                Map_plot_bias_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
+                                          file_name, row, column)
         elif metrics_name == 'Taylor_diagram_spatial_pattern_of_multiyear_climatology':
             Taylor_diagram_spatial_pattern_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
                                       file_name)

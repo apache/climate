@@ -15,7 +15,7 @@ from matplotlib.patches import Polygon
 import string
 
 def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets, model_names,
-                                      file_name, row, column):
+                                      file_name, row, column, map_projection=None):
     '''Draw maps of observed multi-year climatology and biases of models"'''
 
     # calculate climatology of observation data
@@ -42,7 +42,11 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
 
     string_list = list(string.ascii_lowercase) 
     ax = fig.add_subplot(row,column,1)
-    m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
+    if map_projection == 'npstere':
+        m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
+            resolution = 'l', fix_aspect=False)
+    else:
+        m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
             llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=False)
     lons, lats = np.meshgrid(obs_dataset.lons, obs_dataset.lats)
 
@@ -58,7 +62,11 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     clevs = plotter._nice_intervals(rcm_bias, 11)
     for imodel in np.arange(len(model_datasets)):
         ax = fig.add_subplot(row, column,2+imodel)
-        m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
+        if map_projection == 'npstere':
+            m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
+                resolution = 'l', fix_aspect=False)
+        else:
+            m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
                 llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=False)
         m.drawcoastlines(linewidth=1)
         m.drawcountries(linewidth=1)
