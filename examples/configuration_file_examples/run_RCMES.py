@@ -8,7 +8,6 @@ from ocw.dataset import Bounds
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-from mpl_toolkits.basemap import shiftgrid
 import numpy as np
 import numpy.ma as ma
 import yaml
