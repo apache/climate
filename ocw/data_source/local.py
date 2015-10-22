@@ -342,7 +342,6 @@ def load_multiple_files(file_path,
     
     return datasets, data_name
 
-<<<<<<< HEAD
 def load_WRF_2d_files_RAIN(file_path=None,
                       filename_pattern=None,
                       filelist=None,
@@ -493,26 +492,10 @@ def load_NLDAS_forcingA_files(file_path=None,
     :param filelist: A list of filenames
     :type filelist: :list:`string`
     :param variable_name: The variable name to load from the NetCDF file.
-=======
-def load_GPM_IMERG_files(file_path=None,
-                      filename_pattern=None,
-                      filelist=None,
-                      variable_name='precipitationCal',
-                      name='GPM_IMERG'):
-    ''' Load multiple GPM Level 3 IMEGE files containing calibrated precipitation and generate an OCW Dataset obejct.
-    :param file_path: Directory to the HDF files to load.
-    :type file_path: :mod:`string`
-    :param filename_pattern: Path to the HDF files to load.
-    :type filename_pattern: :list:`string`
-    :param filelist: A list of filenames
-    :type filelist: :list:`string`
-    :param variable_name: The variable name to load from the HDF file.
->>>>>>> CLIMATE-687
     :type variable_name: :mod:`string`
     :param name: (Optional) A name for the loaded dataset.
     :type name: :mod:`string`
     :returns: An OCW Dataset object with the requested variable's data from
-<<<<<<< HEAD
         the NetCDF file.
     :rtype: :class:`dataset.Dataset`
     :raises ValueError:
@@ -545,7 +528,29 @@ def load_GPM_IMERG_files(file_path=None,
         if ifile == 0:
             values = values0
             variable_unit = file_object.variables[variable_name].units
-=======
+        else:
+            values = numpy.concatenate((values, values0))
+        file_object.close()
+    times = numpy.array(times)
+    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
+
+def load_GPM_IMERG_files(file_path=None,
+                      filename_pattern=None,
+                      filelist=None,
+                      variable_name='precipitationCal',
+                      name='GPM_IMERG'):
+    ''' Load multiple GPM Level 3 IMEGE files containing calibrated precipitation and generate an OCW Dataset obejct.
+    :param file_path: Directory to the HDF files to load.
+    :type file_path: :mod:`string`
+    :param filename_pattern: Path to the HDF files to load.
+    :type filename_pattern: :list:`string`
+    :param filelist: A list of filenames
+    :type filelist: :list:`string`
+    :param variable_name: The variable name to load from the HDF file.
+    :type variable_name: :mod:`string`
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+    :returns: An OCW Dataset object with the requested variable's data from
         the HDF file.
     :rtype: :class:`dataset.Dataset`
     :raises ValueError:
@@ -579,9 +584,8 @@ def load_GPM_IMERG_files(file_path=None,
         values0= numpy.expand_dims(values0, axis=0)
         if ifile == 0:
             values = values0
->>>>>>> CLIMATE-687
         else:
             values = numpy.concatenate((values, values0))
         file_object.close()
     times = numpy.array(times)
-    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
+    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)    

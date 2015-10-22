@@ -160,7 +160,7 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
     # nt2 is the length of time dimension in the rebinned dataset
     nt2 = nt/nt_average
     binned_dates = target_dataset.times[np.arange(nt2)*nt_average]
-    binned_values = np.zeros(np.insert(target_dataset.values.shape[1:],0,nt2))
+    binned_values = ma.zeros(np.insert(target_dataset.values.shape[1:],0,nt2))
     for it in np.arange(nt2):
         binned_values[it,:] = ma.average(target_dataset.values[nt_average*it:nt_average*it+nt_average,:], axis=0)
     new_dataset = ds.Dataset(target_dataset.lats,
