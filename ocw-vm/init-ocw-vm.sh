@@ -25,7 +25,7 @@ sudo apt-get install -y liblapack-dev
 sudo apt-get install -y gfortran
 sudo apt-get install -y g++
 sudo apt-get install -y build-essential
-sudo apt-get install -y python-dev 
+sudo apt-get install -y python-dev
 sudo apt-get install -y ia32-libs --fix-missing
 sudo apt-get install -y git
 sudo apt-get install -y vim

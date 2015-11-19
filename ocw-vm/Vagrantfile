@@ -6,7 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.box = "hashicorp/precise64"
-    
+
     #Boot the VM into GUI mode.
     config.vm.provider "virtualbox" do |vb|
         # Don't boot with headless mode
