@@ -36,9 +36,10 @@ command -v conda >/dev/null 2>&1 || {
         echo "Unable to identify your OS. Please report this to the OCW List"
         echo "dev@climate.apache.org"
     fi
-
-    source ~/.bashrc
 }
+
+PS1='$ '
+source ~/.bashrc
 
 echo "Creating conda environment from ocw environment file"
 conda env create -f conda_environment.txt
