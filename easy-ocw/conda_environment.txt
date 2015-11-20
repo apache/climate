@@ -3,7 +3,6 @@ dependencies:
 - basemap=1.0.7=np18py27_0
 - curl=7.43.0=1
 - dateutil=2.4.1=py27_0
-- freetype=2.4.10=1
 - geos=3.3.3=0
 - h5py=2.5.0=np110py27_4
 - hdf5=1.8.15.1=2
