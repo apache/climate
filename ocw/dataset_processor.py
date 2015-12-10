@@ -218,11 +218,9 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     
     # Call _rcmes_spatial_regrid on each time slice
     for i in range(len(target_dataset.times)):
-        new_values[i] = _rcmes_spatial_regrid(target_values[i],
-                                              lats,
-                                              lons,
-                                              new_lats,
-                                              new_lons)
+        print 'Regridding time = %d/%d' %(i+1,len(target_dataset.times))
+        new_values[i] = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), target_values[i].flatten(),
+                                              (new_lons.flatten(), new_lats.flatten()), method='linear').reshape([new_lats.shape[0],new_lons.shape[1]])
     
     # TODO: 
     # This will call down to the _congrid() function and the lat and lon 

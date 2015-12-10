@@ -145,8 +145,10 @@ for model_name in model_names:
 print 'Regridding datasets: ', config['regrid']
 if not config['regrid']['regrid_on_reference']:
     ref_dataset = dsp.spatial_regrid(ref_dataset, new_lat, new_lon)
+    print 'Reference dataset has been regridded'
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.spatial_regrid(dataset, new_lat, new_lon)
+    print model_names[idata]+' has been regridded'
 
 print 'Propagating missing data information'
 ref_dataset = dsp.mask_missing_data([ref_dataset]+model_datasets)[0]
