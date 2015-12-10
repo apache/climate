@@ -209,17 +209,26 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                            new_lats.shape[0],  
                            new_lons.shape[1]])
 
-    # Convert all lats and lons into Numpy Masked Arrays
-    lats = ma.array(lats)
-    lons = ma.array(lons)
-    new_lats = ma.array(new_lats)
-    new_lons = ma.array(new_lons)
-    target_values = ma.array(target_dataset.values)
-    
     # Call _rcmes_spatial_regrid on each time slice
     for i in range(len(target_dataset.times)):
-        print 'Regridding time = %d/%d' %(i+1,len(target_dataset.times))
-        new_values[i] = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), target_values[i].flatten(),
+        print 'Regridding time: %d/%d' %(i+1,len(target_dataset.times))
+        values_original = ma.array(target_dataset.values[i])
+        if ma.count_masked(values_original) >= 1:
+            # Make a masking map using nearest neighbour interpolation -use this to determine locations with MDI and mask these
+            qmdi = np.zeros_like(values_original)
+            qmdi[values_original.mask == True] = 1.
+            qmdi[values_original.mask == False] = 0.
+            qmdi_r = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), qmdi.flatten(),
+                                              (new_lons.flatten(), new_lats.flatten()), method='nearest').reshape([new_lats.shape[0],new_lons.shape[1]])
+            mdimask = (qmdi_r != 0.0)
+
+            index = np.where(values_original.mask == False)
+            new_values[i] = scipy.interpolate.griddata((lons[index], lats[index]), values_original[index],
+                                              (new_lons.flatten(), new_lats.flatten()), method='linear', fill_value=1.e+20).reshape([new_lats.shape[0],new_lons.shape[1]])
+            new_values[i] = ma.masked_greater(new_values[i], 1.e+19) 
+            new_values[i] = ma.array(new_values[i], mask = mdimask)
+        else:
+            new_values[i] = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), values_original.flatten(),
                                               (new_lons.flatten(), new_lats.flatten()), method='linear').reshape([new_lats.shape[0],new_lons.shape[1]])
     
     # TODO: 
