@@ -213,7 +213,7 @@ alias below.
 To make it easier to change into the 'ocw' virtualenv add the
 following alias to your ~/.bash_profile
 
-    alias ocw='source $ocw_path/ocw/bin/activate ~/ocw/'
+    alias ocw='source $ocw_path/ocw/bin/activate $ocw_path/ocw/'
 
 When you want to use ocw in the future, you just have to type 'ocw'
 in your terminal."
