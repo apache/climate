@@ -55,6 +55,9 @@ angular.module('ocwUiApp')
     // Toggle display of a confirmation when loading a dataset
     $scope.fileAdded = false;
 
+    //Toggle if the file loading failed/there was a discrepancy in loading the variables.
+    $scope.fileLoadFailed = false;
+
     $scope.latLonVals = [];
     $scope.timeVals = [];
     $scope.localSelectForm = {};
@@ -90,6 +93,7 @@ angular.module('ocwUiApp')
         // Handle success fetches!
         function(arrayOfResults) {
           $scope.loadingFile = false;
+          $scope.fileLoadFailed = false;
 
           // Handle lat/lon results
           var data = arrayOfResults[1].data;
@@ -128,6 +132,7 @@ angular.module('ocwUiApp')
         // Uh oh! AT LEAST on of our fetches failed
         function(arrayOfFailure) {
           $scope.loadingFile = false;
+          $scope.fileLoadFailed = true;
 
           $scope.params      = ['Unable to load variable(s)'];
           $scope.paramSelect = $scope.params[0];
@@ -173,29 +178,39 @@ angular.module('ocwUiApp')
         newDataset['time'] = $scope.timeSelect;
         newDataset['timeVals'] = {'start': $scope.timeVals[0], 'end': $scope.timeVals[1]};
 
-        selectedDatasetInformation.addDataset(newDataset);
+        //Check if the file loading filaed.
+        if($scope.fileLoadFailed === 'false'){
+          selectedDatasetInformation.addDataset(newDataset);  
+          
+          // Reset all the fields!!
+          $scope.params = ['Please select a file above'];
+          $scope.paramSelect = $scope.params[0];
+          $scope.lats = ['Please select a file above'];
+          $scope.latsSelect = $scope.lats[0];
+          $scope.lons = ['Please select a file above'];
+          $scope.lonsSelect = $scope.lons[0];
+          $scope.times = ['Please select a file above'];
+          $scope.timeSelect = $scope.times[0];
+          $scope.latLonVals = [];
+          $scope.timeVals = [];
 
-        // Reset all the fields!!
-        $scope.params = ['Please select a file above'];
-        $scope.paramSelect = $scope.params[0];
-        $scope.lats = ['Please select a file above'];
-        $scope.latsSelect = $scope.lats[0];
-        $scope.lons = ['Please select a file above'];
-        $scope.lonsSelect = $scope.lons[0];
-        $scope.times = ['Please select a file above'];
-        $scope.timeSelect = $scope.times[0];
-        $scope.latLonVals = [];
-        $scope.timeVals = [];
+          // Clear the input box
+          $('#observationFileInput').val('');
 
-        // Clear the input box
-        $('#observationFileInput').val('');
+          // Display a confirmation message for a little bit
+          $scope.fileAdded = true;
+          $timeout(function() {
+            $scope.fileAdded = false;
+          }, 2000);
 
-        // Display a confirmation message for a little bit
-        $scope.fileAdded = true;
-        $timeout(function() {
-          $scope.fileAdded = false;
+          $timeout(function(){
+            $scope.fileLoadFailed=false;
+          }, 2000);
+        } 
+        $timeout(function(){
+            $scope.fileLoadFailed=false;
         }, 2000);
-    }
+    };
 
     $scope.shouldDisableLoadButton = function() {
       return $scope.loadingFile;
