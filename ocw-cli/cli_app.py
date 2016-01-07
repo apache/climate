@@ -599,7 +599,13 @@ def run_screen(model_datasets, models_info, observations_info,
 
              for member, each_target_dataset in enumerate(new_model_datasets):
                   new_model_datasets[member] = dsp.temporal_rebin(new_model_datasets[member], timedelta(days))
-                  new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
+                  if each_target_dataset.lats.ndim !=2 and each_target_dataset.lons.ndim !=2:
+                      new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
+                  else:
+                      timeStart = min(np.nonzero(each_target_dataset.times >= EVAL_BOUNDS.start)[0])
+                      timeEnd = max(np.nonzero(each_target_dataset.times <= EVAL_BOUNDS.end)[0])
+                      new_model_datasets[member].times = each_target_dataset.times[timeStart:timeEnd+1]
+                      new_model_datasets[member].values = each_target_dataset.values[timeStart:timeEnd+1,:]
              screen.addstr(5, 4, "--> Temporally regridded.")
              screen.refresh()
 
@@ -609,21 +615,18 @@ def run_screen(model_datasets, models_info, observations_info,
              new_lons = np.arange(overlap_min_lon, overlap_max_lon, spatial_grid_setting_lon)
              for i in range(len(obs_dataset)):
                   obs_dataset[i] = dsp.spatial_regrid(obs_dataset[i], new_lats, new_lons)
+                  obs_dataset[i] = dsp.variable_unit_conversion(obs_dataset[i])
 
              for member, each_target_dataset in enumerate(new_model_datasets):
                   new_model_datasets[member] = dsp.spatial_regrid(new_model_datasets[member], new_lats, new_lons)
+                  new_model_datasets[member] = dsp.variable_unit_conversion(new_model_datasets[member])
              screen.addstr(6, 4, "--> Spatially regridded.")
              screen.refresh()
 
+             obs_dataset = dsp.mask_missing_data(obs_dataset+new_model_datasets)[0:len(obs_dataset)]
+             new_model_datasets = dsp.mask_missing_data(obs_dataset+new_model_datasets)[len(obs_dataset):]
+
              if metric == 'bias':
-                  for i in range(len(obs_dataset)):
-                       _, obs_dataset[i].values = utils.calc_climatology_year(obs_dataset[i])
-                       obs_dataset[i].values = np.expand_dims(obs_dataset[i].values, axis=0)
-
-                  for member, each_target_dataset in enumerate(new_model_datasets):
-                          _, new_model_datasets[member].values = utils.calc_climatology_year(new_model_datasets[member])
-                          new_model_datasets[member].values = np.expand_dims(new_model_datasets[member].values, axis=0)
-
                   allNames = []
 
                   for model in new_model_datasets:
@@ -631,7 +634,7 @@ def run_screen(model_datasets, models_info, observations_info,
 
                   screen.addstr(7, 4, "Setting up metrics...")
                   screen.refresh()
-                  mean_bias = metrics.Bias()
+                  mean_bias = metrics.TemporalMeanBias()
                   pattern_correlation = metrics.PatternCorrelation()
                   spatial_std_dev_ratio = metrics.StdDevRatio()
                   screen.addstr(7, 4, "--> Metrics setting done.")
@@ -652,21 +655,24 @@ def run_screen(model_datasets, models_info, observations_info,
                             targets.append(new_model_datasets[int(target[-1])])
 
                   evaluation_result = evaluation.Evaluation(reference, targets, [mean_bias])
-                  export_evaluation_to_config(evaluation_result)
+                  #export_evaluation_to_config(evaluation_result)
                   evaluation_result.run()
                   screen.addstr(8, 4, "--> Evaluation Finished.")
                   screen.refresh()
 
                   screen.addstr(9, 4, "Generating plots....")
                   screen.refresh()
-                  rcm_bias = evaluation_result.results[:][0]
-                  new_rcm_bias = np.squeeze(np.array(evaluation_result.results))
+                  new_rcm_bias = evaluation_result.results[0]
 
                   if not os.path.exists(working_directory):
                        os.makedirs(working_directory)
 
                   fname = working_directory + 'Bias_contour'
+                  fname2= working_directory + 'Obs_contour'
+                  fname3= working_directory + 'Model_contour'
                   plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5), fname=fname, subtitles=allNames, cmap='coolwarm_r')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(reference), new_lats, new_lons, gridshape=(2, 5), fname=fname2, subtitles=allNames, cmap='coolwarm_r')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(targets[0]), new_lats, new_lons, gridshape=(2, 5), fname=fname3, subtitles=allNames, cmap='coolwarm_r')
                   screen.addstr(9, 4, "--> Plots generated.")
                   screen.refresh()
                   screen.addstr(y-2, 1, "Press 'enter' to Exit: ")
