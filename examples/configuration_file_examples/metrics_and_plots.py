@@ -16,6 +16,7 @@
 # under the License.
 
 #Apache OCW lib immports
+import ocw.dataset as ds
 import ocw.data_source.local as local
 import ocw.plotter as plotter
 import ocw.utils as utils
@@ -44,7 +45,6 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     bias_evaluation = Evaluation(obs_dataset, # Reference dataset for the evaluation
                                  model_datasets, # list of target datasets for the evaluation
                                  [map_of_bias, map_of_bias])
-
     # run the evaluation (bias calculation)
     bias_evaluation.run() 
 
@@ -78,6 +78,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     plt.colorbar(max, cax = cax) 
     clevs = plotter._nice_intervals(rcm_bias, 11)
     for imodel in np.arange(len(model_datasets)):
+
         ax = fig.add_subplot(row, column,2+imodel)
         if map_projection == 'npstere':
             m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
@@ -102,17 +103,18 @@ def Taylor_diagram_spatial_pattern_of_multiyear_climatology(obs_dataset, obs_nam
                                       file_name):
 
     # calculate climatological mean fields
-    obs_dataset.values = utils.calc_temporal_mean(obs_dataset)
+    obs_clim_dataset = ds.Dataset(obs_dataset.lats, obs_dataset.lons, obs_dataset.times, utils.calc_temporal_mean(obs_dataset))
+    model_clim_datasets = []
     for dataset in model_datasets:
-        dataset.values = utils.calc_temporal_mean(dataset)
+        model_clim_datasets.append(ds.Dataset(dataset.lats, dataset.lons, dataset.times, utils.calc_temporal_mean(dataset)))
 
     # Metrics (spatial standard deviation and pattern correlation)
     # determine the metrics
     taylor_diagram = metrics.SpatialPatternTaylorDiagram()
 
     # create the Evaluation object
-    taylor_evaluation = Evaluation(obs_dataset, # Reference dataset for the evaluation
-                                 model_datasets, # list of target datasets for the evaluation
+    taylor_evaluation = Evaluation(obs_clim_dataset, # Climatological mean of reference dataset for the evaluation
+                                 model_clim_datasets, # list of climatological means from model datasets for the evaluation
                                  [taylor_diagram])
 
     # run the evaluation (bias calculation)
