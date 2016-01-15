@@ -63,6 +63,7 @@ WITH_VIRTUAL_ENV=0
 WITH_HOMEBREW=0
 WITH_INTERACT=1
 INIT_PWD=$PWD
+
 while getopts ":h :e :q" FLAG
 do
     case $FLAG in
@@ -94,16 +95,28 @@ ENDINTRO
 
 if [ $WITH_VIRTUAL_ENV != 1 ]; then
 cat << VIRTUALENV_WARNING
+$(tput setaf 1)<-----------------------------[WARNING!]----------------------------------->$(tput sgr 0)
 It is highly recommended that you allow Easy OCW to install the dependencies
 into a virtualenv environment to ensure that your global Python install is
-not affected. If you're unsure, you should pass the -e flag
+not affected. If you're UNSURE, you should pass the -e flag
 to this script. If you aren't concerned, or you want to create your own
 virtualenv environment, then feel free to ignore this message.
 
 VIRTUALENV_WARNING
-fi
 
-read -p "Press [ENTER] to begin installation ..."
+read -p "Press [Yy] to begin installation with the flag -e $(tput setaf 2)[RECOMMENDED]$(tput sgr 0)
+[OR] 
+Press [Nn] to continue with the normal installation..." yn
+case $yn in 
+    [Yy]* ) 
+            WITH_VIRTUAL_ENV=1
+            ;;
+    [Nn]* ) 
+            WITH_VIRTUAL_ENV=0 
+            ;;
+    * ) echo "Please answer yes or no.." ;;
+esac
+fi
 fi
 
 header "Checking for pip ..."
@@ -131,17 +144,27 @@ if [ $WITH_VIRTUAL_ENV == 1 ]; then
         subtask "done"
     }
 
+    #Read the path for installation from the user.
+    read -e -p "Enter the path where you want to install ocw..." ocw_path
+    #check if the file path exists.
+    while [ ! -d "$ocw_path" ];
+    do 
+        echo "Path not found..."
+        read -e -p "Please enter a valid path..." ocw_path
+    done
+
     header "Checking for previously installed  ocw virtual environment..."
-    if [ -e ~/ocw/bin/python ]; then
-        echo "We found an existing 'ocw' virtualenv on your system in ~/ocw."
+    if [ -e $ocw_path/ocw/bin/python ]; then
+        echo "We found an existing 'ocw' virtualenv on your system in $ocw_path/ocw."
         read -n1 -p "Do you want to replace it with a clean install? y/n :" replace 
         if [ "$replace" == "y" ]; then
             echo ""
-            echo "WARNING this will delete all file and data in ~/ocw on your system."
-            read  -p "To confirm and proceed type YES or ENTER to quit:" confirm
-            if [ "$confirm" == "YES" ]; then
-                echo "Deleting contents of ~/ocw" >> install_log
-                rm -rf ~/ocw
+            echo "$(tput setaf 1)[WARNING!] this will delete all file and data in $ocw_path/ocw on your system.$(tput sgr 0)"
+            read -n1 -p "To confirm and proceed type y or n to quit:" confirm
+            if [ "$confirm" == "y" ]; then
+                echo ""
+                echo "Deleting contents of $ocw_path/ocw" >> install_log
+                rm -rf $ocw_path/ocw
             else
                 echo ""
                 echo "Stopping Open Climate Workbench Installation"
@@ -155,11 +178,11 @@ if [ $WITH_VIRTUAL_ENV == 1 ]; then
         fi
     fi
 
+    cd $ocw_path
     # Create a new environment for OCW work
     task "Creating a new environment in ~/ocw..."
-    cd ~
     virtualenv ocw >> install_log
-    source ~/ocw/bin/activate >> install_log
+    source $ocw_path/ocw/bin/activate >> install_log
     cd $INIT_PWD
     subtask "done"
 fi
@@ -179,7 +202,6 @@ echo | conda install --file ocw-conda-dependencies.txt
 header "Installing additional Python packages"
 pip install -r ocw-pip-dependencies.txt >> install_log
 
-
 if [ $WITH_VIRTUAL_ENV == 1 ]; then
     echo "***POST INSTALLATION NOTE***
 
@@ -191,7 +213,7 @@ alias below.
 To make it easier to change into the 'ocw' virtualenv add the
 following alias to your ~/.bash_profile
 
-    alias ocw='source ~/ocw/bin/activate ~/ocw/'
+    alias ocw='source $ocw_path/ocw/bin/activate $ocw_path/ocw/'
 
 When you want to use ocw in the future, you just have to type 'ocw'
 in your terminal."

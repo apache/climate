@@ -209,20 +209,27 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                            new_lats.shape[0],  
                            new_lons.shape[1]])
 
-    # Convert all lats and lons into Numpy Masked Arrays
-    lats = ma.array(lats)
-    lons = ma.array(lons)
-    new_lats = ma.array(new_lats)
-    new_lons = ma.array(new_lons)
-    target_values = ma.array(target_dataset.values)
-    
     # Call _rcmes_spatial_regrid on each time slice
     for i in range(len(target_dataset.times)):
-        new_values[i] = _rcmes_spatial_regrid(target_values[i],
-                                              lats,
-                                              lons,
-                                              new_lats,
-                                              new_lons)
+        print 'Regridding time: %d/%d' %(i+1,len(target_dataset.times))
+        values_original = ma.array(target_dataset.values[i])
+        if ma.count_masked(values_original) >= 1:
+            # Make a masking map using nearest neighbour interpolation -use this to determine locations with MDI and mask these
+            qmdi = np.zeros_like(values_original)
+            qmdi[values_original.mask == True] = 1.
+            qmdi[values_original.mask == False] = 0.
+            qmdi_r = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), qmdi.flatten(),
+                                              (new_lons.flatten(), new_lats.flatten()), method='nearest').reshape([new_lats.shape[0],new_lons.shape[1]])
+            mdimask = (qmdi_r != 0.0)
+
+            index = np.where(values_original.mask == False)
+            new_values[i] = scipy.interpolate.griddata((lons[index], lats[index]), values_original[index],
+                                              (new_lons.flatten(), new_lats.flatten()), method='linear', fill_value=1.e+20).reshape([new_lats.shape[0],new_lons.shape[1]])
+            new_values[i] = ma.masked_greater(new_values[i], 1.e+19) 
+            new_values[i] = ma.array(new_values[i], mask = mdimask)
+        else:
+            new_values[i] = scipy.interpolate.griddata((lons.flatten(), lats.flatten()), values_original.flatten(),
+                                              (new_lons.flatten(), new_lats.flatten()), method='linear').reshape([new_lats.shape[0],new_lons.shape[1]])
     
     # TODO: 
     # This will call down to the _congrid() function and the lat and lon 
@@ -341,6 +348,31 @@ def subset(subregion, target_dataset, subregion_name=None):
         origin=target_dataset.origin
     )
 
+def temporal_slice(start_time_index, end_time_index, target_dataset):
+    '''Temporally slice given dataset(s) with subregion information. This does not
+    spatially subset the target_Dataset
+
+    :param start_time_index: time index of the start time
+    :type start_time_index: :class:'int'
+
+    :param end_time_index: time index of the end time
+    :type end_time_index: :class:'int'
+
+    :param target_dataset: The Dataset object to subset.
+    :type target_dataset: :class:`dataset.Dataset`
+
+    :returns: The subset-ed Dataset object
+    :rtype: :class:`dataset.Dataset`
+
+    :raises: ValueError
+    '''
+
+    timeStart = min(np.nonzero(target_dataset.times >= start_time_index)[0])
+    timeEnd = max(np.nonzero(target_dataset.times <= end_time_index)[0])
+    target_dataset.times = target_dataset.times[timeStart:timeEnd+1]
+    target_dataset.values = target_dataset.values[timeStart:timeEnd+1,:]
+
+    return target_dataset
 
 def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
@@ -1093,19 +1125,19 @@ def _are_bounds_contained_by_dataset(bounds, dataset):
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry lib instead in the future
-    if not lat_min <= bounds.lat_min <= lat_max:
+    if not np.round(lat_min,3) <= np.round(bounds.lat_min,3) <= np.round(lat_max,3):
         error = "bounds.lat_min: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_min, lat_min, lat_max)
         errors.append(error)
 
-    if not lat_min <= bounds.lat_max <= lat_max:
+    if not np.round(lat_min,3) <= np.round(bounds.lat_max,3) <= np.round(lat_max,3):
         error = "bounds.lat_max: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_max, lat_min, lat_max)
         errors.append(error)
 
-    if not lon_min <= bounds.lon_min <= lon_max:
+    if not np.round(lon_min,3) <= np.round(bounds.lon_min,3) <= np.round(lon_max,3):
         error = "bounds.lon_min: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_min, lon_min, lon_max)
         errors.append(error)
 
-    if not lon_min <= bounds.lon_max <= lon_max:
+    if not np.round(lon_min,3) <= np.round(bounds.lon_max,3) <= np.round(lon_max,3):
         error = "bounds.lon_max: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_max, lon_min, lon_max)
         errors.append(error)
 
