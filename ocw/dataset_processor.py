@@ -348,6 +348,31 @@ def subset(subregion, target_dataset, subregion_name=None):
         origin=target_dataset.origin
     )
 
+def temporal_slice(start_time_index, end_time_index, target_dataset):
+    '''Temporally slice given dataset(s) with subregion information. This does not
+    spatially subset the target_Dataset
+
+    :param start_time_index: time index of the start time
+    :type start_time_index: :class:'int'
+
+    :param end_time_index: time index of the end time
+    :type end_time_index: :class:'int'
+
+    :param target_dataset: The Dataset object to subset.
+    :type target_dataset: :class:`dataset.Dataset`
+
+    :returns: The subset-ed Dataset object
+    :rtype: :class:`dataset.Dataset`
+
+    :raises: ValueError
+    '''
+
+    timeStart = min(np.nonzero(target_dataset.times >= start_time_index)[0])
+    timeEnd = max(np.nonzero(target_dataset.times <= end_time_index)[0])
+    target_dataset.times = target_dataset.times[timeStart:timeEnd+1]
+    target_dataset.values = target_dataset.values[timeStart:timeEnd+1,:]
+
+    return target_dataset
 
 def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
