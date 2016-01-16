@@ -602,10 +602,7 @@ def run_screen(model_datasets, models_info, observations_info,
                   if each_target_dataset.lats.ndim !=2 and each_target_dataset.lons.ndim !=2:
                       new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
                   else:
-                      timeStart = min(np.nonzero(each_target_dataset.times >= EVAL_BOUNDS.start)[0])
-                      timeEnd = max(np.nonzero(each_target_dataset.times <= EVAL_BOUNDS.end)[0])
-                      new_model_datasets[member].times = each_target_dataset.times[timeStart:timeEnd+1]
-                      new_model_datasets[member].values = each_target_dataset.values[timeStart:timeEnd+1,:]
+                      new_model_datasets[member] = dsp.temporal_slice(EVAL_BOUNDS.start, EVAL_BOUNDS.end, each_target_dataset)
              screen.addstr(5, 4, "--> Temporally regridded.")
              screen.refresh()
 
