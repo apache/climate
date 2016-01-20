@@ -152,6 +152,7 @@ angular.module('ocwUiApp')
 
       var newDataset = {};
       var input = $('#observationFileInput').val();
+      var name = $('#customDatasetName').val();
 
       // If the backend is limiting directory access we need to add that leader to our path
       // so it remains valid!
@@ -163,8 +164,13 @@ angular.module('ocwUiApp')
       // Save the model path. Note that the path is effectively the "id" for the model.
       newDataset['id'] = input;
       // Grab the file name later for display purposes.
-      var splitFilePath = input.split('/');
-      newDataset['name'] = splitFilePath[splitFilePath.length - 1];
+      if(name == ""){
+        var splitFilePath = input.split('/');
+        newDataset['name'] = splitFilePath[splitFilePath.length - 1];  
+      }
+      else{
+        newDataset['name'] = name;
+      }
       // Save the model parameter variable. We save it twice for consistency and display convenience.
       newDataset['param'] = $scope.paramSelect;
       newDataset['paramName'] = newDataset['param'];
