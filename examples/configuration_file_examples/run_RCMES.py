@@ -108,9 +108,13 @@ bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
 if ref_dataset.lats.ndim !=2 and ref_dataset.lons.ndim !=2:
     ref_dataset = dsp.subset(bounds,ref_dataset)
+else:
+    ref_dataset = dsp.temporal_slice(bounds.start, bounds.end, ref_dataset)
 for idata,dataset in enumerate(model_datasets):
     if dataset.lats.ndim !=2 and dataset.lons.ndim !=2:
         model_datasets[idata] = dsp.subset(bounds,dataset)
+    else:
+        model_datasets[idata] = dsp.temporal_slice(bounds.start, bounds.end, dataset)
 
 # Temporaly subset both observation and model datasets for the user specified season
 month_start = time_info['month_start']
