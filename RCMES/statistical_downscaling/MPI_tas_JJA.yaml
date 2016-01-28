@@ -16,14 +16,14 @@ month_index: !!python/tuple [6,7,8]
 reference:
     data_source: local
     data_name: CRU
-    path: ./data/observation/tas_cru_monthly_1981-2010.nc
+    path: ./data/Stat_dscale/tas_cru_monthly_1981-2010.nc
     variable: tas
 
 model:
     data_name: MPI
     variable: tas
     present:
-        path: ./data/model_present/tas_Amon_MPI_decadal1980_198101-201012.nc
+        path: ./data/Stat_dscale/tas_Amon_MPI_decadal1980_198101-201012.nc
     future:
         scenario_name: RCP8.5_2041-70
-        path: ./data/model_rcp85/tas_Amon_MPI_rcp85_204101-207012.nc 
+        path: ./data/Stat_dscale/tas_Amon_MPI_rcp85_204101-207012.nc 
