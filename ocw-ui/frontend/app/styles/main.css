@@ -22,7 +22,7 @@ body {
 }
 
 #header-img {
-	
+	heigh: auto;
 }
 
 #header-title {
@@ -60,6 +60,11 @@ body {
 }
 
 #map { height: 500px; }
+
+.navbar-header {
+    height: 100px;
+    padding-top: 0;
+}
 
 /* Small preview map that is displayed alongside dataset information */
 .preview-map {
