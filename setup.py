@@ -45,7 +45,7 @@ _name         = 'ocw'
 _namespaces   = []
 _testSuite    = 'ocw.tests'
 _url          = 'http://climate.apache.org/'
-_version      = '1.0.0'
+_version      = '1.1.0'
 _zipSafe      = True
 
 # Setup Metadata
