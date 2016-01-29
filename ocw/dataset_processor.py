@@ -667,12 +667,12 @@ def temperature_unit_conversion(dataset):
     :returns: The dataset with (potentially) updated units.
     :rtype: :class:`dataset.Dataset`
     '''
-    temperature_variables = ['temp','tas','tasmax','taxmin','T']
+    temperature_variables = ['temp','tas','tasmax','taxmin','T','t']
     variable = dataset.variable.lower()
 
     if any(sub_string in variable for sub_string in temperature_variables):
         dataset_units = dataset.units.lower()
-        if dataset_units == 'c':
+        if dataset_units == 'c' or dataset_units == 'celcius':
             dataset.values = 273.15 + dataset.values
             dataset.units = 'K'
 
