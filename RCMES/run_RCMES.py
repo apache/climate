@@ -59,11 +59,18 @@ max_lon = space_info['max_lon']
 
 """ Step 1: Load the reference data """
 ref_data_info = config['datasets']['reference']
+ref_lat_name = None
+ref_lon_name = None
+if 'latitude_name' in ref_data_info.keys():
+    ref_lat_name = ref_data_info['latitude_name']
+if 'longitude_name' in ref_data_info.keys():
+    ref_lon_name = ref_data_info['longitude_name']
 print 'Loading observation dataset:\n',ref_data_info
 ref_name = ref_data_info['data_name']
 if ref_data_info['data_source'] == 'local':
     ref_dataset = local.load_file(ref_data_info['path'],
-                                  ref_data_info['variable'], name=ref_name)
+                                  ref_data_info['variable'], name=ref_name,
+                                  lat_name=ref_lat_name, lon_name=ref_lon_name)
 elif ref_data_info['data_source'] == 'rcmed':
       ref_dataset = rcmed.parameter_dataset(ref_data_info['dataset_id'],
                                             ref_data_info['parameter_id'],
@@ -72,22 +79,30 @@ elif ref_data_info['data_source'] == 'rcmed':
 else:
     print ' '
     # TO DO: support ESGF
-
-ref_dataset =  dsp.normalize_dataset_datetimes(ref_dataset, temporal_resolution)
+if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
+    ref_dataset =  dsp.normalize_dataset_datetimes(ref_dataset, temporal_resolution)
 if 'multiplying_factor' in ref_data_info.keys():
     ref_dataset.values = ref_dataset.values*ref_data_info['multiplying_factor']
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
 model_data_info = config['datasets']['targets']
+model_lat_name = None
+model_lon_name = None
+if 'latitude_name' in model_data_info.keys():
+    model_lat_name = model_data_info['latitude_name']
+if 'longitude_name' in model_data_info.keys():
+    model_lon_name = model_data_info['longitude_name']
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
-                                                            variable_name =model_data_info['variable'])
+                                                            variable_name =model_data_info['variable'], 
+                                                            lat_name=model_lat_name, lon_name=model_lon_name)
 else:
     print ' '
     # TO DO: support RCMED and ESGF
-for idata,dataset in enumerate(model_datasets):
-    model_datasets[idata] = dsp.normalize_dataset_datetimes(dataset, temporal_resolution)
+if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
+    for idata,dataset in enumerate(model_datasets):
+        model_datasets[idata] = dsp.normalize_dataset_datetimes(dataset, temporal_resolution)
 
 """ Step 3: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
@@ -106,15 +121,13 @@ if ref_data_info['data_source'] == 'rcmed':
     max_lon = np.min([max_lon, ref_dataset.lons.max()])
 bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
-if ref_dataset.lats.ndim !=2 and ref_dataset.lons.ndim !=2:
-    ref_dataset = dsp.subset(bounds,ref_dataset)
-else:
-    ref_dataset = dsp.temporal_slice(bounds.start, bounds.end, ref_dataset)
+ref_dataset = dsp.subset(bounds,ref_dataset)
+if ref_dataset.temporal_resolution() != temporal_resolution:
+    ref_dataset = dsp.temporal_rebin(ref_dataset, temporal_resolution)
 for idata,dataset in enumerate(model_datasets):
-    if dataset.lats.ndim !=2 and dataset.lons.ndim !=2:
-        model_datasets[idata] = dsp.subset(bounds,dataset)
-    else:
-        model_datasets[idata] = dsp.temporal_slice(bounds.start, bounds.end, dataset)
+    model_datasets[idata] = dsp.subset(bounds,dataset)
+    if dataset.temporal_resolution() != temporal_resolution:
+        model_datasets[idata] = dsp.temporal_rebin(dataset, temporal_resolution)
 
 # Temporaly subset both observation and model datasets for the user specified season
 month_start = time_info['month_start']
