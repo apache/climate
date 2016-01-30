@@ -61,11 +61,15 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     ax = fig.add_subplot(row,column,1)
     if map_projection == 'npstere':
         m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
-            resolution = 'l', fix_aspect=False)
+            resolution = 'l', fix_aspect=True)
     else:
         m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
-            llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=False)
-    lons, lats = np.meshgrid(obs_dataset.lons, obs_dataset.lats)
+            llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=True)
+    if obs_dataset.lons.ndim == 1 and obs_dataset.lats.ndim == 1:
+        lons, lats = np.meshgrid(obs_dataset.lons, obs_dataset.lats)
+    if obs_dataset.lons.ndim == 2 and obs_dataset.lats.ndim == 2:
+        lons = obs_dataset.lons
+        lats = obs_dataset.lats
 
     x,y = m(lons, lats)
 
@@ -74,7 +78,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     m.drawstates(linewidth=0.5, color='w')
     max = m.contourf(x,y,obs_clim,levels = plotter._nice_intervals(obs_dataset.values, 10), extend='both',cmap='rainbow')
     ax.annotate('(a) \n' + obs_name,xy=(lon_min, lat_min))
-    cax = fig.add_axes([0.02, 1.-float(1./row), 0.01, 1./row*0.6])
+    cax = fig.add_axes([0.02, 1.-float(1./row)+1./row*0.25, 0.01, 1./row*0.5])
     plt.colorbar(max, cax = cax) 
     clevs = plotter._nice_intervals(rcm_bias, 11)
     for imodel in np.arange(len(model_datasets)):
@@ -82,17 +86,17 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
         ax = fig.add_subplot(row, column,2+imodel)
         if map_projection == 'npstere':
             m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
-                resolution = 'l', fix_aspect=False)
+                resolution = 'l', fix_aspect=True)
         else:
             m = Basemap(ax=ax, projection ='cyl', llcrnrlat = lat_min, urcrnrlat = lat_max,
-                llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=False)
+                llcrnrlon = lon_min, urcrnrlon = lon_max, resolution = 'l', fix_aspect=True)
         m.drawcoastlines(linewidth=1)
         m.drawcountries(linewidth=1)
         m.drawstates(linewidth=0.5, color='w')
         max = m.contourf(x,y,rcm_bias[imodel,:],levels = clevs, extend='both', cmap='RdBu_r')
         ax.annotate('('+string_list[imodel+1]+')  \n '+model_names[imodel],xy=(lon_min, lat_min))
 
-    cax = fig.add_axes([0.91, 0.1, 0.015, 0.8])
+    cax = fig.add_axes([0.91, 0.5, 0.015, 0.4])
     plt.colorbar(max, cax = cax) 
 
     plt.subplots_adjust(hspace=0.01,wspace=0.05)
