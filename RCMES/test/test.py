@@ -118,9 +118,9 @@ print("CRU31_Dataset.values shape: (times, lats, lons) - %s" % (cru31_dataset.va
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.values.shape,))
 
 print("Temporally Rebinning the Datasets to a Single Timestep")
-# To run FULL temporal Rebinning use a timedelta > 366 days.  I used 999 in this example
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=999))
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=999))
+# To run FULL temporal Rebinning,
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution='full')
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution='full')
 
 print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("CRU31_Dataset.values shape: %s \n\n" % (cru31_dataset.values.shape,))
