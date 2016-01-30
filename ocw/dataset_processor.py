@@ -565,8 +565,9 @@ def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name,
     # Set attribute lenghts
     nobs = 1
     nmodel = len(model_dataset_array)
-    lat_len = len(dataset.lats)
-    lon_len = len(dataset.lons)
+    lat_len, lon_len = dataset.values.shape[1:]
+    lat_ndim = dataset.lats.ndim
+    lon_ndim = dataset.lons.ndim
     time_len = len(dataset.times)
 
     if not subregions == None:
@@ -578,9 +579,15 @@ def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name,
     time_dim = out_file.createDimension('time', time_len)
 
     # Create variables and store the values
-    lats = out_file.createVariable('lat', 'f8', ('y'))
+    if lat_ndim ==2:
+        lats = out_file.createVariable('lat', 'f8', ('y','x'))
+    else:
+        lats = out_file.createVariable('lat', 'f8', ('y'))
     lats[:] = dataset.lats
-    lons = out_file.createVariable('lon', 'f8', ('x'))
+    if lon_ndim ==2:
+        lons = out_file.createVariable('lon', 'f8', ('y','x'))
+    else:
+        lons = out_file.createVariable('lon', 'f8', ('x'))
     lons[:] = dataset.lons
     times = out_file.createVariable('time', 'f8', ('time',))
     times.units = "days since %s" % dataset.times[0]
@@ -656,12 +663,12 @@ def temperature_unit_conversion(dataset):
     :returns: The dataset with (potentially) updated units.
     :rtype: :class:`dataset.Dataset`
     '''
-    temperature_variables = ['temp','tas','tasmax','taxmin','T','t']
+    temperature_variables = ['temp','tas','tasmax','taxmin','T','tg']
     variable = dataset.variable.lower()
 
     if any(sub_string in variable for sub_string in temperature_variables):
         dataset_units = dataset.units.lower()
-        if dataset_units == 'c' or dataset_units == 'celcius':
+        if dataset_units == 'c' or dataset_units == 'celsius':
             dataset.values = 273.15 + dataset.values
             dataset.units = 'K'
 
@@ -900,7 +907,7 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
         new_data = ma.mean(data, axis=0)
         new_date = [dates[size(dates)/2]]
     if unit == 'annual':
-        years = [d.year for d in target_dataset.times]
+        years = [d.year for d in dates]
         years_sorted = np.unique(years)
         new_data = ma.zeros([years_sorted.size, ny, nx])
         it = 0
@@ -911,9 +918,9 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
             new_date.append(datetime.datetime(year=year, month=7, day=2))
             it = it+1
     if unit == 'monthly':
-        years = [d.year for d in target_dataset.times]
+        years = [d.year for d in dates]
         years_sorted = np.unique(years)
-        months = [d.month for d in target_dataset.times]
+        months = [d.month for d in dates]
         months_sorted = np.unique(months)
         
         new_data = ma.zeros([years_sorted.size*months_sorted.size, ny, nx])
@@ -926,16 +933,16 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
                 new_date.append(datetime.datetime(year=year, month=month, day=15))
                 it = it+1   
     if unit == 'daily':
-        dates = [d.year*10000.+d.month*100.+d.day for d in target_dataset.times] 
-        dates_sorted = np.unique(dates)
+        days = [d.year*10000.+d.month*100.+d.day for d in dates] 
+        days_sorted = np.unique(days)
 
-        new_data = ma.zeros([dates_sorted.size, ny, nx])
+        new_data = ma.zeros([days_sorted.size, ny, nx])
         it = 0
         new_date = []
-        for date in dates_sorted:
-            index = np.where(dates == date)[0]
+        for day in days_sorted:
+            index = np.where(days = day)[0]
             new_data[it,:] = ma.mean(data[index,:], axis=0)
-            new_date.append(datetime.datetime(year=date/10000, month=(date % 10000)/100, day=date % 100))
+            new_date.append(datetime.datetime(year=day/10000, month=(day % 10000)/100, day=day % 100))
             it = it+1
         
     return new_data, np.array(new_date)
