@@ -54,8 +54,8 @@ print("WRF_Dataset.values shape: (times, lats, lons) - %s \n" % (wrf_dataset.val
 
 """ Step 2: Temporally Rebin the Data into an Annual Timestep """
 print("Temporally Rebinning the Datasets to an Annual Timestep")
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=365))
-wrf_dataset = dsp.temporal_rebin(wrf_dataset, datetime.timedelta(days=365))
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution='annual')
+wrf_dataset = dsp.temporal_rebin(wrf_dataset, temporal_resolution='annual')
 print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("WRF_Dataset.values shape: %s \n\n" % (wrf_dataset.values.shape,))
 
