@@ -62,6 +62,10 @@ angular
           templateUrl: 'views/results.html',
           controller: 'ResultCtrl'
         })
+        .state('demo', {
+          url: '/demo',
+          templateUrl: 'views/demo.html'
+        })
         .state('results.list', {
           // parent: 'results',
           url: '',
