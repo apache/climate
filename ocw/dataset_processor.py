@@ -104,33 +104,22 @@ def temporal_subset(month_start, month_end, target_dataset, average_each_year=Fa
     
     return new_dataset
 
-def temporal_rebin(target_dataset, temporal_resolution):     
+def temporal_rebin(target_dataset, time_unit):     
     """ Rebin a Dataset to a new temporal resolution
     
     :param target_dataset: Dataset object that needs temporal rebinned
     :type target_dataset: :class:`dataset.Dataset`
 
-    :param temporal_resolution: The new temporal bin size
-    :type temporal_resolution: :class:`datetime.timedelta`
+    :param temporal_resolution: The new temporal resolution
+    :type temporal_resolution: :mod:`string`               
     
     :returns: A new temporally rebinned Dataset
     :rtype: :class:`dataset.Dataset`
     """
     # Decode the temporal resolution into a string format that 
     # _rcmes_calc_average_on_new_time_unit_K() can understand
-    day_count = temporal_resolution.days
-    time_unit = None
-    if day_count == 1:
-        time_unit = 'daily'
-    elif day_count > 1 and day_count <= 31:
-        time_unit = 'monthly'
-    elif day_count > 31 and day_count <= 366:
-        time_unit = 'annual'
-    else:
-        time_unit = 'full'
 
-    masked_values = target_dataset.values.view(ma.MaskedArray)
-    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit_K(masked_values, target_dataset.times, time_unit)
+    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit(target_dataset.values, target_dataset.times, time_unit)
     binned_dates = np.array(binned_dates)
     new_dataset = ds.Dataset(target_dataset.lats, 
                              target_dataset.lons, 
@@ -886,6 +875,70 @@ def _rcmes_create_mask_using_threshold(masked_array, threshold=0.5):
 
     return mymask
 
+def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
+    """ Rebin 3d array and list of dates using the provided unit parameter
+
+    :param data: Input data that needs to be averaged
+    :type data: 3D masked numpy array of shape (times, lats, lons)
+    :param dates: List of dates that correspond to the given data values
+    :type dates: Python datetime objects
+    :param unit: Time unit to average the data into
+    :type unit: String matching one of these values : full | annual | monthly | daily
+
+    :returns: meanstorem, newTimesList
+    :rtype: 3D numpy masked array the same shape as the input array, list of python datetime objects
+    """
+
+    # Check if the user-selected temporal grid is valid. If not, EXIT
+    acceptable = (unit=='full')|(unit=='annual')|(unit=='monthly')|(unit=='daily')
+    if not acceptable:
+        print 'Error: unknown unit type selected for time averaging: EXIT'
+        return -1,-1,-1,-1
+
+    nt, ny, nx = data.shape
+    if unit == 'full':
+        new_data = ma.mean(data, axis=0)
+        new_date = [dates[size(dates)/2]]
+    if unit == 'annual':
+        years = [d.year for d in target_dataset.times]
+        years_sorted = np.unique(years)
+        new_data = ma.zeros([years_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for year in years_sorted:
+            index = np.where(years == year)[0]
+            new_data[it,:] = ma.mean(data[index,:], axis=0)
+            new_date.append(datetime.datetime(year=year, month=7, day=2))
+            it = it+1
+    if unit == 'monthly':
+        years = [d.year for d in target_dataset.times]
+        years_sorted = np.unique(years)
+        months = [d.month for d in target_dataset.times]
+        months_sorted = np.unique(months)
+        
+        new_data = ma.zeros([years_sorted.size*months_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for year in years_sorted:
+            for month in months_sorted:
+                index = np.where((years == year) & (months == month))[0]
+                new_data[it,:] = ma.mean(data[index,:], axis=0)
+                new_date.append(datetime.datetime(year=year, month=month, day=15))
+                it = it+1   
+    if unit == 'daily':
+        dates = [d.year*10000.+d.month*100.+d.day for d in target_dataset.times] 
+        dates_sorted = np.unique(dates)
+
+        new_data = ma.zeros([dates_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for date in dates_sorted:
+            index = np.where(dates == date)[0]
+            new_data[it,:] = ma.mean(data[index,:], axis=0)
+            new_date.append(datetime.datetime(year=date/10000, month=(date % 10000)/100, day=date % 100))
+            it = it+1
+        
+    return new_data, np.array(new_date)
 
 def _rcmes_calc_average_on_new_time_unit_K(data, dates, unit):
     """ Rebin 3d array and list of dates using the provided unit parameter

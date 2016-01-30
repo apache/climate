@@ -120,10 +120,10 @@ cru31_dataset = rcmed.parameter_dataset(dataset_id,
 """ Step 3: Resample Datasets so they are the same shape """
 
 print("Temporally Rebinning the Datasets to an Annual Timestep")
-# To run annual temporal Rebinning use a timedelta of 360 days.
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=360))
-wrf311_dataset = dsp.temporal_rebin(wrf311_dataset, datetime.timedelta(days=360))
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=360))
+# To run annual temporal Rebinning,
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution = 'annual')
+wrf311_dataset = dsp.temporal_rebin(wrf311_dataset, temporal_resolution = 'annual')
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution = 'annual')
 
 # Running Temporal Rebin early helps negate the issue of datasets being on different 
 # days of the month (1st vs. 15th)
