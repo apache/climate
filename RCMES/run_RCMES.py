@@ -61,9 +61,9 @@ max_lon = space_info['max_lon']
 ref_data_info = config['datasets']['reference']
 ref_lat_name = None
 ref_lon_name = None
-if ref_data_info['latitude_name'] in ref_data_info.keys():
+if 'latitude_name' in ref_data_info.keys():
     ref_lat_name = ref_data_info['latitude_name']
-if ref_data_info['longitude_name'] in ref_data_info.keys():
+if 'longitude_name' in ref_data_info.keys():
     ref_lon_name = ref_data_info['longitude_name']
 print 'Loading observation dataset:\n',ref_data_info
 ref_name = ref_data_info['data_name']
@@ -88,9 +88,9 @@ if 'multiplying_factor' in ref_data_info.keys():
 model_data_info = config['datasets']['targets']
 model_lat_name = None
 model_lon_name = None
-if model_data_info['latitude_name'] in model_data_info.keys():
+if 'latitude_name' in model_data_info.keys():
     model_lat_name = model_data_info['latitude_name']
-if model_data_info['longitude_name'] in model_data_info.keys():
+if 'longitude_name' in model_data_info.keys():
     model_lon_name = model_data_info['longitude_name']
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
