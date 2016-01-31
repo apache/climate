@@ -49,10 +49,14 @@ def serve_static(path):
 def serve_static(path):
     return static_file(path, root='./frontend/app/views/')
 
+@app.route('/img/:path#.+#')
+def server_static(path):
+     return static_file(path, root='./frontend/app/img/')
+
 @app.route('/static/eval_results/<file_path:path>')
 def get_eval_result_image(file_path):
     ''' Return static file.
-    
+
     Return static file specified by root + filepath where root defaults to:
         /tmp/ocw
 
