@@ -104,7 +104,7 @@ def temporal_subset(month_start, month_end, target_dataset, average_each_year=Fa
     
     return new_dataset
 
-def temporal_rebin(target_dataset, time_unit):     
+def temporal_rebin(target_dataset, temporal_resolution):     
     """ Rebin a Dataset to a new temporal resolution
     
     :param target_dataset: Dataset object that needs temporal rebinned
@@ -119,7 +119,7 @@ def temporal_rebin(target_dataset, time_unit):
     # Decode the temporal resolution into a string format that 
     # _rcmes_calc_average_on_new_time_unit_K() can understand
 
-    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit(target_dataset.values, target_dataset.times, time_unit)
+    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit(target_dataset.values, target_dataset.times, temporal_resolution)
     binned_dates = np.array(binned_dates)
     new_dataset = ds.Dataset(target_dataset.lats, 
                              target_dataset.lons, 
