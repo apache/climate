@@ -188,7 +188,8 @@ def normalize_lat_lon_values(lats, lons, values):
     '''
     if lats.ndim ==1 and lons.ndim ==1:
         # Avoid unnecessary shifting if all lons are higher than 180
-        lons[lons > 180] = lons[lons > 180] - 360.
+        if lons.min() > 180:
+            lons-=360
 
     	# Make sure lats and lons are monotonically increasing
     	lats_decreasing = np.diff(lats) < 0
@@ -223,7 +224,6 @@ def normalize_lat_lon_values(lats, lons, values):
 
         return lats_out, lons_out, data_out
     else:
-        # Avoid unnecessary shifting if all lons are higher than 180
         lons[lons > 180] = lons[lons > 180] - 360.
 
         return lats, lons, values
