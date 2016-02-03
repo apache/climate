@@ -184,8 +184,8 @@ angular.module('ocwUiApp')
         newDataset['time'] = $scope.timeSelect;
         newDataset['timeVals'] = {'start': $scope.timeVals[0], 'end': $scope.timeVals[1]};
 
-        //Check if the file loading filaed.
-        if($scope.fileLoadFailed === 'false'){
+        // Check if the file loading failed.
+        if($scope.fileLoadFailed === false){
           selectedDatasetInformation.addDataset(newDataset);  
           
           // Reset all the fields!!
