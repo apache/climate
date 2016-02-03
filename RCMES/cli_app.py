@@ -586,19 +586,11 @@ def run_screen(model_datasets, models_info, observations_info,
 
              screen.addstr(5, 4, "Temporally regridding...")
              screen.refresh()
-             if temp_grid_setting.lower() == 'hourly':
-                  days = 0.5
-             elif temp_grid_setting.lower() == 'daily':
-                  days = 1
-             elif temp_grid_setting.lower() == 'monthly':
-                  days = 31
-             else:
-                  days = 365
              for i in range(len(obs_dataset)):
-                  obs_dataset[i] = dsp.temporal_rebin(obs_dataset[i], timedelta(days))
+                  obs_dataset[i] = dsp.temporal_rebin(obs_dataset[i], temp_grid_setting.lower())
 
              for member, each_target_dataset in enumerate(new_model_datasets):
-                  new_model_datasets[member] = dsp.temporal_rebin(new_model_datasets[member], timedelta(days))
+                  new_model_datasets[member] = dsp.temporal_rebin(new_model_datasets[member], temp_grid_setting.lower())
                   if each_target_dataset.lats.ndim !=2 and each_target_dataset.lons.ndim !=2:
                       new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
                   else:
