@@ -75,7 +75,6 @@ setup(
     name=_name,
     namespace_packages=_namespaces,
     packages=find_packages(),
-    #_packages     = ['ocw', 'ocw.data_source', 'ocw.tests', 'ocw.esgf']
     test_suite=_testSuite,
     url=_url,
     version=_version,
