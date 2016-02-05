@@ -23,9 +23,9 @@ import datetime as dt
 class TestDap(unittest.TestCase):
     @classmethod
     def setup_class(self):
-        self.url = 'http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz'
+        self.url = 'http://test.opendap.org/opendap/data/ncml/agg/dated/CG2006158_120000h_usfc.nc'
         self.name = 'foo'
-        self.dataset = dap.load(self.url, 'sst', name=self.name)
+        self.dataset = dap.load(self.url, 'CGusfc', name=self.name)
 
     def test_dataset_is_returned(self):
         self.assertTrue(isinstance(self.dataset, Dataset))

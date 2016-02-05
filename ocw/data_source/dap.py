@@ -70,7 +70,7 @@ def load(url, variable, name=''):
 def _convert_times_to_datetime(time):
     '''Convert the OpenDAP time object's values to datetime objects
 
-    The time values are stores as some unit since an epoch. These need to be 
+    The time values are stored as some unit since an epoch. These need to be
     converted into datetime objects for the OCW Dataset object.
 
     :param time: The time object's values to convert
