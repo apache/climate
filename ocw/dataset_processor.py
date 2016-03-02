@@ -164,7 +164,7 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
                              origin=target_dataset.origin)
     return new_dataset
 
-def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
+def spatial_regrid(target_dataset, new_latitudes, new_longitudes, boundary_check=True):
     """ Regrid a Dataset using the new latitudes and longitudes
 
     :param target_dataset: Dataset object that needs spatially regridded
@@ -175,6 +175,9 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
 
     :param new_longitudes: Array of longitudes
     :type new_longitudes: :class:`numpy.ndarray`
+
+    :param boundary_check:  Check if the regriding domain's boundaries are outside target_dataset's domain          
+    :type boundary_check: :class:'bool'
 
     :returns: A new spatially regridded Dataset
     :rtype: :class:`dataset.Dataset`
@@ -232,7 +235,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
   
     for iy in np.arange(ny_new):
         for ix in np.arange(nx_new):
-            if path.contains_point([new_lons[iy,ix], new_lats[iy,ix]]): 
+            if path.contains_point([new_lons[iy,ix], new_lats[iy,ix]]) or not boundary_check: 
                 if regular_grid:
                     new_lats_indices[iy,ix] = (ny_old -1.)*(new_lats[iy,ix] - lats.min())/(lats.max() - lats.min())  
                     new_lons_indices[iy,ix] = (nx_old -1.)*(new_lons[iy,ix] - lons.min())/(lons.max() - lons.min())  
