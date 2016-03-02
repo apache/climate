@@ -17,29 +17,44 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Check if the user has conda installed. If not, we'll install Miniconda for them
-command -v conda >/dev/null 2>&1 || {
-    echo "Couldn't find conda. Attempting to install Miniconda"
-    OS=`uname -s`
-
-    if [ "${OS}" == "Darwin" ]; then
-        curl https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o /tmp/miniconda.sh
-        bash /tmp/miniconda.sh
-    elif [ "${OS}" == "Linux" ]; then
-        if [ `uname -m` == "x86_64" ]; then
-            curl https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o /tmp/miniconda.sh
-        else
-            curl https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh -o /tmp/miniconda.sh
-        fi
-        bash /tmp/miniconda.sh
-    else
-        echo "Unable to identify your OS. Please report this to the OCW List"
-        echo "dev@climate.apache.org"
-    fi
+header()
+{
+    echo
+    echo $1
 }
 
-PS1='$ '
-source ~/.bashrc
+task()
+{
+    echo " - " $1
+}
 
-echo "Creating conda environment from ocw environment file"
-conda env create -f conda_environment.txt
+subtask()
+{
+    echo "     " $1
+}
+
+# Find absolute path to the easy-ocw directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
+
+header "Installing dependencies via conda"
+task "Reading and installing from ocw-conda-dependencies.txt (This might take some time"
+conda install --file ocw-conda-dependencies.txt
+subtask "done"
+
+# Install miscellaneous Python packages needed for OCW. Some of these
+# can be installed with Conda, but since none of them have an annoying
+# compiled component we just installed them with Pip.
+header "Installing additional Python packages"
+task "Reading and installing from ocw-pip-dependencies.txt (Please wait...)"
+pip install -r ocw-pip-dependencies.txt
+subtask "done"
+
+header "Installing ocw module"
+cd ..
+# Open new and install OCW
+python setup.py install 
+subtask "finished installing ocw module"
+
+header "Part 2/2 of Installation completed. Please close the terminal and start to new one for the changes to take effect"
+header "For any issues with installation please contact dev@climate.apache.org"
