@@ -94,7 +94,8 @@ if 'longitude_name' in model_data_info.keys():
     model_lon_name = model_data_info['longitude_name']
 boundary_check_model = True
 if 'GCM_data' in model_data_info.keys():
-    boundary_check_model = ~model_data_info['GCM_data']                    
+    if model_data_info['GCM_data']:
+        boundary_check_model = False                                           
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
