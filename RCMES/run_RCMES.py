@@ -65,9 +65,6 @@ if 'latitude_name' in ref_data_info.keys():
     ref_lat_name = ref_data_info['latitude_name']
 if 'longitude_name' in ref_data_info.keys():
     ref_lon_name = ref_data_info['longitude_name']
-boundary_check_obs = True
-if 'monotonic_grids' in ref_data_info.keys():
-    boundary_check_obs = ref_data_info['monotonic_grids']
 print 'Loading observation dataset:\n',ref_data_info
 ref_name = ref_data_info['data_name']
 if ref_data_info['data_source'] == 'local':
@@ -96,8 +93,8 @@ if 'latitude_name' in model_data_info.keys():
 if 'longitude_name' in model_data_info.keys():
     model_lon_name = model_data_info['longitude_name']
 boundary_check_model = True
-if 'monotonic_grids' in model_data_info.keys():
-    boundary_check_model = model_data_info['monotonic_grids']
+if 'GCM_data' in model_data_info.keys():
+    boundary_check_model = ~model_data_info['GCM_data']                    
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
@@ -167,7 +164,7 @@ for model_name in model_names:
 """ Step 4: Spatial regriding of the reference datasets """
 print 'Regridding datasets: ', config['regrid']
 if not config['regrid']['regrid_on_reference']:
-    ref_dataset = dsp.spatial_regrid(ref_dataset, new_lat, new_lon, boundary_check = boundary_check_obs)
+    ref_dataset = dsp.spatial_regrid(ref_dataset, new_lat, new_lon)
     print 'Reference dataset has been regridded'
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.spatial_regrid(dataset, new_lat, new_lon, boundary_check = boundary_check_model)
