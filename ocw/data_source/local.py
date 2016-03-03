@@ -257,7 +257,8 @@ def load_file(file_path,
         elev_names = set(dimension_names) - set(lat_lon_time_var_names)
 
         # Grab the index value for the elevation values
-        level_index = dimension_names.index(elev_names.pop())
+        #level_index = dimension_names.index(elev_names.pop())
+        level_index = 1
 
         # Strip out the elevation values so we're left with a 3D array.
         if level_index == 0:

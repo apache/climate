@@ -256,7 +256,10 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
                       
     # Regrid the data on each time slice
     for i in range(len(target_dataset.times)):
-        values_original = ma.array(target_dataset.values[i])
+        if len(target_dataset.times) == 1:
+            values_original = ma.array(target_dataset.values)
+        else: 
+            values_original = ma.array(target_dataset.values[i])
         for shift in (-1, 1):
             for axis in (0, 1):
                 q_shifted = np.roll(values_original, shift=shift, axis=axis)
@@ -905,7 +908,7 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
     nt, ny, nx = data.shape
     if unit == 'full':
         new_data = ma.mean(data, axis=0)
-        new_date = [dates[size(dates)/2]]
+        new_date = [dates[dates.size/2]]
     if unit == 'annual':
         years = [d.year for d in dates]
         years_sorted = np.unique(years)
