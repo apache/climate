@@ -92,6 +92,10 @@ if 'latitude_name' in model_data_info.keys():
     model_lat_name = model_data_info['latitude_name']
 if 'longitude_name' in model_data_info.keys():
     model_lon_name = model_data_info['longitude_name']
+boundary_check_model = True
+if 'GCM_data' in model_data_info.keys():
+    if model_data_info['GCM_data']:
+        boundary_check_model = False                                           
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
@@ -164,9 +168,8 @@ if not config['regrid']['regrid_on_reference']:
     ref_dataset = dsp.spatial_regrid(ref_dataset, new_lat, new_lon)
     print 'Reference dataset has been regridded'
 for idata,dataset in enumerate(model_datasets):
-    model_datasets[idata] = dsp.spatial_regrid(dataset, new_lat, new_lon)
+    model_datasets[idata] = dsp.spatial_regrid(dataset, new_lat, new_lon, boundary_check = boundary_check_model)
     print model_names[idata]+' has been regridded'
-
 print 'Propagating missing data information'
 ref_dataset = dsp.mask_missing_data([ref_dataset]+model_datasets)[0]
 model_datasets = dsp.mask_missing_data([ref_dataset]+model_datasets)[1:]
