@@ -31,7 +31,7 @@ datasets:
 
     targets:
         data_source: local
-        path: ../data/prec*ncep.monavg.nc                                                    
+        path: ./data/NARCCAP_data/prec*ncep.monavg.nc                                                    
         variable: prec    
 
 number_of_metrics_and_plots: 2

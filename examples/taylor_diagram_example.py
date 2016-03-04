@@ -67,8 +67,8 @@ wrf_dataset = dsp.subset(subset, wrf_dataset)
 
 # Temporally re-bin the data into a monthly timestep.
 ################################################################################
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=30))
-wrf_dataset = dsp.temporal_rebin(wrf_dataset, datetime.timedelta(days=30))
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution = 'monthly')
+wrf_dataset = dsp.temporal_rebin(wrf_dataset, temporal_resolution = 'monthly')
 
 # Spatially regrid the datasets onto a 1 degree grid.
 ################################################################################

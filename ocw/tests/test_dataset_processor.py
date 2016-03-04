@@ -61,43 +61,45 @@ class TestTemporalRebin(unittest.TestCase):
     
     def setUp(self):
         self.ten_year_monthly_dataset = ten_year_monthly_dataset()
-        self.ten_year_annual_times = np.array([datetime.datetime(year, 1, 1) for year in range(2000, 2010)])
+        self.ten_year_annual_times = np.array([datetime.datetime(year, 7, 2) for year in range(2000, 2010)])
         self.two_years_daily_dataset = two_year_daily_dataset()
     
     def test_monthly_to_annual_rebin(self):
-        annual_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=365))
+        annual_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, "annual")
         np.testing.assert_array_equal(annual_dataset.times, self.ten_year_annual_times)
     
     def test_monthly_to_full_rebin(self):
-        full_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=3650))
-        full_times = [datetime.datetime(2004, 12, 16)]
+        full_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, "full")
+        full_times = [datetime.datetime(2005, 1, 1)]
         self.assertEqual(full_dataset.times, full_times)
     
     def test_daily_to_monthly_rebin(self):
         """This test takes a really long time to run.  TODO: Figure out where the performance drag is"""
-        monthly_dataset = dp.temporal_rebin(self.two_years_daily_dataset, datetime.timedelta(days=31))
-        bins = list(set([datetime.datetime(time_reading.year, time_reading.month, 1) for time_reading in self.two_years_daily_dataset.times]))
+        monthly_dataset = dp.temporal_rebin(self.two_years_daily_dataset, "monthly")
+        bins = list(set([datetime.datetime(time_reading.year, time_reading.month, 15) for time_reading in self.two_years_daily_dataset.times]))
         bins = np.array(bins)
         bins.sort()
         np.testing.assert_array_equal(monthly_dataset.times, bins)
     
     def test_daily_to_annual_rebin(self):
-        annual_dataset = dp.temporal_rebin(self.two_years_daily_dataset, datetime.timedelta(days=366))
-        bins = list(set([datetime.datetime(time_reading.year, 1, 1) for time_reading in self.two_years_daily_dataset.times]))
+        annual_dataset = dp.temporal_rebin(self.two_years_daily_dataset, "annual")
+        bins = list(set([datetime.datetime(time_reading.year, 7, 2) for time_reading in self.two_years_daily_dataset.times]))
         bins = np.array(bins)
         bins.sort()
         np.testing.assert_array_equal(annual_dataset.times, bins)
-    
+   
     def test_non_rebin(self):
         """This will take a monthly dataset and ask for a monthly rebin of 28 days.  The resulting
         dataset should have the same time values"""
-        monthly_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, datetime.timedelta(days=28))
-        good_times = self.ten_year_monthly_dataset.times
-        np.testing.assert_array_equal(monthly_dataset.times, good_times)
-
+        monthly_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset, "monthly")
+        bins = list(set([datetime.datetime(time_reading.year, time_reading.month, 15) for time_reading in self.ten_year_monthly_dataset.times]))
+        bins = np.array(bins)
+        bins.sort()
+        np.testing.assert_array_equal(monthly_dataset.times, bins)
+    
     def test_variable_propagation(self):
         annual_dataset = dp.temporal_rebin(self.ten_year_monthly_dataset,
-                                           datetime.timedelta(days=365))
+                                           "annual")
         self.assertEquals(annual_dataset.name,
                           self.ten_year_monthly_dataset.name)
         self.assertEquals(annual_dataset.variable,
@@ -382,7 +384,7 @@ def ten_year_monthly_15th_dataset():
     lats = np.array(range(-89, 90, 2))
     lons = np.array(range(-179, 180, 2))
     # Ten Years of monthly data
-    times = np.array([datetime.datetime(year, month, 15) for year in range(2000, 2010) for month in range(1, 13)])
+    times = np.array([datetime.datetime(year, month, 1) for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
     input_dataset = ds.Dataset(lats, lons, times, values, variable="test variable name", units='test variable units')
     return input_dataset

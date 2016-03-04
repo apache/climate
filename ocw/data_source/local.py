@@ -257,7 +257,8 @@ def load_file(file_path,
         elev_names = set(dimension_names) - set(lat_lon_time_var_names)
 
         # Grab the index value for the elevation values
-        level_index = dimension_names.index(elev_names.pop())
+        #level_index = dimension_names.index(elev_names.pop())
+        level_index = 1
 
         # Strip out the elevation values so we're left with a 3D array.
         if level_index == 0:
@@ -406,9 +407,9 @@ def load_WRF_2d_files_RAIN(file_path=None,
     times2 = numpy.array(times2)
     return Dataset(lats, lons, times2, values, variable_name, units=variable_unit, name=name)
 
-def load_dataset_from_multiple_netcdf_files(file_list, variable_name,
+def load_dataset_from_multiple_netcdf_files(variable_name, 
                                             lat_name=None, lon_name=None, time_name=None,
-                                            name='', file_path=None, filename_pattern=None,
+                                            name='', file_list=None, file_path=None, filename_pattern=None,
                                             mask_file=None, mask_variable=None, mask_value=0):
     ''' Load multiple netCDF files from the same source (an observation or a model) into a Dataset.
     The dataset can be spatially subset.

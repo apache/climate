@@ -26,13 +26,13 @@ datasets:
     reference:
         data_source: local
         data_name: SRB
-        path: ../data/srb_rel3.0_shortwave_from_1983_to_2007.nc                           
+        path: ./data/NARCCAP_data/srb_rel3.0_shortwave_from_1983_to_2007.nc                           
         variable: sw_sfc_dn
   
 
     targets:
         data_source: local
-        path: ../data/rsds*ncep.monavg.nc                                                    
+        path: ./data/NARCCAP_data/rsds*ncep.monavg.nc                                                    
         variable: rsds    
 
 number_of_metrics_and_plots: 2
