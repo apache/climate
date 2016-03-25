@@ -22,27 +22,24 @@ Example main program for ESGF-RCMES integration.
 '''
 
 # constant parameters
-USER_OPENID = "https://esg-datanode.jpl.nasa.gov/esgf-idp/openid/lucacinquini"
-USER_PASSWORD = "*****"
 DATA_DIRECTORY = "/tmp"
 
 from ocw.esgf.logon import logon
-from ocw.esgf.logon2 import logon2
 from ocw.esgf.search import SearchClient
 from ocw.esgf.download import download
 
 def main():
     '''Example driver program'''
-    
+
+    username = raw_input('Enter your ESGF Username:\n')
+    password = raw_input('Enter your ESGF Password:\n')
+
     # step 1: obtain short-term certificate
     print 'Retrieving ESGF certificate...'
     # logon using client-side MyProxy libraries
-    #if logon(USER_OPENID, USER_PASSWORD):
-    #    print "...done."
-    # logon through server-side MyProxy service
-    if logon2(USER_OPENID, USER_PASSWORD):
-        print "...done"
-    
+    if logon(username, password):
+        print "...done."
+
     # step 2: execute faceted search for files
     urls = main_obs4mips()
     #urls = main_cmip5()

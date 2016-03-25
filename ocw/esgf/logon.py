@@ -19,13 +19,14 @@
 '''
 RCMES module to logon onto the ESGF.
 '''
-
-from pyesgf.logon import LogonManager
 import os
 
-from ocw.esgf.constants import JPL_MYPROXY_SERVER_DN
+from pyesgf.logon import LogonManager
+
+from ocw.esgf.constants import JPL_MYPROXY_SERVER_DN, JPL_HOSTNAME
 
 def logon(openid, password):
+
     '''
     Function to retrieve a short-term X.509 certificate that can be used to authenticate with ESGF.
     The certificate is written in the location ~/.esg/credentials.pem.
@@ -33,11 +34,13 @@ def logon(openid, password):
     '''
     
     # Must configure the DN of the JPL MyProxy server if using a JPL openid
-    if "esg-datanode.jpl.nasa.gov" in openid:  
+    if JPL_HOSTNAME in openid:
         os.environ['MYPROXY_SERVER_DN'] = JPL_MYPROXY_SERVER_DN
-        
+
     lm = LogonManager()
-    lm.logon_with_openid(openid,password)
+
+    lm.logon_with_openid(openid, password)
+
     return lm.is_logged_on()
     
     
