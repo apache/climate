@@ -22,6 +22,7 @@ import numpy as np
 import getpass
 import urllib2
 import json
+from glob import glob
 
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
@@ -97,24 +98,30 @@ def load_local_model_screen(header):
 
     ready_screen("load_local_model_screen")
     screen.addstr(1, 1, header + " > Load Local Model File ")
-    screen.addstr(4, 2, "Enter model path: ")
-    model_path = screen.getstr()
+    model_path = glob('./data/*.nc')
+    screen.addstr(4, 10, "Model-ID   filename")
+    for imodel, model in enumerate(model_path):
+         screen.addstr(5+imodel, 14, '[%d]:  ' %imodel +model[7:]) 
+    screen.addstr(3, 2, "Select Model (Model-ID): ")
+    model_id = int(screen.getstr())
     try:
-         netCDF_file = Dataset(model_path, 'r')
+         netCDF_file = Dataset(model_path[model_id], 'r')
          all_netcdf_variables = [variable.encode() for variable in netCDF_file.variables.keys()]
          try:
-              screen.addstr(6, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
+              screen.addstr(7+imodel, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
               variable_name = screen.getstr()
-              screen.addstr(7, 4, "{0}".format(netCDF_file.variables[variable_name]))
-              screen.addstr(20, 2, "Confirm:")
-              screen.addstr(21, 4, "0- No")
-              screen.addstr(22, 4, "1- Yes")
-              screen.addstr(23, 3, "Would you take this variable:")
+              variable_info = format(netCDF_file.variables[variable_name]).splitlines()
+              for ii,info in enumerate(variable_info):
+                  screen.addstr(8+imodel+ii, 2, info)
+              screen.addstr(17+imodel, 2, "Confirm:")
+              screen.addstr(18+imodel, 4, "0- No")
+              screen.addstr(19+imodel, 4, "1- Yes")
+              screen.addstr(20+imodel, 3, "Would you take this variable:")
               answer = screen.getstr()
               if answer == "0":
                    note = "WARNING: Model file cannot be added."
               elif answer == "1":
-                   model_dataset = load_file(model_path, variable_name)
+                   model_dataset = load_file(model_path[model_id], variable_name)
                    model_datasets.append(model_dataset)
                    models_info.append({'directory': model_path, 'variable_name': variable_name})
                    note = "Model file successfully added."
