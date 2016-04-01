@@ -122,7 +122,7 @@ def load_local_model_screen(header):
                    note = "WARNING: Model file cannot be added."
               elif answer == "1":
                    model_dataset = load_file(model_path[model_id], variable_name)
-                   model_datasets.append(model_dataset)
+                   model_datasets.append(dsp.normalize_dataset_datetimes(model_dataset, model_dataset.temporal_resolution()))
                    models_info.append({'directory': model_path, 'variable_name': variable_name})
                    note = "Model file successfully added."
               else:
@@ -520,7 +520,7 @@ def manage_obs_screen(header, note=""):
 def run_screen(model_datasets, models_info, observations_info,
                overlap_start_time, overlap_end_time, overlap_min_lat,
                overlap_max_lat, overlap_min_lon, overlap_max_lon,
-               temp_grid_setting, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title):
+               temp_grid_setting, spatial_grid_option, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title):
     '''Generates screen to show running evaluation process.
 
     :param model_datasets: list of model dataset objects
@@ -607,22 +607,30 @@ def run_screen(model_datasets, models_info, observations_info,
 
              screen.addstr(6, 4, "Spatially regridding...")
              screen.refresh()
-             new_lats = np.arange(overlap_min_lat, overlap_max_lat, spatial_grid_setting_lat)
-             new_lons = np.arange(overlap_min_lon, overlap_max_lon, spatial_grid_setting_lon)
-             for i in range(len(obs_dataset)):
-                  obs_dataset[i] = dsp.spatial_regrid(obs_dataset[i], new_lats, new_lons)
-                  obs_dataset[i] = dsp.variable_unit_conversion(obs_dataset[i])
-
-             for member, each_target_dataset in enumerate(new_model_datasets):
-                  new_model_datasets[member] = dsp.spatial_regrid(new_model_datasets[member], new_lats, new_lons)
-                  new_model_datasets[member] = dsp.variable_unit_conversion(new_model_datasets[member])
+             if spatial_grid_option == 'Observation':
+                 new_lats = obs_dataset[0].lats
+                 new_lons = obs_dataset[0].lons
+             elif spatial_grid_option == 'Model':
+                 new_lats = new_model_datasets[0].lats
+                 new_lons = new_model_datasets[0].lons
+             else: 
+                 new_lats = np.arange(overlap_min_lat, overlap_max_lat, spatial_grid_setting_lat)
+                 new_lons = np.arange(overlap_min_lon, overlap_max_lon, spatial_grid_setting_lon)
+             if spatial_grid_option != 'Observation':
+                 for i in range(len(obs_dataset)):
+                      obs_dataset[i] = dsp.spatial_regrid(obs_dataset[i], new_lats, new_lons)
+                      obs_dataset[i] = dsp.variable_unit_conversion(obs_dataset[i])
+             if spatial_grid_option != 'Model':
+                 for member, each_target_dataset in enumerate(new_model_datasets):
+                      new_model_datasets[member] = dsp.spatial_regrid(new_model_datasets[member], new_lats, new_lons)
+                      new_model_datasets[member] = dsp.variable_unit_conversion(new_model_datasets[member])
              screen.addstr(6, 4, "--> Spatially regridded.")
              screen.refresh()
 
              obs_dataset = dsp.mask_missing_data(obs_dataset+new_model_datasets)[0:len(obs_dataset)]
              new_model_datasets = dsp.mask_missing_data(obs_dataset+new_model_datasets)[len(obs_dataset):]
 
-             if metric == 'bias':
+             if metric == 'bias_of_multiyear_climatology':
                   allNames = []
 
                   for model in new_model_datasets:
@@ -666,9 +674,9 @@ def run_screen(model_datasets, models_info, observations_info,
                   fname = working_directory + 'Bias_contour'
                   fname2= working_directory + 'Obs_contour'
                   fname3= working_directory + 'Model_contour'
-                  plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5), fname=fname, subtitles=allNames, cmap='coolwarm_r')
-                  plotter.draw_contour_map(utils.calc_temporal_mean(reference), new_lats, new_lons, gridshape=(2, 5), fname=fname2, subtitles=allNames, cmap='coolwarm_r')
-                  plotter.draw_contour_map(utils.calc_temporal_mean(targets[0]), new_lats, new_lons, gridshape=(2, 5), fname=fname3, subtitles=allNames, cmap='coolwarm_r')
+                  plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5), fname=fname, subtitles=allNames, cmap='coolwarm')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(reference), new_lats, new_lons, gridshape=(2, 5), fname=fname2, subtitles=allNames, cmap='rainbow')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(targets[0]), new_lats, new_lons, gridshape=(2, 5), fname=fname3, subtitles=allNames, cmap='rainbow')
                   screen.addstr(9, 4, "--> Plots generated.")
                   screen.refresh()
                   screen.addstr(y-2, 1, "Press 'enter' to Exit: ")
@@ -1073,9 +1081,9 @@ def settings_screen(header):
     for i in range(len(model_datasets)):
          target_datasets.append('mod{0}'.format(i))
     subregion_path = None
-    metrics_dict = {'1':'bias', '2':'std'}
-    metric = 'bias'
-    plots = {'bias':"contour map", 'std':"taylor diagram, bar chart(coming soon)"}
+    metrics_dict = {'1':'bias_of_multiyear_climatology'}
+    metric = 'bias_of_multiyear_climatology'
+    plots = {'bias_of_multiyear_climatology':"contour map"}
     working_directory = os.getcwd() + "/plots/"  #Default value of working directory set to "plots" folder in current directory
     plot_title = '' #TODO: ask user about plot title or figure out automatically
 
@@ -1143,34 +1151,28 @@ def settings_screen(header):
          option = screen.getstr()
 
          if option == '1':
-              screen.addstr(25, x/2, "Enter Start Time [min time: {0}] (Format YYYY-MM-DD):".format(fix_min_time))
+              screen.addstr(25, x/2, "Enter Start Time [min time: {0}] (Format YYYY-MM-DD)")
+              screen.addstr(26, x/2, ":".format(fix_min_time))
               new_start_time = screen.getstr()
               try:
                    new_start_time = datetime.strptime(new_start_time, '%Y-%m-%d')
-                   new_start_time_int = int("{0}{1}".format(new_start_time.year, new_start_time.month))
-                   fix_min_time_int = int("{0}{1}".format(fix_min_time.year, fix_min_time.month))
-                   fix_max_time_int = int("{0}{1}".format(fix_max_time.year, fix_max_time.month))
-                   all_overlap_end_time_int = int("{0}{1}".format(all_overlap_end_time.year, all_overlap_end_time.month))
-                   if new_start_time_int < fix_min_time_int \
-                   or new_start_time_int > fix_max_time_int \
-                   or new_start_time_int > all_overlap_end_time_int:
+                   if new_start_time < fix_min_time \
+                   or new_start_time > fix_max_time \
+                   or new_start_time > all_overlap_end_time:
                         note = "Start time has not changed. "
                    else:
                         all_overlap_start_time = new_start_time
                         note = "Start time has changed successfully. "
               except:
                    note = "Start time has not changed. "
-              screen.addstr(26, x/2, "Enter End Time [max time:{0}] (Format YYYY-MM-DD):".format(fix_max_time))
+              screen.addstr(27, x/2, "Enter End Time [max time:{0}] (Format YYYY-MM-DD)")
+              screen.addstr(28, x/2, ":".format(fix_max_time))
               new_end_time = screen.getstr()
               try:
                    new_end_time = datetime.strptime(new_end_time, '%Y-%m-%d')
-                   new_end_time_int = int("{0}{1}".format(new_end_time.year, new_end_time.month))
-                   fix_min_time_int = int("{0}{1}".format(fix_min_time.year, fix_min_time.month))
-                   fix_max_time_int = int("{0}{1}".format(fix_max_time.year, fix_max_time.month))
-                   all_overlap_start_time_int = int("{0}{1}".format(all_overlap_start_time.year, all_overlap_start_time.month))
-                   if new_end_time_int > fix_max_time_int \
-                   or new_end_time_int < fix_min_time_int \
-                   or new_end_time_int < all_overlap_start_time_int:
+                   if new_end_time > fix_max_time \
+                   or new_end_time < fix_min_time \
+                   or new_end_time < all_overlap_start_time:
                         note = note + " End time has not changed. "
                    else:
                         all_overlap_end_time = new_end_time
@@ -1376,7 +1378,7 @@ def settings_screen(header):
          if option.lower() == 'r':
               note = run_screen(model_datasets, models_info, observations_info, all_overlap_start_time, all_overlap_end_time, \
                          all_overlap_min_lat, all_overlap_max_lat, all_overlap_min_lon, all_overlap_max_lon, \
-                         temp_grid_setting, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title)
+                         temp_grid_setting, spatial_grid_option, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title)
 
 
 ##############################################################
