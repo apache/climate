@@ -9,3 +9,4 @@ sphinx==1.2.1
 sphinxcontrib-httpdomain==1.2.1
 esgf-pyclient==0.1.2
 python-dateutil==2.4.1
+mock==1.3.0
