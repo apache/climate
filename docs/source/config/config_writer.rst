@@ -1,5 +1,5 @@
 Configuration File Writer API
 =============================
 
-.. automodule:: configuration_writer
+.. automodule:: ocw_config_runner.configuration_writer
     :members:
