@@ -76,9 +76,16 @@ elif ref_data_info['data_source'] == 'rcmed':
                                             ref_data_info['parameter_id'],
                                             min_lat, max_lat, min_lon, max_lon,
                                             start_time, end_time)
+elif ref_data_info['data_source'] == 'ESGF':
+      username=raw_input('Enter your ESGF OpenID:\n')
+      password=raw_input('Enter your ESGF password:\n')
+      ds = esgf.load_dataset(dataset_id = ref_data_info['dataset_id'],
+                             variable = ref_data_info['variable'],
+                             esgf_username=username,
+                             esgf_password=password)
+      ref_dataset = ds[0]
 else:
     print ' '
-    # TO DO: support ESGF
 if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
     ref_dataset =  dsp.normalize_dataset_datetimes(ref_dataset, temporal_resolution)
 if 'multiplying_factor' in ref_data_info.keys():
@@ -101,9 +108,15 @@ if model_data_info['data_source'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
                                                             variable_name =model_data_info['variable'], 
                                                             lat_name=model_lat_name, lon_name=model_lon_name)
+elif model_data_info['data_source'] == 'ESGF':
+      md = esgf.load_dataset(dataset_id=model_data_info['dataset_id'],
+                             variable=model_data_info['variable'],
+                             esgf_username=username,
+                             esgf_password=password)
+      model_datasets, model_names = md[0]
 else:
     print ' '
-    # TO DO: support RCMED and ESGF
+    # TO DO: support RCMED
 if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
     for idata,dataset in enumerate(model_datasets):
         model_datasets[idata] = dsp.normalize_dataset_datetimes(dataset, temporal_resolution)
