@@ -14,23 +14,23 @@
 # limitations under the License.
 
 workdir: ./results/ESGF_example                                   
-output_netcdf_filename: narccap_zos_annual_mean_1993-2002.nc
+output_netcdf_filename: zos_annual_mean.nc
 
 # (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: False
+    maximum_overlap_period: False 
     start_time: 1995-01-01
-    end_time: 2003-12-31
+    end_time: 2004-12-31
     temporal_resolution: monthly
-    month_start: 3
-    month_end: 9
+    month_start: 1
+    month_end: 12
     average_each_year: False  
 
 space:
-    min_lat: 10
-    max_lat: 30
-    min_lon: -100
-    max_lon: -60
+    min_lat: -70
+    max_lat: 70
+    min_lon: -178.5
+    max_lon: 178.5 
 
 regrid:
     regrid_on_reference: True
@@ -40,13 +40,14 @@ regrid:
 datasets:
     reference:
         data_source: ESGF
-        data_name: obs4MIPS
+        data_name: AVISO    
         dataset_id: obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov                          
         variable: zos
 
     targets:
         data_source: ESGF
-        dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de                                                 
+        data_name: MPI-ESM
+        dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de 
         variable: zos
         GCM_data: True
 
@@ -55,8 +56,7 @@ number_of_metrics_and_plots: 1
 metrics1: Map_plot_bias_of_multiyear_climatology
 
 plots1:
-    file_name: BIAS_aviso-NARCCAP_1993-2002_ESGF
+    file_name: BIAS_zos_MPI-AVISO_1995-2004
     subplots_array: !!python/tuple [2,2]
-
 
 use_subregions: False

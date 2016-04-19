@@ -35,6 +35,7 @@ from dateutil import parser
 from datetime import datetime
 import os
 import sys
+from getpass import getpass
 
 from metrics_and_plots import *
 
@@ -59,8 +60,13 @@ max_lat = space_info['max_lat']
 min_lon = space_info['min_lon']
 max_lon = space_info['max_lon']
 
-""" Step 1: Load the reference data """
 ref_data_info = config['datasets']['reference']
+model_data_info = config['datasets']['targets']
+if ref_data_info['data_source'] == 'ESGF' or model_data_info['data_source'] == 'ESGF':
+    username=raw_input('Enter your ESGF OpenID:\n')
+    password=getpass(prompt='Enter your ESGF password:\n')
+
+""" Step 1: Load the reference data """
 ref_lat_name = None
 ref_lon_name = None
 if 'latitude_name' in ref_data_info.keys():
@@ -79,8 +85,6 @@ elif ref_data_info['data_source'] == 'rcmed':
                                             min_lat, max_lat, min_lon, max_lon,
                                             start_time, end_time)
 elif ref_data_info['data_source'] == 'ESGF':
-      username=raw_input('Enter your ESGF OpenID:\n')
-      password=raw_input('Enter your ESGF password:\n')
       ds = esgf.load_dataset(dataset_id = ref_data_info['dataset_id'],
                              variable = ref_data_info['variable'],
                              esgf_username=username,
@@ -94,7 +98,6 @@ if 'multiplying_factor' in ref_data_info.keys():
     ref_dataset.values = ref_dataset.values*ref_data_info['multiplying_factor']
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
-model_data_info = config['datasets']['targets']
 model_lat_name = None
 model_lon_name = None
 if 'latitude_name' in model_data_info.keys():
@@ -115,7 +118,10 @@ elif model_data_info['data_source'] == 'ESGF':
                              variable=model_data_info['variable'],
                              esgf_username=username,
                              esgf_password=password)
-      model_datasets, model_names = md[0]
+      model_datasets = []
+      model_names = []
+      model_datasets.append(md[0])
+      model_names.append(model_data_info['data_name'])
 else:
     print ' '
     # TO DO: support RCMED
@@ -220,7 +226,7 @@ if workdir[-1] != '/':
     workdir = workdir+'/'
 print 'Writing a netcdf file: ',workdir+config['output_netcdf_filename']
 if not os.path.exists(workdir):
-    os.system("mkdir "+workdir)
+    os.system("mkdir -p "+workdir)
 
 if config['use_subregions']:
     dsp.write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, model_datasets, model_names,
