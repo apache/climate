@@ -110,7 +110,7 @@ def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     url = url.format(dataset_id, variable)
 
     r = requests.get(url)
-    xml = BeautifulSoup(r.content)
+    xml = BeautifulSoup(r.content, "html.parser")
 
     dont_have_results = not bool(xml.response.result['numfound'])
 
