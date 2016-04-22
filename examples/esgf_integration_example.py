@@ -16,13 +16,13 @@
 # under the License.
 
 import ocw.data_source.esgf as esgf
-
+from getpass import getpass
 
 dataset_id = 'obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov'
 variable = 'zosStderr'
 
-username = raw_input('Enter your ESGF Username:\n')
-password = raw_input('Enter your ESGF Password:\n')
+username = raw_input('Enter your ESGF OpenID:\n')
+password = getpass(prompt='Enter your ESGF Password:\n')
 
 # Multiple datasets are returned in a list if the ESGF dataset is
 # divided into multiple files.
