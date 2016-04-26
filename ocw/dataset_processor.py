@@ -22,8 +22,10 @@ import numpy as np
 import numpy.ma as ma
 import scipy.interpolate
 import scipy.ndimage
+from scipy.stats import rankdata
 from scipy.ndimage import map_coordinates
 import netCDF4
+from matplotlib.path import Path
 
 import logging
 
@@ -108,27 +110,16 @@ def temporal_rebin(target_dataset, temporal_resolution):
     :param target_dataset: Dataset object that needs temporal rebinned
     :type target_dataset: :class:`dataset.Dataset`
 
-    :param temporal_resolution: The new temporal bin size
-    :type temporal_resolution: :class:`datetime.timedelta`
+    :param temporal_resolution: The new temporal resolution
+    :type temporal_resolution: :mod:`string`               
     
     :returns: A new temporally rebinned Dataset
     :rtype: :class:`dataset.Dataset`
     """
     # Decode the temporal resolution into a string format that 
     # _rcmes_calc_average_on_new_time_unit_K() can understand
-    day_count = temporal_resolution.days
-    time_unit = None
-    if day_count == 1:
-        time_unit = 'daily'
-    elif day_count > 1 and day_count <= 31:
-        time_unit = 'monthly'
-    elif day_count > 31 and day_count <= 366:
-        time_unit = 'annual'
-    else:
-        time_unit = 'full'
 
-    masked_values = target_dataset.values.view(ma.MaskedArray)
-    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit_K(masked_values, target_dataset.times, time_unit)
+    binned_values, binned_dates = _rcmes_calc_average_on_new_time_unit(target_dataset.values, target_dataset.times, temporal_resolution)
     binned_dates = np.array(binned_dates)
     new_dataset = ds.Dataset(target_dataset.lats, 
                              target_dataset.lons, 
@@ -141,7 +132,39 @@ def temporal_rebin(target_dataset, temporal_resolution):
     
     return new_dataset
 
-def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
+def temporal_rebin_with_time_index(target_dataset, nt_average):
+    """ Rebin a Dataset to a new temporal resolution
+
+    :param target_dataset: Dataset object that needs temporal rebinned
+    :type target_dataset: :class:`dataset.Dataset`
+
+    :param nt_average: Time resolution for the output datasets. 
+     It is the same as the number of time indicies to be averaged. (length of time dimension in the rebinned dataset) = (original time dimension length/nt_average)
+    :type temporal_resolution: integer
+
+    :returns: A new temporally rebinned Dataset
+    :rtype: :class:`dataset.Dataset`
+    """
+    nt = target_dataset.times.size
+    if nt % nt_average !=0:
+        print 'Warning: length of time dimension must be a multiple of nt_average'
+    # nt2 is the length of time dimension in the rebinned dataset
+    nt2 = nt/nt_average
+    binned_dates = target_dataset.times[np.arange(nt2)*nt_average]
+    binned_values = ma.zeros(np.insert(target_dataset.values.shape[1:],0,nt2))
+    for it in np.arange(nt2):
+        binned_values[it,:] = ma.average(target_dataset.values[nt_average*it:nt_average*it+nt_average,:], axis=0)
+    new_dataset = ds.Dataset(target_dataset.lats,
+                             target_dataset.lons,
+                             binned_dates,
+                             binned_values,
+                             variable=target_dataset.variable,
+                             units=target_dataset.units,
+                             name=target_dataset.name,
+                             origin=target_dataset.origin)
+    return new_dataset
+
+def spatial_regrid(target_dataset, new_latitudes, new_longitudes, boundary_check=True):
     """ Regrid a Dataset using the new latitudes and longitudes
 
     :param target_dataset: Dataset object that needs spatially regridded
@@ -153,34 +176,110 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes):
     :param new_longitudes: Array of longitudes
     :type new_longitudes: :class:`numpy.ndarray`
 
+    :param boundary_check:  Check if the regriding domain's boundaries are outside target_dataset's domain          
+    :type boundary_check: :class:'bool'
+
     :returns: A new spatially regridded Dataset
     :rtype: :class:`dataset.Dataset`
     """
-    # Make masked array of shape (times, new_latitudes,new_longitudes)
-    new_values = ma.zeros([len(target_dataset.times), 
-                           len(new_latitudes), 
-                           len(new_longitudes)])
-
+    
     # Create grids of the given lats and lons for the underlying API
-    # NOTE: np.meshgrid() requires inputs (x, y) and returns data 
+    # NOTE: np.meshgrid() requires inputs (x, y) and returns data
     #       of shape(y|lat|rows, x|lon|columns).  So we pass in lons, lats
     #       and get back data.shape(lats, lons)
-    lons, lats = np.meshgrid(target_dataset.lons, target_dataset.lats)
-    new_lons, new_lats = np.meshgrid(new_longitudes, new_latitudes)
-    # Convert all lats and lons into Numpy Masked Arrays
-    lats = ma.array(lats)
-    lons = ma.array(lons)
-    new_lats = ma.array(new_lats)
-    new_lons = ma.array(new_lons)
-    target_values = ma.array(target_dataset.values)
-    
-    # Call _rcmes_spatial_regrid on each time slice
+    if target_dataset.lons.ndim ==1 and target_dataset.lats.ndim ==1:
+        regular_grid = True
+        lons, lats = np.meshgrid(target_dataset.lons, target_dataset.lats)
+    else:
+        regular_grid = False
+        lons = target_dataset.lons
+        lats = target_dataset.lats
+    if new_longitudes.ndim ==1 and new_latitudes.ndim ==1:
+        new_lons, new_lats = np.meshgrid(new_longitudes, new_latitudes)
+    else:
+        new_lons = new_longitudes
+        new_lats = new_latitudes
+
+    ny_old, nx_old = lats.shape
+    ny_new, nx_new = new_lats.shape
+
+    # Make masked array of shape (times, new_latitudes,new_longitudes)
+    new_values = ma.zeros([len(target_dataset.times), 
+                           ny_new, nx_new]) 
+    # Make masked array of shape (times, new_latitudes,new_longitudes)
+    new_values = ma.zeros([len(target_dataset.times), 
+                           ny_new, nx_new])
+
+    # Boundary vertices of target_dataset
+    vertices = []
+
+    if regular_grid: 
+        vertices.append([lons[0,0], lats[0,0]])
+        vertices.append([lons[-1,0], lats[-1,0]])
+        vertices.append([lons[-1,-1], lats[-1,-1]])
+        vertices.append([lons[0,-1], lats[0,-1]])
+    else: 
+        for iy in np.arange(ny_old):   # from south to north along the west boundary
+            vertices.append([lons[iy,0], lats[iy,0]]) 
+        for ix in np.arange(nx_old):   # from west to east along the north boundary
+            vertices.append([lons[-1, ix], lats[-1, ix]])
+        for iy in np.arange(ny_old)[::-1]:   # from north to south along the east boundary
+            vertices.append([lons[iy, -1], lats[iy, -1]])
+        for ix in np.arange(nx_old)[::-1]:   # from east to west along the south boundary
+            vertices.append([lons[0, ix], lats[0, ix]])
+    path = Path(vertices)
+
+    # Convert new_lats and new_lons to float indices
+    new_lons_indices = np.zeros(new_lons.shape)
+    new_lats_indices = np.zeros(new_lats.shape)
+  
+    for iy in np.arange(ny_new):
+        for ix in np.arange(nx_new):
+            if path.contains_point([new_lons[iy,ix], new_lats[iy,ix]]) or not boundary_check: 
+                if regular_grid:
+                    new_lats_indices[iy,ix] = (ny_old -1.)*(new_lats[iy,ix] - lats.min())/(lats.max() - lats.min())  
+                    new_lons_indices[iy,ix] = (nx_old -1.)*(new_lons[iy,ix] - lons.min())/(lons.max() - lons.min())  
+                else:
+                    distance_from_original_grids = ((lons - new_lons[iy,ix])**2.+(lats - new_lats[iy,ix])**2.)**0.5  
+                    if np.min(distance_from_original_grids) == 0.:
+                        new_lats_indices[iy,ix], new_lons_indices[iy,ix] = np.where(distance_from_original_grids ==0)
+                    else:
+                        distance_rank = rankdata(distance_from_original_grids.flatten(), method='ordinal').reshape(lats.shape)                
+                        iy1, ix1 = np.where(distance_rank == 1) # the nearest grid point's indices 
+                        iy2, ix2 = np.where(distance_rank == 4) # point [iy2, ix] is diagonally across from [iy1, ix1] 
+                        dist1 = distance_from_original_grids[iy1,ix1]
+                        dist2 = distance_from_original_grids[iy2,ix2]
+                        new_lats_indices[iy,ix] = (dist1*iy2 + dist2*iy1)/(dist1+dist2) 
+                        new_lons_indices[iy,ix] = (dist1*ix2 + dist2*ix1)/(dist1+dist2) 
+            else:
+                new_lats_indices[iy,ix] = -999.    
+                new_lats_indices[iy,ix] = -999.    
+    new_lats_indices = ma.masked_less(new_lats_indices, 0.)
+    new_lons_indices = ma.masked_less(new_lons_indices, 0.)
+                      
+    # Regrid the data on each time slice
     for i in range(len(target_dataset.times)):
-        new_values[i] = _rcmes_spatial_regrid(target_values[i],
-                                              lats,
-                                              lons,
-                                              new_lats,
-                                              new_lons)
+        if len(target_dataset.times) == 1:
+            values_original = ma.array(target_dataset.values)
+        else: 
+            values_original = ma.array(target_dataset.values[i])
+        for shift in (-1, 1):
+            for axis in (0, 1):
+                q_shifted = np.roll(values_original, shift=shift, axis=axis)
+                idx = ~q_shifted.mask * values_original.mask
+                values_original.data[idx] = q_shifted[idx]
+        new_values[i] = map_coordinates(values_original, [new_lats_indices.flatten(), new_lons_indices.flatten()], order=1).reshape(new_lats.shape) 
+        new_values[i] = ma.array(new_values[i], mask=new_lats_indices.mask)
+        # Make a masking map using nearest neighbour interpolation -use this to determine locations with MDI and mask these
+        qmdi = np.zeros_like(values_original)
+        qmdi[values_original.mask == True] = 1.
+        qmdi[values_original.mask == False] = 0.
+        qmdi_r = map_coordinates(qmdi, [new_lats_indices.flatten(), new_lons_indices.flatten()], order=1).reshape(new_lats.shape)
+        mdimask = (qmdi_r != 0.0)
+
+        # Combine missing data mask, with outside domain mask define above.
+        new_values[i].mask = np.logical_or(mdimask, new_values[i].mask)
+
     
     # TODO: 
     # This will call down to the _congrid() function and the lat and lon 
@@ -250,55 +349,90 @@ def subset(subregion, target_dataset, subregion_name=None):
     # Ensure that the subregion information is well formed
     _are_bounds_contained_by_dataset(subregion, target_dataset)
 
-    # Get subregion indices into subregion data
-    dataset_slices = _get_subregion_slice_indices(subregion, target_dataset)
-
     if not subregion_name:
         subregion_name = target_dataset.name
 
-   # Slice the values array with our calculated slice indices
-    if target_dataset.values.ndim == 2:
-        subset_values = ma.zeros([len(target_dataset.values[
-            dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
-            len(target_dataset.values[
-                dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+    if target_dataset.lats.ndim ==2 and target_dataset.lons.ndim ==2:
+        target_dataset = temporal_slice(subregion.start, subregion.end, target_dataset)
+        nt, ny, nx = target_dataset.values.shape
+        y_index, x_index = np.where((target_dataset.lats >= subregion.lat_max) | (target_dataset.lats <= subregion.lat_min) |
+                         (target_dataset.lons >= subregion.lon_max) | (target_dataset.lons <= subregion.lon_min)) 
+        for it in np.arange(nt):
+            target_dataset.values[it,y_index, x_index] = 1.e+20
+        target_dataset.values = ma.masked_equal(target_dataset.values, 1.e+20)
+        return target_dataset
 
-        subset_values = target_dataset.values[
-            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
-
-    elif target_dataset.values.ndim == 3:
-        subset_values = ma.zeros([len(target_dataset.values[
-            dataset_slices["time_start"]:dataset_slices["time_end"]]),
-            len(target_dataset.values[
+    elif target_dataset.lats.ndim ==1 and target_dataset.lons.ndim ==1:
+        # Get subregion indices into subregion data
+        dataset_slices = _get_subregion_slice_indices(subregion, target_dataset)
+       # Slice the values array with our calculated slice indices
+        if target_dataset.values.ndim == 2:
+            subset_values = ma.zeros([len(target_dataset.values[
                 dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
-            len(target_dataset.values[
+                len(target_dataset.values[
+                    dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+
+            subset_values = target_dataset.values[
+                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+
+        elif target_dataset.values.ndim == 3:
+            subset_values = ma.zeros([len(target_dataset.values[
+                dataset_slices["time_start"]:dataset_slices["time_end"]]),
+                len(target_dataset.values[
+                dataset_slices["lat_start"]:dataset_slices["lat_end"]]), 
+                len(target_dataset.values[
                 dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
         
-        subset_values = target_dataset.values[
-            dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
-            dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-            dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+            subset_values = target_dataset.values[
+                dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
+                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
             
-    # Build new dataset with subset information
-    return ds.Dataset(
-        # Slice the lats array with our calculated slice indices
-        target_dataset.lats[dataset_slices["lat_start"]: 
-                            dataset_slices["lat_end"] + 1],
-        # Slice the lons array with our calculated slice indices
-        target_dataset.lons[dataset_slices["lon_start"]: 
-                            dataset_slices["lon_end"] + 1],
-        # Slice the times array with our calculated slice indices
-        target_dataset.times[dataset_slices["time_start"]: 
-                            dataset_slices["time_end"]+ 1],
-        # Slice the values array with our calculated slice indices
-        subset_values,
-        variable=target_dataset.variable,
-        units=target_dataset.units,
-        name=subregion_name,
-        origin=target_dataset.origin
-    )
+        # Build new dataset with subset information
+        return ds.Dataset(
+            # Slice the lats array with our calculated slice indices
+            target_dataset.lats[dataset_slices["lat_start"]: 
+                                dataset_slices["lat_end"] + 1],
+            # Slice the lons array with our calculated slice indices
+            target_dataset.lons[dataset_slices["lon_start"]: 
+                                dataset_slices["lon_end"] + 1],
+            # Slice the times array with our calculated slice indices
+            target_dataset.times[dataset_slices["time_start"]: 
+                                dataset_slices["time_end"]+ 1],
+            # Slice the values array with our calculated slice indices
+            subset_values,
+            variable=target_dataset.variable,
+            units=target_dataset.units,
+            name=subregion_name,
+            origin=target_dataset.origin
+        )
 
+def temporal_slice(start_time_index, end_time_index, target_dataset):
+    '''Temporally slice given dataset(s) with subregion information. This does not
+    spatially subset the target_Dataset
+
+    :param start_time_index: time index of the start time
+    :type start_time_index: :class:'int'
+
+    :param end_time_index: time index of the end time
+    :type end_time_index: :class:'int'
+
+    :param target_dataset: The Dataset object to subset.
+    :type target_dataset: :class:`dataset.Dataset`
+
+    :returns: The subset-ed Dataset object
+    :rtype: :class:`dataset.Dataset`
+
+    :raises: ValueError
+    '''
+
+    timeStart = min(np.nonzero(target_dataset.times >= start_time_index)[0])
+    timeEnd = max(np.nonzero(target_dataset.times <= end_time_index)[0])
+    target_dataset.times = target_dataset.times[timeStart:timeEnd+1]
+    target_dataset.values = target_dataset.values[timeStart:timeEnd+1,:]
+
+    return target_dataset
 
 def safe_subset(subregion, target_dataset, subregion_name=None):
     '''Safely subset given dataset with subregion information
@@ -437,8 +571,9 @@ def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name,
     # Set attribute lenghts
     nobs = 1
     nmodel = len(model_dataset_array)
-    lat_len = len(dataset.lats)
-    lon_len = len(dataset.lons)
+    lat_len, lon_len = dataset.values.shape[1:]
+    lat_ndim = dataset.lats.ndim
+    lon_ndim = dataset.lons.ndim
     time_len = len(dataset.times)
 
     if not subregions == None:
@@ -450,9 +585,15 @@ def write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name,
     time_dim = out_file.createDimension('time', time_len)
 
     # Create variables and store the values
-    lats = out_file.createVariable('lat', 'f8', ('y'))
+    if lat_ndim ==2:
+        lats = out_file.createVariable('lat', 'f8', ('y','x'))
+    else:
+        lats = out_file.createVariable('lat', 'f8', ('y'))
     lats[:] = dataset.lats
-    lons = out_file.createVariable('lon', 'f8', ('x'))
+    if lon_ndim ==2:
+        lons = out_file.createVariable('lon', 'f8', ('y','x'))
+    else:
+        lons = out_file.createVariable('lon', 'f8', ('x'))
     lons[:] = dataset.lons
     times = out_file.createVariable('time', 'f8', ('time',))
     times.units = "days since %s" % dataset.times[0]
@@ -528,12 +669,12 @@ def temperature_unit_conversion(dataset):
     :returns: The dataset with (potentially) updated units.
     :rtype: :class:`dataset.Dataset`
     '''
-    temperature_variables = ['temp','tas','tasmax','taxmin','T']
+    temperature_variables = ['temp','tas','tasmax','taxmin','T','tg']
     variable = dataset.variable.lower()
 
     if any(sub_string in variable for sub_string in temperature_variables):
         dataset_units = dataset.units.lower()
-        if dataset_units == 'c':
+        if dataset_units == 'c' or dataset_units == 'celsius':
             dataset.values = 273.15 + dataset.values
             dataset.units = 'K'
 
@@ -747,6 +888,70 @@ def _rcmes_create_mask_using_threshold(masked_array, threshold=0.5):
 
     return mymask
 
+def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
+    """ Rebin 3d array and list of dates using the provided unit parameter
+
+    :param data: Input data that needs to be averaged
+    :type data: 3D masked numpy array of shape (times, lats, lons)
+    :param dates: List of dates that correspond to the given data values
+    :type dates: Python datetime objects
+    :param unit: Time unit to average the data into
+    :type unit: String matching one of these values : full | annual | monthly | daily
+
+    :returns: meanstorem, newTimesList
+    :rtype: 3D numpy masked array the same shape as the input array, list of python datetime objects
+    """
+
+    # Check if the user-selected temporal grid is valid. If not, EXIT
+    acceptable = (unit=='full')|(unit=='annual')|(unit=='monthly')|(unit=='daily')
+    if not acceptable:
+        print 'Error: unknown unit type selected for time averaging: EXIT'
+        return -1,-1,-1,-1
+
+    nt, ny, nx = data.shape
+    if unit == 'full':
+        new_data = ma.mean(data, axis=0)
+        new_date = [dates[dates.size/2]]
+    if unit == 'annual':
+        years = [d.year for d in dates]
+        years_sorted = np.unique(years)
+        new_data = ma.zeros([years_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for year in years_sorted:
+            index = np.where(years == year)[0]
+            new_data[it,:] = ma.mean(data[index,:], axis=0)
+            new_date.append(datetime.datetime(year=year, month=7, day=2))
+            it = it+1
+    if unit == 'monthly':
+        years = [d.year for d in dates]
+        years_sorted = np.unique(years)
+        months = [d.month for d in dates]
+        months_sorted = np.unique(months)
+        
+        new_data = ma.zeros([years_sorted.size*months_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for year in years_sorted:
+            for month in months_sorted:
+                index = np.where((years == year) & (months == month))[0]
+                new_data[it,:] = ma.mean(data[index,:], axis=0)
+                new_date.append(datetime.datetime(year=year, month=month, day=15))
+                it = it+1   
+    if unit == 'daily':
+        days = [d.year*10000.+d.month*100.+d.day for d in dates] 
+        days_sorted = np.unique(days)
+
+        new_data = ma.zeros([days_sorted.size, ny, nx])
+        it = 0
+        new_date = []
+        for day in days_sorted:
+            index = np.where(days = day)[0]
+            new_data[it,:] = ma.mean(data[index,:], axis=0)
+            new_date.append(datetime.datetime(year=day/10000, month=(day % 10000)/100, day=day % 100))
+            it = it+1
+        
+    return new_data, np.array(new_date)
 
 def _rcmes_calc_average_on_new_time_unit_K(data, dates, unit):
     """ Rebin 3d array and list of dates using the provided unit parameter
@@ -1051,19 +1256,19 @@ def _are_bounds_contained_by_dataset(bounds, dataset):
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry lib instead in the future
-    if not lat_min <= bounds.lat_min <= lat_max:
+    if not np.round(lat_min,3) <= np.round(bounds.lat_min,3) <= np.round(lat_max,3):
         error = "bounds.lat_min: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_min, lat_min, lat_max)
         errors.append(error)
 
-    if not lat_min <= bounds.lat_max <= lat_max:
+    if not np.round(lat_min,3) <= np.round(bounds.lat_max,3) <= np.round(lat_max,3):
         error = "bounds.lat_max: %s is not between lat_min: %s and lat_max: %s" % (bounds.lat_max, lat_min, lat_max)
         errors.append(error)
 
-    if not lon_min <= bounds.lon_min <= lon_max:
+    if not np.round(lon_min,3) <= np.round(bounds.lon_min,3) <= np.round(lon_max,3):
         error = "bounds.lon_min: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_min, lon_min, lon_max)
         errors.append(error)
 
-    if not lon_min <= bounds.lon_max <= lon_max:
+    if not np.round(lon_min,3) <= np.round(bounds.lon_max,3) <= np.round(lon_max,3):
         error = "bounds.lon_max: %s is not between lon_min: %s and lon_max: %s" % (bounds.lon_max, lon_min, lon_max)
         errors.append(error)
 

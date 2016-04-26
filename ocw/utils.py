@@ -43,6 +43,8 @@ def decode_time_values(dataset, time_var_name):
     '''
     time_data = dataset.variables[time_var_name]
     time_format = time_data.units
+    if time_format[-1].lower() == 'z':
+        time_format = time_format[:-1]
 
     time_units = parse_time_units(time_format)
     time_base = parse_time_base(time_format)
@@ -187,7 +189,7 @@ def normalize_lat_lon_values(lats, lons, values):
     if lats.ndim ==1 and lons.ndim ==1:
         # Avoid unnecessary shifting if all lons are higher than 180
         if lons.min() > 180:
-            lons -= 360
+            lons-=360
 
     	# Make sure lats and lons are monotonically increasing
     	lats_decreasing = np.diff(lats) < 0
@@ -222,6 +224,8 @@ def normalize_lat_lon_values(lats, lons, values):
 
         return lats_out, lons_out, data_out
     else:
+        lons[lons > 180] = lons[lons > 180] - 360.
+
         return lats, lons, values
 
 

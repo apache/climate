@@ -22,7 +22,7 @@ import unittest
 from ocw.dataset import Dataset, Bounds
 from ocw.evaluation import Evaluation
 import ocw.metrics as metrics
-import configuration_writer as writer
+import ocw_config_runner.configuration_writer as writer
 
 import datetime as dt
 import numpy as np

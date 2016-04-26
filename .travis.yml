@@ -14,27 +14,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-import ocw.data_source.esgf as esgf
-
-dataset_id = 'obs4MIPs.CNES.AVISO.mon.v1|esg-datanode.jpl.nasa.gov'
-variable = 'zosStderr'
-
-username = raw_input('Enter your ESGF Username:\n')
-password = raw_input('Enter your ESGF Password:\n')
-
-# Multiple datasets are returned in a list if the ESGF dataset is
-# divided into multiple files.
-datasets = esgf.load_dataset(dataset_id,
-                             variable,
-                             username,
-                             password)
-
-# For this example, our dataset is only stored in a single file so
-# we only need to look at the 0-th value in the returned list.
-ds = datasets[0]
-
-print '\n--------\n'
-print 'Variable: ', ds.variable
-print 'Shape: ', ds.values.shape
-print 'A Value: ', ds.values[100][100][100]
+language: python
+python:
+  - "2.7"
+install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  - sudo apt-get -y install python-dev
+  - sudo apt-get -y install python-pip
+  - conda install --file easy-ocw/ocw-conda-dependencies.txt
+  - pip install -r easy-ocw/ocw-pip-dependencies.txt
+  - python setup.py install
+script:
+  - nosetests

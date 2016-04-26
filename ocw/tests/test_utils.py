@@ -28,7 +28,7 @@ from ocw.dataset import Dataset
 import ocw.utils as utils
 
 class TestDecodeTimes(unittest.TestCase):
-    test_model = '../ocw-ui/backend/tests/example_data/lat_lon_time.nc'
+    test_model = os.getcwd() + '/ocw-ui/backend/tests/example_data/lat_lon_time.nc'
 
     def setUp(self):
         self.netcdf = netCDF4.Dataset(os.path.abspath(self.test_model), mode='r')

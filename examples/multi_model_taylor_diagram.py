@@ -10,8 +10,13 @@ import ocw.utils as utils
 
 import datetime
 import numpy as np
+import urllib
 
 from os import path
+import ssl
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
+
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -66,7 +71,7 @@ target_datasets.append(local.load_file(FILE_3, varName, name="UCT"))
 
 
 """ Step 2: Fetch an OCW Dataset Object from the data_source.rcmed module """
-print("Working with the rcmed interface to get CRU3.1 Daily Precipitation")
+print("Working with the rcmed interface to get CRU3.1 Monthly Mean Precipitation")
 # the dataset_id and the parameter id were determined from  
 # https://rcmes.jpl.nasa.gov/content/data-rcmes-database 
 CRU31 = rcmed.parameter_dataset(10, 37, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
@@ -76,11 +81,11 @@ print("Resampling datasets ...")
 print("... on units")
 CRU31 = dsp.water_flux_unit_conversion(CRU31)
 print("... temporal")
-CRU31 = dsp.temporal_rebin(CRU31, datetime.timedelta(days=30))
+CRU31 = dsp.temporal_rebin(CRU31, temporal_resolution = 'monthly')
 
 for member, each_target_dataset in enumerate(target_datasets):
 	target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
-	target_datasets[member] = dsp.temporal_rebin(target_datasets[member], datetime.timedelta(days=30)) 
+	target_datasets[member] = dsp.temporal_rebin(target_datasets[member], temporal_resolution = 'monthly') 
 	target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])	
 	
 #Regrid
@@ -94,8 +99,7 @@ for member, each_target_dataset in enumerate(target_datasets):
 	
 #find the mean values
 #way to get the mean. Note the function exists in util.py as def calc_climatology_year(dataset):
-CRU31.values,_ = utils.calc_climatology_year(CRU31)
-CRU31.values = np.expand_dims(CRU31.values, axis=0)
+CRU31.values = utils.calc_temporal_mean(CRU31)
 
 #make the model ensemble
 target_datasets_ensemble = dsp.ensemble(target_datasets)
@@ -105,8 +109,7 @@ target_datasets_ensemble.name="ENS"
 target_datasets.append(target_datasets_ensemble)
 
 for member, each_target_dataset in enumerate(target_datasets):
-	target_datasets[member].values,_ = utils.calc_climatology_year(target_datasets[member])
-	target_datasets[member].values = np.expand_dims(target_datasets[member].values, axis=0)
+	target_datasets[member].values = utils.calc_temporal_mean(target_datasets[member])
 	
 allNames =[]
 
@@ -114,8 +117,7 @@ for target in target_datasets:
 	allNames.append(target.name)
 
 #calculate the metrics
-pattern_correlation = metrics.PatternCorrelation()
-spatial_std_dev = metrics.StdDevRatio()
+taylor_diagram = metrics.SpatialPatternTaylorDiagram()
 
 
 #create the Evaluation object
@@ -123,17 +125,12 @@ RCMs_to_CRU_evaluation = evaluation.Evaluation(CRU31, # Reference dataset for th
                                     # 1 or more target datasets for the evaluation                
                                     target_datasets,
                                     # 1 or more metrics to use in the evaluation
-                                    [spatial_std_dev, pattern_correlation])#, mean_bias,spatial_std_dev_ratio, pattern_correlation])   
+                                    [taylor_diagram])#, mean_bias,spatial_std_dev_ratio, pattern_correlation])   
 RCMs_to_CRU_evaluation.run()
 
-rcm_std_dev = [results[0] for results in RCMs_to_CRU_evaluation.results]
-rcm_pat_cor = [results[1] for results in RCMs_to_CRU_evaluation.results]
+taylor_data = RCMs_to_CRU_evaluation.results[0]
 
-taylor_data = np.array([rcm_std_dev, rcm_pat_cor]).transpose()
-
-new_taylor_data = np.squeeze(np.array(taylor_data))
-
-plotter.draw_taylor_diagram(new_taylor_data,
+plotter.draw_taylor_diagram(taylor_data,
                         allNames, 
                         "CRU31",
                         fname=OUTPUT_PLOT,

@@ -22,7 +22,7 @@ import urllib2
 
 from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
 from ocw.esgf.download import download
-from ocw.esgf.logon2 import logon2
+from ocw.esgf.logon import logon
 from ocw.esgf.search import SearchClient
 import ocw.data_source.local as local
 
@@ -110,7 +110,7 @@ def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
     url = url.format(dataset_id, variable)
 
     r = requests.get(url)
-    xml = BeautifulSoup(r.content)
+    xml = BeautifulSoup(r.content, "html.parser")
 
     dont_have_results = not bool(xml.response.result['numfound'])
 
@@ -133,7 +133,7 @@ def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
 def _download_files(file_urls, username, password, download_directory='/tmp'):
     ''''''
     try:
-        logon2(username, password)
+        logon(username, password)
     except urllib2.HTTPError:
         raise ValueError('esgf._download_files: Invalid login credentials')
 

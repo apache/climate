@@ -48,7 +48,9 @@ under the License.
         <div class="navbar navbar-default" id="ocw-navbar" role="navigation">
           <div class="container">
             <div class="navbar-header">
-              <a class="navbar-brand brand" href="#">OCW UI</a>
+              <a class="navbar-brand brand" href="http://climate.apache.org">
+                <img id="header-img" src="img/ocw-logo-variant-sm-01-01.png" align="right" height="75"/>
+              </a>
             </div>
             <div class="navbar-collapse">
               <ul class="nav navbar-nav">
@@ -61,7 +63,6 @@ under the License.
         <div class="row">
           <div class="col-md-12">
             <div id="header">
-              <img id="header-img" src=""/>
               <h3 id="header-title">Project Name</h3>
               <h5 id="OCW-powered">Powered by Apache Open Climate Workbench</h5>
             </div>
@@ -92,7 +93,7 @@ under the License.
     <!-- Google visualization library needs to be initialized for the timeline -->
     <!-- Note that the terms of use forbid having a local copy of the code, so we're -->
     <!-- stuck downloading it this way unfortunately. -->
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">google.load("visualization", "1");</script>
 
     <!-- build:js(.) scripts/vendor.js -->
@@ -111,7 +112,7 @@ under the License.
     <script src="bower_components/chap-links-timeline/timeline-min.js"></script>
     <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.js"></script>
-    <script src="bower_components/angular-ui-date/ui-date.js"></script>
+    <script src="bower_components/angular-ui-date/src/ui-date.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -143,5 +144,21 @@ under the License.
 
     <!-- grunt wiredep wasn't properly linking this. Had to add manually -->
     <script src="bower_components/angular-ui-date/src/date.js"></script>
+
+    <!-- Footer for the Web-App -->
+    <footer class="footer" align="center">
+      <div class="container">
+        <hr>
+        <p>
+          Apache Open Climate Workbench Software.
+          <a href="https://climate.apache.org/" target="_blank">About Us</a>. 
+          <a href="http://climate.apache.org/community/mailing-lists.html" target="_blank">Report an issue</a>.
+          <br>
+          Copyright © 2016 The Apache Software Foundation, Licensed under the
+          <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.
+        </p>
+      </div>
+    <footer>
+
   </body>
 </html>

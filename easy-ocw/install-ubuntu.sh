@@ -26,12 +26,7 @@ its dependencies.
 
 Flags:
     -h  Display this help message.
-    -e  Install and configure a virtualenv environment before installation.
     -q  Quiet install. User prompts are removed (when possible).
-
-It is recommended that you pass -e when running this script. If you don't, 
-parts of this installation will pollute your global Python install. 
-If you're unsure, pass -e just to be safe!
 
 N.B. This install script has been tested against Ubuntu 12.04 and 14.04.
 Please report problems with this script to dev@climate.apache.org
@@ -60,10 +55,14 @@ echo "                         Welcome to Easy OCW"
 echo "---------------------------------------------------------------------------"
 echo
 
-WITH_VIRTUAL_ENV=0
 WITH_HOMEBREW=0
 WITH_INTERACT=1
-ocw_path="${HOME}/climate"
+
+# Find absolute path to the easy-ocw directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cd $DIR
+ocw_path="$DIR/../climate"
 
 while getopts ":h :e :q" FLAG
 do
@@ -71,9 +70,6 @@ do
         h)
             help
             exit 1
-            ;;
-        e)
-            WITH_VIRTUAL_ENV=1
             ;;
         q)
             WITH_INTERACT=0
@@ -91,105 +87,49 @@ A number of dependencies for OCW will now be installed. Please check the wiki
 for a complete list of dependencies. Additionally, please read the wiki for
 useful installation guidelines and information that may be pertinent to your
 situation. All of this can be found at http://s.apache.org/3p2
-
 ENDINTRO
 
-if [ $WITH_VIRTUAL_ENV != 1 ]; then
-cat << VIRTUALENV_WARNING
-It is highly recommended that you allow Easy OCW to install the dependencies
-into a virtualenv environment to ensure that your global Python install is
-not affected. If you're unsure, you should pass the -e flag
-to this script. If you aren't concerned, or you want to create your own
-virtualenv environment, then feel free to ignore this message.
-
-VIRTUALENV_WARNING
 fi
 
-read -p "Press [ENTER] to begin installation ..."
-echo -n "Please specify a full path to where your OCW download is then press [ENTER] ..."
-read ocw_path
-fi
-
+echo "Easy-OCW script logs" > install_log
 header "Checking for pip ..."
 command -v pip >/dev/null 2>&1 || { 
     task "Unable to locate pip."
     task "Installing Pip"
-    sudo apt-get install python-pip >> install_log
+    sudo apt-get -y install python-pip >> install_log 2>&1
     subtask "done"
 }
 
-if [ $WITH_VIRTUAL_ENV == 1 ]; then
-    header "Setting up a virtualenv ..."
-
-    # Check if virtualenv is installed. If it's not, we'll install it for the user.
-    command -v virtualenv >/dev/null 2>&1 || { 
-        task "Installing virtualenv ..."
-        sudo apt-get install -y python-virtualenv >> install_log
-        subtask "done"
-    }
-
-    # Create a new environment for OCW work
-    task "Creating a new environment ..."
-    virtualenv ocw >> install_log
-    source ocw/bin/activate
-    subtask "done"
-fi
-
-# Install Continuum Analytics Anaconda Python distribution. This gives
+# Install Continuum Analytics Miniconda Python distribution. This gives
 # almost all the dependencies that OCW needs in a single, easy to
 # install package.
 
-header "Installing Anaconda Python distribution ..."
+header "Installing Miniconda Python distribution ..."
 echo
-echo "*** NOTE *** When asked to update your PATH, you should respond YES."
+echo "*** NOTE *** When asked to update your PATH, you should respond YES and please do not change the default installation directory"
 read -p "Press [ENTER] to continue ..."
 
-cd
-task "Downloading Anaconda ..."
-wget -O Anaconda-1.9.2-Linux-x86_64.sh "http://repo.continuum.io/archive/Anaconda-1.9.2-Linux-x86_64.sh" 2>> install_log
+MACHINE_TYPE=`uname -m`
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+	link="https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh"
+else
+	link="https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh"
+fi
+
+header "Checking for conda ..."
+command -v conda >/dev/null 2>&1 || { 
+    task "Unable to locate conda."
+    if ! [ -f Miniconda-latest-linux.sh ]; then
+		task "Downloading Miniconda ..."
+		wget -O Miniconda-latest-linux.sh $link >> install_log 2>&1
+		subtask "done"
+    fi
+	task "Installing ..."
+	bash Miniconda-latest-linux.sh
+	subtask "done"
+}
+
+task "Installing python-dev"
+sudo apt-get -y install python-dev >> install_log 2>&1
 subtask "done"
-
-task "Installing ..."
-bash Anaconda-1.9.2-Linux-x86_64.sh
-export PATH="${HOME}/anaconda/bin:$PATH"
-subtask "done"
-
-# Install Basemap. Conda cannot be used for this install since
-# it fails to analyse the dependencies (at the time of writing). This
-# will install it manually. At some point, this should be replaced with
-# 'conda install basemap' once it is working again!
-header "Handling Basemap install ..."
-
-cd
-task "Downloading basemap ..."
-wget -O basemap-1.0.7.tar.gz "http://sourceforge.net/projects/matplotlib/files/matplotlib-toolkits/basemap-1.0.7/basemap-1.0.7.tar.gz/download" 2>> install_log
-tar xzf basemap-1.0.7.tar.gz >> install_log
-subtask "done"
-
-# Install GEOS
-task "Installing GEOS dependency ..."
-cd basemap-1.0.7/geos-3.3.3
-export GEOS_DIR=/usr/local
-./configure --prefix=$GEOS_DIR >> install_log
-sudo make >> install_log
-sudo make install >> install_log
-subtask "done"
-
-# Install basemap
-task "Installing Basemap ..."
-cd ..
-python setup.py install >> install_log
-subtask "done"
-
-cd
-
-# Install miscellaneous Python packages needed for OCW. Some of these
-# can be installed with Conda, but since none of them have an annoying
-# compiled component we just installed them with Pip.
-header "Installing additional Python packages"
-pip install -r ocw-pip-dependencies.txt >> install_log
-
-# Ensure that the climate code is included in the Python Path
-header "Updating PYTHONPATH with ocw executables ..."
-echo "export PYTHONPATH=${ocw_path}:${ocw_path}/ocw" >> ${HOME}/.bashrc
-subtask "done"
+header "Part 1/2 of installation completed. Please start a new terminal and execute conda-install.sh script."

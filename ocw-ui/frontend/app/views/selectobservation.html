@@ -69,6 +69,14 @@ under the License.
           <select class="form-control" ng-model="timeSelect" ng-options="time for time in times"></select>
         </div>
       </div>
+      <div class="row top3">
+        <div class="col-md-5 text-center">
+          Custom Dataset Name
+        </div>
+        <div class="col-md-6">
+          <input id ="customDatasetName" placeHolder="This field is optional..." type="text" predictive-file-browser-input/>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row top3">
@@ -76,5 +84,6 @@ under the License.
       <button class="btn btn-primary btn-block" ng-click="addDataSet()">Add Dataset</button>
     </div>
     <div class="pull-left small-alert" ng-show="fileAdded">Successfully added dataset...</div>
+    <div class="pull-left small-alert" ng-show="fileLoadFailed">Failed loading the Dataset. Retry...</div>
   </div>
 </div>

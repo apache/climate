@@ -22,6 +22,7 @@ import numpy as np
 import getpass
 import urllib2
 import json
+from glob import glob
 
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
@@ -97,25 +98,31 @@ def load_local_model_screen(header):
 
     ready_screen("load_local_model_screen")
     screen.addstr(1, 1, header + " > Load Local Model File ")
-    screen.addstr(4, 2, "Enter model path: ")
-    model_path = screen.getstr()
+    model_path = glob('./data/*.nc')
+    screen.addstr(4, 10, "Model-ID   filename")
+    for imodel, model in enumerate(model_path):
+         screen.addstr(5+imodel, 14, '[%d]:  ' %imodel +model[7:]) 
+    screen.addstr(3, 2, "Select Model (Model-ID): ")
+    model_id = int(screen.getstr())
     try:
-         netCDF_file = Dataset(model_path, 'r')
+         netCDF_file = Dataset(model_path[model_id], 'r')
          all_netcdf_variables = [variable.encode() for variable in netCDF_file.variables.keys()]
          try:
-              screen.addstr(6, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
+              screen.addstr(7+imodel, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
               variable_name = screen.getstr()
-              screen.addstr(7, 4, "{0}".format(netCDF_file.variables[variable_name]))
-              screen.addstr(20, 2, "Confirm:")
-              screen.addstr(21, 4, "0- No")
-              screen.addstr(22, 4, "1- Yes")
-              screen.addstr(23, 3, "Would you take this variable:")
+              variable_info = format(netCDF_file.variables[variable_name]).splitlines()
+              for ii,info in enumerate(variable_info):
+                  screen.addstr(8+imodel+ii, 2, info)
+              screen.addstr(17+imodel, 2, "Confirm:")
+              screen.addstr(18+imodel, 4, "0- No")
+              screen.addstr(19+imodel, 4, "1- Yes")
+              screen.addstr(20+imodel, 3, "Would you take this variable:")
               answer = screen.getstr()
               if answer == "0":
                    note = "WARNING: Model file cannot be added."
               elif answer == "1":
-                   model_dataset = load_file(model_path, variable_name)
-                   model_datasets.append(model_dataset)
+                   model_dataset = load_file(model_path[model_id], variable_name)
+                   model_datasets.append(dsp.normalize_dataset_datetimes(model_dataset, model_dataset.temporal_resolution()))
                    models_info.append({'directory': model_path, 'variable_name': variable_name})
                    note = "Model file successfully added."
               else:
@@ -513,7 +520,7 @@ def manage_obs_screen(header, note=""):
 def run_screen(model_datasets, models_info, observations_info,
                overlap_start_time, overlap_end_time, overlap_min_lat,
                overlap_max_lat, overlap_min_lon, overlap_max_lon,
-               temp_grid_setting, spatial_grid_setting, reference_dataset, target_datasets, metric, working_directory, plot_title):
+               temp_grid_setting, spatial_grid_option, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title):
     '''Generates screen to show running evaluation process.
 
     :param model_datasets: list of model dataset objects
@@ -586,44 +593,44 @@ def run_screen(model_datasets, models_info, observations_info,
 
              screen.addstr(5, 4, "Temporally regridding...")
              screen.refresh()
-             if temp_grid_setting.lower() == 'hourly':
-                  days = 0.5
-             elif temp_grid_setting.lower() == 'daily':
-                  days = 1
-             elif temp_grid_setting.lower() == 'monthly':
-                  days = 31
-             else:
-                  days = 365
              for i in range(len(obs_dataset)):
-                  obs_dataset[i] = dsp.temporal_rebin(obs_dataset[i], timedelta(days))
+                  obs_dataset[i] = dsp.temporal_rebin(obs_dataset[i], temp_grid_setting.lower())
 
              for member, each_target_dataset in enumerate(new_model_datasets):
-                  new_model_datasets[member] = dsp.temporal_rebin(new_model_datasets[member], timedelta(days))
-                  new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
+                  new_model_datasets[member] = dsp.temporal_rebin(new_model_datasets[member], temp_grid_setting.lower())
+                  if each_target_dataset.lats.ndim !=2 and each_target_dataset.lons.ndim !=2:
+                      new_model_datasets[member] = dsp.subset(EVAL_BOUNDS, new_model_datasets[member])
+                  else:
+                      new_model_datasets[member] = dsp.temporal_slice(EVAL_BOUNDS.start, EVAL_BOUNDS.end, each_target_dataset)
              screen.addstr(5, 4, "--> Temporally regridded.")
              screen.refresh()
 
              screen.addstr(6, 4, "Spatially regridding...")
              screen.refresh()
-             new_lats = np.arange(overlap_min_lat, overlap_max_lat, spatial_grid_setting)
-             new_lons = np.arange(overlap_min_lon, overlap_max_lon, spatial_grid_setting)
-             for i in range(len(obs_dataset)):
-                  obs_dataset[i] = dsp.spatial_regrid(obs_dataset[i], new_lats, new_lons)
-
-             for member, each_target_dataset in enumerate(new_model_datasets):
-                  new_model_datasets[member] = dsp.spatial_regrid(new_model_datasets[member], new_lats, new_lons)
+             if spatial_grid_option == 'Observation':
+                 new_lats = obs_dataset[0].lats
+                 new_lons = obs_dataset[0].lons
+             elif spatial_grid_option == 'Model':
+                 new_lats = new_model_datasets[0].lats
+                 new_lons = new_model_datasets[0].lons
+             else: 
+                 new_lats = np.arange(overlap_min_lat, overlap_max_lat, spatial_grid_setting_lat)
+                 new_lons = np.arange(overlap_min_lon, overlap_max_lon, spatial_grid_setting_lon)
+             if spatial_grid_option != 'Observation':
+                 for i in range(len(obs_dataset)):
+                      obs_dataset[i] = dsp.spatial_regrid(obs_dataset[i], new_lats, new_lons)
+                      obs_dataset[i] = dsp.variable_unit_conversion(obs_dataset[i])
+             if spatial_grid_option != 'Model':
+                 for member, each_target_dataset in enumerate(new_model_datasets):
+                      new_model_datasets[member] = dsp.spatial_regrid(new_model_datasets[member], new_lats, new_lons)
+                      new_model_datasets[member] = dsp.variable_unit_conversion(new_model_datasets[member])
              screen.addstr(6, 4, "--> Spatially regridded.")
              screen.refresh()
 
-             if metric == 'bias':
-                  for i in range(len(obs_dataset)):
-                       _, obs_dataset[i].values = utils.calc_climatology_year(obs_dataset[i])
-                       obs_dataset[i].values = np.expand_dims(obs_dataset[i].values, axis=0)
+             obs_dataset = dsp.mask_missing_data(obs_dataset+new_model_datasets)[0:len(obs_dataset)]
+             new_model_datasets = dsp.mask_missing_data(obs_dataset+new_model_datasets)[len(obs_dataset):]
 
-                  for member, each_target_dataset in enumerate(new_model_datasets):
-                          _, new_model_datasets[member].values = utils.calc_climatology_year(new_model_datasets[member])
-                          new_model_datasets[member].values = np.expand_dims(new_model_datasets[member].values, axis=0)
-
+             if metric == 'bias_of_multiyear_climatology':
                   allNames = []
 
                   for model in new_model_datasets:
@@ -631,7 +638,7 @@ def run_screen(model_datasets, models_info, observations_info,
 
                   screen.addstr(7, 4, "Setting up metrics...")
                   screen.refresh()
-                  mean_bias = metrics.Bias()
+                  mean_bias = metrics.TemporalMeanBias()
                   pattern_correlation = metrics.PatternCorrelation()
                   spatial_std_dev_ratio = metrics.StdDevRatio()
                   screen.addstr(7, 4, "--> Metrics setting done.")
@@ -652,21 +659,24 @@ def run_screen(model_datasets, models_info, observations_info,
                             targets.append(new_model_datasets[int(target[-1])])
 
                   evaluation_result = evaluation.Evaluation(reference, targets, [mean_bias])
-                  export_evaluation_to_config(evaluation_result)
+                  #export_evaluation_to_config(evaluation_result)
                   evaluation_result.run()
                   screen.addstr(8, 4, "--> Evaluation Finished.")
                   screen.refresh()
 
                   screen.addstr(9, 4, "Generating plots....")
                   screen.refresh()
-                  rcm_bias = evaluation_result.results[:][0]
-                  new_rcm_bias = np.squeeze(np.array(evaluation_result.results))
+                  new_rcm_bias = evaluation_result.results[0]
 
                   if not os.path.exists(working_directory):
                        os.makedirs(working_directory)
 
                   fname = working_directory + 'Bias_contour'
-                  plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5), fname=fname, subtitles=allNames, cmap='coolwarm_r')
+                  fname2= working_directory + 'Obs_contour'
+                  fname3= working_directory + 'Model_contour'
+                  plotter.draw_contour_map(new_rcm_bias, new_lats, new_lons, gridshape=(2, 5), fname=fname, subtitles=allNames, cmap='coolwarm')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(reference), new_lats, new_lons, gridshape=(2, 5), fname=fname2, subtitles=allNames, cmap='rainbow')
+                  plotter.draw_contour_map(utils.calc_temporal_mean(targets[0]), new_lats, new_lons, gridshape=(2, 5), fname=fname3, subtitles=allNames, cmap='rainbow')
                   screen.addstr(9, 4, "--> Plots generated.")
                   screen.refresh()
                   screen.addstr(y-2, 1, "Press 'enter' to Exit: ")
@@ -1056,7 +1066,8 @@ def settings_screen(header):
     temp_grid_option = "Observation"
     temp_grid_setting = obs_temp_res
     spatial_grid_option = "Observation"
-    spatial_grid_setting = obs_lat_res
+    spatial_grid_setting_lat = obs_lat_res
+    spatial_grid_setting_lon = obs_lon_res
     models_dict = {}
 
     for i in enumerate(models_info):
@@ -1070,9 +1081,9 @@ def settings_screen(header):
     for i in range(len(model_datasets)):
          target_datasets.append('mod{0}'.format(i))
     subregion_path = None
-    metrics_dict = {'1':'bias', '2':'std'}
-    metric = 'bias'
-    plots = {'bias':"contour map", 'std':"taylor diagram, bar chart(coming soon)"}
+    metrics_dict = {'1':'bias_of_multiyear_climatology'}
+    metric = 'bias_of_multiyear_climatology'
+    plots = {'bias_of_multiyear_climatology':"contour map"}
     working_directory = os.getcwd() + "/plots/"  #Default value of working directory set to "plots" folder in current directory
     plot_title = '' #TODO: ask user about plot title or figure out automatically
 
@@ -1140,34 +1151,28 @@ def settings_screen(header):
          option = screen.getstr()
 
          if option == '1':
-              screen.addstr(25, x/2, "Enter Start Time [min time: {0}] (Format YYYY-MM-DD):".format(fix_min_time))
+              screen.addstr(25, x/2, "Enter Start Time [min time: {0}] (Format YYYY-MM-DD)")
+              screen.addstr(26, x/2, ":".format(fix_min_time))
               new_start_time = screen.getstr()
               try:
                    new_start_time = datetime.strptime(new_start_time, '%Y-%m-%d')
-                   new_start_time_int = int("{0}{1}".format(new_start_time.year, new_start_time.month))
-                   fix_min_time_int = int("{0}{1}".format(fix_min_time.year, fix_min_time.month))
-                   fix_max_time_int = int("{0}{1}".format(fix_max_time.year, fix_max_time.month))
-                   all_overlap_end_time_int = int("{0}{1}".format(all_overlap_end_time.year, all_overlap_end_time.month))
-                   if new_start_time_int < fix_min_time_int \
-                   or new_start_time_int > fix_max_time_int \
-                   or new_start_time_int > all_overlap_end_time_int:
+                   if new_start_time < fix_min_time \
+                   or new_start_time > fix_max_time \
+                   or new_start_time > all_overlap_end_time:
                         note = "Start time has not changed. "
                    else:
                         all_overlap_start_time = new_start_time
                         note = "Start time has changed successfully. "
               except:
                    note = "Start time has not changed. "
-              screen.addstr(26, x/2, "Enter End Time [max time:{0}] (Format YYYY-MM-DD):".format(fix_max_time))
+              screen.addstr(27, x/2, "Enter End Time [max time:{0}] (Format YYYY-MM-DD)")
+              screen.addstr(28, x/2, ":".format(fix_max_time))
               new_end_time = screen.getstr()
               try:
                    new_end_time = datetime.strptime(new_end_time, '%Y-%m-%d')
-                   new_end_time_int = int("{0}{1}".format(new_end_time.year, new_end_time.month))
-                   fix_min_time_int = int("{0}{1}".format(fix_min_time.year, fix_min_time.month))
-                   fix_max_time_int = int("{0}{1}".format(fix_max_time.year, fix_max_time.month))
-                   all_overlap_start_time_int = int("{0}{1}".format(all_overlap_start_time.year, all_overlap_start_time.month))
-                   if new_end_time_int > fix_max_time_int \
-                   or new_end_time_int < fix_min_time_int \
-                   or new_end_time_int < all_overlap_start_time_int:
+                   if new_end_time > fix_max_time \
+                   or new_end_time < fix_min_time \
+                   or new_end_time < all_overlap_start_time:
                         note = note + " End time has not changed. "
                    else:
                         all_overlap_end_time = new_end_time
@@ -1240,20 +1245,26 @@ def settings_screen(header):
               new_spatial_grid_option = screen.getstr()
               if new_spatial_grid_option.lower() == 'model':
                    spatial_grid_option = 'Model'
-                   spatial_grid_setting = model_lat_res
+                   spatial_grid_setting_lat = model_lat_res
+                   spatial_grid_setting_lon = model_lon_res
                    note = "Spatial gridding option has changed successfully to {0}".format(spatial_grid_option)
               elif new_spatial_grid_option.lower() == 'observation':
                    spatial_grid_option = 'Observation'
-                   spatial_grid_setting = obs_lat_res
+                   spatial_grid_setting_lat = obs_lat_res
+                   spatial_grid_setting_lon = obs_lon_res
                    note = "Spatial gridding option has changed successfully to {0}".format(spatial_grid_option)
               elif new_spatial_grid_option.lower() == 'user':
-                   screen.addstr(26, x/2, "Please enter spatial resolution: ")
-                   user_res = screen.getstr()
+                   screen.addstr(26, x/2, "Please enter latitude spatial resolution: ")
+                   user_lat_res = screen.getstr()
+                   screen.addstr(27, x/2, "Please enter longitude spatial resolution: ")
+                   user_lon_res = screen.getstr()
                    try:
-                        user_res = float(user_res)
-                        spatial_grid_option = 'User: resolution {0}'.format(str(user_res))
-                        spatial_grid_setting = user_res
-                        note = "Spatial gridding option has changed successfully to {0}".format(spatial_grid_option)
+                        user_lat_res = float(user_lat_res)
+                        user_lon_res = float(user_lon_res)
+                        spatial_grid_option = 'User: resolution lat:{0}, lon:{1}'.format(str(user_lat_res), str(user_lon_res))
+                        spatial_grid_setting_lat = user_lat_res
+                        spatial_grid_setting_lon = user_lon_res
+                        note = "Spatial gridding option has changed successfully to user defined."
                    except:
                         note = "Spatial gridding option has not changed."
               else:
@@ -1367,7 +1378,7 @@ def settings_screen(header):
          if option.lower() == 'r':
               note = run_screen(model_datasets, models_info, observations_info, all_overlap_start_time, all_overlap_end_time, \
                          all_overlap_min_lat, all_overlap_max_lat, all_overlap_min_lon, all_overlap_max_lon, \
-                         temp_grid_setting, spatial_grid_setting, reference_dataset, target_datasets, metric, working_directory, plot_title)
+                         temp_grid_setting, spatial_grid_option, spatial_grid_setting_lat, spatial_grid_setting_lon, reference_dataset, target_datasets, metric, working_directory, plot_title)
 
 
 ##############################################################

@@ -18,6 +18,8 @@
 '''
 Classes:
     RCMED - A class for retrieving data from Regional Climate Model Evalutaion Database (JPL).
+    More information about the RCMED Query Specification can be found below:
+    https://rcmes.jpl.nasa.gov/query-api/query.php?
 '''
 
 import urllib, urllib2

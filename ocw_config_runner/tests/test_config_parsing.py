@@ -18,7 +18,7 @@
 from mock import patch
 import unittest
 
-import configuration_parsing as parser
+import ocw_config_runner.configuration_parsing as parser
 import ocw.metrics as metrics
 
 import yaml
@@ -60,7 +60,7 @@ class TestIsConfigValid(unittest.TestCase):
         """
         self.not_well_formed = yaml.load(not_well_formed_config)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_not_minimal_config(self, mock_logger):
         ret = parser.is_config_valid(self.not_minimal)
         self.assertFalse(ret)
@@ -69,7 +69,7 @@ class TestIsConfigValid(unittest.TestCase):
             'Insufficient configuration file data for an evaluation'
         )
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_not_valid_config(self, mock_logger):
         ret = parser.is_config_valid(self.not_well_formed)
         self.assertFalse(ret)
@@ -172,7 +172,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         """
         self.binary_no_target = yaml.load(binary_no_target_config)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_no_datasets(self, mock_logger):
         ret = parser._valid_minimal_config(self.no_datasets)
         self.assertFalse(ret)
@@ -181,7 +181,7 @@ class TestValidMinimalConfig(unittest.TestCase):
             'No datasets specified in configuration data.'
         )
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_no_metrics(self, mock_logger):
         ret = parser._valid_minimal_config(self.no_metrics)
         self.assertFalse(ret)
@@ -198,7 +198,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         ret = parser._valid_minimal_config(self.unary_with_target)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_unary_no_datasets(self, mock_logger):
         ret = parser._valid_minimal_config(self.unary_no_ref_or_target)
         self.assertFalse(ret)
@@ -213,7 +213,7 @@ class TestValidMinimalConfig(unittest.TestCase):
         ret = parser._valid_minimal_config(self.binary_valid)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_binary_no_reference(self, mock_logger):
         ret = parser._valid_minimal_config(self.binary_no_reference)
         self.assertFalse(ret)
@@ -224,7 +224,7 @@ class TestValidMinimalConfig(unittest.TestCase):
             'that your config is well formed.'
         )
         
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_binary_no_target(self, mock_logger):
         ret = parser._valid_minimal_config(self.binary_no_target)
         self.assertFalse(ret)
@@ -324,7 +324,7 @@ class TestConfigIsWellFormed(unittest.TestCase):
         ret = parser._config_is_well_formed(self.malformed_reference_conf)
         self.assertFalse(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_malformed_target_dataset_list(self, mock_logger):
         ret = parser._config_is_well_formed(self.malformed_target_list)
         self.assertFalse(ret)
@@ -338,7 +338,7 @@ class TestConfigIsWellFormed(unittest.TestCase):
         ret = parser._config_is_well_formed(self.missing_metric_name)
         self.assertFalse(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_warns_regarding_not_builtin_metric(self, mock_logger):
         ret = parser._config_is_well_formed(self.missing_metric_name)
         mock_logger.warn.assert_called_with(
@@ -406,14 +406,14 @@ class InvalidDatasetConfig(unittest.TestCase):
         self.missing_data_source = conf[0]
         self.invalid_data_source = conf[1]
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_missing_data_source_config(self, mock_logger):
         parser._valid_dataset_config_data(self.missing_data_source)
         mock_logger.error.assert_called_with(
             'Dataset does not contain a data_source attribute.'
         )
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_data_source(self, mock_logger):
         parser._valid_dataset_config_data(self.invalid_data_source)
         mock_logger.error.assert_called_with(
@@ -464,7 +464,7 @@ class TestLocalDatasetConfig(unittest.TestCase):
         ret = parser._valid_dataset_config_data(self.valid_local_multi)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_local_config(self, mock_logger):
         parser._valid_dataset_config_data(self.invalid_local_single)
 
@@ -478,7 +478,7 @@ class TestLocalDatasetConfig(unittest.TestCase):
         )
         mock_logger.error.assert_called_with(error)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_local_config_multi_file(self, mock_logger):
         # mutlifile config is handled slightly differently. We should see the
         # same missing keys in this situation as we would on the single file
@@ -496,7 +496,7 @@ class TestLocalDatasetConfig(unittest.TestCase):
         )
         mock_logger.error.assert_called_with(error)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_local_config_multi_file_missing_file_glob(self, mock_logger):
         # We can't check for the file_glob_pattern pattern until after we have
         # verified that the single local file config has been met.
@@ -541,7 +541,7 @@ class TestRCMEDDatasetConfig(unittest.TestCase):
         ret = parser._valid_dataset_config_data(self.valid_rcmed)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_rcmed_config(self, mock_logger):
         parser._valid_dataset_config_data(self.invalid_rcmed)
 
@@ -583,7 +583,7 @@ class TestESGFDatasetConfig(unittest.TestCase):
         ret = parser._valid_dataset_config_data(self.valid_esgf)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_esgf_conf(self, mock_logger):
         parser._valid_dataset_config_data(self.invalid_esgf)
 
@@ -617,7 +617,7 @@ class TestDAPDatasetConfig(unittest.TestCase):
         ret = parser._valid_dataset_config_data(self.valid_dap)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_dap_config(self, mock_logger):
         parser._valid_dataset_config_data(self.invalid_dap)
 
@@ -667,7 +667,7 @@ class ContourMapConfig(unittest.TestCase):
         ret = parser._valid_plot_config_data(self.valid_contour)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_missing_keys_contour(self, mock_logger):
         ret = parser._valid_plot_config_data(self.missing_keys_contour)
 
@@ -714,7 +714,7 @@ class TestSubregionPlotConfig(unittest.TestCase):
         ret = parser._valid_plot_config_data(self.valid_subregion)
         self.assertTrue(ret)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_missing_keys_subregion(self, mock_logger):
         ret = parser._valid_plot_config_data(self.missing_keys_subregion)
 
@@ -775,7 +775,7 @@ class TestInvalidPlotConfig(unittest.TestCase):
         """
         self.missing_subregions = yaml.load(missing_subregions_for_plot_type)
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_invalid_plot_type(self, mock_logger):
         ret = parser._valid_plot_config_data(self.bad_plot_type)
         self.assertFalse(ret)
@@ -784,7 +784,7 @@ class TestInvalidPlotConfig(unittest.TestCase):
             'Invalid plot type specified.'
         )
 
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_missing_plot_type(self, mock_logger):
         ret = parser._valid_plot_config_data(self.missing_plot_type)
         self.assertFalse(ret)
@@ -793,7 +793,7 @@ class TestInvalidPlotConfig(unittest.TestCase):
             'Plot config does not include a type attribute.'
         )
         
-    @patch('configuration_parsing.logger')
+    @patch('ocw_config_runner.configuration_parsing.logger')
     def test_missing_subregion(self, mock_logger):
         ret = parser._config_is_well_formed(self.missing_subregions)
         self.assertFalse(ret)

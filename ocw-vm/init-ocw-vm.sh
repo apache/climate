@@ -17,6 +17,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# Make sure we don't fail to source a .bashrc file due to
+# interactive mode checks.
+PS1='$ '
+
 # Install some useful/necessary dependencies to make future installs easier
 sudo apt-get update
 sudo apt-get install -y make
@@ -25,10 +29,11 @@ sudo apt-get install -y liblapack-dev
 sudo apt-get install -y gfortran
 sudo apt-get install -y g++
 sudo apt-get install -y build-essential
-sudo apt-get install -y python-dev 
+sudo apt-get install -y python-dev
 sudo apt-get install -y ia32-libs --fix-missing
 sudo apt-get install -y git
 sudo apt-get install -y vim
+sudo apt-get install -y curl
 
 # GUI related installs
 sudo apt-get install -y lightdm
@@ -46,21 +51,23 @@ sudo apt-get install -y ubuntu-desktop
 git clone http://git-wip-us.apache.org/repos/asf/climate.git
 
 # Copy the Easy-OCW install script for Ubuntu
-cp climate/easy-ocw/install-ubuntu.sh .
+cp climate/easy-ocw/conda-install.sh .
 # Copy the requirements files for conda and pip used by Easy-OCW
 cp climate/easy-ocw/*.txt .
 
-bash install-ubuntu.sh -q
+./conda-install.sh
 
 # Set symlink for the UI frontend code
 cd climate/ocw-ui/backend
 ln -s ../frontend/app app
 
-# Cleanup Anaconda and Basemap downloads from the install script
+# Cleanup junk from the install
 cd
-sudo rm -f Anaconda-1.9.2-Linux-x86_64.sh
-sudo rm -f basemap-1.0.7.tar.gz
-sudo rm -rf basemap-1.0.7
+rm *.sh
+rm *.txt
+
+# Auto-activate the OCW conda environment!
+echo "source activate OCW" >> ~/.bashrc
 
 mkdir /home/vagrant/Desktop
 
@@ -101,3 +108,5 @@ UIBOOTUP
 chmod +x ~/Desktop/climate.desktop
 chmod +x ~/Desktop/.ui.sh
 chmod +x ~/Desktop/ui.desktop
+
+source ~/.bashrc
