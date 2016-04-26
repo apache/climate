@@ -156,40 +156,43 @@ def load_esgf_model_screen(header):
     esgf_username = screen.getstr()
     screen.addstr(9, 1, "Enter Password:")
     esgf_password = screen.getstr()
-    try:
-        solr_url = "http://esg-datanode.jpl.nasa.gov/esg-search/search?id={0}&variable={1}&format=application%2Fsolr%2Bjson".format(esgf_dataset_id, esgf_variable)
-        metadata_json = json.load(urllib2.urlopen(solr_url))
-        if metadata_json['response']['docs'][0]["product"][0] != "observations":
-            screen.addstr(11, 4, "Title: {0}".format(metadata_json['response']['docs'][0]['title']))
-            screen.addstr(12, 4, "Start Date: {0}".format(metadata_json['response']['docs'][0]['datetime_start']))
-            screen.addstr(13, 4, "End Date: {0}".format(metadata_json['response']['docs'][0]['datetime_stop']))
-            screen.addstr(15, 2, "Confirm:")
-            screen.addstr(16, 4, "0- No")
-            screen.addstr(17, 4, "1- Yes")
-            screen.addstr(18, 3, "Would you take this dataset:")
-            answer = screen.getstr()
-            if answer == "0":
-                note = "WARNING: ESGF model file cannot be added."
-            elif answer == "1":
-                try:
-                    screen.addstr(20, 4, "Downloading dataset.....")
-                    screen.refresh()
-                    datasets = esgf.load_dataset(esgf_dataset_id,
-                                                esgf_variable,
-                                                esgf_username,
-                                                esgf_password)
-                    netCDF_name = get_esgf_netCDF_file_name(esgf_dataset_id, esgf_variable)
-                    netCDF_path = "/tmp/{0}".format(netCDF_name)
-                    model_dataset = load_file(netCDF_path, esgf_variable)
-                    model_datasets.append(model_dataset)
-                    models_info.append({'directory': netCDF_path, 'variable_name': esgf_variable})
-                    note = "Dataset successfully downloaded."
-                except:
-                    note = "WARNING: Dataset has not been downloaded. Check your ESGF permission."
-        else:
-            note = "The selected dataset is Observation, please enter model dataset."
-    except:
-        note = "WARNING: Something went wrong in downloading model dataset from ESGF."
+    if esgf_dataset_id and esgf_variable and esgf_username and esgf_password:
+        try:
+            solr_url = "http://esg-datanode.jpl.nasa.gov/esg-search/search?id={0}&variable={1}&format=application%2Fsolr%2Bjson".format(esgf_dataset_id, esgf_variable)
+            metadata_json = json.load(urllib2.urlopen(solr_url))
+            if metadata_json['response']['docs'][0]["product"][0] != "observations":
+                screen.addstr(11, 4, "Title: {0}".format(metadata_json['response']['docs'][0]['title']))
+                screen.addstr(12, 4, "Start Date: {0}".format(metadata_json['response']['docs'][0]['datetime_start']))
+                screen.addstr(13, 4, "End Date: {0}".format(metadata_json['response']['docs'][0]['datetime_stop']))
+                screen.addstr(15, 2, "Confirm:")
+                screen.addstr(16, 4, "0- No")
+                screen.addstr(17, 4, "1- Yes")
+                screen.addstr(18, 3, "Would you take this dataset:")
+                answer = screen.getstr()
+                if answer == "0":
+                    note = "WARNING: ESGF model file cannot be added."
+                elif answer == "1":
+                    try:
+                        screen.addstr(20, 4, "Downloading dataset.....")
+                        screen.refresh()
+                        datasets = esgf.load_dataset(esgf_dataset_id,
+                                                    esgf_variable,
+                                                    esgf_username,
+                                                    esgf_password)
+                        netCDF_name = get_esgf_netCDF_file_name(esgf_dataset_id, esgf_variable)
+                        netCDF_path = "/tmp/{0}".format(netCDF_name)
+                        model_dataset = load_file(netCDF_path, esgf_variable)
+                        model_datasets.append(model_dataset)
+                        models_info.append({'directory': netCDF_path, 'variable_name': esgf_variable})
+                        note = "Dataset successfully downloaded."
+                    except:
+                        note = "WARNING: Dataset has not been downloaded. Check your ESGF permission."
+            else:
+                note = "The selected dataset is Observation, please enter model dataset."
+        except:
+            note = "WARNING: Something went wrong in downloading model dataset from ESGF."
+    else:
+        note = "WARNING: No information given and no ESGF dataset has been downloaded."
 
     return  note
 
@@ -377,62 +380,65 @@ def load_esgf_obs_screen(header):
     esgf_username = screen.getstr()
     screen.addstr(9, 1, "Enter Password:")
     esgf_password = screen.getstr()
-    try:
-        solr_url = "http://esg-datanode.jpl.nasa.gov/esg-search/search?id={0}&variable={1}&format=application%2Fsolr%2Bjson".format(esgf_dataset_id, esgf_variable)
-        metadata_json = json.load(urllib2.urlopen(solr_url))
-        all_variables = metadata_json['response']['docs'][0]['variable']
-        variable_index = all_variables.index(esgf_variable)
-        if metadata_json['response']['docs'][0]["product"][0] == "observations":
-            screen.addstr(11, 4, "Variable Long Name: {0}".format(metadata_json['response']['docs'][0]['variable_long_name'][variable_index]))
-            screen.addstr(12, 4, "Start Date: {0}".format(metadata_json['response']['docs'][0]['datetime_start']))
-            screen.addstr(13, 4, "End Stop: {0}".format(metadata_json['response']['docs'][0]['datetime_stop']))
-            screen.addstr(14, 4, "Time Frequency: {0}".format(metadata_json['response']['docs'][0]['time_frequency']))
-            screen.addstr(15, 4, "Variable Units: {0}".format(metadata_json['response']['docs'][0]['variable_units'][variable_index]))
-            screen.addstr(16, 4, "East Degrees: {0}".format(metadata_json['response']['docs'][0]['east_degrees']))
-            screen.addstr(17, 4, "North Degrees: {0}".format(metadata_json['response']['docs'][0]['north_degrees']))
-            screen.addstr(18, 4, "South Degrees: {0}".format(metadata_json['response']['docs'][0]['south_degrees']))
-            screen.addstr(19, 4, "West Degrees: {0}".format(metadata_json['response']['docs'][0]['west_degrees']))
-            screen.addstr(22, 2, "Confirm:")
-            screen.addstr(23, 4, "0- No")
-            screen.addstr(24, 4, "1- Yes")
-            screen.addstr(25, 3, "Would you take this dataset:")
-            answer = screen.getstr()
-            if answer == "0":
-                note = "WARNING: ESGF observation file cannot be added."
-            elif answer == "1":
-                try:
-                    screen.addstr(27, 4, "Downloading dataset.....")
-                    screen.refresh()
-                    datasets = esgf.load_dataset(esgf_dataset_id,
-                                                esgf_variable,
-                                                esgf_username,
-                                                esgf_password)
-                    netCDF_name = get_esgf_netCDF_file_name(esgf_dataset_id, esgf_variable)
-                    netCDF_path = "/tmp/{0}".format(netCDF_name)
-                    obs_dataset = load_file(netCDF_path, esgf_variable)
-                    observations_info.append({
-                     'database':"{0}".format(netCDF_path),
-                     'dataset_id':"esgf".format(esgf_variable),
-                     'parameter_id':"{0}".format(esgf_variable),
-                     'start_date': obs_dataset.time_range()[0].strftime("%Y-%m-%d"),
-                     'end_date':obs_dataset.time_range()[1].strftime("%Y-%m-%d"),
-                     #'bounding_box':obs['bounding_box'],
-                     'timestep':"monthly",
-                     'min_lat':obs_dataset.spatial_boundaries()[0],
-                     'max_lat':obs_dataset.spatial_boundaries()[1],
-                     'min_lon':obs_dataset.spatial_boundaries()[2],
-                     'max_lon':obs_dataset.spatial_boundaries()[3],
-                     'lat_res':obs_dataset.spatial_resolution()[0],
-                     'lon_res':obs_dataset.spatial_resolution()[1],
-                     'unit':"{0}".format(metadata_json['response']['docs'][0]['variable_units'][1])
-                     })
-                    note = "Dataset successfully downloaded."
-                except:
-                    note = "WARNING: Dataset has not been downloaded."
-        else:
-            note = "The selected dataset is not Observation, please enter observation dataset."
-    except:
-        note = "WARNING: Something went wrong in downloading observation dataset from ESGF."
+    if esgf_dataset_id and esgf_variable and esgf_username and esgf_password:
+        try:
+            solr_url = "http://esg-datanode.jpl.nasa.gov/esg-search/search?id={0}&variable={1}&format=application%2Fsolr%2Bjson".format(esgf_dataset_id, esgf_variable)
+            metadata_json = json.load(urllib2.urlopen(solr_url))
+            all_variables = metadata_json['response']['docs'][0]['variable']
+            variable_index = all_variables.index(esgf_variable)
+            if metadata_json['response']['docs'][0]["product"][0] == "observations":
+                screen.addstr(11, 4, "Variable Long Name: {0}".format(metadata_json['response']['docs'][0]['variable_long_name'][variable_index]))
+                screen.addstr(12, 4, "Start Date: {0}".format(metadata_json['response']['docs'][0]['datetime_start']))
+                screen.addstr(13, 4, "End Stop: {0}".format(metadata_json['response']['docs'][0]['datetime_stop']))
+                screen.addstr(14, 4, "Time Frequency: {0}".format(metadata_json['response']['docs'][0]['time_frequency']))
+                screen.addstr(15, 4, "Variable Units: {0}".format(metadata_json['response']['docs'][0]['variable_units'][variable_index]))
+                screen.addstr(16, 4, "East Degrees: {0}".format(metadata_json['response']['docs'][0]['east_degrees']))
+                screen.addstr(17, 4, "North Degrees: {0}".format(metadata_json['response']['docs'][0]['north_degrees']))
+                screen.addstr(18, 4, "South Degrees: {0}".format(metadata_json['response']['docs'][0]['south_degrees']))
+                screen.addstr(19, 4, "West Degrees: {0}".format(metadata_json['response']['docs'][0]['west_degrees']))
+                screen.addstr(22, 2, "Confirm:")
+                screen.addstr(23, 4, "0- No")
+                screen.addstr(24, 4, "1- Yes")
+                screen.addstr(25, 3, "Would you take this dataset:")
+                answer = screen.getstr()
+                if answer == "0":
+                    note = "WARNING: ESGF observation file cannot be added."
+                elif answer == "1":
+                    try:
+                        screen.addstr(27, 4, "Downloading dataset.....")
+                        screen.refresh()
+                        datasets = esgf.load_dataset(esgf_dataset_id,
+                                                    esgf_variable,
+                                                    esgf_username,
+                                                    esgf_password)
+                        netCDF_name = get_esgf_netCDF_file_name(esgf_dataset_id, esgf_variable)
+                        netCDF_path = "/tmp/{0}".format(netCDF_name)
+                        obs_dataset = load_file(netCDF_path, esgf_variable)
+                        observations_info.append({
+                         'database':"{0}".format(netCDF_path),
+                         'dataset_id':"esgf".format(esgf_variable),
+                         'parameter_id':"{0}".format(esgf_variable),
+                         'start_date': obs_dataset.time_range()[0].strftime("%Y-%m-%d"),
+                         'end_date':obs_dataset.time_range()[1].strftime("%Y-%m-%d"),
+                         #'bounding_box':obs['bounding_box'],
+                         'timestep':"monthly",
+                         'min_lat':obs_dataset.spatial_boundaries()[0],
+                         'max_lat':obs_dataset.spatial_boundaries()[1],
+                         'min_lon':obs_dataset.spatial_boundaries()[2],
+                         'max_lon':obs_dataset.spatial_boundaries()[3],
+                         'lat_res':obs_dataset.spatial_resolution()[0],
+                         'lon_res':obs_dataset.spatial_resolution()[1],
+                         'unit':"{0}".format(metadata_json['response']['docs'][0]['variable_units'][1])
+                         })
+                        note = "Dataset successfully downloaded."
+                    except:
+                        note = "WARNING: Dataset has not been downloaded."
+            else:
+                note = "The selected dataset is not Observation, please enter observation dataset."
+        except:
+            note = "WARNING: Something went wrong in downloading observation dataset from ESGF."
+    else:
+        note = "WARNING: No information given and no ESGF dataset has been downloaded."
 
     return  note
 
