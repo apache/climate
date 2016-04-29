@@ -204,18 +204,10 @@ def _beginning_of_date(time, time_step):
 
     if time_step.lower() == 'monthly':
         if time.day != 1:
-            start_time_string = time.strftime('%Y%m%d')
-            start_time_string = start_time_string[:6] + '01'
-            time = datetime.strptime(start_time_string, '%Y%m%d')
-            ##TODO: Change the 3 lines above with this line:
-            ##time = datetime(time.year, time.month, 1)
+            time = datetime(time.year, time.month, 1)
     elif time_step.lower() == 'daily':
         if time.hour != 0 or time.minute != 0 or time.second != 0:
-            start_time_string = time.strftime('%Y%m%d%H%M%S')
-            start_time_string = start_time_string[:8] + '000000'
-            time = datetime.strptime(start_time_string, '%Y%m%d%H%M%S')
-            ##TODO: Change the 3 lines above with this line:
-            ##time = datetime(time.year, time.month, time.day, 00, 00, 00)
+            time = datetime(time.year, time.month, time.day, 00, 00, 00)
 
     return time
 
@@ -234,17 +226,9 @@ def _end_of_date(time, time_step):
 
     last_day_of_month = calendar.monthrange(time.year, time.month)[1]
     if time.day != last_day_of_month:
-        end_time_string = time.strftime('%Y%m%d')
-        end_time_string = end_time_string[:6] + str(last_day_of_month)
-        time = datetime.strptime(end_time_string, '%Y%m%d')
-        ##TODO: Change the 3 lines above with this line:
-        ##time = datetime(time.year, time.month, lastDayOfMonth)
+        time = datetime(time.year, time.month, last_day_of_month)
     elif time_step.lower() == 'daily':
-        end_time_string = time.strftime('%Y%m%d%H%M%S')
-        end_time_string = end_time_string[:8] + '235959'
-        time = datetime.strptime(end_time_string, '%Y%m%d%H%M%S')
-        ##TODO: Change the 3 lines above with this line:
-        ##time = datetime(time.year, time.month, end_time.day, 23, 59, 59)
+        time = datetime(time.year, time.month, end_time.day, 23, 59, 59)
 
     return time
 
