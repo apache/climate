@@ -44,7 +44,7 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
         self.end_time = datetime.datetime(2002, 10, 1)
         #start and end time for URL to query database is the beginning and end of start_time and end_time
         self.start_time_for_url = "20020801T0000Z"
-        self.end_time_for_url = "20021031T0000Z"
+        self.end_time_for_url = "20021001T2359Z"
         self.url = "http://rcmes.jpl.nasa.gov/query-api/query.php?"
         self.lats=numpy.arange(50.5, 70, 1)
         self.lons=numpy.arange(1.5, 15, 1)
@@ -69,8 +69,11 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
 
 
     def return_text(self, url):
-        if url == self.url + "datasetId={0}&parameterId={1}&latMin={2}&latMax={3}&lonMin={4}&lonMax={5}&timeStart=20020801T0000Z&timeEnd=20021031T0000Z"\
-                .format(self.dataset_id, self.parameter_id, self.min_lat, self.max_lat, self.min_lon, self.max_lon, self.start_time_for_url, self.end_time_for_url):
+        if url == self.url + ("datasetId={0}&parameterId={1}&latMin={2}&latMax={3}"
+                              "&lonMin={4}&lonMax={5}&timeStart={6}&timeEnd={7}").format(
+                               self.dataset_id, self.parameter_id, self.min_lat,
+                               self.max_lat, self.min_lon, self.max_lon,
+                               self.start_time_for_url, self.end_time_for_url):
             return open(os.path.join(self.file_path, "parameter_dataset_text.txt"))
         elif url == self.url + "&param_info=yes":
             return open(os.path.join(self.file_path, "parameters_metadata_text.txt"))
@@ -81,6 +84,14 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
     def test_function_get_parameters_metadata(self):
         rcmed.urllib2.urlopen = self.return_text
         self.assertEqual(rcmed.get_parameters_metadata(), self.param_metadata_output)
+
+
+    def test_function_parameter_dataset_lats_monthly(self):
+        self.dataset_id = 6
+        self.parameter_id = 32
+        self.end_time_for_url = "20021031T0000Z"
+        rcmed.urllib2.urlopen = self.return_text
+        self.assert1DArraysEqual(rcmed.parameter_dataset(self.dataset_id, self.parameter_id, self.min_lat, self.max_lat, self.min_lon, self.max_lon, self.start_time, self.end_time).lats, self.lats)
 
 
     def test_function_parameter_dataset_lats(self):
@@ -107,6 +118,7 @@ class test_rcmed(unittest.TestCase, CustomAssertions):
         rcmed.urllib2.urlopen = self.return_text
         ds = rcmed.parameter_dataset(self.dataset_id, self.parameter_id, self.min_lat, self.max_lat, self.min_lon, self.max_lon, self.start_time, self.end_time, name='foo')
         self.assertEquals(ds.name, 'foo')
+
 
     def test_dataset_origin(self):
         rcmed.urllib2.urlopen = self.return_text

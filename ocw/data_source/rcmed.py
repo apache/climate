@@ -76,12 +76,7 @@ def _make_mask_array(values, parameter_id, parameters_metadata):
         if each['parameter_id'].encode() == str(parameter_id):
             missing_values = each['missingdataflag'].encode()
             break
-    # Need to encode the string to proper dtype so the mask is applied
-    if 'float' in str(values.dtype):
-        missing_values = float(missing_values)
-    if 'int' in str(values.dtype):
-        missing_values = int(missing_values)
-
+    missing_values = float(missing_values)
     values = ma.masked_array(values, mask=(values == missing_values))
 
     return values
@@ -225,10 +220,10 @@ def _end_of_date(time, time_step):
     '''
 
     last_day_of_month = calendar.monthrange(time.year, time.month)[1]
-    if time.day != last_day_of_month:
+    if time_step.lower() == 'monthly':
         time = datetime(time.year, time.month, last_day_of_month)
     elif time_step.lower() == 'daily':
-        time = datetime(time.year, time.month, end_time.day, 23, 59, 59)
+        time = datetime(time.year, time.month, time.day, 23, 59, 59)
 
     return time
 
