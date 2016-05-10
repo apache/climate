@@ -1157,8 +1157,8 @@ def settings_screen(header):
          option = screen.getstr()
 
          if option == '1':
-              screen.addstr(25, x/2, "Enter Start Time [min time: {0}] (Format YYYY-MM-DD)")
-              screen.addstr(26, x/2, ":".format(fix_min_time))
+              screen.addstr(25, x/2, "Enter Start Time [min time:{0}](Format YYYY-MM-DD)".format(fix_min_time))
+              screen.addstr(26, x/2, ":")
               new_start_time = screen.getstr()
               try:
                    new_start_time = datetime.strptime(new_start_time, '%Y-%m-%d')
@@ -1171,8 +1171,8 @@ def settings_screen(header):
                         note = "Start time has changed successfully. "
               except:
                    note = "Start time has not changed. "
-              screen.addstr(27, x/2, "Enter End Time [max time:{0}] (Format YYYY-MM-DD)")
-              screen.addstr(28, x/2, ":".format(fix_max_time))
+              screen.addstr(27, x/2, "Enter End Time [max time:{0}](Format YYYY-MM-DD)".format(fix_max_time))
+              screen.addstr(28, x/2, ":")
               new_end_time = screen.getstr()
               try:
                    new_end_time = datetime.strptime(new_end_time, '%Y-%m-%d')
