@@ -68,8 +68,6 @@ def temporal_subset(month_start, month_end, target_dataset, average_each_year=Fa
 
     time_index = np.sort(time_index)
 
-    time_index = time_index[np.where((time_index >= time_index_first) & (time_index <= time_index_last))]
-
     time_index = list(time_index)
 
     new_dataset = ds.Dataset(target_dataset.lats,

@@ -29,6 +29,28 @@ import logging
 logging.basicConfig(level=logging.CRITICAL)
 
 
+class TestTemporalSubset(unittest.TestCase):
+
+    def setUp(self):
+        self.ten_year_dataset = ten_year_monthly_dataset()
+
+    def test_returned_dataset(self):
+        self.dataset_times = np.array([datetime.datetime(year, month, 1)
+                                       for year in range(2000, 2010)
+                                       for month in range(1, 6)])
+        self.tempSubset = dp.temporal_subset(1, 5, self.ten_year_dataset)
+        np.testing.assert_array_equal(
+            self.dataset_times, self.tempSubset.times)
+
+    def test_startMonth_greater_than_endMonth(self):
+        self.dataset_times = np.array([datetime.datetime(year, month, 1)
+                                       for year in range(2000, 2010)
+                                       for month in [1, 8, 9, 10, 11, 12]])
+        self.tempSubset = dp.temporal_subset(8, 1, self.ten_year_dataset)
+        np.testing.assert_array_equal(
+            self.dataset_times, self.tempSubset.times)
+
+
 class TestEnsemble(unittest.TestCase):
     def test_unequal_dataset_shapes(self):
         self.ten_year_dataset = ten_year_monthly_dataset()
