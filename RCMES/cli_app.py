@@ -98,40 +98,79 @@ def load_local_model_screen(header):
 
     ready_screen("load_local_model_screen")
     screen.addstr(1, 1, header + " > Load Local Model File ")
-    model_path = glob('./data/*.nc')
-    screen.addstr(4, 10, "Model-ID   filename")
-    for imodel, model in enumerate(model_path):
-         screen.addstr(5+imodel, 14, '[%d]:  ' %imodel +model[7:]) 
-    screen.addstr(3, 2, "Select Model (Model-ID): ")
-    model_id = int(screen.getstr())
-    try:
-         netCDF_file = Dataset(model_path[model_id], 'r')
-         all_netcdf_variables = [variable.encode() for variable in netCDF_file.variables.keys()]
-         try:
-              screen.addstr(7+imodel, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
-              variable_name = screen.getstr()
-              variable_info = format(netCDF_file.variables[variable_name]).splitlines()
-              for ii,info in enumerate(variable_info):
-                  screen.addstr(8+imodel+ii, 2, info)
-              screen.addstr(17+imodel, 2, "Confirm:")
-              screen.addstr(18+imodel, 4, "0- No")
-              screen.addstr(19+imodel, 4, "1- Yes")
-              screen.addstr(20+imodel, 3, "Would you take this variable:")
-              answer = screen.getstr()
-              if answer == "0":
-                   note = "WARNING: Model file cannot be added."
-              elif answer == "1":
-                   model_dataset = load_file(model_path[model_id], variable_name)
-                   model_datasets.append(dsp.normalize_dataset_datetimes(model_dataset, model_dataset.temporal_resolution()))
-                   models_info.append({'directory': model_path, 'variable_name': variable_name})
-                   note = "Model file successfully added."
-              else:
-                   note = "WARNING: Model file cannot be added."
-         except:
-              note = "WARNING: Model file cannot be added. The variable [{0}] is not accepted. Please try again.".format(variable_name)
-         netCDF_file.close()
-    except:
-         note = "WARNING: Model file cannot be read. Please check the file directory or format. Only netCDF format is accepted."
+    screen.addstr(4, 3, "[0]: Enter model full path")
+    screen.addstr(5, 3, "[1]: Select from existing model file/s")
+    screen.addstr(3, 2, "Select Option: ")
+    model_selection_option = screen.getstr()
+
+    if model_selection_option == '0':
+        screen.addstr(7, 2, "Enter model (netCDF) full path: ")
+        model_full_path = screen.getstr()
+        model_full_path = model_full_path.replace(" ", "")
+        try:
+            netCDF_file = Dataset(model_full_path, 'r')
+            all_netcdf_variables = [variable.encode() for variable in netCDF_file.variables.keys()]
+            screen.addstr(9, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
+            variable_name = screen.getstr()
+            try:
+                variable_info = format(netCDF_file.variables[variable_name]).splitlines()
+                for i, info in enumerate(variable_info):
+                    screen.addstr(11 + i, 2, info)
+                screen.addstr(22, 2, "Confirm:")
+                screen.addstr(23, 4, "0- No")
+                screen.addstr(24, 4, "1- Yes")
+                screen.addstr(25, 3, "Would you take this variable:")
+                answer = screen.getstr()
+                if answer == "0":
+                    note = "WARNING: Model file cannot be added."
+                elif answer == "1":
+                    model_dataset = load_file(model_full_path, variable_name)
+                    model_datasets.append(dsp.normalize_dataset_datetimes(model_dataset, model_dataset.temporal_resolution()))
+                    models_info.append({'directory': model_full_path, 'variable_name': variable_name})
+                    note = "Model file successfully added."
+                else:
+                    note = "WARNING: Model file cannot be added."
+            except:
+                note = "WARNING: Model file cannot be added. The variable [{0}] is not accepted. Please try again.".format(variable_name)
+        except:
+            note = "WARNING: Model file cannot be read. Please check the file directory or format. Only netCDF format is accepted."
+    elif model_selection_option == '1':
+        model_path = glob('./data/*.nc')
+        for imodel, model in enumerate(model_path):
+            screen.addstr(8 + imodel, 14, '[%d]:  ' %imodel + model[7:])
+        screen.addstr(7, 2, "Select Model (Model-ID): ")
+        model_id = screen.getstr()
+        try:
+            model_id = int(model_id)
+            netCDF_file = Dataset(model_path[model_id], 'r')
+            all_netcdf_variables = [variable.encode() for variable in netCDF_file.variables.keys()]
+            screen.addstr(10 + imodel, 2, "Enter model variable name {0}: ".format(all_netcdf_variables))
+            variable_name = screen.getstr()
+            try:
+                variable_info = format(netCDF_file.variables[variable_name]).splitlines()
+                for ii, info in enumerate(variable_info):
+                    screen.addstr(11 + imodel + ii, 2, info)
+                screen.addstr(17 + ii, 2, "Confirm:")
+                screen.addstr(18 + ii, 4, "0- No")
+                screen.addstr(19 + ii, 4, "1- Yes")
+                screen.addstr(20 + ii, 3, "Would you take this variable:")
+                answer = screen.getstr()
+                if answer == "0":
+                    note = "WARNING: Model file cannot be added."
+                elif answer == "1":
+                    model_dataset = load_file(model_path[model_id], variable_name)
+                    model_datasets.append(dsp.normalize_dataset_datetimes(model_dataset, model_dataset.temporal_resolution()))
+                    models_info.append({'directory': model_path, 'variable_name': variable_name})
+                    note = "Model file successfully added."
+                else:
+                    note = "WARNING: Model file cannot be added."
+            except:
+                note = "WARNING: Model file cannot be added. The variable [{0}] is not accepted. Please try again.".format(variable_name)
+            netCDF_file.close()
+        except:
+            note = "WARNING: Model file cannot be read. Please check the file directory or format. Only netCDF format is accepted."
+    else:
+        note = "WARNING: Model file cannot be added."
 
     return note
 
