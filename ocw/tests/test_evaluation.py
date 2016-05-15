@@ -24,6 +24,7 @@ from ocw.dataset import Dataset, Bounds
 from ocw.evaluation import Evaluation
 from ocw.metrics import Bias, TemporalStdDev
 
+
 class TestEvaluation(unittest.TestCase):
     def setUp(self):
         self.eval = Evaluation(None, [], [])
@@ -36,8 +37,8 @@ class TestEvaluation(unittest.TestCase):
         self.variable = 'prec'
         self.other_var = 'temp'
         self.test_dataset = Dataset(lat, lon, time, value, self.variable)
-        self.another_test_dataset = Dataset(lat, lon, time, value, 
-                self.other_var)
+        self.another_test_dataset = Dataset(lat, lon, time, value,
+                                            self.other_var)
 
     def test_init(self):
         self.assertEquals(self.eval.ref_dataset, None)
@@ -47,9 +48,9 @@ class TestEvaluation(unittest.TestCase):
 
     def test_full_init(self):
         self.eval = Evaluation(
-                        self.test_dataset,           
-                        [self.test_dataset, self.another_test_dataset], 
-                        [Bias(), Bias(), TemporalStdDev()])                    
+            self.test_dataset,
+            [self.test_dataset, self.another_test_dataset],
+            [Bias(), Bias(), TemporalStdDev()])
 
         self.assertEqual(self.eval.ref_dataset.variable, self.variable)
 
@@ -69,9 +70,9 @@ class TestEvaluation(unittest.TestCase):
 
     def test_valid_subregion(self):
         bound = Bounds(
-                -10, 10, 
-                -20, 20, 
-                dt.datetime(2000, 1, 1), dt.datetime(2001, 1, 1))
+            -10, 10,
+            -20, 20,
+            dt.datetime(2000, 1, 1), dt.datetime(2001, 1, 1))
 
         self.eval.subregions = [bound, bound]
         self.assertEquals(len(self.eval.subregions), 2)
@@ -90,17 +91,17 @@ class TestEvaluation(unittest.TestCase):
     def test_add_dataset(self):
         self.eval.add_dataset(self.test_dataset)
 
-        self.assertEqual(self.eval.target_datasets[0].variable, 
-                self.variable)
+        self.assertEqual(self.eval.target_datasets[0].variable,
+                         self.variable)
 
     def test_add_datasets(self):
         self.eval.add_datasets([self.test_dataset, self.another_test_dataset])
 
         self.assertEqual(len(self.eval.target_datasets), 2)
-        self.assertEqual(self.eval.target_datasets[0].variable, 
-                self.variable)
-        self.assertEqual(self.eval.target_datasets[1].variable, 
-                self.other_var)
+        self.assertEqual(self.eval.target_datasets[0].variable,
+                         self.variable)
+        self.assertEqual(self.eval.target_datasets[1].variable,
+                         self.other_var)
 
     def test_add_metric(self):
         # Add a "binary" metric
@@ -117,9 +118,10 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(len(self.eval.metrics), 0)
         self.eval.add_metrics([Bias(), Bias()])
         self.assertEqual(len(self.eval.metrics), 2)
-    
+
     def test_bias_output_shape(self):
-        bias_eval = Evaluation(self.test_dataset, [self.another_test_dataset], [Bias()])
+        bias_eval = Evaluation(self.test_dataset, [
+                               self.another_test_dataset], [Bias()])
         bias_eval.run()
         input_shape = tuple(self.test_dataset.values.shape)
         bias_results_shape = tuple(bias_eval.results[0][0].shape)
@@ -128,7 +130,8 @@ class TestEvaluation(unittest.TestCase):
     def test_result_shape(self):
         bias_eval = Evaluation(
             self.test_dataset,
-            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
+            [self.another_test_dataset, self.another_test_dataset,
+                self.another_test_dataset],
             [Bias(), Bias()]
         )
         bias_eval.run()
@@ -141,22 +144,23 @@ class TestEvaluation(unittest.TestCase):
     def test_unary_result_shape(self):
         new_eval = Evaluation(
             self.test_dataset,
-            [self.another_test_dataset, self.another_test_dataset, self.another_test_dataset, self.another_test_dataset],
+            [self.another_test_dataset, self.another_test_dataset,
+                self.another_test_dataset, self.another_test_dataset],
             [TemporalStdDev()]
         )
         new_eval.run()
 
         # Expected result shape is
         # [stddev] where stddev.shape[0] = number of datasets
-        
+
         self.assertTrue(len(new_eval.unary_results) == 1)
         self.assertTrue(new_eval.unary_results[0].shape[0] == 5)
 
     def test_subregion_result_shape(self):
         bound = Bounds(
-                10, 18, 
-                100, 108, 
-                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+            10, 18,
+            100, 108,
+            dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
 
         bias_eval = Evaluation(
             self.test_dataset,
@@ -175,13 +179,13 @@ class TestEvaluation(unittest.TestCase):
         self.assertTrue(len(bias_eval.results) == 1)
         self.assertTrue(len(bias_eval.results[0]) == 1)
         self.assertTrue(bias_eval.results[0][0].shape[0] == 2)
-        self.assertTrue(type(bias_eval.results) == type([]))
+        self.assertTrue(isinstance(bias_eval.results, type([])))
 
     def test_subregion_unary_result_shape(self):
         bound = Bounds(
-                10, 18, 
-                100, 108, 
-                dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+            10, 18,
+            100, 108,
+            dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
 
         new_eval = Evaluation(
             self.test_dataset,
@@ -197,11 +201,15 @@ class TestEvaluation(unittest.TestCase):
         #           [3, temporalstddev.run(reference).shape],
         #       ]
         # ]
-        self.assertTrue(len(new_eval.unary_results) == 5)  # number of subregions
-        self.assertTrue(len(new_eval.unary_results[0]) == 2) # number of metrics
-        self.assertTrue(type(new_eval.unary_results) == type([]))
-        self.assertTrue(new_eval.unary_results[0][0].shape[0] == 3) # number of datasets (ref + target)
+
+        # 5 = number of subregions
+        self.assertTrue(len(new_eval.unary_results) == 5)
+        # number of metrics
+        self.assertTrue(len(new_eval.unary_results[0]) == 2)
+        self.assertTrue(isinstance(new_eval.unary_results, type([])))
+        # number of datasets (ref + target)
+        self.assertTrue(new_eval.unary_results[0][0].shape[0] == 3)
 
 
-if __name__  == '__main__':
+if __name__ == '__main__':
     unittest.main()

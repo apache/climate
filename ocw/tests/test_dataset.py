@@ -22,6 +22,7 @@ from ocw.dataset import Dataset, Bounds
 import numpy as np
 import datetime as dt
 
+
 class TestDatasetAttributes(unittest.TestCase):
     def setUp(self):
         self.lat = np.array([10, 12, 14, 16, 18])
@@ -61,6 +62,7 @@ class TestDatasetAttributes(unittest.TestCase):
     def test_origin(self):
         self.assertEqual(self.test_dataset.origin, self.origin)
 
+
 class TestInvalidDatasetInit(unittest.TestCase):
     def setUp(self):
         self.lat = np.array([10, 12, 14, 16, 18])
@@ -96,9 +98,9 @@ class TestInvalidDatasetInit(unittest.TestCase):
         self.lat = self.lat[:-2]
         with self.assertRaises(ValueError):
             Dataset(self.lat, self.lon, self.time, self.value, 'prec')
-    
+
     def test_values_given_in_wrong_order(self):
-         with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):
             Dataset(self.lat, self.lon, self.time, self.values_in_wrong_order)
 
     def test_lons_values_incorrectly_gridded(self):
@@ -110,10 +112,11 @@ class TestInvalidDatasetInit(unittest.TestCase):
 
         ds = Dataset(lats, bad_lons, times, values)
         np.testing.assert_array_equal(ds.lons, np.arange(-180, 180))
-    
+
     def test_reversed_lats(self):
         ds = Dataset(self.lat[::-1], self.lon, self.time, self.value)
         np.testing.assert_array_equal(ds.lats, self.lat)
+
 
 class TestDatasetFunctions(unittest.TestCase):
     def setUp(self):
@@ -123,17 +126,17 @@ class TestDatasetFunctions(unittest.TestCase):
         flat_array = np.array(range(300))
         self.value = flat_array.reshape(12, 5, 5)
         self.variable = 'prec'
-        self.test_dataset = Dataset(self.lat, self.lon, self.time, 
-                                     self.value, self.variable)
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
 
     def test_spatial_boundaries(self):
         self.assertEqual(
-            self.test_dataset.spatial_boundaries(), 
+            self.test_dataset.spatial_boundaries(),
             (min(self.lat), max(self.lat), min(self.lon), max(self.lon)))
 
     def test_time_range(self):
         self.assertEqual(
-            self.test_dataset.time_range(), 
+            self.test_dataset.time_range(),
             (dt.datetime(2000, 1, 1), dt.datetime(2000, 12, 1)))
 
     def test_spatial_resolution(self):
@@ -142,12 +145,13 @@ class TestDatasetFunctions(unittest.TestCase):
     def test_temporal_resolution(self):
         self.assertEqual(self.test_dataset.temporal_resolution(), 'monthly')
 
+
 class TestBounds(unittest.TestCase):
     def setUp(self):
         self.bounds = Bounds(-80, 80,                # Lats
-                            -160, 160,               # Lons
-                            dt.datetime(2000, 1, 1), # Start time
-                            dt.datetime(2002, 1, 1)) # End time
+                             -160, 160,               # Lons
+                             dt.datetime(2000, 1, 1),  # Start time
+                             dt.datetime(2002, 1, 1))  # End time
 
     # Latitude tests
     def test_inverted_min_max_lat(self):

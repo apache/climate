@@ -33,7 +33,8 @@ class test_load_file(unittest.TestCase):
         self.latitudes = self.netCDF_file.variables['latitude'][:]
         self.longitudes = self.netCDF_file.variables['longitude'][:]
         self.values = self.netCDF_file.variables['value'][:]
-        self.variable_name_list = ['latitude', 'longitude', 'time', 'level', 'value']
+        self.variable_name_list = ['latitude',
+                                   'longitude', 'time', 'level', 'value']
         self.possible_value_name = ['latitude', 'longitude', 'time', 'level']
 
     def tearDown(self):
@@ -41,21 +42,26 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_lats(self):
         """To test load_file function for latitudes"""
-        self.assertItemsEqual(local.load_file(self.file_path, "value").lats, self.latitudes)
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value").lats, self.latitudes)
 
     def test_function_load_file_lons(self):
         """To test load_file function for longitudes"""
-        self.assertItemsEqual(local.load_file(self.file_path, "value").lons, self.longitudes)
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value").lons, self.longitudes)
 
     def test_function_load_file_times(self):
         """To test load_file function for times"""
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(2001, 02, 01), datetime.datetime(2001, 03, 01)
-        self.assertItemsEqual(local.load_file(self.file_path, "value").times, newTimes)
+        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
+            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value").times, newTimes)
 
     def test_function_load_file_values(self):
         """To test load_file function for values"""
         new_values = self.values[:, 0, :, :]
-        self.assertTrue(numpy.allclose(local.load_file(self.file_path, "value").values, new_values))
+        self.assertTrue(numpy.allclose(local.load_file(
+            self.file_path, "value").values, new_values))
 
     def test_custom_dataset_name(self):
         """Test adding a custom name to a dataset"""
@@ -84,18 +90,16 @@ class test_get_netcdf_variable_names(unittest.TestCase):
         os.remove(self.test_model)
 
     def test_valid_latitude(self):
-        self.lat = local._get_netcdf_variable_name(
-            local.LAT_NAMES,
-            self.netcdf,
-            "tasmax")
+        self.lat = local._get_netcdf_variable_name(local.LAT_NAMES,
+                                                   self.netcdf,
+                                                   "tasmax")
         self.assertEquals(self.lat, "rlat")
 
     def test_invalid_dimension_latitude(self):
         self.netcdf = netCDF4.Dataset(self.invalid_netcdf_path, mode='r')
-        self.lat = local._get_netcdf_variable_name(
-            local.LAT_NAMES,
-            self.netcdf,
-            "value")
+        self.lat = local._get_netcdf_variable_name(local.LAT_NAMES,
+                                                   self.netcdf,
+                                                   "value")
         self.assertEquals(self.lat, "latitude")
 
     def test_dimension_variable_name_mismatch(self):
@@ -108,10 +112,9 @@ class test_get_netcdf_variable_names(unittest.TestCase):
 
     def test_no_match_latitude(self):
         with self.assertRaises(ValueError):
-            self.lat = local._get_netcdf_variable_name(
-                ['notAVarName'],
-                self.netcdf,
-                "tasmax")
+            self.lat = local._get_netcdf_variable_name(['notAVarName'],
+                                                       self.netcdf,
+                                                       "tasmax")
 
 
 def create_netcdf_object():
@@ -128,7 +131,12 @@ def create_netcdf_object():
     longitudes = netCDF_file.createVariable('longitude', 'd', ('lon_dim',))
     times = netCDF_file.createVariable('time', 'd', ('time_dim',))
     levels = netCDF_file.createVariable('level', 'd', ('level_dim',))
-    values = netCDF_file.createVariable('value', 'd', ('time_dim', 'level_dim', 'lat_dim', 'lon_dim'))
+    values = netCDF_file.createVariable('value', 'd',
+                                        ('time_dim',
+                                         'level_dim',
+                                         'lat_dim',
+                                         'lon_dim')
+                                        )
 
     # To latitudes and longitudes for five values
     latitudes_data = range(0, 5)
@@ -140,7 +148,8 @@ def create_netcdf_object():
     # Create 150 values
     values_data = numpy.array([i for i in range(150)])
     # Reshape values to 4D array (level, time, lats, lons)
-    values_data = values_data.reshape(len(times_data), len(levels_data), len(latitudes_data), len(longitudes_data))
+    values_data = values_data.reshape(len(times_data), len(
+        levels_data), len(latitudes_data), len(longitudes_data))
 
     # Ingest values to netCDF file
     latitudes[:] = latitudes_data
@@ -169,7 +178,13 @@ def create_invalid_dimensions_netcdf_object():
     longitudes = netCDF_file.createVariable('longitude', 'd', ('lon_dim',))
     times = netCDF_file.createVariable('time', 'd', ('time_dim',))
     levels = netCDF_file.createVariable('level', 'd', ('level_dim',))
-    values = netCDF_file.createVariable('value', 'd', ('level_dim', 'time_dim', 'lat_dim', 'lon_dim'))
+    values = netCDF_file.createVariable('value',
+                                        'd',
+                                        ('level_dim',
+                                         'time_dim',
+                                         'lat_dim',
+                                         'lon_dim')
+                                        )
     # To latitudes and longitudes for five values
     latitudes = range(0, 5)
     longitudes = range(200, 205)
@@ -180,7 +195,8 @@ def create_invalid_dimensions_netcdf_object():
     # Create 150 values
     values = numpy.array([i for i in range(150)])
     # Reshape values to 4D array (level, time, lats, lons)
-    values = values.reshape(len(levels), len(times), len(latitudes), len(longitudes))
+    values = values.reshape(len(levels), len(
+        times), len(latitudes), len(longitudes))
     # Ingest values to netCDF file
     latitudes[:] = latitudes
     longitudes[:] = longitudes

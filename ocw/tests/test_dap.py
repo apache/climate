@@ -25,7 +25,8 @@ class TestDap(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.url = 'http://test.opendap.org/opendap/data/ncml/agg/dated/CG2006158_120000h_usfc.nc'
+        cls.url = 'http://test.opendap.org/opendap/data/ncml/agg/dated/'\
+                  'CG2006158_120000h_usfc.nc'
         cls.name = 'foo'
         cls.dataset = dap.load(cls.url, 'CGusfc', name=cls.name)
 
