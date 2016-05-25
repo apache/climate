@@ -26,7 +26,6 @@ its dependencies.
 
 Flags:
     -h  Display this help message.
-    -q  Quiet install. User prompts are removed (when possible).
 
 N.B. This install script has been tested against Ubuntu 12.04 and 14.04.
 Please report problems with this script to dev@climate.apache.org
@@ -55,24 +54,18 @@ echo "                         Welcome to Easy OCW"
 echo "---------------------------------------------------------------------------"
 echo
 
-WITH_HOMEBREW=0
-WITH_INTERACT=1
-
 # Find absolute path to the easy-ocw directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd $DIR
 ocw_path="$DIR/../climate"
 
-while getopts ":h :e :q" FLAG
+while getopts ":h" FLAG
 do
     case $FLAG in
         h)
             help
             exit 1
-            ;;
-        q)
-            WITH_INTERACT=0
             ;;
         ?)
             help
@@ -81,7 +74,6 @@ do
     esac
 done
 
-if [ $WITH_INTERACT == 1 ]; then
 cat << ENDINTRO
 A number of dependencies for OCW will now be installed. Please check the wiki
 for a complete list of dependencies. Additionally, please read the wiki for
@@ -89,25 +81,28 @@ useful installation guidelines and information that may be pertinent to your
 situation. All of this can be found at http://s.apache.org/3p2
 ENDINTRO
 
-fi
+cat << VIRTUALENV_WARNING
+$(tput setaf 1)<-----------------------------[WARNING!]----------------------------------->$(tput sgr 0)
+Easy OCW will automatically create a conda environment "venv-ocw".
+All the dependencies will be installed in the virtual environment
+to ensure that your global Python install is not affected.
+
+Please activate the virtual environment venv-ocw after the script has completed to use OCW.
+
+To activate the virtual environment execute
+> source active venv-ocw
+
+To deactivate the virtual environment execute
+> source deactivate
+
+VIRTUALENV_WARNING
 
 echo "Easy-OCW script logs" > install_log
-header "Checking for pip ..."
-command -v pip >/dev/null 2>&1 || { 
-    task "Unable to locate pip."
-    task "Installing Pip"
-    sudo apt-get -y install python-pip >> install_log 2>&1
-    subtask "done"
-}
 
 # Install Continuum Analytics Miniconda Python distribution. This gives
 # almost all the dependencies that OCW needs in a single, easy to
 # install package.
-
 header "Installing Miniconda Python distribution ..."
-echo
-echo "*** NOTE *** When asked to update your PATH, you should respond YES and please do not change the default installation directory"
-read -p "Press [ENTER] to continue ..."
 
 MACHINE_TYPE=`uname -m`
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
@@ -125,11 +120,38 @@ command -v conda >/dev/null 2>&1 || {
 		subtask "done"
     fi
 	task "Installing ..."
-	bash Miniconda-latest-linux.sh
+	bash Miniconda-latest-linux.sh -b -p $HOME/miniconda
+	export PATH="$HOME/miniconda/bin/:$PATH"
 	subtask "done"
 }
 
+header "Creating venv-ocw environment and installing dependencies"
+conda create --name venv-ocw -y --file ocw-conda-dependencies.txt
+task "Activating venv-ocw virtual environment"
+source activate venv-ocw
+
+conda config --set always_yes yes
+conda update -q conda
+
+header "Conda Information"
+echo "------------------------------------------------------------------"
+conda info -a
+
+echo 
 task "Installing python-dev"
 sudo apt-get -y install python-dev >> install_log 2>&1
 subtask "done"
-header "Part 1/2 of installation completed. Please start a new terminal and execute conda-install.sh script."
+
+cd $DIR
+
+header "Installing remaining dependencies via pip"
+pip install -r ocw-pip-dependencies.txt
+subtask "done"
+
+header "Installing ocw module"
+
+cd ..
+python setup.py install
+subtask "Finished installing OCW module"
+
+header "For any issues with installation please contact dev@climate.apache.org"
