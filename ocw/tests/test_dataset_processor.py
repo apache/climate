@@ -95,6 +95,68 @@ class TestTemporalRebinWithTimeIndex(unittest.TestCase):
         np.testing.assert_array_equal(self.ten_year_dataset.lons, dataset.lons)
 
 
+class TestVariableUnitConversion(unittest.TestCase):
+    def setUp(self):
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        self.ten_year_dataset.variable = 'temp'
+        self.ten_year_dataset.units = 'celsius'
+
+    def test_returned_variable_unit_celsius(self):
+        ''' Tests returned dataset unit if original dataset unit is celcius '''
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.units, 'K')
+
+    def test_returned_variable_unit_kelvin(self):
+        ''' Tests returned dataset unit if original dataset unit is kelvin '''
+        self.ten_year_dataset.units = 'K'
+        another_dataset = dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(another_dataset.units, self.ten_year_dataset.units)
+
+    def test_temp_unit_conversion(self):
+        ''' Tests returned dataset temp values '''
+        self.ten_year_dataset.values = np.ones([
+            len(self.ten_year_dataset.times),
+            len(self.ten_year_dataset.lats),
+            len(self.ten_year_dataset.lons)])
+        values = self.ten_year_dataset.values + 273.15
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+    def test_returned_variable_unit_swe(self):
+        ''' Tests returned dataset unit if original dataset unit is swe '''
+        self.ten_year_dataset.variable = 'swe'
+        self.ten_year_dataset.units = 'm'
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.variable, 'swe')
+        self.assertEqual(self.ten_year_dataset.units, 'km')
+
+    def test_returned_variable_unit_pr(self):
+        '''
+        Tests returned dataset unit if original dataset unit is kgm^-2s^-1
+        '''
+        self.ten_year_dataset.variable = 'pr'
+        self.ten_year_dataset.units = 'kg m-2 s-1'
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.variable, 'pr')
+        self.assertEqual(self.ten_year_dataset.units, 'mm/day')
+
+    def test_water_flux_unit_conversion_swe(self):
+        ''' Tests variable values in returned dataset '''
+        self.ten_year_dataset.variable = 'swe'
+        self.ten_year_dataset.units = 'm'
+        values = self.ten_year_dataset.values + 999
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+    def test_water_flux_unit_conversion_pr(self):
+        ''' Tests variable values in returned dataset '''
+        self.ten_year_dataset.variable = 'pr'
+        self.ten_year_dataset.units = 'kg m-2 s-1'
+        values = self.ten_year_dataset.values + 86399
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+
 class TestEnsemble(unittest.TestCase):
     def test_unequal_dataset_shapes(self):
         self.ten_year_dataset = ten_year_monthly_dataset()
