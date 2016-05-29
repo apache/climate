@@ -51,6 +51,14 @@ class TestEvaluation(unittest.TestCase):
             self.test_dataset,
             [self.test_dataset, self.another_test_dataset],
             [Bias(), Bias(), TemporalStdDev()])
+        ref_dataset = self.test_dataset
+        target_datasets = [self.test_dataset, self.another_test_dataset]
+        metrics = [Bias(), Bias()]
+        unary_metrics = [TemporalStdDev()]
+
+        self.eval = Evaluation(ref_dataset,
+                               target_datasets,
+                               metrics + unary_metrics)
 
         self.assertEqual(self.eval.ref_dataset.variable, self.variable)
 
@@ -63,6 +71,26 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(len(self.eval.metrics), 2)
         # TemporalStdDev is a "unary" metric and should be stored as such
         self.assertEqual(len(self.eval.unary_metrics), 1)
+        self.eval.run()
+        out_str = (
+            "<Evaluation - ref_dataset: {}, "
+            "target_dataset(s): {}, "
+            "binary_metric(s): {}, "
+            "unary_metric(s): {}, "
+            "subregion(s): {}>"
+        ).format(
+            str(self.test_dataset),
+            [str(ds) for ds in target_datasets],
+            [str(m) for m in metrics],
+            [str(u) for u in unary_metrics],
+            None
+        )
+        self.assertEqual(str(self.eval), out_str)
+
+    def test_valid_ref_dataset_setter(self):
+        self.eval.ref_dataset = self.another_test_dataset
+        self.assertEqual(self.eval.ref_dataset.variable,
+                         self.another_test_dataset.variable)
 
     def test_invalid_ref_dataset(self):
         with self.assertRaises(TypeError):
@@ -88,11 +116,15 @@ class TestEvaluation(unittest.TestCase):
 
         self.assertEqual(self.eval.ref_dataset.variable, self.variable)
 
-    def test_add_dataset(self):
+    def test_add_valid_dataset(self):
         self.eval.add_dataset(self.test_dataset)
 
         self.assertEqual(self.eval.target_datasets[0].variable,
                          self.variable)
+
+    def test_add_invalid_dataset(self):
+        with self.assertRaises(TypeError):
+            self.eval.add_dataset('This is an invalid dataset')
 
     def test_add_datasets(self):
         self.eval.add_datasets([self.test_dataset, self.another_test_dataset])
@@ -103,7 +135,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(self.eval.target_datasets[1].variable,
                          self.other_var)
 
-    def test_add_metric(self):
+    def test_add_valid_metric(self):
         # Add a "binary" metric
         self.assertEqual(len(self.eval.metrics), 0)
         self.eval.add_metric(Bias())
@@ -114,10 +146,18 @@ class TestEvaluation(unittest.TestCase):
         self.eval.add_metric(TemporalStdDev())
         self.assertEqual(len(self.eval.unary_metrics), 1)
 
+    def test_add_invalid_metric(self):
+        with self.assertRaises(TypeError):
+            self.eval.add_metric('This is an invalid metric')
+
     def test_add_metrics(self):
         self.assertEqual(len(self.eval.metrics), 0)
         self.eval.add_metrics([Bias(), Bias()])
         self.assertEqual(len(self.eval.metrics), 2)
+
+    def test_invalid_evaluation_run(self):
+        self.eval = Evaluation(None, [], [])
+        self.assertEqual(self.eval.run(), None)
 
     def test_bias_output_shape(self):
         bias_eval = Evaluation(self.test_dataset, [
