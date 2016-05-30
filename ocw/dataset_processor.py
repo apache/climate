@@ -424,9 +424,10 @@ def temporal_slice(start_time_index, end_time_index, target_dataset):
 
     :raises: ValueError
     '''
-
-    timeStart = min(np.nonzero(target_dataset.times >= start_time_index)[0])
-    timeEnd = max(np.nonzero(target_dataset.times <= end_time_index)[0])
+    start_date = target_dataset.times[start_time_index]
+    end_date = target_dataset.times[end_time_index]
+    timeStart = min(np.nonzero(target_dataset.times >= start_date)[0])
+    timeEnd = max(np.nonzero(target_dataset.times <= end_date)[0])
     target_dataset.times = target_dataset.times[timeStart:timeEnd+1]
     target_dataset.values = target_dataset.values[timeStart:timeEnd+1,:]
 
