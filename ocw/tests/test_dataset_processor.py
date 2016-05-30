@@ -157,6 +157,31 @@ class TestVariableUnitConversion(unittest.TestCase):
         np.testing.assert_array_equal(self.ten_year_dataset.values, values)
 
 
+class TestTemporalSlice(unittest.TestCase):
+    def test_returned_dataset_times(self):
+        ''' Tests returned dataset times values '''
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        start_index = 1
+        end_index = 4
+        dates = np.array([datetime.datetime(2000, month, 1)
+                          for month in range(start_index + 1, end_index + 2)])
+        new_dataset = dp.temporal_slice(start_index,
+                                        end_index,
+                                        self.ten_year_dataset)
+        np.testing.assert_array_equal(new_dataset.times, dates)
+
+    def test_returned_dataset_values(self):
+        ''' Tests returned dataset variable values '''
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        start_index = 1
+        end_index = 4
+        values = self.ten_year_dataset.values[start_index:end_index + 1]
+        new_dataset = dp.temporal_slice(start_index,
+                                        end_index,
+                                        self.ten_year_dataset)
+        np.testing.assert_array_equal(new_dataset.values, values)
+
+
 class TestEnsemble(unittest.TestCase):
     def test_unequal_dataset_shapes(self):
         self.ten_year_dataset = ten_year_monthly_dataset()
