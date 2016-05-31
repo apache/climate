@@ -41,6 +41,47 @@ class TestTemporalSubset(unittest.TestCase):
         np.testing.assert_array_equal(
             self.dataset_times, self.tempSubset.times)
 
+    def test_temporal_subset_with_average_time(self):
+        self.dataset_times = np.array([datetime.datetime(year, 2, 1)
+                                       for year in range(2000, 2010)])
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        np.testing.assert_array_equal(self.dataset_times,
+                                      self.tempSubset.times)
+
+    def test_temporal_subset_with_average_values(self):
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        self.dataset_values = np.ones([len(self.tempSubset.times),
+                                       len(self.ten_year_dataset.lats),
+                                       len(self.ten_year_dataset.lons)])
+        np.testing.assert_array_equal(self.dataset_values,
+                                      self.tempSubset.values)
+
+    def test_temporal_subset_attributes(self):
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        self.assertEqual(self.tempSubset.name, self.ten_year_dataset.name)
+        self.assertEqual(self.tempSubset.variable,
+                         self.ten_year_dataset.variable)
+        self.assertEqual(self.tempSubset.units, self.ten_year_dataset.units)
+        np.testing.assert_array_equal(self.tempSubset.lats,
+                                      self.ten_year_dataset.lats)
+        np.testing.assert_array_equal(self.tempSubset.lons,
+                                      self.ten_year_dataset.lons)
+
+    def test_temporal_subset_equal_start_end_month(self):
+        self.dataset_times = np.array([datetime.datetime(year, 1, 1)
+                                       for year in range(2000, 2010)])
+        self.tempSubset = dp.temporal_subset(1, 1,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        np.testing.assert_array_equal(self.dataset_times,
+                                      self.tempSubset.times)
+
     def test_startMonth_greater_than_endMonth(self):
         self.dataset_times = np.array([datetime.datetime(year, month, 1)
                                        for year in range(2000, 2010)
@@ -334,6 +375,15 @@ class TestSpatialRegrid(unittest.TestCase):
         self.assertEquals(self.input_dataset.variable,
                           self.regridded_dataset.variable)
 
+    def test_two_dimensional_lats_lons(self):
+        self.input_dataset.lats = np.array(range(-89, 90, 2))
+        self.input_dataset.lons = np.array(range(-179, 180, 4))
+        self.input_dataset.lats = self.input_dataset.lats.reshape(2, 45)
+        self.input_dataset.lons = self.input_dataset.lons.reshape(2, 45)
+        new_dataset = dp.spatial_regrid(
+            self.input_dataset, self.new_lats, self.new_lons)
+        np.testing.assert_array_equal(new_dataset.lats, self.new_lats)
+
 
 class TestNormalizeDatasetDatetimes(unittest.TestCase):
     def setUp(self):
@@ -417,6 +467,23 @@ class TestSubset(unittest.TestCase):
                                 "time_start": 13,
                                 "time_end": 49}
         self.assertDictEqual(index_slices, control_index_slices)
+
+    def test_subset_without_start_index(self):
+        self.subregion = ds.Bounds(
+            -81, 81,
+            -161, 161,
+        )
+        subset = dp.subset(self.subregion, self.target_dataset)
+        times = np.array([datetime.datetime(year, month, 1)
+                         for year in range(2000, 2010)
+                         for month in range(1, 13)])
+        self.assertEqual(subset.lats.shape[0], 82)
+        self.assertSequenceEqual(list(np.array(range(-81, 82, 2))),
+                                 list(subset.lats))
+        self.assertEqual(subset.lons.shape[0], 162)
+        self.assertEqual(subset.values.shape, (120, 82, 162))
+        self.assertEqual(subset.times.shape[0], 120)
+        np.testing.assert_array_equal(subset.times, times)
 
 
 class TestSafeSubset(unittest.TestCase):
