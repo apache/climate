@@ -142,8 +142,51 @@ class TestDatasetFunctions(unittest.TestCase):
     def test_spatial_resolution(self):
         self.assertEqual(self.test_dataset.spatial_resolution(), (2, 2))
 
-    def test_temporal_resolution(self):
+    def test_temporal_resolution_monthly(self):
         self.assertEqual(self.test_dataset.temporal_resolution(), 'monthly')
+
+    def test_temporal_resolution_daily(self):
+        self.time = np.array([dt.datetime(2000, 3, x) for x in range(1, 31)])
+        flat_array = np.array(range(750))
+        self.value = flat_array.reshape(30, 5, 5)
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+        self.assertEqual(self.test_dataset.temporal_resolution(), 'daily')
+
+    def test_temporal_resolution_yearly(self):
+        self.time = np.array([dt.datetime(x, 6, 1) for x in range(2000, 2015)])
+        flat_array = np.array(range(375))
+        self.value = flat_array.reshape(15, 5, 5)
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+        self.assertEqual(self.test_dataset.temporal_resolution(), 'yearly')
+
+    def test_str_(self):
+        dataset = self.test_dataset
+        lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
+        start, end = dataset.time_range()
+        lat_range = "({}, {})".format(lat_min, lon_min)
+        lon_range = "({}, {})".format(lon_min, lon_min)
+        time_range = "({}, {})".format(start, end)
+
+        formatted_repr = (
+            "<Dataset - name: {}, "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}, "
+            "var: {}, "
+            "units: {}>"
+        )
+
+        output = formatted_repr.format(
+            dataset.name if dataset.name != "" else None,
+            lat_range,
+            lon_range,
+            time_range,
+            dataset.variable,
+            dataset.units
+        )
+        self.assertEqual(str(self.test_dataset), output)
 
 
 class TestBounds(unittest.TestCase):
@@ -152,7 +195,8 @@ class TestBounds(unittest.TestCase):
                              -160, 160,               # Lons
                              dt.datetime(2000, 1, 1),  # Start time
                              dt.datetime(2002, 1, 1))  # End time
-
+        self.another_bounds = Bounds(-80, 80,                # Lats
+                                     -160, 160)
     # Latitude tests
     def test_inverted_min_max_lat(self):
         with self.assertRaises(ValueError):
@@ -218,6 +262,33 @@ class TestBounds(unittest.TestCase):
     def test_invalid_end(self):
         with self.assertRaises(ValueError):
             self.bounds.end = "This is not a date time object"
+
+    # Start tests
+    def test_none_value_start(self):
+        self.assertEqual(self.another_bounds.start, None)
+
+    # End tests
+    def test_none_value_end(self):
+        self.assertEqual(self.another_bounds.end, None)
+
+    def test__str__(self):
+        lat_range = "({}, {})".format(self.bounds.lat_min, self.bounds.lat_max)
+        lon_range = "({}, {})".format(self.bounds.lon_min, self.bounds.lon_max)
+        time_range = "({}, {})".format(self.bounds.start, self.bounds.end)
+
+        formatted_repr = (
+            "<Bounds - "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}> "
+        )
+
+        output = formatted_repr.format(
+            lat_range,
+            lon_range,
+            time_range,
+        )
+        self.assertEqual(str(self.bounds), output)
 
 if __name__ == '__main__':
     unittest.main()
