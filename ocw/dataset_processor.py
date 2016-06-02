@@ -351,7 +351,9 @@ def subset(subregion, target_dataset, subregion_name=None):
         subregion_name = target_dataset.name
 
     if target_dataset.lats.ndim ==2 and target_dataset.lons.ndim ==2:
-        target_dataset = temporal_slice(subregion.start, subregion.end, target_dataset)
+        start_time_index = np.where(target_dataset.times == subregion.start)[0][0]
+        end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
+        target_dataset = temporal_slice(start_time_index, end_time_index, target_dataset)
         nt, ny, nx = target_dataset.values.shape
         y_index, x_index = np.where((target_dataset.lats >= subregion.lat_max) | (target_dataset.lats <= subregion.lat_min) |
                          (target_dataset.lons >= subregion.lon_max) | (target_dataset.lons <= subregion.lon_min)) 
