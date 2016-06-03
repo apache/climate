@@ -318,6 +318,16 @@ class TestTemporalRebin(unittest.TestCase):
         self.assertEquals(annual_dataset.variable,
                           self.ten_year_monthly_dataset.variable)
 
+    def test_daily_to_daily_rebin(self):
+        daily_dataset = dp.temporal_rebin(
+            self.two_years_daily_dataset, "daily")
+        np.testing.assert_array_equal(
+            daily_dataset.times, self.two_years_daily_dataset.times)
+
+    def test_invalid_unit_rebin(self):
+        with self.assertRaises(ValueError):
+            dp.temporal_rebin(self.two_years_daily_dataset, "days")
+
 
 class TestRcmesSpatialRegrid(unittest.TestCase):
 
@@ -403,6 +413,17 @@ class TestNormalizeDatasetDatetimes(unittest.TestCase):
         # Check that all the days have been shifted to the first of the month
         self.assertTrue(all(x.day == 1 for x in new_ds.times))
 
+    def test_daily_time(self):
+        # Test daily with time.hour != 0
+        self.monthly_dataset.times = np.array([
+                                              datetime.datetime(
+                                                  year, month, 15, 5)
+                                              for year in range(2000, 2010)
+                                              for month in range(1, 13)])
+        new_ds = dp.normalize_dataset_datetimes(self.monthly_dataset, 'daily')
+        # Check that all the days have been shifted to the first of the month
+        self.assertTrue(all(x.hour == 0 for x in new_ds.times))
+
 
 class TestSubset(unittest.TestCase):
     def setUp(self):
@@ -475,8 +496,8 @@ class TestSubset(unittest.TestCase):
         )
         subset = dp.subset(self.subregion, self.target_dataset)
         times = np.array([datetime.datetime(year, month, 1)
-                         for year in range(2000, 2010)
-                         for month in range(1, 13)])
+                          for year in range(2000, 2010)
+                          for month in range(1, 13)])
         self.assertEqual(subset.lats.shape[0], 82)
         self.assertSequenceEqual(list(np.array(range(-81, 82, 2))),
                                  list(subset.lats))
@@ -645,8 +666,8 @@ def ten_year_monthly_dataset():
 def ten_year_monthly_15th_dataset():
     lats = np.array(range(-89, 90, 2))
     lons = np.array(range(-179, 180, 2))
-    # Ten Years of monthly data
-    times = np.array([datetime.datetime(year, month, 1)
+    # Ten Years of monthly 15th data
+    times = np.array([datetime.datetime(year, month, 15)
                       for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
     input_dataset = ds.Dataset(lats,
