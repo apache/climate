@@ -947,9 +947,12 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
         it = 0
         new_date = []
         for day in days_sorted:
-            index = np.where(days = day)[0]
+            index = np.where(days == day)[0]
             new_data[it,:] = ma.mean(data[index,:], axis=0)
-            new_date.append(datetime.datetime(year=day/10000, month=(day % 10000)/100, day=day % 100))
+            y = int(day / 10000)
+            m = int(day % 10000) / 100
+            d = int(day % 100)
+            new_date.append(datetime.datetime(year=y, month=m, day=d))
             it = it+1
         
     return new_data, np.array(new_date)
