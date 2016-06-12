@@ -28,12 +28,17 @@ import ocw.utils as utils
 
 
 class TestDecodeTimes(unittest.TestCase):
-    test_model = os.getcwd() + '/ocw-ui/backend/tests/example_data/'\
-                               'lat_lon_time.nc'
 
     def setUp(self):
+        path = os.path.dirname(os.path.realpath(__file__))
+        self.test_model = path + \
+            '/../../ocw-ui/backend/tests/example_data/lat_lon_time.nc'
+        self.test_model_daily = path + '/lat_lon_time_daily.nc'
+
         self.netcdf = netCDF4.Dataset(
             os.path.abspath(self.test_model), mode='r')
+        self.netcdf_daily = netCDF4.Dataset(
+            os.path.abspath(self.test_model_daily), mode='r')
 
     def test_proper_return_format(self):
         times = utils.decode_time_values(self.netcdf, 'time')
@@ -46,9 +51,17 @@ class TestDecodeTimes(unittest.TestCase):
         end_time = datetime.datetime.strptime(
             '2008-12-01 00:00:00', '%Y-%m-%d %H:%M:%S')
         times = utils.decode_time_values(self.netcdf, 'time')
-
         self.assertEquals(times[0], start_time)
         self.assertEquals(times[-1], end_time)
+
+    def test_days_time_processing(self):
+        start_time = datetime.datetime.strptime(
+            '1951-4-14 00:00:00', '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.datetime.strptime(
+            '1951-12-9 00:00:00', '%Y-%m-%d %H:%M:%S')
+        new_times = utils.decode_time_values(self.netcdf_daily, 'time')
+        self.assertEqual(new_times[0], start_time)
+        self.assertEqual(new_times[-1], end_time)
 
 
 class TestTimeUnitsParse(unittest.TestCase):
@@ -125,6 +138,23 @@ class TestNormalizeLatLonValues(unittest.TestCase):
         np.testing.assert_array_equal(lats, self.lats)
         np.testing.assert_array_equal(values, self.values)
 
+    def test_lons_reversed(self):
+        self.lats = np.arange(-10, 10)
+        self.lons = np.arange(40)
+        times = np.array([datetime.datetime(2000, x, 1) for x in range(1, 7)])
+        flat_array = np.arange(len(times) * len(self.lats) * len(self.lons))
+        self.variable = flat_array.reshape(len(times),
+                                           len(self.lats),
+                                           len(self.lons))
+        lats, lons, values = utils.normalize_lat_lon_values(self.lats,
+                                                            self.lons[::-1],
+                                                            self.values[:,
+                                                                        ::,
+                                                                        ::-1])
+        np.testing.assert_array_equal(lats, self.lats)
+        np.testing.assert_array_equal(values, self.values)
+        np.testing.assert_array_equal(lons, self.lons)
+
     def test_lons_shift_values(self):
         expected_vals = np.array([[2, 3, 0, 1],
                                   [6, 7, 4, 5],
@@ -156,6 +186,49 @@ class TestNormalizeLatLonValues(unittest.TestCase):
                           self.lats2,
                           self.lons_unsorted,
                           self.values2)
+
+    def test_lons_greater_than_180(self):
+        self.lons = np.array([190, 210, 230, 250])
+        self.lats = np.array([-30, 0, 30])
+        self.values = np.arange(12).reshape(3, 4)
+        expected_lons = np.array([-170, -150, -130, -110])
+        expected_values = np.array([[0, 1, 2, 3],
+                                    [4, 5, 6, 7],
+                                    [8, 9, 10, 11]])
+        lats, lons, values = utils.normalize_lat_lon_values(self.lats,
+                                                            self.lons,
+                                                            self.values)
+        np.testing.assert_array_equal(lons, expected_lons)
+        np.testing.assert_array_equal(expected_values, values)
+
+
+class TestGetTemporalOverlap(unittest.TestCase):
+    def setUp(self):
+        self.lat = np.array([10, 12, 14, 16, 18])
+        self.lon = np.array([100, 102, 104, 106, 108])
+        self.time = np.array(
+            [datetime.datetime(2000, x, 1) for x in range(1, 13)])
+        flat_array = np.array(range(300))
+        self.value = flat_array.reshape(12, 5, 5)
+        self.variable = 'prec'
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+        self.dataset_array = [self.test_dataset, self.test_dataset]
+
+    def test_same_dataset_temporal_overlap(self):
+        maximum, minimum = utils.get_temporal_overlap(self.dataset_array)
+        self.assertEqual(maximum, datetime.datetime(2000, 1, 1))
+        self.assertEqual(minimum, datetime.datetime(2000, 12, 1))
+
+    def test_different_dataset_temporal_overlap(self):
+        new_times = np.array(
+            [datetime.datetime(2002, x, 1) for x in range(1, 13)])
+        another_dataset = Dataset(self.lat, self.lon, new_times,
+                                  self.value, self.variable)
+        self.dataset_array = [self.test_dataset, another_dataset]
+        maximum, minimum = utils.get_temporal_overlap(self.dataset_array)
+        self.assertEqual(maximum, datetime.datetime(2002, 1, 1))
+        self.assertEqual(minimum, datetime.datetime(2000, 12, 1))
 
 
 class TestReshapeMonthlyToAnnually(unittest.TestCase):
@@ -191,6 +264,56 @@ class TestReshapeMonthlyToAnnually(unittest.TestCase):
             ValueError, utils.reshape_monthly_to_annually, bad_dataset)
 
 
+class TestCalcTemporalMean(unittest.TestCase):
+    def setUp(self):
+        self.lat = np.array([10, 12, 14])
+        self.lon = np.array([100, 102, 104])
+        self.time = np.array(
+            [datetime.datetime(2000, x, 1) for x in range(1, 7)])
+        flat_array = np.array(range(54))
+        self.value = flat_array.reshape(6, 3, 3)
+        self.variable = 'prec'
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+
+    def test_returned_mean(self):
+        mean_values = np.array([[22.5, 23.5, 24.5],
+                                [25.5, 26.5, 27.5],
+                                [28.5, 29.5, 30.5]])
+
+        result = utils.calc_temporal_mean(self.test_dataset)
+        np.testing.assert_array_equal(result, mean_values)
+
+
+class TestCalcAreaWeightedSpatialAverage(unittest.TestCase):
+    def setUp(self):
+        self.lat = np.array([10, 12, 14])
+        self.lon = np.array([100, 102, 104])
+        self.time = np.array(
+            [datetime.datetime(2000, x, 1) for x in range(1, 7)])
+        flat_array = np.array(range(54))
+        self.value = flat_array.reshape(6, 3, 3)
+        self.variable = 'prec'
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+
+    def test_spatial_average(self):
+        avg = np.ma.array([4., 13., 22., 31., 40., 49.])
+        result = utils.calc_area_weighted_spatial_average(self.test_dataset)
+        np.testing.assert_array_equal(avg, result)
+
+    def test_2_dim_lats_lons(self):
+        self.lat = np.array([10, 12, 14]).reshape(3, 1)
+        self.lon = np.array([100, 102, 104]).reshape(3, 1)
+        flat_array = np.array(range(18))
+        self.value = flat_array.reshape(6, 3, 1)
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+        avg = np.ma.array([1., 4., 7., 10., 13., 16.])
+        result = utils.calc_area_weighted_spatial_average(self.test_dataset)
+        np.testing.assert_array_equal(avg, result)
+
+
 class TestCalcClimatologyYear(unittest.TestCase):
     ''' Testing function 'calc_climatology_year' from ocw.utils.py '''
 
@@ -219,6 +342,12 @@ class TestCalcClimatologyYear(unittest.TestCase):
         np.testing.assert_array_equal(
             utils.calc_climatology_year(self.test_dataset)[1], total_mean)
 
+    def test_invalid_time_shape(self):
+        flat_array = np.array(range(350))
+        self.test_dataset.values = flat_array.reshape(14, 5, 5)
+        with self.assertRaises(ValueError):
+            utils.calc_climatology_year(self.test_dataset)
+
 
 class TestCalcClimatologyMonthly(unittest.TestCase):
     ''' Tests the 'calc_climatology_monthly' method from ocw.utils.py '''
@@ -244,6 +373,12 @@ class TestCalcClimatologyMonthly(unittest.TestCase):
             self.dataset)
         np.testing.assert_array_equal(actual_result, expected_result)
         np.testing.assert_array_equal(actual_times, expected_times)
+
+    def test_invalid_time_shape(self):
+        flat_array = np.array(range(350))
+        self.dataset.values = flat_array.reshape(14, 5, 5)
+        with self.assertRaises(ValueError):
+            utils.calc_climatology_monthly(self.dataset)
 
 
 class TestCalcTimeSeries(unittest.TestCase):
