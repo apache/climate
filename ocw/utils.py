@@ -217,7 +217,7 @@ def normalize_lat_lon_values(lats, lons, values):
 
     	if lons_reversed:
             lons_out = lons_out[::-1]
-            data_out = data_out[..., ::-1]
+            data_out = data_out[..., :, ::-1]
 
     	if lons_shifted:
             data_out, lons_out = shiftgrid(180, data_out, lons_out, start=False)
