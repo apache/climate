@@ -18,3 +18,5 @@
 [report]
 exclude_lines = 
     if __name__ == .__main__.:
+    # Due to issue https://issues.apache.org/jira/browse/CLIMATE-803
+    def calc_subregion_area_mean_and_std*
