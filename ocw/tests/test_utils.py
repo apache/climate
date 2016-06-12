@@ -313,6 +313,26 @@ class TestCalcAreaWeightedSpatialAverage(unittest.TestCase):
         result = utils.calc_area_weighted_spatial_average(self.test_dataset)
         np.testing.assert_array_equal(avg, result)
 
+    def test_spatial_average_with_area_weight(self):
+        avg = np.ma.array([3.985158, 12.985158, 21.985158,
+                           30.985158, 39.985158, 48.985158])
+        result = utils.calc_area_weighted_spatial_average(
+            self.test_dataset, area_weight=True)
+        np.testing.assert_array_almost_equal(avg, result)
+
+    def test__2_dim_lats_lons_area_weight(self):
+        self.lat = np.array([10, 12, 14]).reshape(3, 1)
+        self.lon = np.array([100, 102, 104]).reshape(3, 1)
+        flat_array = np.array(range(18))
+        self.value = flat_array.reshape(6, 3, 1)
+        self.test_dataset = Dataset(self.lat, self.lon, self.time,
+                                    self.value, self.variable)
+        avg = np.ma.array([0.995053, 3.995053, 6.995053, 9.995053, 12.995053,
+                           15.995053])
+        result = utils.calc_area_weighted_spatial_average(
+            self.test_dataset, area_weight=True)
+        np.testing.assert_array_almost_equal(avg, result)
+
 
 class TestCalcClimatologyYear(unittest.TestCase):
     ''' Testing function 'calc_climatology_year' from ocw.utils.py '''
