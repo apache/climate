@@ -40,6 +40,12 @@ class test_load_file(unittest.TestCase):
     def tearDown(self):
         os.remove(self.file_path)
 
+    def test_load_invalid_file_path(self):
+        self.invalid_netcdf_path = '/invalid/path'
+        with self.assertRaises(ValueError):
+            local.load_file(file_path=self.invalid_netcdf_path,
+                            variable_name='test variable')
+
     def test_function_load_file_lats(self):
         """To test load_file function for latitudes"""
         self.assertItemsEqual(local.load_file(
@@ -74,6 +80,104 @@ class test_load_file(unittest.TestCase):
                              'time_name', 'elevation_index'])
         self.assertEqual(set(ds.origin.keys()), expected_keys)
         self.assertEqual(ds.origin['source'], 'local')
+
+
+class TestLoadMultipleFiles(unittest.TestCase):
+    def setUp(self):
+        # Read netCDF file
+        self.file_path = create_netcdf_object()
+        self.netCDF_file = netCDF4.Dataset(self.file_path, 'r')
+        self.latitudes = self.netCDF_file.variables['latitude'][:]
+        self.longitudes = self.netCDF_file.variables['longitude'][:]
+        self.values = self.netCDF_file.variables['value'][:]
+        self.variable_name_list = ['latitude',
+                                   'longitude', 'time', 'level', 'value']
+        self.possible_value_name = ['latitude', 'longitude', 'time', 'level']
+
+    def tearDown(self):
+        os.remove(self.file_path)
+
+    def test_function_load_multiple_files_data_name(self):
+        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        self.assertEqual(data_name, ['model'])
+
+    def test_function_load_multiple_files_lons(self):
+        """To test load_multiple_file function for longitudes"""
+        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        self.assertItemsEqual(dataset[0].lons, self.longitudes)
+
+    def test_function_load_multiple_files_times(self):
+        """To test load_multiple_files function for times"""
+        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+
+        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
+            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        self.assertItemsEqual(dataset[0].times, newTimes)
+
+    def test_function_load_multiple_files_values(self):
+        """To test load_multiple_files function for values"""
+        new_values = self.values[:, 0, :, :]
+        dataset, data_name = local.load_multiple_files(
+            self.file_path, "value")
+        self.assertTrue(numpy.allclose(dataset[0].values, new_values))
+
+    def test_load_multiple_files_custom_dataset_name(self):
+        """Test adding a custom name to a dataset"""
+        dataset, data_name = local.load_multiple_files(self.file_path,
+                                                       "value",
+                                                       dataset_name='foo')
+        self.assertEqual(dataset[0].name, 'foo')
+
+    def test_dataset_origin(self):
+        dataset, data_name = local.load_multiple_files(self.file_path, 'value')
+        expected_keys = set(['source', 'path', 'lat_name', 'lon_name',
+                             'time_name'])
+        self.assertEqual(set(dataset[0].origin.keys()), expected_keys)
+        self.assertEqual(dataset[0].origin['source'], 'local')
+
+
+class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
+    def setUp(self):
+        self.file_path = create_netcdf_object()
+        self.netCDF_file = netCDF4.Dataset(self.file_path, 'r+')
+        self.latitudes = self.netCDF_file.variables['latitude'][:]
+        self.longitudes = self.netCDF_file.variables['longitude'][:]
+        self.values = self.netCDF_file.variables['value'][:]
+        self.variable_name_list = ['latitude',
+                                   'longitude', 'time', 'level', 'value']
+        self.possible_value_name = ['latitude', 'longitude', 'time', 'level']
+        self.dataset = local.load_dataset_from_multiple_netcdf_files(
+            variable_name='value',
+            file_path='',
+            filename_pattern=[
+                self.file_path])
+
+    def tearDown(self):
+        os.remove(self.file_path)
+
+    def test_variable_name(self):
+        self.assertEqual(self.dataset.variable, 'value')
+
+    def test_function_load_dataset_from_multiple_netcdf_files_lats(self):
+        """To test load_multiple_files function for times"""
+        _, self.latitudes = numpy.meshgrid(self.longitudes, self.latitudes)
+        numpy.testing.assert_array_equal(self.dataset.lats, self.latitudes)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_lons(self):
+        """To test load_multiple_files function for times"""
+        self.longitudes, _ = numpy.meshgrid(self.longitudes, self.latitudes)
+        numpy.testing.assert_array_equal(self.dataset.lons, self.longitudes)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_times(self):
+        """To test load_multiple_files function for times"""
+        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
+            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        self.assertItemsEqual(self.dataset.times, newTimes)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_values(self):
+        """To test load_multiple_files function for values"""
+        new_values = self.values[:, 0, :, :]
+        self.assertTrue(numpy.allclose(self.dataset.values, new_values))
 
 
 class test_get_netcdf_variable_names(unittest.TestCase):

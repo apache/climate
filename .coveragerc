@@ -18,3 +18,8 @@
 [report]
 exclude_lines = 
     if __name__ == .__main__.:
+    # These lines will never be executed under any circumstances
+    if level_index == 0:
+    elif level_index == 1:
+    elif level_index == 2:
+    else:
