@@ -30,7 +30,6 @@ logging.basicConfig(level=logging.CRITICAL)
 
 
 class TestTemporalSubset(unittest.TestCase):
-
     def setUp(self):
         self.ten_year_dataset = ten_year_monthly_dataset()
 
@@ -42,6 +41,47 @@ class TestTemporalSubset(unittest.TestCase):
         np.testing.assert_array_equal(
             self.dataset_times, self.tempSubset.times)
 
+    def test_temporal_subset_with_average_time(self):
+        self.dataset_times = np.array([datetime.datetime(year, 2, 1)
+                                       for year in range(2000, 2010)])
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        np.testing.assert_array_equal(self.dataset_times,
+                                      self.tempSubset.times)
+
+    def test_temporal_subset_with_average_values(self):
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        self.dataset_values = np.ones([len(self.tempSubset.times),
+                                       len(self.ten_year_dataset.lats),
+                                       len(self.ten_year_dataset.lons)])
+        np.testing.assert_array_equal(self.dataset_values,
+                                      self.tempSubset.values)
+
+    def test_temporal_subset_attributes(self):
+        self.tempSubset = dp.temporal_subset(1, 3,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        self.assertEqual(self.tempSubset.name, self.ten_year_dataset.name)
+        self.assertEqual(self.tempSubset.variable,
+                         self.ten_year_dataset.variable)
+        self.assertEqual(self.tempSubset.units, self.ten_year_dataset.units)
+        np.testing.assert_array_equal(self.tempSubset.lats,
+                                      self.ten_year_dataset.lats)
+        np.testing.assert_array_equal(self.tempSubset.lons,
+                                      self.ten_year_dataset.lons)
+
+    def test_temporal_subset_equal_start_end_month(self):
+        self.dataset_times = np.array([datetime.datetime(year, 1, 1)
+                                       for year in range(2000, 2010)])
+        self.tempSubset = dp.temporal_subset(1, 1,
+                                             self.ten_year_dataset,
+                                             average_each_year=True)
+        np.testing.assert_array_equal(self.dataset_times,
+                                      self.tempSubset.times)
+
     def test_startMonth_greater_than_endMonth(self):
         self.dataset_times = np.array([datetime.datetime(year, month, 1)
                                        for year in range(2000, 2010)
@@ -49,6 +89,138 @@ class TestTemporalSubset(unittest.TestCase):
         self.tempSubset = dp.temporal_subset(8, 1, self.ten_year_dataset)
         np.testing.assert_array_equal(
             self.dataset_times, self.tempSubset.times)
+
+
+class TestTemporalRebinWithTimeIndex(unittest.TestCase):
+    def setUp(self):
+        self.ten_year_dataset = ten_year_monthly_dataset()
+
+    def test_time_dimension_multiple_of_orig_time_dimension(self):
+        # ten_year_dataset.times.size is 120
+        nt_avg = self.ten_year_dataset.times.size / 2
+        # Temporal Rebin to exactly 2 (time) values
+        dataset = dp.temporal_rebin_with_time_index(
+            self.ten_year_dataset, nt_avg)
+        start_time = self.ten_year_dataset.times[0]
+        # First month of the middle year
+        middle_element = self.ten_year_dataset.times.size / 2
+        end_time = self.ten_year_dataset.times[middle_element]
+        self.assertEqual(dataset.times.size,
+                         self.ten_year_dataset.times.size / nt_avg)
+        np.testing.assert_array_equal(dataset.times, [start_time, end_time])
+
+    def test_time_dimension_not_multiple_of_orig_time_dimension(self):
+        # ten_year_dataset.times.size is 120
+        nt_avg = 11
+        # Temporal Rebin to exactly 10 (time) values
+        dataset = dp.temporal_rebin_with_time_index(
+            self.ten_year_dataset, nt_avg)
+        new_times = self.ten_year_dataset.times[::11][:-1]
+        self.assertEqual(dataset.times.size,
+                         self.ten_year_dataset.times.size / nt_avg)
+        np.testing.assert_array_equal(dataset.times, new_times)
+
+    def test_returned_dataset_attributes(self):
+        nt_avg = 3
+        dataset = dp.temporal_rebin_with_time_index(
+            self.ten_year_dataset, nt_avg)
+        new_times = self.ten_year_dataset.times[::3]
+        new_values = self.ten_year_dataset.values[::3]
+        self.assertEqual(self.ten_year_dataset.name, dataset.name)
+        self.assertEqual(self.ten_year_dataset.origin, dataset.origin)
+        self.assertEqual(self.ten_year_dataset.units, dataset.units)
+        self.assertEqual(self.ten_year_dataset.variable, dataset.variable)
+        np.testing.assert_array_equal(new_times, dataset.times)
+        np.testing.assert_array_equal(new_values, dataset.values)
+        np.testing.assert_array_equal(self.ten_year_dataset.lats, dataset.lats)
+        np.testing.assert_array_equal(self.ten_year_dataset.lons, dataset.lons)
+
+
+class TestVariableUnitConversion(unittest.TestCase):
+    def setUp(self):
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        self.ten_year_dataset.variable = 'temp'
+        self.ten_year_dataset.units = 'celsius'
+
+    def test_returned_variable_unit_celsius(self):
+        ''' Tests returned dataset unit if original dataset unit is celcius '''
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.units, 'K')
+
+    def test_returned_variable_unit_kelvin(self):
+        ''' Tests returned dataset unit if original dataset unit is kelvin '''
+        self.ten_year_dataset.units = 'K'
+        another_dataset = dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(another_dataset.units, self.ten_year_dataset.units)
+
+    def test_temp_unit_conversion(self):
+        ''' Tests returned dataset temp values '''
+        self.ten_year_dataset.values = np.ones([
+            len(self.ten_year_dataset.times),
+            len(self.ten_year_dataset.lats),
+            len(self.ten_year_dataset.lons)])
+        values = self.ten_year_dataset.values + 273.15
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+    def test_returned_variable_unit_swe(self):
+        ''' Tests returned dataset unit if original dataset unit is swe '''
+        self.ten_year_dataset.variable = 'swe'
+        self.ten_year_dataset.units = 'm'
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.variable, 'swe')
+        self.assertEqual(self.ten_year_dataset.units, 'km')
+
+    def test_returned_variable_unit_pr(self):
+        '''
+        Tests returned dataset unit if original dataset unit is kgm^-2s^-1
+        '''
+        self.ten_year_dataset.variable = 'pr'
+        self.ten_year_dataset.units = 'kg m-2 s-1'
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        self.assertEqual(self.ten_year_dataset.variable, 'pr')
+        self.assertEqual(self.ten_year_dataset.units, 'mm/day')
+
+    def test_water_flux_unit_conversion_swe(self):
+        ''' Tests variable values in returned dataset '''
+        self.ten_year_dataset.variable = 'swe'
+        self.ten_year_dataset.units = 'm'
+        values = self.ten_year_dataset.values + 999
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+    def test_water_flux_unit_conversion_pr(self):
+        ''' Tests variable values in returned dataset '''
+        self.ten_year_dataset.variable = 'pr'
+        self.ten_year_dataset.units = 'kg m-2 s-1'
+        values = self.ten_year_dataset.values + 86399
+        dp.variable_unit_conversion(self.ten_year_dataset)
+        np.testing.assert_array_equal(self.ten_year_dataset.values, values)
+
+
+class TestTemporalSlice(unittest.TestCase):
+    def test_returned_dataset_times(self):
+        ''' Tests returned dataset times values '''
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        start_index = 1
+        end_index = 4
+        dates = np.array([datetime.datetime(2000, month, 1)
+                          for month in range(start_index + 1, end_index + 2)])
+        new_dataset = dp.temporal_slice(start_index,
+                                        end_index,
+                                        self.ten_year_dataset)
+        np.testing.assert_array_equal(new_dataset.times, dates)
+
+    def test_returned_dataset_values(self):
+        ''' Tests returned dataset variable values '''
+        self.ten_year_dataset = ten_year_monthly_dataset()
+        start_index = 1
+        end_index = 4
+        values = self.ten_year_dataset.values[start_index:end_index + 1]
+        new_dataset = dp.temporal_slice(start_index,
+                                        end_index,
+                                        self.ten_year_dataset)
+        np.testing.assert_array_equal(new_dataset.values, values)
 
 
 class TestEnsemble(unittest.TestCase):
@@ -146,6 +318,16 @@ class TestTemporalRebin(unittest.TestCase):
         self.assertEquals(annual_dataset.variable,
                           self.ten_year_monthly_dataset.variable)
 
+    def test_daily_to_daily_rebin(self):
+        daily_dataset = dp.temporal_rebin(
+            self.two_years_daily_dataset, "daily")
+        np.testing.assert_array_equal(
+            daily_dataset.times, self.two_years_daily_dataset.times)
+
+    def test_invalid_unit_rebin(self):
+        with self.assertRaises(ValueError):
+            dp.temporal_rebin(self.two_years_daily_dataset, "days")
+
 
 class TestRcmesSpatialRegrid(unittest.TestCase):
 
@@ -203,6 +385,15 @@ class TestSpatialRegrid(unittest.TestCase):
         self.assertEquals(self.input_dataset.variable,
                           self.regridded_dataset.variable)
 
+    def test_two_dimensional_lats_lons(self):
+        self.input_dataset.lats = np.array(range(-89, 90, 2))
+        self.input_dataset.lons = np.array(range(-179, 180, 4))
+        self.input_dataset.lats = self.input_dataset.lats.reshape(2, 45)
+        self.input_dataset.lons = self.input_dataset.lons.reshape(2, 45)
+        new_dataset = dp.spatial_regrid(
+            self.input_dataset, self.new_lats, self.new_lons)
+        np.testing.assert_array_equal(new_dataset.lats, self.new_lats)
+
 
 class TestNormalizeDatasetDatetimes(unittest.TestCase):
     def setUp(self):
@@ -221,6 +412,17 @@ class TestNormalizeDatasetDatetimes(unittest.TestCase):
 
         # Check that all the days have been shifted to the first of the month
         self.assertTrue(all(x.day == 1 for x in new_ds.times))
+
+    def test_daily_time(self):
+        # Test daily with time.hour != 0
+        self.monthly_dataset.times = np.array([
+                                              datetime.datetime(
+                                                  year, month, 15, 5)
+                                              for year in range(2000, 2010)
+                                              for month in range(1, 13)])
+        new_ds = dp.normalize_dataset_datetimes(self.monthly_dataset, 'daily')
+        # Check that all the days have been shifted to the first of the month
+        self.assertTrue(all(x.hour == 0 for x in new_ds.times))
 
 
 class TestSubset(unittest.TestCase):
@@ -286,6 +488,23 @@ class TestSubset(unittest.TestCase):
                                 "time_start": 13,
                                 "time_end": 49}
         self.assertDictEqual(index_slices, control_index_slices)
+
+    def test_subset_without_start_index(self):
+        self.subregion = ds.Bounds(
+            -81, 81,
+            -161, 161,
+        )
+        subset = dp.subset(self.subregion, self.target_dataset)
+        times = np.array([datetime.datetime(year, month, 1)
+                          for year in range(2000, 2010)
+                          for month in range(1, 13)])
+        self.assertEqual(subset.lats.shape[0], 82)
+        self.assertSequenceEqual(list(np.array(range(-81, 82, 2))),
+                                 list(subset.lats))
+        self.assertEqual(subset.lons.shape[0], 162)
+        self.assertEqual(subset.values.shape, (120, 82, 162))
+        self.assertEqual(subset.times.shape[0], 120)
+        np.testing.assert_array_equal(subset.times, times)
 
 
 class TestSafeSubset(unittest.TestCase):
@@ -447,8 +666,8 @@ def ten_year_monthly_dataset():
 def ten_year_monthly_15th_dataset():
     lats = np.array(range(-89, 90, 2))
     lons = np.array(range(-179, 180, 2))
-    # Ten Years of monthly data
-    times = np.array([datetime.datetime(year, month, 1)
+    # Ten Years of monthly 15th data
+    times = np.array([datetime.datetime(year, month, 15)
                       for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
     input_dataset = ds.Dataset(lats,
