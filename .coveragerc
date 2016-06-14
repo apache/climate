@@ -18,8 +18,12 @@
 [report]
 exclude_lines = 
     if __name__ == .__main__.:
+    
     # These lines will never be executed under any circumstances
     if level_index == 0:
     elif level_index == 1:
     elif level_index == 2:
     else:
+    
+    # Due to issue https://issues.apache.org/jira/browse/CLIMATE-803
+    def calc_subregion_area_mean_and_std*
