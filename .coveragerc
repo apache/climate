@@ -26,4 +26,44 @@ exclude_lines =
     else:
     
     # Due to issue https://issues.apache.org/jira/browse/CLIMATE-803
-    def calc_subregion_area_mean_and_std*
+    def calc_subregion_area_mean_and_std
+
+    # The following lines from plotter module are excluded from test 
+    # coverage because they cannot be tested
+    def set_cmap
+
+    # Ignore all draw functions
+    def draw
+
+    # Multi line function definitions need to be ignored in this way
+    # Ignore function draw_taylor_diagram
+    def draw_taylor_diagram
+    gridshape=(1,1), ptitle='', subtitles=None, #pragma: no cover
+    pos='upper right', frameon=True, radmax=1.5
+
+    # Ignore function draw_subregions
+    def draw_subregions
+    parallels=None, meridians=None, subregion_masks=None
+
+    # Ignore function draw_time_series
+    def draw_time_series
+    xlabel='', ylabel='', ptitle='', subtitles=None,
+    label_month=False, yscale='linear', aspect=None
+
+    # Ignore function draw_barchart
+    def draw_barchart
+    xlabel='', ylabel=''
+
+    # Ignore function draw_contour_map
+    def draw_contour_map
+    clabel='', ptitle='', subtitles=None, cmap=None,
+    clevs=None, nlevs=10, parallels=None, meridians=None,
+    extend='neither', aspect=8.5/2.5
+
+    # Ignore function draw_portrait_diagram
+    def draw_portrait_diagram
+    gridshape=(1, 1), xlabel='', ylabel='', clabel='',
+    ptitle='', subtitles=None, cmap=None, clevs=None,
+    nlevs=10, extend='neither', aspect=None
+
+    class TaylorDiagram
