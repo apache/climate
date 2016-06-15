@@ -47,7 +47,10 @@ angular.module('ocwUiApp')
 					worldCopyJump: true,
 				});
 
-				L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {}).addTo(map);
+				L.tileLayer('http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+					maxZoom: 19
+				}).addTo(map);
 
 				// Zoom the map to the dataset bound regions (or at least try our best to do so)
 				var datasetBounds = [[scope.dataset.latlonVals.latMax, scope.dataset.latlonVals.lonMin], 
