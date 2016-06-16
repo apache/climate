@@ -40,7 +40,10 @@ angular.module('ocwUiApp')
 				worldCopyJump: true,
 			});
 
-			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {}).addTo($rootScope.map);
+			L.tileLayer('http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+					maxZoom: 19
+			}).addTo($rootScope.map);
 		}
 	};
 });
