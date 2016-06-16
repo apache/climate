@@ -276,7 +276,7 @@ def load_file(file_path,
             values = values [:,elevation_index,:,:]
         elif level_index == 2:
             values = values [:,:,elevation_index,:]
-        else:
+        else: #pragma: no cover
             values = values [:,:,:,elevation_index]
 
     origin = {
