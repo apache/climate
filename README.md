@@ -1,6 +1,7 @@
 ## Apache Open Climate Workbench
 [![Build Status](https://travis-ci.org/apache/climate.svg?branch=master)](https://travis-ci.org/apache/climate)
 [![Coverage Status](https://coveralls.io/repos/github/apache/climate/badge.svg?branch=master)](https://coveralls.io/github/apache/climate?branch=master)
+[![Requirements Status](https://requires.io/github/apache/climate/requirements.svg?branch=master)](https://requires.io/github/apache/climate/requirements/?branch=master)
 
 Apache Open Climate Workbench is an effort to develop software that performs climate model evaluations using model outputs from a variety of different sources (the Earth System Grid Federation, the Coordinated Regional Downscaling Experiment, the U.S. National Climate Assessment and the North American Regional Climate Change Assessment Program) and temporal/spatial scales with remote sensing data from NASA, NOAA and other agencies. The toolkit includes capabilities for rebinning, metrics computation and visualization. For additional project information, please check the [project website](http://climate.apache.org/).
 
