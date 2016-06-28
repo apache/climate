@@ -37,24 +37,24 @@ TIME_NAMES = ['time', 'times', 'date', 'dates', 'julian']
 
 
 def _get_netcdf_variable_name(valid_var_names, netcdf, netcdf_var):
-    ''' Determine if one of a set of variable names are in a NetCDF Dataset. 
+    ''' Determine if one of a set of variable names are in a NetCDF Dataset.
 
     Looks for an occurrence of a valid_var_name in the NetCDF variable data.
     This is useful for automatically determining the names of the lat, lon,
     and time variable names inside of a dataset object.
 
-    :param valid_var_names: The possible variable names to search for in 
+    :param valid_var_names: The possible variable names to search for in
         the netCDF object.
     :type valid_var_names: List of Strings
     :param netcdf: The netCDF Dataset object in which to check for
         valid_var_names.
     :type netcdf: netcdf4.Dataset
-    :param netcdf_var: The relevant variable name to search over in the 
+    :param netcdf_var: The relevant variable name to search over in the
         netcdf object. This is used to narrow down the search for valid
         variable names by first checking the desired variable's dimension
         values for one or more of the valid variable names.
 
-    :returns: The variable from valid_var_names that it locates in 
+    :returns: The variable from valid_var_names that it locates in
         the netCDF object.
 
     :raises ValueError: When unable to locate a single matching variable
@@ -162,15 +162,15 @@ def load_WRF_2d_files(file_path=None,
     for ifile, file in enumerate(WRF_files):
         print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
         file_object = netCDF4.Dataset(file)
-        time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")     
+        time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")
         for ihour in numpy.arange(24):
             times.append(datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
         values0= file_object.variables[variable_name][:]
         if ifile == 0:
-            values = values0                                  
+            values = values0
             variable_unit = file_object.variables[variable_name].units
         else:
-            values = numpy.concatenate((values, values0)) 
+            values = numpy.concatenate((values, values0))
         file_object.close()
     times = numpy.array(times)
     return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
@@ -240,14 +240,14 @@ def load_file(file_path,
         )
         raise ValueError(err)
 
-    if not lat_name:
+    if lat_name is None:
         lat_name = _get_netcdf_variable_name(LAT_NAMES, netcdf, variable_name)
-    if not lon_name:
+    if lon_name is None:
         lon_name = _get_netcdf_variable_name(LON_NAMES, netcdf, variable_name)
-    if not time_name:
+    if time_name is None:
         time_name = _get_netcdf_variable_name(TIME_NAMES, netcdf, variable_name)
 
-    lats = netcdf.variables[lat_name][:]    
+    lats = netcdf.variables[lat_name][:]
     lons = netcdf.variables[lon_name][:]
     time_raw_values = netcdf.variables[time_name][:]
     times = utils.decode_time_values(netcdf, time_name)
@@ -302,7 +302,7 @@ def load_multiple_files(file_path,
 
     :param file_path: directory name and common file name patterns where the NetCDF files to load are stored.
     :type file_path: :mod:`string`
-    :param dataset_name: a name of dataset when reading a single file 
+    :param dataset_name: a name of dataset when reading a single file
     :type dataset_name: :mod:'string'
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
@@ -349,7 +349,7 @@ def load_multiple_files(file_path,
     for ifile,filename in enumerate(data_filenames):
         datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
                         lat_name=lat_name, lon_name=lon_name, time_name=time_name))
-    
+
     return datasets, data_name
 
 def load_WRF_2d_files_RAIN(file_path=None,
@@ -422,7 +422,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     times2 = numpy.array(times2)
     return Dataset(lats, lons, times2, values, variable_name, units=variable_unit, name=name)
 
-def load_dataset_from_multiple_netcdf_files(variable_name, 
+def load_dataset_from_multiple_netcdf_files(variable_name,
                                             lat_name=None, lon_name=None, time_name=None,
                                             name='', file_list=None, file_path=None, filename_pattern=None,
                                             mask_file=None, mask_variable=None, mask_value=0):
@@ -463,7 +463,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
     :param mask_variable: The variable name to load from the mask_file.
     :type variable_name: :mod:`string`
 
-    :param mask_value: an index for spatial subsetting a dataset 
+    :param mask_value: an index for spatial subsetting a dataset
     :type mask_value: :class:`int`
 
     :returns: An OCW Dataset object with the requested variable's data from \
@@ -481,14 +481,15 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
 
     nc_files.sort()
 
-    dataset0 = load_file(nc_files[0], variable_name=variable_name, lat_name=lat_name, lon_name=lon_name, time_name=time_name)
+    dataset0 = load_file(nc_files[0], variable_name, lat_name=lat_name,
+                         lon_name=lon_name, time_name=time_name)
     if dataset0.lons.ndim == 1 and dataset0.lats.ndim ==1:
         lons, lats = numpy.meshgrid(dataset0.lons, dataset0.lats)
     elif dataset0.lons.ndim == 2 and dataset0.lats.ndim ==2:
         lons = dataset0.lons
         lats = dataset0.lats
 
-    if mask_file: 
+    if mask_file:
         mask_dataset = load_file(mask_file, mask_variable)
         y_index, x_index = numpy.where(mask_dataset.values == mask_value)
 
@@ -496,7 +497,8 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
     nfile = len(nc_files)
     for ifile, file in enumerate(nc_files):
         print 'NC file '+str(ifile+1)+'/'+str(nfile), file
-        file_object0= load_file(file, variable_name)
+        file_object0= load_file(file, variable_name, lat_name=lat_name,
+                                lon_name=lon_name, time_name=time_name)
         values0= file_object0.values
         times.extend(file_object0.times)
         if mask_file:
@@ -538,7 +540,7 @@ def load_NLDAS_forcingA_files(file_path=None,
 
     :raises ValueError:
     '''
- 
+
     if not filelist:
         NLDAS_files = []
         for pattern in filename_pattern:
@@ -560,7 +562,7 @@ def load_NLDAS_forcingA_files(file_path=None,
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-20:-7],"%Y%m%d.%H%M")
         times.append(datetime(*time_struct_parsed[:6]))
-        
+
         values0 = file_object.variables[variable_name][:]
         values0 = numpy.expand_dims(values0, axis=0)
         if ifile == 0:
@@ -634,4 +636,4 @@ def load_GPM_IMERG_files(file_path=None,
             values = numpy.concatenate((values, values0))
         file_object.close()
     times = numpy.array(times)
-    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)    
+    return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
