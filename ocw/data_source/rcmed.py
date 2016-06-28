@@ -18,6 +18,8 @@
 '''
 Classes:
     RCMED - A class for retrieving data from Regional Climate Model Evalutaion Database (JPL).
+    More information about the RCMED Query Specification can be found below:
+    https://rcmes.jpl.nasa.gov/query-api/query.php?
 '''
 
 import urllib, urllib2
@@ -37,7 +39,7 @@ def get_parameters_metadata():
     '''Get the metadata of all parameter from RCMED.
 
     :returns: Dictionary of information for each parameter stored in one list
-    :rtype: List of dictionaries
+    :rtype: :class:`list` of :class:`dict`
     '''
 
     param_info_list = []
@@ -74,12 +76,7 @@ def _make_mask_array(values, parameter_id, parameters_metadata):
         if each['parameter_id'].encode() == str(parameter_id):
             missing_values = each['missingdataflag'].encode()
             break
-    # Need to encode the string to proper dtype so the mask is applied
-    if 'float' in str(values.dtype):
-        missing_values = float(missing_values)
-    if 'int' in str(values.dtype):
-        missing_values = int(missing_values)
-
+    missing_values = float(missing_values)
     values = ma.masked_array(values, mask=(values == missing_values))
 
     return values
@@ -202,18 +199,10 @@ def _beginning_of_date(time, time_step):
 
     if time_step.lower() == 'monthly':
         if time.day != 1:
-            start_time_string = time.strftime('%Y%m%d')
-            start_time_string = start_time_string[:6] + '01'
-            time = datetime.strptime(start_time_string, '%Y%m%d')
-            ##TODO: Change the 3 lines above with this line:
-            ##time = datetime(time.year, time.month, 1)
+            time = datetime(time.year, time.month, 1)
     elif time_step.lower() == 'daily':
         if time.hour != 0 or time.minute != 0 or time.second != 0:
-            start_time_string = time.strftime('%Y%m%d%H%M%S')
-            start_time_string = start_time_string[:8] + '000000'
-            time = datetime.strptime(start_time_string, '%Y%m%d%H%M%S')
-            ##TODO: Change the 3 lines above with this line:
-            ##time = datetime(time.year, time.month, time.day, 00, 00, 00)
+            time = datetime(time.year, time.month, time.day, 00, 00, 00)
 
     return time
 
@@ -231,18 +220,10 @@ def _end_of_date(time, time_step):
     '''
 
     last_day_of_month = calendar.monthrange(time.year, time.month)[1]
-    if time.day != last_day_of_month:
-        end_time_string = time.strftime('%Y%m%d')
-        end_time_string = end_time_string[:6] + str(last_day_of_month)
-        time = datetime.strptime(end_time_string, '%Y%m%d')
-        ##TODO: Change the 3 lines above with this line:
-        ##time = datetime(time.year, time.month, lastDayOfMonth)
+    if time_step.lower() == 'monthly':
+        time = datetime(time.year, time.month, last_day_of_month)
     elif time_step.lower() == 'daily':
-        end_time_string = time.strftime('%Y%m%d%H%M%S')
-        end_time_string = end_time_string[:8] + '235959'
-        time = datetime.strptime(end_time_string, '%Y%m%d%H%M%S')
-        ##TODO: Change the 3 lines above with this line:
-        ##time = datetime(time.year, time.month, end_time.day, 23, 59, 59)
+        time = datetime(time.year, time.month, time.day, 23, 59, 59)
 
     return time
 
@@ -312,32 +293,42 @@ def _get_parameter_info(parameters_metadata, parameter_id):
     return (database, time_step, realm, instrument, start_date, end_date, unit)
 
 
-def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time):
+def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time, name=''):
     '''Get data from one database(parameter).
 
     :param dataset_id: Dataset id.
-    :type dataset_id: Integer
-    :param parameter_id: Parameter id
-    :type parameter_id: Integer
-    :param min_lat: Minimum latitude
-    :type min_lat: Float
-    :param max_lat: Maximum latitude
-    :type max_lat: Float
-    :param min_lon: Minimum longitude
-    :type min_lon: Float
-    :param max_lon: Maximum longitude
-    :type max_lon: Float
-    :param start_time: Start time
-    :type start_time: Datetime
-    :param end_time: End time 
-    :type end_time: Datetime
+    :type dataset_id: :class:`int`
 
-    :returns: Dataset object
-    :rtype: Object
+    :param parameter_id: Parameter id
+    :type parameter_id: :class:`int`
+
+    :param min_lat: Minimum latitude
+    :type min_lat: :class:`float`
+
+    :param max_lat: Maximum latitude
+    :type max_lat: :class:`float`
+
+    :param min_lon: Minimum longitude
+    :type min_lon: :class:`float`
+    
+    :param max_lon: Maximum longitude
+    :type max_lon: :class:`float`
+
+    :param start_time: Start time
+    :type start_time: :class:`datetime.datetime`
+
+    :param end_time: End time 
+    :type end_time: :class:`datetime.datetime`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+
+    :returns: An OCW Dataset object contained the requested data from RCMED.
+    :rtype: :class:`dataset.Dataset`
     '''
     
     parameters_metadata = get_parameters_metadata()
-    parameter_name, time_step, _, _, _, _, _= _get_parameter_info(parameters_metadata, parameter_id)
+    parameter_name, time_step, _, _, _, _, parameter_units = _get_parameter_info(parameters_metadata, parameter_id)
     url = _generate_query_url(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon, start_time, end_time, time_step)
     lats, lons, times, values = _get_data(url)
 
@@ -345,5 +336,18 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     unique_times = _calculate_time(unique_lats_lons_times[2], time_step)
     values = _reshape_values(values, unique_lats_lons_times)
     values = _make_mask_array(values, parameter_id, parameters_metadata)
+
+    origin = {
+        'source': 'rcmed',
+        'dataset_id': dataset_id,
+        'parameter_id': parameter_id
+    }
     
-    return Dataset(unique_lats_lons_times[0], unique_lats_lons_times[1], unique_times, values, parameter_name)
+    return Dataset(unique_lats_lons_times[0],
+                   unique_lats_lons_times[1],
+                   unique_times,
+                   values,
+                   variable=parameter_name,
+                   units=parameter_units,
+                   name=name,
+                   origin=origin)

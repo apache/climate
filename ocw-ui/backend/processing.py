@@ -39,10 +39,24 @@ import numpy as np
 
 processing_app = Bottle()
 
-@processing_app.hook('after_request')
-def enable_cors():
-    ''' Allow Cross-Origin Resource Sharing for all URLs. '''
-    response.headers['Access-Control-Allow-Origin'] = '*'
+class EnableCors(object):
+    name = 'enable_cors'
+    api = 2
+
+    def apply(self, fn, context):
+        def _enable_cors(*args, **kwargs):
+            # set CORS headers
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+
+            if request.method != 'OPTIONS':
+                # actual request; reply with the actual response
+                return fn(*args, **kwargs)
+
+        return _enable_cors
+
+processing_app.install(EnableCors())
 
 @processing_app.route('/metrics/')
 def retrieve_metrics():
@@ -68,7 +82,7 @@ def retrieve_metrics():
         return '%s(%s)' % (request.query.callback, output)
     return output
 
-@processing_app.route('/run_evaluation/', method='POST')
+@processing_app.route('/run_evaluation/', method=['POST', 'OPTIONS'])
 def run_evaluation():
     ''' Run an OCW Evaluation.
 
@@ -454,6 +468,12 @@ def _get_valid_metric_options():
     :returns: A dictionary of metric (name, object) pairs
     '''
     invalid_metrics = ['ABCMeta', 'Metric', 'UnaryMetric', 'BinaryMetric']
+
+    # Consider all Unary Metrics invalid. At the moment, the UI cannot handle
+    # running Unary Metrics.
+    unary_metrics = [cls.__name__ for cls in metrics.UnaryMetric.__subclasses__()]
+    invalid_metrics += unary_metrics
+
     return {name:obj
             for name, obj in inspect.getmembers(metrics)
             if inspect.isclass(obj) and name not in invalid_metrics}

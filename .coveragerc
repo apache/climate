@@ -1,0 +1,70 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+[report]
+exclude_lines = 
+    if __name__ == .__main__.:
+    pragma: no cover
+
+    # These lines will never be executed under any circumstances in local module
+    if level_index == 0:
+    elif level_index == 1:
+    elif level_index == 2:
+    
+    # In utils module
+    # Due to issue https://issues.apache.org/jira/browse/CLIMATE-803
+    def calc_subregion_area_mean_and_std
+
+    # The following lines from plotter module are excluded from test 
+    # coverage because they cannot be tested
+    def set_cmap
+
+    # Ignore all draw functions
+    def draw
+
+    # Multi line function definitions need to be ignored in this way
+    # Ignore function draw_taylor_diagram
+    def draw_taylor_diagram
+    gridshape=(1,1), ptitle='', subtitles=None, #pragma: no cover
+    pos='upper right', frameon=True, radmax=1.5
+
+    # Ignore function draw_subregions
+    def draw_subregions
+    parallels=None, meridians=None, subregion_masks=None
+
+    # Ignore function draw_time_series
+    def draw_time_series
+    xlabel='', ylabel='', ptitle='', subtitles=None,
+    label_month=False, yscale='linear', aspect=None
+
+    # Ignore function draw_barchart
+    def draw_barchart
+    xlabel='', ylabel=''
+
+    # Ignore function draw_contour_map
+    def draw_contour_map
+    clabel='', ptitle='', subtitles=None, cmap=None,
+    clevs=None, nlevs=10, parallels=None, meridians=None,
+    extend='neither', aspect=8.5/2.5
+
+    # Ignore function draw_portrait_diagram
+    def draw_portrait_diagram
+    gridshape=(1, 1), xlabel='', ylabel='', clabel='',
+    ptitle='', subtitles=None, cmap=None, clevs=None,
+    nlevs=10, extend='neither', aspect=None
+
+    class TaylorDiagram

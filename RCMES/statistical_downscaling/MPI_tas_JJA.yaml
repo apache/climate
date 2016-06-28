@@ -1,0 +1,29 @@
+case_name: MPI_tas_JJA
+
+# downscaling method (1: delta addition, 2: Delta correction, 3: quantile mapping, 4: asynchronous regression)
+downscaling_option: 4
+
+# longitude (-180 ~ 180) and latitude (-90 ~ 90) of the grid point to downscale model output [in degrees]
+location:
+    name: HoChiMinh_City 
+    grid_lat: 10.75    
+    grid_lon: 106.67   
+
+# Season (for December - February, month_start=12 & month_end =2; for June - August, month_start=6 & month_end = 8)
+month_index: !!python/tuple [6,7,8]
+
+# reference (observation) data
+reference:
+    data_source: local
+    data_name: CRU
+    path: ./data/Stat_dscale/tas_cru_monthly_1981-2010.nc
+    variable: tas
+
+model:
+    data_name: MPI
+    variable: tas
+    present:
+        path: ./data/Stat_dscale/tas_Amon_MPI_decadal1980_198101-201012.nc
+    future:
+        scenario_name: RCP8.5_2041-70
+        path: ./data/Stat_dscale/tas_Amon_MPI_rcp85_204101-207012.nc 

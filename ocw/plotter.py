@@ -36,7 +36,7 @@ def set_cmap(name):
     version of it.
 
     :param name: The name of the colormap.
-    :type name: str
+    :type name: :mod:`string`
     '''
     # The first line is redundant but it prevents the user from setting
     # the cmap rc value improperly
@@ -61,8 +61,20 @@ def _nice_intervals(data, nlevs):
     # Find the min and max levels by cutting off the tails of the distribution
     # This mitigates the influence of outliers
     data = data.ravel()
-    mnlvl = mstats.scoreatpercentile(data, 5)
-    mxlvl = mstats.scoreatpercentile(data, 95)
+    mn = mstats.scoreatpercentile(data, 5)
+    mx = mstats.scoreatpercentile(data, 95)
+    #if there min less than 0 and
+    # or max more than 0 
+    #put 0 in center of color bar
+    if mn < 0 and mx > 0:
+        level = max(abs(mn), abs(mx))
+        mnlvl = -1 * level
+        mxlvl = level
+    #if min is larger than 0 then
+    #have color bar between min and max
+    else:
+        mnlvl = mn
+        mxlvl = mx
     locator = mpl.ticker.MaxNLocator(nlevs)
     clevs = locator.tick_values(mnlvl, mxlvl)
 
@@ -70,6 +82,7 @@ def _nice_intervals(data, nlevs):
     # MaxNLocator gives values outside the domain of the input data
     clevs = clevs[(clevs >= mnlvl) & (clevs <= mxlvl)]
     return clevs
+
 
 def _best_grid_shape(nplots, oldshape):
     '''
@@ -139,27 +152,47 @@ def _fig_size(gridshape, aspect=None):
 def draw_taylor_diagram(results, names, refname, fname, fmt='png',
                         gridshape=(1,1), ptitle='', subtitles=None,
                         pos='upper right', frameon=True, radmax=1.5):
-    '''
-    Purpose::
-        Draws a Taylor diagram
+    ''' Draw a Taylor diagram.
 
-    Input::
-        results - an Nx2 array containing normalized standard deviations,
-               correlation coefficients, and names of evaluation results
-        names - list of names for each evaluated dataset
-        refname - The name of the reference dataset
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        ptitle - an optional string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        pos - an optional string or tuple of float for determining
-                    the position of the legend
-        frameon - an optional boolean that determines whether to draw a frame
-                        around the legend box
-        radmax - an optional float to adjust the extent of the axes in terms of
-                 standard deviation.
+    :param results: An Nx2 array containing normalized standard deviations,
+       correlation coefficients, and names of evaluation results.
+    :type results: :class:`numpy.ndarray`
+
+    :param names: A list of names for each evaluated dataset
+    :type names: :class:`list` of :mod:`string`
+
+    :param refname: The name of the reference dataset.
+    :type refname: :mod:`string`
+
+    :param fname: The filename of the plot.
+    :type fname: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output plot.
+    :type fmt: :mod:`string`
+
+    :param gridshape: (Optional) Tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: A :class:`tuple` of the form (num_rows, num_cols)
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+    
+    :param subtitles: (Optional) list of strings specifying the title for each
+        subplot.
+    :type subtitles: :class:`list` of :mod:`string`
+
+    :param pos: (Optional) string or tuple of floats used to set the position
+        of the legend. Check the `Matplotlib docs <http://matplotlib.org/api/legend_api.html#matplotlib.legend.Legend>`_
+        for additional information.
+    :type pos: :mod:`string` or :func:`tuple` of :class:`float`
+
+    :param frameon: (Optional) boolean specifying whether to draw a frame
+        around the legend box.
+    :type frameon: :class:`bool`
+
+    :param radmax: (Optional) float to adjust the extent of the axes in terms of
+        standard deviation.
+    :type radmax: :class:`float`
     '''
     # Handle the single plot case.
     if results.ndim == 2:
@@ -202,22 +235,40 @@ def draw_taylor_diagram(results, names, refname, fname, fmt='png',
 
 def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
                     parallels=None, meridians=None, subregion_masks=None):
-    '''
-    Purpose::
-        Function to draw subregion domain(s) on a map
+    ''' Draw subregion domain(s) on a map.
 
-    Input::
-        subregions - a list of subRegion objects
-        lats - array of latitudes
-        lons - array of longitudes
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        ptitle - an optional string specifying plot title
-        parallels - an optional list of ints or floats for the parallels to be drawn
-        meridians - an optional list of ints or floats for the meridians to be drawn
-        subregion_masks - optional dictionary of boolean arrays for each subRegion
-                         for giving finer control of the domain to be drawn, by default
-                         the entire domain is drawn.
+    :param subregions: The subregion objects to plot on the map.
+    :type subregions: :class:`list` of subregion objects (Bounds objects)
+
+    :param lats: Array of latitudes values.
+    :type lats: :class:`numpy.ndarray`
+
+    :param lons: Array of longitudes values.
+    :type lons: :class:`numpy.ndarray`
+
+    :param fname: The filename of the plot.
+    :type fname: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param parallels: (Optional) :class:`list` of :class:`int` or :class:`float` for the parallels to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type parallels: :class:`list` of :class:`int` or :class:`float`
+
+    :param meridians: (Optional) :class:`list` of :class:`int` or :class:`float` for the meridians to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type meridians: :class:`list` of :class:`int` or :class:`float`
+
+    :param subregion_masks: (Optional) :class:`dict` of :class:`bool` arrays for each
+        subregion for giving finer control of the domain to be drawn, by default
+        the entire domain is drawn.
+    :type subregion_masks: :class:`dict` of :class:`bool` arrays
     '''
     # Set up the figure
     fig = plt.figure()
@@ -271,8 +322,8 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         nlats, nlons = domain.shape
         domain = ma.masked_equal(domain, 0)
-        reglats = np.linspace(reg.latmin, reg.latmax, nlats)
-        reglons = np.linspace(reg.lonmin, reg.lonmax, nlons)
+        reglats = np.linspace(reg.lat_min, reg.lat_max, nlats)
+        reglons = np.linspace(reg.lon_min, reg.lon_max, nlons)
         reglons, reglats = np.meshgrid(reglons, reglats)
 
         # Convert to to projection coordinates. Not really necessary
@@ -285,7 +336,7 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 
         # Label the subregion
         xm, ym = x.mean(), y.mean()
-        m.plot(xm, ym, marker='$%s$' %(reg.name), markersize=12, color='k')
+        m.plot(xm, ym, marker='$%s$' %("R"+str(i+1)), markersize=12, color='k')
 
     # Add the title
     ax.set_title(ptitle)
@@ -297,27 +348,51 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
 def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
                      xlabel='', ylabel='', ptitle='', subtitles=None,
                      label_month=False, yscale='linear', aspect=None):
-    '''
-    Purpose::
-        Function to draw a time series plot
+    ''' Draw a time series plot.
 
-    Input::
-        results - a 3d array of time series
-        times - a list of python datetime objects
-        labels - a list of strings with the names of each set of data
-        fname - a string specifying the filename of the plot
-        fmt - an optional string specifying the output filetype
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        xlabel - a string specifying the x-axis title
-        ylabel - a string specifying the y-axis title
-        ptitle - a string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        label_month - optional bool to toggle drawing month labels
-        yscale - optional string for setting the y-axis scale, 'linear' for linear
-                 and 'log' for log base 10.
-        aspect - Float denoting approximate aspect ratio of each subplot
-                 (width / height). Default is 8.5 / 5.5
+    :param results: 3D array of time series data.
+    :type results: :class:`numpy.ndarray`
+
+    :param times: List of Python datetime objects used by Matplotlib to handle
+        axis formatting.
+    :type times: :class:`list` of :class:`datetime.datetime`
+
+    :param labels: List of names for each data being plotted.
+    :type labels: :class:`list` of :mod:`string`
+
+    :param fname: Filename of the plot.
+    :type fname: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param gridshape: (Optional) tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: :func:`tuple` of the form (num_rows, num_cols)
+
+    :param xlabel: (Optional) x-axis title.
+    :type xlabel: :mod:`string`
+    
+    :param ylabel: (Optional) y-axis title.
+    :type ylabel: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param subtitles: (Optional) list of titles for each subplot.
+    :type subtitles: :class:`list` of :mod:`string`
+    
+    :param label_month: (Optional) flag to toggle drawing month labels on the
+        x-axis.
+    :type label_month: :class:`bool`
+
+    :param yscale: (Optional) y-axis scale value, 'linear' for linear and 'log'
+        for log base 10.
+    :type yscale: :mod:`string`
+    
+    :param aspect: (Optional) approximate aspect ratio of each subplot
+        (width / height). Default is 8.5 / 5.5
+    :type aspect: :class:`float`
     '''
     # Handle the single plot case.
     if results.ndim == 2:
@@ -413,35 +488,145 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
     fig.clf()
 
+def draw_barchart(results, yvalues, fname, ptitle='', fmt='png', 
+                     xlabel='', ylabel=''):
+    ''' Draw a barchart.
+
+    :param results: 1D array of  data.
+    :type results: :class:`numpy.ndarray`
+
+    :param yvalues: List of y-axis labels
+    :type times: :class:`list` 
+
+    :param fname: Filename of the plot.
+    :type fname: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param xlabel: (Optional) x-axis title.
+    :type xlabel: :mod:`string`
+    
+    :param ylabel: (Optional) y-axis title.
+    :type ylabel: :mod:`string`
+
+    '''
+
+    y_pos = list(range(len(yvalues))) 
+    fig = plt.figure() 
+    fig.set_size_inches((11., 8.5))
+    fig.dpi = 300
+    ax = plt.subplot(111)
+    plt.barh(y_pos, results, align="center", height=0.8, linewidth=0)
+    plt.yticks(y_pos, yvalues)
+    plt.tick_params(axis="both", which="both", bottom="on", top="off",labelbottom="on", left="off", right="off", labelleft="on")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    ymin = min(y_pos) 
+    ymax = max(y_pos)
+    ymin = min((ymin - ((ymax - ymin) * 0.1)/2),0.5) 
+    ymax = ymax + ((ymax - ymin) * 0.1)
+    ax.set_ylim((ymin, ymax))
+    plt.xlabel(xlabel)
+    plt.tight_layout()
+       
+    # Save the figure
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()
+
+def draw_marker_on_map(lat, lon, fname, fmt='png', location_name=' ',gridshape=(1,1)):
+    '''
+    Purpose::
+        Draw a marker on a map
+
+    Input::
+        lat - latitude for plotting a marker
+        lon - longitude for plotting a marker
+        fname  - a string specifying the filename of the plot
+    '''   
+    fig = plt.figure()
+    fig.dpi = 300
+    ax = fig.add_subplot(111)
+    
+    m = Basemap(projection='cyl', resolution = 'c', llcrnrlat =lat-30, urcrnrlat = lat+30, llcrnrlon = lon-60, urcrnrlon = lon+60)
+    m.drawcoastlines(linewidth=1)
+    m.drawcountries(linewidth=1)
+    m.drawmapboundary(fill_color='aqua')
+    m.fillcontinents(color='coral',lake_color='aqua')
+    m.ax = ax
+   
+    xpt,ypt = m(lon,lat)
+    m.plot(xpt,ypt,'bo')  # plot a blue dot there
+    # put some text next to the dot, offset a little bit
+    # (the offset is in map projection coordinates)
+    plt.text(xpt+0.5, ypt+1.5,location_name+'\n(lon: %5.1f, lat: %3.1f)' % (lon, lat)) 
+                       
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()
+
 def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
                      clabel='', ptitle='', subtitles=None, cmap=None,
                      clevs=None, nlevs=10, parallels=None, meridians=None,
                      extend='neither', aspect=8.5/2.5):
-    '''
-    Purpose::
-        Create a multiple panel contour map plot.
+    ''' Draw a multiple panel contour map plot.
 
-    Input::
-        dataset -  3d array of the field to be plotted with shape (nT, nLon, nLat)
-        lats - array of latitudes
-        lons - array of longitudes
-        fname  - a string specifying the filename of the plot
-        fmt  - an optional string specifying the filetype, default is .png
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        clabel - an optional string specifying the colorbar title
-        ptitle - an optional string specifying plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        cmap - an string or optional matplotlib.colors.LinearSegmentedColormap instance
-               denoting the colormap
-        clevs - an optional list of ints or floats specifying contour levels
-        nlevs - an optional integer specifying the target number of contour levels if
-                clevs is None
-        parallels - an optional list of ints or floats for the parallels to be drawn
-        meridians - an optional list of ints or floats for the meridians to be drawn
-        extend - an optional string to toggle whether to place arrows at the colorbar
-             boundaries. Default is 'neither', but can also be 'min', 'max', or
-             'both'. Will be automatically set to 'both' if clevs is None.
+    :param dataset: 3D array of data to be plotted with shape (nT, nLat, nLon).
+    :type dataset: :class:`numpy.ndarray`
+
+    :param lats: Array of latitudes values.
+    :type lats: :class:`numpy.ndarray`
+
+    :param lons: Array of longitudes
+    :type lons: :class:`numpy.ndarray`
+
+    :param fname: The filename of the plot.
+    :type fname: :mod:`string`
+
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param gridshape: (Optional) tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: :func:`tuple` of the form (num_rows, num_cols)
+
+    :param clabel: (Optional) colorbar title.
+    :type clabel: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param subtitles: (Optional) list of titles for each subplot.
+    :type subtitles: :class:`list` of :mod:`string`
+
+    :param cmap: (Optional) string or :class:`matplotlib.colors.LinearSegmentedColormap`
+        instance denoting the colormap. This must be able to be recognized by
+        `Matplotlib's get_cmap function <http://matplotlib.org/api/cm_api.html#matplotlib.cm.get_cmap>`_.
+    :type cmap: :mod:`string` or :class:`matplotlib.colors.LinearSegmentedColormap`
+
+    :param clevs: (Optional) contour levels values.
+    :type clevs: :class:`list` of :class:`int` or :class:`float`
+    
+    :param nlevs: (Optional) target number of contour levels if clevs is None.
+    :type nlevs: :class:`int`
+
+    :param parallels: (Optional) list of ints or floats for the parallels to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type parallels: :class:`list` of :class:`int` or :class:`float`
+
+    :param meridians: (Optional) list of ints or floats for the meridians to
+        be drawn. See the `Basemap documentation <http://matplotlib.org/basemap/users/graticule.html>`_
+        for additional information.
+    :type meridians: :class:`list` of :class:`int` or :class:`float`
+
+    :param extend: (Optional) flag to toggle whether to place arrows at the colorbar
+         boundaries. Default is 'neither', but can also be 'min', 'max', or
+         'both'. Will be automatically set to 'both' if clevs is None.
+    :type extend: :mod:`string`
     '''
     # Handle the single plot case. Meridians and Parallels are not labeled for
     # multiple plots to save space.
@@ -535,10 +720,10 @@ def draw_contour_map(dataset, lats, lons, fname, fmt='png', gridshape=(1, 1),
             ax.set_title(subtitles[i], fontsize='small')
 
     # Add colorbar
-    cbar = fig.colorbar(cs, cax=ax.cax, drawedges=True, orientation='horizontal',
-                        extendfrac='auto')
+    cbar = fig.colorbar(cs, cax=ax.cax, drawedges=True, orientation='horizontal', extendfrac='auto')
     cbar.set_label(clabel)
     cbar.set_ticks(clevs)
+    cbar.ax.tick_params(labelsize=6)
     cbar.ax.xaxis.set_ticks_position('none')
     cbar.ax.yaxis.set_ticks_position('none')
 
@@ -561,35 +746,63 @@ def draw_portrait_diagram(results, rowlabels, collabels, fname, fmt='png',
                           gridshape=(1, 1), xlabel='', ylabel='', clabel='',
                           ptitle='', subtitles=None, cmap=None, clevs=None,
                           nlevs=10, extend='neither', aspect=None):
-    '''
-    Purpose::
-        Makes a portrait diagram plot.
+    ''' Draw a portrait diagram plot.
 
-    Input::
-        results - 3d array of the field to be plotted. The second dimension
-                  should correspond to the number of rows in the diagram and the
-                  third should correspond to the number of columns.
-        rowlabels - a list of strings denoting labels for each row
-        collabels - a list of strings denoting labels for each column
-        fname - a string specifying the filename of the plot
-        fmt - an optional string specifying the output filetype
-        gridshape - optional tuple denoting the desired grid shape (nrows, ncols) for arranging
-                    the subplots.
-        xlabel - an optional string specifying the x-axis title
-        ylabel - an optional string specifying the y-axis title
-        clabel - an optional string specifying the colorbar title
-        ptitle - a string specifying the plot title
-        subtitles - an optional list of strings specifying the title for each subplot
-        cmap - an optional string or matplotlib.colors.LinearSegmentedColormap instance
-               denoting the colormap
-        clevs - an optional list of ints or floats specifying colorbar levels
-        nlevs - an optional integer specifying the target number of contour levels if
-                clevs is None
-        extend - an optional string to toggle whether to place arrows at the colorbar
-             boundaries. Default is 'neither', but can also be 'min', 'max', or
-             'both'. Will be automatically set to 'both' if clevs is None.
-        aspect - Float denoting approximate aspect ratio of each subplot
-                 (width / height). Default is 8.5 / 5.5
+    :param results: 3D array of the fields to be plotted. The second dimension
+              should correspond to the number of rows in the diagram and the
+              third should correspond to the number of columns.
+    :type results: :class:`numpy.ndarray`
+
+    :param rowlabels: Labels for each row.
+    :type rowlabels: :class:`list` of :mod:`string`
+
+    :param collabels: Labels for each row.
+    :type collabels: :class:`list` of :mod:`string`
+
+    :param fname: Filename of the plot.
+    :type fname: :mod:`string`
+    
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+
+    :param gridshape: (Optional) tuple denoting the desired grid shape
+        (num_rows, num_cols) for arranging the subplots.
+    :type gridshape: :func:`tuple` of the form (num_rows, num_cols)
+
+    :param xlabel: (Optional) x-axis title.
+    :type xlabel: :mod:`string`
+
+    :param ylabel: (Optional) y-ayis title.
+    :type ylabel: :mod:`string`
+
+    :param clabel: (Optional) colorbar title.
+    :type clabel: :mod:`string`
+
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+
+    :param subtitles: (Optional) list of titles for each subplot.
+    :type subtitles: :class:`list` of :mod:`string`
+
+    :param cmap: (Optional) string or :class:`matplotlib.colors.LinearSegmentedColormap`
+        instance denoting the colormap. This must be able to be recognized by
+        `Matplotlib's get_cmap function <http://matplotlib.org/api/cm_api.html#matplotlib.cm.get_cmap>`_.
+    :type cmap: :mod:`string` or :class:`matplotlib.colors.LinearSegmentedColormap`
+
+    :param clevs: (Optional) contour levels values.
+    :type clevs: :class:`list` of :class:`int` or :class:`float`
+
+    :param nlevs: Optional target number of contour levels if clevs is None.
+    :type nlevs: :class:`int`
+
+    :param extend: (Optional) flag to toggle whether to place arrows at the colorbar
+         boundaries. Default is 'neither', but can also be 'min', 'max', or
+         'both'. Will be automatically set to 'both' if clevs is None.
+    :type extend: :mod:`string`
+
+    :param aspect: (Optional) approximate aspect ratio of each subplot
+        (width / height). Default is 8.5 / 5.5
+    :type aspect: :class:`float`
     '''
     # Handle the single plot case.
     if results.ndim == 2:
@@ -675,6 +888,7 @@ def draw_portrait_diagram(results, rowlabels, collabels, fname, fmt='png',
                         extend=extend, orientation='horizontal', extendfrac='auto')
     cbar.set_label(clabel)
     cbar.set_ticks(clevs)
+    cbar.ax.tick_params(labelsize=6)
     cbar.ax.xaxis.set_ticks_position('none')
     cbar.ax.yaxis.set_ticks_position('none')
 
@@ -694,6 +908,10 @@ class TaylorDiagram(object):
     Plot model standard deviation and correlation to reference (data)
     sample in a single-quadrant polar plot, with r=stddev and
     theta=arccos(correlation).
+
+    This class was released as public domain by the original author
+    Yannick Copin. You can find the original Gist where it was
+    released at: https://gist.github.com/ycopin/3342888
     """
 
     def __init__(self, refstd, radmax=1.5, fig=None, rect=111, label='_'):
@@ -803,3 +1021,36 @@ class TaylorDiagram(object):
         r = np.linspace(std1, std2)
 
         return self.ax.plot(t,r,'red',linewidth=2)
+
+def draw_histogram(dataset_array, data_names, fname, fmt='png', nbins=10):
+    '''
+    Purpose::
+        Draw histograms
+
+    Input::
+        dataset_array - a list of data values [data1, data2, ....]
+        data_names    - a list of data names  ['name1','name2',....]
+        fname  - a string specifying the filename of the plot
+        bins - number of bins
+    '''    
+    fig = plt.figure()
+    fig.dpi = 300
+    ndata = len(dataset_array)
+   
+    data_min = 500.
+    data_max = 0.
+ 
+    for data in dataset_array:
+        data_min = np.min([data_min,data.min()]) 
+        data_max = np.max([data_max,data.max()]) 
+
+    bins = np.linspace(np.round(data_min), np.round(data_max+1), nbins)
+    for idata,data in enumerate(dataset_array):
+        ax = fig.add_subplot(ndata, 1, idata+1)
+        ax.hist(data, bins, alpha = 0.5, label=data_names[idata], normed = True)
+        leg = ax.legend()
+        leg.get_frame().set_alpha(0.5)
+        ax.set_xlim([data_min-(data_max-data_min)*0.15, data_max+(data_max-data_min)*0.15])
+        
+    fig.savefig('%s.%s' %(fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+ 

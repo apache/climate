@@ -28,30 +28,42 @@ import datetime as dt
 
 import ocw.utils as utils
 
-from mpl_toolkits.basemap import shiftgrid
-
 logger = logging.getLogger(__name__)
+
 
 class Dataset:
     '''Container for a dataset's attributes and data.'''
 
-    def __init__(self, lats, lons, times, values, variable=None, name=""):
+    def __init__(self, lats, lons, times, values, variable=None, units=None,
+                 origin=None, name=""):
         '''Default Dataset constructor
 
         :param lats: One dimensional numpy array of unique latitude values.
-        :type lats: numpy array
+        :type lats: :class:`numpy.ndarray`
+
         :param lons: One dimensional numpy array of unique longitude values.
-        :type lons: numpy array
-        :param times: One dimensional numpy array of unique python datetime 
+        :type lons: :class:`numpy.ndarray`
+
+        :param times: One dimensional numpy array of unique python datetime
             objects.
-        :type times: numpy array
-        :param values: Three dimensional numpy array of parameter values with 
-            shape [timesLength, latsLength, lonsLength]. 
-        :type values: numpy array
+        :type times: :class:`numpy.ndarray`
+
+        :param values: Three dimensional numpy array of parameter values with
+            shape [timesLength, latsLength, lonsLength].
+        :type values: :class:`numpy.ndarray`
+
         :param variable: Name of the value variable.
-        :type variable: string
+        :type variable: :mod:`string`
+
+        :param units: Name of the value units
+        :type units: :mod:`string`
+
         :param name: An optional string name for the Dataset.
-        :type variable: string
+        :type name: :mod:`string`
+
+        :param origin: An optional object used to specify information on where
+            this dataset was loaded from.
+        :type origin: :class:`dict`
 
         :raises: ValueError
         '''
@@ -63,26 +75,29 @@ class Dataset:
         self.times = times
         self.values = values
         self.variable = variable
+        self.units = units
         self.name = name
+        self.origin = origin
 
     def spatial_boundaries(self):
         '''Calculate the spatial boundaries.
 
         :returns: The Dataset's bounding latitude and longitude values as a
             tuple in the form (min_lat, max_lat, min_lon, max_lon)
-        :rtype: (float, float, float, float)
+        :rtype: :func:`tuple` of the form (:class:`float`, :class:`float`,
+            :class:`float`, :class:`float`).
 
         '''
-        return (float(min(self.lats)), float(max(self.lats)),
-                float(min(self.lons)), float(max(self.lons)))
-
+        return (float(numpy.min(self.lats)), float(numpy.max(self.lats)),
+                float(numpy.min(self.lons)), float(numpy.max(self.lons)))
 
     def time_range(self):
         '''Calculate the temporal range
 
-        :returns: The start and end date of the Dataset's temporal range as 
+        :returns: The start and end date of the Dataset's temporal range as
             a tuple in the form (start_time, end_time).
-        :rtype: (datetime, datetime)
+        :rtype: :func:`tuple` of the form (:class:`datetime.datetime`,
+            :class:`datetime.datetime`)
         '''
         sorted_time = numpy.sort(self.times)
         start_time = sorted_time[0]
@@ -90,23 +105,25 @@ class Dataset:
 
         return (start_time, end_time)
 
-
     def spatial_resolution(self):
         '''Calculate the latitudinal and longitudinal spatial resolution.
 
-        .. warning:: This only works with properly gridded data.
-
+           If self.lats and self.lons are from curvilinear coordinates,
+           the output resolutions are approximate values.
         :returns: The Dataset's latitudinal and longitudinal spatial resolution
             as a tuple of the form (lat_resolution, lon_resolution).
-        :rtype: (float, float)
+        :rtype: (:class:`float`, :class:`float`)
         '''
-        sorted_lats = numpy.sort(list(set(self.lats)))
-        sorted_lons = numpy.sort(list(set(self.lons)))
-        lat_resolution = sorted_lats[1] - sorted_lats[0]
-        lon_resolution = sorted_lons[1] - sorted_lons[0]
+        if self.lats.ndim == 1 and self.lons.ndim == 1:
+            sorted_lats = numpy.sort(list(set(self.lats)))
+            sorted_lons = numpy.sort(list(set(self.lons)))
+            lat_resolution = sorted_lats[1] - sorted_lats[0]
+            lon_resolution = sorted_lons[1] - sorted_lons[0]
+        if self.lats.ndim == 2 and self.lons.ndim == 2:
+            lat_resolution = self.lats[1, 1] - self.lats[0, 0]
+            lon_resolution = self.lons[1, 1] - self.lons[0, 0]
 
         return (lat_resolution, lon_resolution)
-
 
     def temporal_resolution(self):
         '''Calculate the temporal resolution.
@@ -115,7 +132,7 @@ class Dataset:
             list of times is an unrecognized value a ValueError is raised.
 
         :returns: The temporal resolution.
-        :rtype: string
+        :rtype: :mod:`string`
         '''
         sorted_times = numpy.sort(self.times)
         time_resolution = sorted_times[1] - sorted_times[0]
@@ -130,90 +147,121 @@ class Dataset:
             time_resolution = 'monthly'
         elif num_days > 31:
             time_resolution = 'yearly'
-        else:
-            error = (
-                "Unable to calculate the temporal resolution for the "
-                "dataset. The number of days between two time values is "
-                "an unexpected value: " + str(num_days)
-            )
-
-            logger.error(error)
-            raise ValueError(error)
 
         return time_resolution
 
     def _validate_inputs(self, lats, lons, times, values):
         """Check that Dataset inputs are valid.
-        
+
         :raises: ValueError
         """
         err_msg = None
-        #Setup and Check parameter dimensionality is correct
+        # Setup and Check parameter dimensionality is correct
         lat_dim = len(lats.shape)
         lon_dim = len(lons.shape)
         time_dim = len(times.shape)
         value_dim = len(values.shape)
         lat_count = lats.shape[0]
         lon_count = lons.shape[0]
+
+        if lat_dim == 2 and lon_dim == 2:
+            lon_count = lons.shape[1]
         time_count = times.shape[0]
-        
-        if lat_dim != 1:
-            err_msg = "Latitude Array should be 1 dimensional.  %s dimensions found." % lat_dim
-        elif lon_dim != 1:
-            err_msg = "Longitude Array should be 1 dimensional. %s dimensions found." % lon_dim
-        elif time_dim != 1:
-            err_msg = "Time Array should be 1 dimensional.  %s dimensions found." % time_dim
-        elif value_dim != 3:
-            err_msg = "Value Array should be 3 dimensional.  %s dimensions found." % value_dim
+
+        if time_dim != 1:
+            err_msg = ("Time Array should be 1 dimensional.  %s dimensions"
+                       " found." % time_dim)
+        elif value_dim < 2:
+            err_msg = ("Value Array should be at least 2 dimensional."
+                       "  %s dimensions found." % value_dim)
         # Finally check that the Values array conforms to the proper shape
-        elif values.shape != (time_count, lat_count, lon_count):
+        if value_dim == 2:
+            if (values.shape[0] != time_count and
+                    values.shape != (lat_count, lon_count)):
+                err_msg = """Value Array must be of shape (lats, lons) or (times, locations).
+                Expected shape (%s, %s) but received (%s, %s)""" % (
+                    lat_count,
+                    lon_count,
+                    values.shape[0],
+                    values.shape[1])
+        if (value_dim == 3 and
+                values.shape != (time_count, lat_count, lon_count)):
             err_msg = """Value Array must be of shape (times, lats, lons).
-Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (time_count,
-                                                            lat_count,
-                                                            lon_count,
-                                                            values.shape[0],
-                                                            values.shape[1],
-                                                            values.shape[2])
+            Expected shape (%s, %s, %s) but received (%s, %s, %s)""" % (
+                time_count,
+                lat_count,
+                lon_count,
+                values.shape[0],
+                values.shape[1],
+                values.shape[2])
         if err_msg:
             logger.error(err_msg)
             raise ValueError(err_msg)
+
+    def __str__(self):
+        lat_min, lat_max, lon_min, lon_max = self.spatial_boundaries()
+        start, end = self.time_range()
+        lat_range = "({}, {})".format(lat_min, lon_min)
+        lon_range = "({}, {})".format(lon_min, lon_min)
+        time_range = "({}, {})".format(start, end)
+
+        formatted_repr = (
+            "<Dataset - name: {}, "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}, "
+            "var: {}, "
+            "units: {}>"
+        )
+
+        return formatted_repr.format(
+            self.name if self.name != "" else None,
+            lat_range,
+            lon_range,
+            time_range,
+            self.variable,
+            self.units
+        )
 
 
 class Bounds(object):
     '''Container for holding spatial and temporal bounds information.
 
     Certain operations require valid bounding information to be present for
-    correct functioning. Bounds guarantees that a function receives well 
+    correct functioning. Bounds guarantees that a function receives well
     formed information without the need to do the validation manually.
 
     Spatial and temporal bounds must follow the following guidelines.
 
     * Latitude values must be in the range [-90, 90]
     * Longitude values must be in the range [-180, 180]
-    * Lat/Lon Min values must be less than the corresponding Lat/Lon Max values.
+    * Lat/Lon Min values must be less than the corresponding Lat/Lon Max
+      values.
     * Temporal bounds must a valid datetime object
     '''
 
-    def __init__(self, lat_min, lat_max, lon_min, lon_max, start, end):
+    def __init__(self, lat_min, lat_max, lon_min,
+                 lon_max, start=None, end=None):
         '''Default Bounds constructor
 
         :param lat_min: The minimum latitude bound.
-        :type lat_min: float
-        
+        :type lat_min: :class:`float`
+
         :param lat_max: The maximum latitude bound.
-        :type lat_max: float
+        :type lat_max: :class:`float`
 
         :param lon_min: The minimum longitude bound.
-        :type lon_min: float
-        
+        :type lon_min: :class:`float`
+
         :param lon_max: The maximum longitude bound.
-        :type lon_max: float
+        :type lon_max: :class:`float`
 
-        :param start: The starting datetime bound.
-        :type start: datetime
+        :param start: An optional datetime object for the starting
+                      datetime bound.
+        :type start: :class:`datetime.datetime`
 
-        :param end: The ending datetime bound.
-        :type end: datetime
+        :param end: An optional datetime object for the ending datetime bound.
+        :type end: :class:`datetime.datetime`
 
         :raises: ValueError
         '''
@@ -221,8 +269,16 @@ class Bounds(object):
         self._lat_max = float(lat_max)
         self._lon_min = float(lon_min)
         self._lon_max = float(lon_max)
-        self._start = start
-        self._end = end
+
+        if start:
+            self._start = start
+        else:
+            self._start = None
+
+        if end:
+            self._end = end
+        else:
+            self._end = None
 
     @property
     def lat_min(self):
@@ -282,10 +338,11 @@ class Bounds(object):
 
     @start.setter
     def start(self, value):
-        if not (type(value) is dt.datetime and value < self._end):
-            error = "Attempted to set start to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
+        if self._end:
+            if not (type(value) is dt.datetime and value < self._end):
+                error = "Attempted to set start to invalid value: %s" % (value)
+                logger.error(error)
+                raise ValueError(error)
 
         self._start = value
 
@@ -295,9 +352,28 @@ class Bounds(object):
 
     @end.setter
     def end(self, value):
-        if not (type(value) is dt.datetime and value > self._start):
-            error = "Attempted to set end to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
+        if self._start:
+            if not (type(value) is dt.datetime and value > self._start):
+                error = "Attempted to set end to invalid value: %s" % (value)
+                logger.error(error)
+                raise ValueError(error)
 
         self._end = value
+
+    def __str__(self):
+        lat_range = "({}, {})".format(self._lat_min, self._lat_max)
+        lon_range = "({}, {})".format(self._lon_min, self._lon_max)
+        time_range = "({}, {})".format(self._start, self._end)
+
+        formatted_repr = (
+            "<Bounds - "
+            "lat-range: {}, "
+            "lon-range: {}, "
+            "time_range: {}> "
+        )
+
+        return formatted_repr.format(
+            lat_range,
+            lon_range,
+            time_range,
+        )

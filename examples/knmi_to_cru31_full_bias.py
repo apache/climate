@@ -1,7 +1,25 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import datetime
+import urllib
+from os import path
 
 import numpy as np
-import urllib
 
 import ocw.data_source.local as local
 import ocw.data_source.rcmed as rcmed
@@ -10,6 +28,10 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+import ssl
+
+if hasattr(ssl, '_create_unverified_context'):
+  ssl._create_default_https_context = ssl._create_unverified_context
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -20,8 +42,11 @@ MODEL = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "cru_31_tmax_knmi_africa_bias_full"
 
-# Download necessary NetCDF file
-urllib.urlretrieve(FILE_LEADER + MODEL, MODEL)
+# Download necessary NetCDF file if not present
+if path.exists(MODEL):
+    pass
+else:
+    urllib.urlretrieve(FILE_LEADER + MODEL, MODEL)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects """
 print("Loading %s into an OCW Dataset Object" % (MODEL,))
@@ -93,15 +118,15 @@ print("CRU31_Dataset.values shape: (times, lats, lons) - %s" % (cru31_dataset.va
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.values.shape,))
 
 print("Temporally Rebinning the Datasets to a Single Timestep")
-# To run FULL temporal Rebinning use a timedelta > 366 days.  I used 999 in this example
-knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=999))
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, datetime.timedelta(days=999))
+# To run FULL temporal Rebinning 
+knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution = 'full')
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution = 'full')
 
 print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("CRU31_Dataset.values shape: %s \n\n" % (cru31_dataset.values.shape,))
  
 """ Spatially Regrid the Dataset Objects to a 1/2 degree grid """
-# Using the bounds we will create a new set of lats and lons on 1 degree step
+# Using the bounds we will create a new set of lats and lons on 0.5 degree step
 new_lons = np.arange(min_lon, max_lon, 0.5)
 new_lats = np.arange(min_lat, max_lat, 0.5)
  
@@ -137,7 +162,7 @@ bias_evaluation.run()
 # Accessing the actual results when we have used 1 metric and 1 dataset is
 # done this way:
 print("Accessing the Results of the Evaluation run")
-results = bias_evaluation.results[0][0]
+results = bias_evaluation.results[0][0,:]
  
 # From the bias output I want to make a Contour Map of the region
 print("Generating a contour map using ocw.plotter.draw_contour_map()")

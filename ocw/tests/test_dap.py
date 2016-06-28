@@ -16,28 +16,42 @@
 # under the License.
 
 import unittest
+import datetime as dt
 import ocw.data_source.dap as dap
 from ocw.dataset import Dataset
-import datetime as dt
 
-class test_dap(unittest.TestCase):
-    dataset = dap.load('http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz', 'sst')
+
+class TestDap(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+
+        cls.url = 'http://test.opendap.org/opendap/data/ncml/agg/dated/'\
+                  'CG2006158_120000h_usfc.nc'
+        cls.name = 'foo'
+        cls.dataset = dap.load(cls.url, 'CGusfc', name=cls.name)
 
     def test_dataset_is_returned(self):
         self.assertTrue(isinstance(self.dataset, Dataset))
 
     def test_correct_lat_shape(self):
-        self.assertEquals(len(self.dataset.lats), 89)
+        self.assertEquals(len(self.dataset.lats), 29)
 
     def test_correct_lon_shape(self):
-        self.assertEquals(len(self.dataset.lons), 180)
+        self.assertEquals(len(self.dataset.lons), 26)
 
     def test_correct_time_shape(self):
-        self.assertEquals(len(self.dataset.times), 1857)
+        self.assertEquals(len(self.dataset.times), 1)
 
     def test_valid_date_conversion(self):
-        start = dt.datetime(1854, 1, 1)
+        start = dt.datetime(2006, 6, 7, 12)
         self.assertTrue(start == self.dataset.times[0])
+
+    def test_custom_dataset_name(self):
+        self.assertEquals(self.dataset.name, self.name)
+
+    def test_dataset_origin(self):
+        self.assertEquals(self.dataset.origin['source'], 'dap')
+        self.assertEquals(self.dataset.origin['url'], self.url)
 
 if __name__ == '__main__':
     unittest.main()
