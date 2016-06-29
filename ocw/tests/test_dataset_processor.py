@@ -625,11 +625,20 @@ class TestFailingSubset(unittest.TestCase):
 class TestNetCDFWrite(unittest.TestCase):
     def setUp(self):
         self.ds = ten_year_monthly_dataset()
+        self.ds_2d = ten_year_monthly_dataset(latlon2d=True)
         self.file_name = 'test.nc'
 
     def tearDown(self):
         if os.path.isfile(self.file_name):
             os.remove(self.file_name)
+
+    def test_file_write(self):
+        dp.write_netcdf(self.ds, self.file_name)
+        self.assertTrue(os.path.isfile(self.file_name))
+
+    def test_file_write_2d(self):
+        dp.write_netcdf(self.ds_2d, self.file_name)
+        self.assertTrue(os.path.isfile(self.file_name))
 
     def test_file_write(self):
         dp.write_netcdf(self.ds, self.file_name)
@@ -646,15 +655,22 @@ class TestNetCDFWrite(unittest.TestCase):
         np.testing.assert_array_equal(self.ds.values, new_ds.values)
 
 
-def ten_year_monthly_dataset():
+def ten_year_monthly_dataset(latlon2d=False):
     lats = np.array(range(-89, 90, 2))
     lons = np.array(range(-179, 180, 2))
+    # Need separate variable for input lats / lons because dataset only
+    # makes shallow copies of them.
+    ilats, ilons = lats, lons
+    # For testing 2D lat lon grids
+    if latlon2d:
+        lons2, lats2 = np.meshgrid(lons, lats)
+        ilats, ilons = lats2, lons2
     # Ten Years of monthly data
     times = np.array([datetime.datetime(year, month, 1)
                       for year in range(2000, 2010) for month in range(1, 13)])
     values = np.ones([len(times), len(lats), len(lons)])
-    input_dataset = ds.Dataset(lats,
-                               lons,
+    input_dataset = ds.Dataset(ilats,
+                               ilons,
                                times,
                                values,
                                variable="test variable name",
