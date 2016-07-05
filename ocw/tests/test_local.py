@@ -32,6 +32,8 @@ class test_load_file(unittest.TestCase):
         self.netCDF_file = netCDF4.Dataset(self.file_path, 'r')
         self.latitudes = self.netCDF_file.variables['latitude'][:]
         self.longitudes = self.netCDF_file.variables['longitude'][:]
+        self.alt_lats = self.netCDF_file.variables['alt_lat'][:]
+        self.alt_lons = self.netCDF_file.variables['alt_lon'][:]
         self.values = self.netCDF_file.variables['value'][:]
         self.variable_name_list = ['latitude',
                                    'longitude', 'time', 'level', 'value']
@@ -62,6 +64,23 @@ class test_load_file(unittest.TestCase):
             2001, 02, 01), datetime.datetime(2001, 03, 01)
         self.assertItemsEqual(local.load_file(
             self.file_path, "value").times, newTimes)
+
+    def test_function_load_file_alt_lats(self):
+        """To test load_file function for lats with different variable names"""
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value", lat_name="alt_lat").lats, self.alt_lats)
+
+    def test_function_load_file_alt_lons(self):
+        """To test load_file function for lons with different variable names"""
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value", lon_name="alt_lon").lons, self.alt_lons)
+
+    def test_function_load_file_alt_times(self):
+        """To test load_file function for times with different variable names"""
+        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
+            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        self.assertItemsEqual(local.load_file(
+            self.file_path, "value", time_name="alt_time").times, newTimes)
 
     def test_function_load_file_values(self):
         """To test load_file function for values"""
@@ -142,12 +161,22 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
         self.netCDF_file = netCDF4.Dataset(self.file_path, 'r+')
         self.latitudes = self.netCDF_file.variables['latitude'][:]
         self.longitudes = self.netCDF_file.variables['longitude'][:]
+        self.alt_lats = self.netCDF_file.variables['alt_lat'][:]
+        self.alt_lons = self.netCDF_file.variables['alt_lon'][:]
         self.values = self.netCDF_file.variables['value'][:]
         self.variable_name_list = ['latitude',
                                    'longitude', 'time', 'level', 'value']
         self.possible_value_name = ['latitude', 'longitude', 'time', 'level']
         self.dataset = local.load_dataset_from_multiple_netcdf_files(
             variable_name='value',
+            file_path='',
+            filename_pattern=[
+                self.file_path])
+        self.alt_dataset = local.load_dataset_from_multiple_netcdf_files(
+            variable_name='value',
+            lat_name='alt_lat',
+            lon_name='alt_lon',
+            time_name='alt_time',
             file_path='',
             filename_pattern=[
                 self.file_path])
@@ -173,6 +202,22 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
         newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
             2001, 02, 01), datetime.datetime(2001, 03, 01)
         self.assertItemsEqual(self.dataset.times, newTimes)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_alt_lats(self):
+        """To test load_multiple_files function for non-default lats"""
+        _, self.alt_lats = numpy.meshgrid(self.alt_lons, self.alt_lats)
+        numpy.testing.assert_array_equal(self.alt_dataset.lats, self.alt_lats)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_alt_lons(self):
+        """To test load_multiple_files function for non-default lons"""
+        self.alt_lons, _ = numpy.meshgrid(self.alt_lons, self.alt_lats)
+        numpy.testing.assert_array_equal(self.alt_dataset.lons, self.alt_lons)
+
+    def test_function_load_dataset_from_multiple_netcdf_files_alt_times(self):
+        """To test load_multiple_files function for non-default times"""
+        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
+            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        self.assertItemsEqual(self.alt_dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_values(self):
         """To test load_multiple_files function for values"""
@@ -234,6 +279,10 @@ def create_netcdf_object():
     latitudes = netCDF_file.createVariable('latitude', 'd', ('lat_dim',))
     longitudes = netCDF_file.createVariable('longitude', 'd', ('lon_dim',))
     times = netCDF_file.createVariable('time', 'd', ('time_dim',))
+    # unusual variable names to test optional arguments for Dataset constructor
+    alt_lats = netCDF_file.createVariable('alt_lat', 'd', ('lat_dim',))
+    alt_lons = netCDF_file.createVariable('alt_lon', 'd', ('lon_dim',))
+    alt_times = netCDF_file.createVariable('alt_time', 'd', ('time_dim',))
     levels = netCDF_file.createVariable('level', 'd', ('level_dim',))
     values = netCDF_file.createVariable('value', 'd',
                                         ('time_dim',
@@ -243,10 +292,10 @@ def create_netcdf_object():
                                         )
 
     # To latitudes and longitudes for five values
-    latitudes_data = range(0, 5)
-    longitudes_data = range(150, 155)
+    latitudes_data = numpy.arange(5.)
+    longitudes_data = numpy.arange(150., 155.)
     # Three months of data.
-    times_data = numpy.array(range(3))
+    times_data = numpy.arange(3)
     # Two levels
     levels_data = [100, 200]
     # Create 150 values
@@ -259,10 +308,14 @@ def create_netcdf_object():
     latitudes[:] = latitudes_data
     longitudes[:] = longitudes_data
     times[:] = times_data
+    alt_lats[:] = latitudes_data + 10
+    alt_lons[:] = longitudes_data - 10
+    alt_times[:] = times_data
     levels[:] = levels_data
     values[:] = values_data
     # Assign time info to time variable
     netCDF_file.variables['time'].units = 'months since 2001-01-01 00:00:00'
+    netCDF_file.variables['alt_time'].units = 'months since 2001-04-01 00:00:00'
     netCDF_file.variables['value'].units = 'foo_units'
     netCDF_file.close()
     return file_path
