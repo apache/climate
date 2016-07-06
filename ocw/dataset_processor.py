@@ -255,7 +255,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
                     mn = lats.min()
                     mx = lats.max()
                     new_lats_indices[iy, ix] = (
-                        ny_old - 1.) * (new_lats[iy, ix] - mn / (mx - mn))
+                        ny_old - 1.) * (new_lats[iy, ix] - mn)/ (mx - mn)
                     mn = lons.min()
                     mx = lons.max()
                     new_lons_indices[iy, ix] = (
