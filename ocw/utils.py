@@ -45,6 +45,8 @@ def decode_time_values(dataset, time_var_name):
     time_format = time_data.units
     if time_format[-1].lower() == 'z':
         time_format = time_format[:-1]
+    if time_format[-3:].lower() == 'utc':
+        time_format = time_format[:-3]
 
     time_units = parse_time_units(time_format)
     time_base = parse_time_base(time_format)
