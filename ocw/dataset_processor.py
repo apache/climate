@@ -569,9 +569,19 @@ def write_netcdf(dataset, path, compress=True):
     '''
     out_file = netCDF4.Dataset(path, 'w', format='NETCDF4')
 
-    # Set attribute lenghts
-    lat_len = len(dataset.lats)
-    lon_len = len(dataset.lons)
+    # Set attribute lengths
+    if dataset.lats.ndim == 2:
+        lat_len = dataset.lats.shape[0]
+        lon_len = dataset.lons.shape[1]
+        lat_dim_info = ('lat', 'lon')
+        lon_dim_info = ('lat', 'lon')
+
+    else:
+        lat_len = len(dataset.lats)
+        lon_len = len(dataset.lons)
+        lat_dim_info = ('lat',)
+        lon_dim_info = ('lon',)
+
     time_len = len(dataset.times)
 
     # Create attribute dimensions
@@ -580,8 +590,8 @@ def write_netcdf(dataset, path, compress=True):
     out_file.createDimension('time', time_len)
 
     # Create variables
-    lats = out_file.createVariable('lat', 'f8', ('lat',), zlib=compress)
-    lons = out_file.createVariable('lon', 'f8', ('lon',), zlib=compress)
+    lats = out_file.createVariable('lat', 'f8', lat_dim_info, zlib=compress)
+    lons = out_file.createVariable('lon', 'f8', lon_dim_info, zlib=compress)
     times = out_file.createVariable('time', 'f8', ('time',), zlib=compress)
 
     var_name = dataset.variable if dataset.variable else 'var'
