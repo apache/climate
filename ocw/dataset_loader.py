@@ -28,7 +28,7 @@ import ocw.data_source.dap as dap
 class DatasetLoader:
     '''Generate OCW Dataset objects from a variety of sources.'''
 
-    def __init__(self, **kwargs):
+    def __init__(self, reference, targets):
         '''Generate OCW Dataset objects from a variety of sources.
 
         Each keyword argument can be information for a dataset in dictionary
@@ -39,7 +39,7 @@ class DatasetLoader:
         >>> targets = {'data_source':'local_multiple',
                        'path':'./data/CORDEX-Africa_data/AFRICA*pr.nc',
                        'variable':'pr'}
-        >>> loader = DatasetLoader(reference=reference, targets=targets)
+        >>> loader = DatasetLoader(reference, targets)
         ``
 
         Or more conveniently if the loader configuration is defined in a
@@ -82,12 +82,22 @@ class DatasetLoader:
         as follows:
         >>> loader.add_source_loader('my_source_name', my_loader_func)
 
+        :param reference: The reference dataset loader configuration.
+        :type reference: :mod:`dict`
+
+        :param targets: The target dataset loader configurations.
+        :type targets: :mod:`dict` or list of mod:`dict`
+
         :raises KeyError: If an invalid argument is passed to a data source
         loader function.
         '''
-        self.reference_dataset = None
-        self.target_datasets = []
-        self._config = kwargs
+        # Reference dataset config
+        self.set_reference(reference)
+
+        # Target dataset(s) config
+        self.set_targets(targets)
+
+        # Default loaders
         self._source_loaders = {
                     'local':local.load,
                     'local_split':local.load_dataset_from_multiple_netcdf_files
@@ -106,26 +116,91 @@ class DatasetLoader:
 
         :param loader_func: Reference to a custom defined function. This should
         return an OCW Dataset object.
-        :type loader_func: :mod:`callable`
+        :type loader_func: :class:`callable`
         '''
         self._source_loader[source_name] = loader_func
 
+    def add_target(self, **kwargs):
+        '''
+        A convenient means of adding a target dataset to the loader.
+        :raises KeyError: If data_source is not specified.
+        '''
+        if 'data_source' not in kwargs:
+            raise KeyError('Dataset configuration must contain a data_source.')
+        self._target_config.append(kwargs)
 
-    def set_config(self, **kwargs):
+    def add_targets(self, targets):
         '''
-        Change loader config if necessary. See class docstring for more info.
+        A convenient means of adding multiple target datasets to the loader.
+
+        :param targets: List of loader configurations for each target
+        :type targets: List of :mod:`dict`
+
+        :raises KeyError: If data_source is not specified.
         '''
-        self._config = kwargs
+        for target_config in targets:
+            self.add_target(**target_config)
+
+    def set_targets(self, targets):
+        '''
+        Reset the target dataset config.
+
+        :param targets: List of loader configurations for each target
+        :type targets: List of :mod:`dict`
+
+        :raises KeyError: If data_source is not specified.
+        '''
+        # This check allows for the user to enter targets as one block or
+        # as a list of separate blocks in their config files
+        if not instanceof(targets, list):
+            targets = [targets]
+        self._target_config = []
+        self.add_targets(targets)
+
+    def set_reference(self, **kwargs):
+        '''
+        Reset the reference dataset config.
+
+        :param targets: List of loader configurations for each target
+        :type targets: List of :mod:`dict`
+
+        :raises KeyError: If data_source is not specified.
+        '''
+        if 'data_source' not in kwargs:
+            raise KeyError('Dataset configuration must contain a data_source.')
+        self._reference_config = kwargs
 
     def load_datasets(self):
         '''
-        Loads the datasets from the given loader configuration.
+        Loads the datasets from the given loader configurations.
         '''
-        for dataset_evaltype, dataset_params in self._config.iteritems():
-            data_source = dataset_params.pop('data_source'):
-            load_func = self._source_loaders[data_source]
-            if dataset_evaltype == 'reference':
-                self.reference_dataset = load_func(**dataset_params)
-            else:
-                target_dataset = load_func(**dataset_params)
-                self.target_datasets.extend(target_dataset)
+        # Load the reference dataset
+        self.reference_dataset = self._load(**self._reference_config)
+
+        # Ensure output is clear if loading is performed more than once to
+        # prevent duplicates.
+        self.target_datasets = []
+
+        # Load the target datasets
+        for loader_params in self._target_config
+            output = self._load(**loader_params)
+
+                # Need to account for the fact that some loaders return lists
+                # of OCW Dataset objects instead of just one
+                if isinstance(target_dataset, list):
+                    self.target_datasets.extend(output)
+                else:
+                    self.target_datasets.append(output)
+
+    def _load(**kwargs):
+        '''
+        Generic dataset loading method
+        '''
+        # Extract the data source
+        data_source = kwargs.pop('data_source')
+
+        # Find the correct loader function for the given data source
+        loader_func = self._source_loaders[data_source]
+
+        # The remaining kwargs should be specific to the loader
+        return loader_func(**kwargs)
