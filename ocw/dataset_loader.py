@@ -192,9 +192,9 @@ class DatasetLoader:
                 else:
                     self.target_datasets.append(output)
 
-    def _load(**kwargs):
+    def _load(self, **kwargs):
         '''
-        Generic dataset loading method
+        Generic dataset loading method.
         '''
         # Extract the data source
         data_source = kwargs.pop('data_source')
