@@ -160,10 +160,6 @@ class DatasetLoader:
     def set_reference(self, **kwargs):
         '''
         Reset the reference dataset config.
-
-        :param targets: List of loader configurations for each target
-        :type targets: List of :mod:`dict`
-
         :raises KeyError: If data_source is not specified.
         '''
         if 'data_source' not in kwargs:
