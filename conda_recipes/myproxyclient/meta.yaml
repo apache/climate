@@ -1,0 +1,67 @@
+package:
+  name: myproxyclient
+  version: "1.4.3"
+
+source:
+  fn: MyProxyClient-1.4.3.tar.gz
+  url: https://files.pythonhosted.org/packages/87/40/c461e690422a1c6994630d5f73d74295037793eb5e41f346a7b55b6d5baa/MyProxyClient-1.4.3.tar.gz
+  md5: 15d1dccae2cde5d24cd8fb082972debc
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+build:
+  # noarch_python: True
+  # preserve_egg_dir: True
+  entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - myproxyclient = myproxyclient:main
+    #
+    # Would create an entry point called myproxyclient that calls myproxyclient.main()
+
+    - myproxyclient = myproxy.script:main
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pyopenssl
+
+  run:
+    - python
+    - pyopenssl
+
+test:
+  # Python imports
+  imports:
+    - myproxy
+    - myproxy.test
+    - myproxy.utils
+
+  commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+    - myproxyclient --help
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: https://github.com/cedadev/MyProxyClient
+  license: GNU Library or Lesser General Public License (BSD)
+  summary: 'MyProxy Client'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
