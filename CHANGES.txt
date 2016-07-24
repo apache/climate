@@ -1,6 +1,173 @@
 Apache Open Climate Workbench Change Log
 ============================================
 
+Release Notes - Apache Open Climate Workbench - Version 1.1.0
+Release Report - https://s.apache.org/110report
+
+Sub-task
+
+    [CLIMATE-709] - Drop Freetype from conda environment file
+    [CLIMATE-712] - Update VM init script
+    [CLIMATE-713] - Update VM wiki page with new instructions
+    [CLIMATE-757] - Fix ERROR: test suite for <class 'ocw.tests.test_dap.TestDap'>
+    [CLIMATE-758] - Fix failing tests in test_local.py
+    [CLIMATE-759] - Fix failing tests in test_dataset_processor.py
+    [CLIMATE-795] - Add tests for dataset_processor module
+    [CLIMATE-801] - Add tests for dataset module
+    [CLIMATE-802] - Add tests for evaluation module
+    [CLIMATE-805] - Add tests for utils module
+    [CLIMATE-806] - Add tests for local module
+    [CLIMATE-808] - Add tests for plotter module
+    [CLIMATE-812] - Fix PEP8 Violations in dataset processor
+    [CLIMATE-813] - Fix PEP8 Violations in utils
+    [CLIMATE-814] - Fix PEP8 Violations in dataset
+
+Bug
+
+    [CLIMATE-407] - Dataset select can queue empty RCMED datasets
+    [CLIMATE-517] - Start and End day values overlap in dataset display
+    [CLIMATE-556] - easy_install scripts should create a new virtualenv e.g. -e flag, by default
+    [CLIMATE-557] - Investigate dubious GEOS installation output
+    [CLIMATE-560] - Incorrect assumption for installation directory within easy-ocw/install-osx.sh
+    [CLIMATE-561] - easy-ocw/install-osx.sh script should not assume relative locations for dependency utilitiy files
+    [CLIMATE-562] - Make nightly documentation SNAPSHOT's available for public consumption
+    [CLIMATE-616] - missing dependencies
+    [CLIMATE-634] - fix calc_climatology_monthly
+    [CLIMATE-642] - Improper unit set in water_flux_unit_conversion
+    [CLIMATE-668] - ocw.dataset_spatial_resolution needs to be fixed
+    [CLIMATE-669] - OCW spatial_boundary bug
+    [CLIMATE-671] - Inappropriate spatial subset for datasets on curvilinear grids
+    [CLIMATE-698] - Handling missing values in ocw.dataset_processor.temporal_rebin_with_time_index
+    [CLIMATE-707] - Rework Easy OCW scripts to only use conda
+    [CLIMATE-710] - OCW Package Tests are Broken
+    [CLIMATE-711] - conda-install won't source .bashrc properly
+    [CLIMATE-716] - Dataset object manipulation when plotting a Taylor diagram using a configuration file
+    [CLIMATE-718] - Temporal slice of two-dimensional model output
+    [CLIMATE-719] - Subsetting model data on curvillinear grids in the configuration file runner
+    [CLIMATE-722] - Extrapolation issues in spatial_regrid
+    [CLIMATE-724] - Debugging load_dataset_from_multiple_netcdf_files
+    [CLIMATE-725] - Ensure that OCW 1.1 Test PyPi Works as Expected
+    [CLIMATE-737] - Debugging dataset_processor.temporal_rebin
+    [CLIMATE-738] - Google jsapi Uses HTTP Rather Than HTTPS
+    [CLIMATE-739] - main.html refers to missing img/globe.png image
+    [CLIMATE-740] - Add img Path Handler To run_webservices.py
+    [CLIMATE-742] - ocw.data_source.local.py cannot properly detect the altitude dimension
+    [CLIMATE-743] - Update utils.normalize_lat_lon_values
+    [CLIMATE-745] - Report an Issue Link and @copyright year are incorrect in ocw-ui
+    [CLIMATE-748] - Debugging ocw.dataset_processor
+    [CLIMATE-749] - Changing temporal_resolution key in CLI
+    [CLIMATE-750] - $scope.fileLoadFailed Compares On Boolean Rather Than String
+    [CLIMATE-752] - Converting the unit of CRU cloud fraction by adding an option to configuration files
+    [CLIMATE-761] - Error in easy-ocw install-ubuntu Basemap stage
+    [CLIMATE-764] - Screen size of CLI
+    [CLIMATE-771] - Critical bugs in LAT_NAMES and LON_NAMES in local.py
+    [CLIMATE-781] - Fix the ESGF example in run_RCMES.py
+    [CLIMATE-786] - Update rcmed.py and test_rcmed.py
+    [CLIMATE-799] - TypeError in subset function
+    [CLIMATE-800] - TypeError in _rcmes_calc_average_on_new_time_unit
+    [CLIMATE-804] - normalize_lat_lon_values does not work
+    [CLIMATE-807] - Add test coverage badge to README
+    [CLIMATE-809] - Fix coveragerc file
+    [CLIMATE-818] - local.load_dataset_from_multiple_netcdf_files() does not accept user entered lon_name and lat_name fields.
+    [CLIMATE-822] - ValueError in RCMES test
+
+Improvement
+
+    [CLIMATE-379] - Allow dataset name customization in UI
+    [CLIMATE-409] - Implement a language sensitive map (I18n) for WebApp
+    [CLIMATE-421] - Add a download page for OCW
+    [CLIMATE-539] - Get OCW on to PyPI
+    [CLIMATE-569] - Updating rcmes.py using the latest OCW library
+    [CLIMATE-572] - Address deprecation and WARN's in ocw-ui/frontend npm install
+    [CLIMATE-573] - Remove sudo requirement to install virtualenv within install-ubuntu.sh
+    [CLIMATE-617] - Documentation Audit
+    [CLIMATE-632] - Adding a loader to handle multiple MERRA reanalysis HDF files stored on a local disk
+    [CLIMATE-635] - Add documentation to dev guide regarding test running
+    [CLIMATE-652] - Calculation of area weighted spatial average
+    [CLIMATE-653] - Netcdf file generator with subregion information
+    [CLIMATE-657] - Adding functions to calculate metrics
+    [CLIMATE-658] - Restructure evaluation results
+    [CLIMATE-666] - Replace examples with the RCMES script and yaml files
+    [CLIMATE-672] - Update the input validation function for OCW datasets
+    [CLIMATE-673] - Update the module to load multiple netcdf files
+    [CLIMATE-674] - Update the spatial_regrid module to handle data on curvilinear grids or irregularly spaced grids
+    [CLIMATE-676] - Cleaning up the examples
+    [CLIMATE-678] - Provide link to Python API documentation
+    [CLIMATE-680] - A new loader to read WRF precipitation data with a file list
+    [CLIMATE-681] - Update the loader to read WRF data (other than precipitation)
+    [CLIMATE-684] - Update README with Python API docs
+    [CLIMATE-700] - Complete examples to reproduce a RCMES-based paper
+    [CLIMATE-701] - Examples for evaluation of CORDEX-Arctic RCMs
+    [CLIMATE-702] - Print Jenkins test result to Github issue
+    [CLIMATE-703] - Remove pop-up windows from metrics_and_plots.py
+    [CLIMATE-704] - Sensitivity of spatial boundary check in dataset_processor
+    [CLIMATE-708] - Switch VM build over to conda environment approach
+    [CLIMATE-714] - Updating the regridding routine
+    [CLIMATE-720] - Revise file structure
+    [CLIMATE-723] - Update subset module for regional climate model output
+    [CLIMATE-726] - Update configuration files
+    [CLIMATE-727] - Ensure that ocwui package.json version is updated in line with releases
+    [CLIMATE-728] - Address WARN's when building ocwui
+    [CLIMATE-729] - Remove config file from NARCCAP examples
+    [CLIMATE-730] - Add OCW logo to ocw-ui header navigation panel
+    [CLIMATE-731] - Update ocw.dataset_processor.temperature_unit_conversion
+    [CLIMATE-734] - Adjust size of the color bars in the map plot of biases
+    [CLIMATE-735] - Update utils.decode_time_values
+    [CLIMATE-736] - Update dataset_processor.write_netcdf_multiple_datasets_with_subregions
+    [CLIMATE-741] - Adding configuration files to evaluate CORDEX-Africa regional climate models
+    [CLIMATE-754] - RCMED dataset parameters need to be more verbose
+    [CLIMATE-760] - Address documentation warnings
+    [CLIMATE-766] - Easy-ocw/install-ubuntu.sh script is broken
+    [CLIMATE-770] - Make boundary checking optional in spatial_regrid
+    [CLIMATE-777] - cli_app shows a list of model
+    [CLIMATE-778] - Cosmetic updates for the cli_app
+    [CLIMATE-779] - Add ESGF Integration into run_RCMES.py
+    [CLIMATE-780] - Add Travis-CI build status to README.md
+    [CLIMATE-783] - Update ESGF examples
+    [CLIMATE-811] - Add landscape.io integration
+    [CLIMATE-815] - Fix all PEP8 Violations in ocw module
+    [CLIMATE-816] - Add requires.io badge to README.md
+    [CLIMATE-817] - More informative error messages for data_source.load_file()
+    [CLIMATE-820] - Update pip requirements
+    [CLIMATE-821] - write_netcdf() assumes lat and lon are 1D arrays
+
+New Feature
+
+    [CLIMATE-246] - Develop PoweredBy Logo for OCW
+    [CLIMATE-367] - Add more 'new contributor' information
+    [CLIMATE-677] - Homebrew Formula for OCW
+    [CLIMATE-683] - A new loader to read multiple netCDF files with a file list and spatial mask
+    [CLIMATE-687] - A new loader to read GPM precipitation data with a file list
+    [CLIMATE-692] - A new loader to read NLDAS data with a file list
+    [CLIMATE-694] - A new module to rebin a dataset using time index
+    [CLIMATE-696] - Examples to evaluate CORDEX-ARCTIC RCMs
+    [CLIMATE-715] - Adding a new demo tab along with the evaluate and result so that user can see the demo of the ocw in this tab.
+    [CLIMATE-732] - Update dataset_processor.temporal_rebin
+    [CLIMATE-733] - Update run_RCMES.py
+    [CLIMATE-747] - Adding configuration files as an example of NASA's downscaling project
+    [CLIMATE-829] - Add conda package recipes
+
+Story
+
+    [CLIMATE-418] - Remove hard links to mailing lists
+
+Task
+
+    [CLIMATE-611] - SSL certificate verify error
+    [CLIMATE-659] - Remove SpatialMeanOfTemporalMeanBias
+    [CLIMATE-695] - Adding h5py library
+    [CLIMATE-782] - Resolve BeautifulSoup warnings in esgf data_source and add myproxyclient to easy-ocw install
+    [CLIMATE-831] - Add License Headers to conda recipes
+
+Test
+
+    [CLIMATE-679] - Statistical downscaling examples
+
+Wish
+
+    [CLIMATE-690] - Data Sources Class for NSIDC's Arctic Data Explorer Platform
+    [CLIMATE-691] - Provide link to RCMED Query Service Documentation from within RCMED data source Python docs
+
 Release Notes - Apache Open Climate Workbench - Version 1.0.0
 
 ** Sub-task
