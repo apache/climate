@@ -535,7 +535,7 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
         subset = out['subset']
 
         ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = self.dataset.spatial_boundaries()
-        start, end = self.dataset.time_range()
+        start, end = self.dataset.temporal_boundaries()
 
         self.assertEqual(ds_lat_min, subset[0])
         self.assertEqual(ds_lat_max, subset[1])
@@ -557,7 +557,7 @@ class TestEvaluationSettingsGeneration(unittest.TestCase):
         subset = out['subset']
 
         ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = self.dataset.spatial_boundaries()
-        start, end = self.dataset.time_range()
+        start, end = self.dataset.temporal_boundaries()
 
         self.assertEqual(ds_lat_min, subset[0])
         # Check that we actually used the different max lat value that we

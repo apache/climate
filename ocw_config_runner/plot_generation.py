@@ -141,11 +141,11 @@ def _draw_portrait_diagram(evaluation, plot_config):
 
 def _draw_time_series_plot(evaluation, plot_config):
     """"""
-    time_range_info = plot_config['time_range']
+    temporal_boundaries_info = plot_config['temporal_boundaries']
     ref_ds = evaluation.ref_dataset
     target_ds = evaluation.target_datasets
 
-    if time_range_info == 'monthly':
+    if temporal_boundaries_info == 'monthly':
         ref_ds.values, ref_ds.times = utils.calc_climatology_monthly(ref_ds)
 
         for t in target_ds:

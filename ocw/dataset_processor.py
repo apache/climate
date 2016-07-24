@@ -504,7 +504,7 @@ def safe_subset(subregion, target_dataset, subregion_name=None):
     '''
 
     lat_min, lat_max, lon_min, lon_max = target_dataset.spatial_boundaries()
-    start, end = target_dataset.time_range()
+    start, end = target_dataset.temporal_boundaries()
 
     if subregion.lat_min < lat_min:
         subregion.lat_min = lat_min
@@ -1372,7 +1372,7 @@ def _are_bounds_contained_by_dataset(bounds, dataset):
         a ValueError otherwise
     '''
     lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
-    start, end = dataset.time_range()
+    start, end = dataset.temporal_boundaries()
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry

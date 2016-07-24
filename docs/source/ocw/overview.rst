@@ -12,7 +12,7 @@ The Apache Open Climate Workbench toolkit aims to provide a suit of tools to mak
 Common Data Abstraction
 -----------------------
 
-The OCW :class:`dataset.Dataset` class is the primary data abstraction used throughout OCW. It facilitates the uniform handling of data throughout the toolkit and provides a few useful helper functions such as :func:`dataset.Dataset.spatial_boundaries` and :func:`dataset.Dataset.time_range`. Creating a new dataset object is straightforward but generally you will want to use an OCW data source to load the data for you.
+The OCW :class:`dataset.Dataset` class is the primary data abstraction used throughout OCW. It facilitates the uniform handling of data throughout the toolkit and provides a few useful helper functions such as :func:`dataset.Dataset.spatial_boundaries` and :func:`dataset.Dataset.temporal_boundaries`. Creating a new dataset object is straightforward but generally you will want to use an OCW data source to load the data for you.
 
 Data Sources
 ------------

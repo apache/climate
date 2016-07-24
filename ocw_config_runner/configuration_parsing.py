@@ -239,7 +239,7 @@ def _valid_plot_config_data(plot_config_data):
         ])
     elif plot_type == 'time_series':
         required_keys = set([
-            'time_range'
+            'temporal_boundaries'
         ])
     elif plot_type == 'portrait':
         required_keys = set([

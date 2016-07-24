@@ -91,7 +91,7 @@ class Dataset:
         return (float(numpy.min(self.lats)), float(numpy.max(self.lats)),
                 float(numpy.min(self.lons)), float(numpy.max(self.lons)))
 
-    def time_range(self):
+    def temporal_boundaries(self):
         '''Calculate the temporal range
 
         :returns: The start and end date of the Dataset's temporal range as
@@ -200,16 +200,16 @@ class Dataset:
 
     def __str__(self):
         lat_min, lat_max, lon_min, lon_max = self.spatial_boundaries()
-        start, end = self.time_range()
+        start, end = self.temporal_boundaries()
         lat_range = "({}, {})".format(lat_min, lon_min)
         lon_range = "({}, {})".format(lon_min, lon_min)
-        time_range = "({}, {})".format(start, end)
+        temporal_boundaries = "({}, {})".format(start, end)
 
         formatted_repr = (
             "<Dataset - name: {}, "
             "lat-range: {}, "
             "lon-range: {}, "
-            "time_range: {}, "
+            "temporal_boundaries: {}, "
             "var: {}, "
             "units: {}>"
         )
@@ -218,7 +218,7 @@ class Dataset:
             self.name if self.name != "" else None,
             lat_range,
             lon_range,
-            time_range,
+            temporal_boundaries,
             self.variable,
             self.units
         )
@@ -363,17 +363,17 @@ class Bounds(object):
     def __str__(self):
         lat_range = "({}, {})".format(self._lat_min, self._lat_max)
         lon_range = "({}, {})".format(self._lon_min, self._lon_max)
-        time_range = "({}, {})".format(self._start, self._end)
+        temporal_boundaries = "({}, {})".format(self._start, self._end)
 
         formatted_repr = (
             "<Bounds - "
             "lat-range: {}, "
             "lon-range: {}, "
-            "time_range: {}> "
+            "temporal_boundaries: {}> "
         )
 
         return formatted_repr.format(
             lat_range,
             lon_range,
-            time_range,
+            temporal_boundaries,
         )

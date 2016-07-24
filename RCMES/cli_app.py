@@ -457,8 +457,8 @@ def load_esgf_obs_screen(header):
                          'database':"{0}".format(netCDF_path),
                          'dataset_id':"esgf".format(esgf_variable),
                          'parameter_id':"{0}".format(esgf_variable),
-                         'start_date': obs_dataset.time_range()[0].strftime("%Y-%m-%d"),
-                         'end_date':obs_dataset.time_range()[1].strftime("%Y-%m-%d"),
+                         'start_date': obs_dataset.temporal_boundaries()[0].strftime("%Y-%m-%d"),
+                         'end_date':obs_dataset.temporal_boundaries()[1].strftime("%Y-%m-%d"),
                          #'bounding_box':obs['bounding_box'],
                          'timestep':"monthly",
                          'min_lat':obs_dataset.spatial_boundaries()[0],
@@ -798,8 +798,8 @@ def get_models_temp_bound():
     models_start_time = []
     models_end_time = []
     for model in model_datasets:
-         models_start_time.append(model.time_range()[0])
-         models_end_time.append(model.time_range()[1])
+         models_start_time.append(model.temporal_boundaries()[0])
+         models_end_time.append(model.temporal_boundaries()[1])
 
     return models_start_time, models_end_time
 

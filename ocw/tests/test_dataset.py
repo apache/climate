@@ -137,9 +137,9 @@ class TestDatasetFunctions(unittest.TestCase):
             self.test_dataset.spatial_boundaries(),
             (min(self.lat), max(self.lat), min(self.lon), max(self.lon)))
 
-    def test_time_range(self):
+    def test_temporal_boundaries(self):
         self.assertEqual(
-            self.test_dataset.time_range(),
+            self.test_dataset.temporal_boundaries(),
             (dt.datetime(2000, 1, 1), dt.datetime(2000, 12, 1)))
 
     def test_spatial_resolution(self):
@@ -187,16 +187,16 @@ class TestDatasetFunctions(unittest.TestCase):
     def test_str_(self):
         dataset = self.test_dataset
         lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
-        start, end = dataset.time_range()
+        start, end = dataset.temporal_boundaries()
         lat_range = "({}, {})".format(lat_min, lon_min)
         lon_range = "({}, {})".format(lon_min, lon_min)
-        time_range = "({}, {})".format(start, end)
+        temporal_boundaries = "({}, {})".format(start, end)
 
         formatted_repr = (
             "<Dataset - name: {}, "
             "lat-range: {}, "
             "lon-range: {}, "
-            "time_range: {}, "
+            "temporal_boundaries: {}, "
             "var: {}, "
             "units: {}>"
         )
@@ -205,7 +205,7 @@ class TestDatasetFunctions(unittest.TestCase):
             dataset.name if dataset.name != "" else None,
             lat_range,
             lon_range,
-            time_range,
+            temporal_boundaries,
             dataset.variable,
             dataset.units
         )
@@ -313,19 +313,19 @@ class TestBounds(unittest.TestCase):
     def test__str__(self):
         lat_range = "({}, {})".format(self.bounds.lat_min, self.bounds.lat_max)
         lon_range = "({}, {})".format(self.bounds.lon_min, self.bounds.lon_max)
-        time_range = "({}, {})".format(self.bounds.start, self.bounds.end)
+        temporal_boundaries = "({}, {})".format(self.bounds.start, self.bounds.end)
 
         formatted_repr = (
             "<Bounds - "
             "lat-range: {}, "
             "lon-range: {}, "
-            "time_range: {}> "
+            "temporal_boundaries: {}> "
         )
 
         output = formatted_repr.format(
             lat_range,
             lon_range,
-            time_range,
+            temporal_boundaries,
         )
         self.assertEqual(str(self.bounds), output)
 

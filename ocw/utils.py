@@ -374,8 +374,8 @@ def get_temporal_overlap(dataset_array):
     start_time = []
     end_time = []
     for dataset in dataset_array:
-        start_time.append(dataset.time_range()[0])
-        end_time.append(dataset.time_range()[1])
+        start_time.append(dataset.temporal_boundaries()[0])
+        end_time.append(dataset.temporal_boundaries()[1])
 
     return np.max(start_time), np.min(end_time)
 

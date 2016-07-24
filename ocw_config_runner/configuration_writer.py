@@ -199,7 +199,7 @@ def _extract_rcmed_dataset_info(dataset):
     dataset_info = {'optional_args': {}}
 
     min_lat, max_lat, min_lon, max_lon = dataset.spatial_boundaries()
-    start_time, end_time = dataset.time_range()
+    start_time, end_time = dataset.temporal_boundaries()
 
     dataset_info['data_source'] = 'rcmed'
     dataset_info['dataset_id'] = dataset.origin['dataset_id']
@@ -279,7 +279,7 @@ def _calc_subset_config(datasets):
 
     for ds in datasets:
         ds_lat_min, ds_lat_max, ds_lon_min, ds_lon_max = ds.spatial_boundaries()
-        ds_start, ds_end = ds.time_range()
+        ds_start, ds_end = ds.temporal_boundaries()
 
         if ds_lat_min < lat_min:
             lat_min = ds_lat_min

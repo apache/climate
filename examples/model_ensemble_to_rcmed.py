@@ -99,7 +99,7 @@ print("Calculating the Maximum Overlap in Time for the datasets")
 
 cru_start = datetime.datetime.strptime(cru_31['start_date'], "%Y-%m-%d")
 cru_end = datetime.datetime.strptime(cru_31['end_date'], "%Y-%m-%d")
-knmi_start, knmi_end = knmi_dataset.time_range()
+knmi_start, knmi_end = knmi_dataset.temporal_boundaries()
 # Set the Time Range to be the year 1989
 start_time = datetime.datetime(1989,1,1)
 end_time = datetime.datetime(1989,12,1)

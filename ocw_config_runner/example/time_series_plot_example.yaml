@@ -24,7 +24,7 @@ metrics:
 
 plots:
     - type: time_series
-      time_range: monthly
+      temporal_boundaries: monthly
 
 subregions:
     - [-10.0, 0.0, -19.0, 19.0]

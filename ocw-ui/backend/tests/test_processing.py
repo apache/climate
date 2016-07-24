@@ -88,7 +88,7 @@ class TestRCMEDDatasetLoad(unittest.TestCase):
     def test_valid_load(self):
         dataset = bp._load_rcmed_dataset_object(self.dataset_info, self.eval_bounds)
         lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
-        start_time, end_time = dataset.time_range()
+        start_time, end_time = dataset.temporal_boundaries()
 
         self.assertTrue(self.eval_bounds['lat_min'] <= lat_min)
         self.assertTrue(self.eval_bounds['lat_max'] >= lat_max)

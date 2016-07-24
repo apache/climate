@@ -556,7 +556,7 @@ class TestSafeSubset(unittest.TestCase):
     def test_partial_temporal_overlap(self):
         '''Ensure that safe_subset can handle out of bounds temporal values'''
         ds = dp.safe_subset(self.temporal_out_of_bounds, self.target_dataset)
-        temporal_bounds = ds.time_range()
+        temporal_bounds = ds.temporal_boundaries()
         start = datetime.datetime(2000, 1, 1)
         end = datetime.datetime(2009, 12, 1)
 
@@ -566,7 +566,7 @@ class TestSafeSubset(unittest.TestCase):
     def test_entire_bounds_overlap(self):
         ds = dp.safe_subset(self.everything_out_of_bounds, self.target_dataset)
         spatial_bounds = ds.spatial_boundaries()
-        temporal_bounds = ds.time_range()
+        temporal_bounds = ds.temporal_boundaries()
         start = datetime.datetime(2000, 1, 1)
         end = datetime.datetime(2009, 12, 1)
 
