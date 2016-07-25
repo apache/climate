@@ -92,18 +92,18 @@ class DatasetLoader:
         loader function.
         '''
         # Reference dataset config
-        self.set_reference(reference)
+        self.set_reference(**reference)
 
         # Target dataset(s) config
         self.set_targets(targets)
 
         # Default loaders
         self._source_loaders = {
-                    'local':local.load,
-                    'local_split':local.load_dataset_from_multiple_netcdf_files
+                    'local':local.load_file,
+                    'local_split':local.load_dataset_from_multiple_netcdf_files,
                     'local_multiple':local.load_multiple_files,
                     'esgf':esgf.load_dataset,
-                    'rcmed':parameter_dataset,
+                    'rcmed':rcmed.parameter_dataset,
                     'dap':dap.load
                     }
 
@@ -118,7 +118,7 @@ class DatasetLoader:
         return an OCW Dataset object.
         :type loader_func: :class:`callable`
         '''
-        self._source_loader[source_name] = loader_func
+        self._source_loaders[source_name] = loader_func
 
     def add_target(self, **kwargs):
         '''
@@ -152,7 +152,7 @@ class DatasetLoader:
         '''
         # This check allows for the user to enter targets as one block or
         # as a list of separate blocks in their config files
-        if not instanceof(targets, list):
+        if not isinstance(targets, list):
             targets = [targets]
         self._target_config = []
         self.add_targets(targets)
@@ -178,15 +178,15 @@ class DatasetLoader:
         self.target_datasets = []
 
         # Load the target datasets
-        for loader_params in self._target_config
+        for loader_params in self._target_config:
             output = self._load(**loader_params)
 
-                # Need to account for the fact that some loaders return lists
-                # of OCW Dataset objects instead of just one
-                if isinstance(target_dataset, list):
-                    self.target_datasets.extend(output)
-                else:
-                    self.target_datasets.append(output)
+            # Need to account for the fact that some loaders return lists
+            # of OCW Dataset objects instead of just one
+            if isinstance(output, list):
+                self.target_datasets.extend(output)
+            else:
+                self.target_datasets.append(output)
 
     def _load(self, **kwargs):
         '''
