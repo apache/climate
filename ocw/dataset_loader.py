@@ -199,4 +199,8 @@ class DatasetLoader:
         loader_func = self._source_loaders[data_source]
 
         # The remaining kwargs should be specific to the loader
-        return loader_func(**kwargs)
+        output = loader_func(**kwargs)
+
+        # Preserve data_source info for later use
+        kwargs['data_source'] = data_source
+        return output
