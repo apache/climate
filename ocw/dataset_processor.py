@@ -385,7 +385,7 @@ def subset(target_dataset, subregion, subregion_name=None):
         subregion.end = target_dataset.times[-1]
 
     # Ensure that the subregion information is well formed
-    _are_bounds_contained_by_dataset(subregion, target_dataset)
+    _are_bounds_contained_by_dataset(target_dataset, subregion)
 
     if not subregion_name:
         subregion_name = target_dataset.name
@@ -409,8 +409,8 @@ def subset(target_dataset, subregion, subregion_name=None):
 
     elif target_dataset.lats.ndim == 1 and target_dataset.lons.ndim == 1:
         # Get subregion indices into subregion data
-        dataset_slices = _get_subregion_slice_indices(subregion,
-                                                      target_dataset)
+        dataset_slices = _get_subregion_slice_indices(target_dataset,
+                                                      subregion)
         # Slice the values array with our calculated slice indices
         if target_dataset.values.ndim == 2:
             subset_values = ma.zeros([len(target_dataset.values[
@@ -526,7 +526,7 @@ def safe_subset(target_dataset, subregion, subregion_name=None):
         if subregion.end > end:
             subregion.end = end
 
-    return subset(subregion, target_dataset, subregion_name)
+    return subset(target_dataset, subregion, subregion_name)
 
 
 def normalize_dataset_datetimes(dataset, timestep):
@@ -1359,7 +1359,7 @@ def _congrid_neighbor(values, new_dims, minus_one, offset):
     return new_values
 
 
-def _are_bounds_contained_by_dataset(bounds, dataset):
+def _are_bounds_contained_by_dataset(dataset, bounds):
     '''Check if a Dataset fully contains a bounds.
 
     :param bounds: The Bounds object to check.
@@ -1418,7 +1418,7 @@ def _are_bounds_contained_by_dataset(bounds, dataset):
         raise ValueError(error_message)
 
 
-def _get_subregion_slice_indices(subregion, target_dataset):
+def _get_subregion_slice_indices(target_dataset, subregion):
     '''Get the indices for slicing Dataset values to generate the subregion.
 
     :param subregion: The Bounds that specify the subset of the Dataset

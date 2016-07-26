@@ -469,7 +469,7 @@ class TestSubset(unittest.TestCase):
 
     def test_subset_using_non_exact_spatial_bounds(self):
         index_slices = dp._get_subregion_slice_indices(
-            self.non_exact_spatial_subregion, self.target_dataset)
+            self.target_dataset, self.non_exact_spatial_subregion)
         control_index_slices = {"lat_start": 5,
                                 "lat_end": 84,
                                 "lon_start": 10,
@@ -480,7 +480,7 @@ class TestSubset(unittest.TestCase):
 
     def test_subset_using_non_exact_temporal_bounds(self):
         index_slices = dp._get_subregion_slice_indices(
-            self.non_exact_temporal_subregion, self.target_dataset)
+            self.target_dataset, self.non_exact_temporal_subregion)
         control_index_slices = {"lat_start": 5,
                                 "lat_end": 84,
                                 "lon_start": 10,
