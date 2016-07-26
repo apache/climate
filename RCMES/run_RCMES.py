@@ -159,9 +159,9 @@ month_start = time_info['month_start']
 month_end = time_info['month_end']
 average_each_year = time_info['average_each_year']
 
-ref_dataset = dsp.temporal_subset(month_start, month_end,ref_dataset,average_each_year)
+ref_dataset = dsp.temporal_subset(ref_dataset,month_start, month_end,average_each_year)
 for idata,dataset in enumerate(model_datasets):
-    model_datasets[idata] = dsp.temporal_subset(month_start, month_end,dataset,average_each_year)
+    model_datasets[idata] = dsp.temporal_subset(dataset,month_start, month_end,average_each_year)
 
 # generate grid points for regridding
 if config['regrid']['regrid_on_reference']:

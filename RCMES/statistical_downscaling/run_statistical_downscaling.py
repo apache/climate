@@ -132,9 +132,9 @@ print(model_info['future']['scenario_name']+':'+model_info['data_name'] +" value
 
 """ Step 2: Temporal subsetting """
 print("Temporal subsetting for the selected month(s)")
-ref_temporal_subset = dsp.temporal_subset(month_start, month_end, ref_dataset)
-model_temporal_subset_present = dsp.temporal_subset(month_start, month_end, model_dataset_present)
-model_temporal_subset_future = dsp.temporal_subset(month_start, month_end, model_dataset_future)
+ref_temporal_subset = dsp.temporal_subset(ref_dataset, month_start, month_end)
+model_temporal_subset_present = dsp.temporal_subset(model_dataset_present, month_start, month_end)
+model_temporal_subset_future = dsp.temporal_subset(model_dataset_future, month_start, month_end)
 
 """ Step 3: Spatial aggregation of observational data into the model grid """
 print("Spatial aggregation of observational data near latitude %0.2f and longitude %0.2f " % (grid_lat, grid_lon))

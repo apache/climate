@@ -37,22 +37,22 @@ class TestTemporalSubset(unittest.TestCase):
         self.dataset_times = np.array([datetime.datetime(year, month, 1)
                                        for year in range(2000, 2010)
                                        for month in range(1, 6)])
-        self.tempSubset = dp.temporal_subset(1, 5, self.ten_year_dataset)
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset, 1, 5)
         np.testing.assert_array_equal(
             self.dataset_times, self.tempSubset.times)
 
     def test_temporal_subset_with_average_time(self):
         self.dataset_times = np.array([datetime.datetime(year, 2, 1)
                                        for year in range(2000, 2010)])
-        self.tempSubset = dp.temporal_subset(1, 3,
-                                             self.ten_year_dataset,
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset,
+                                             1, 3,
                                              average_each_year=True)
         np.testing.assert_array_equal(self.dataset_times,
                                       self.tempSubset.times)
 
     def test_temporal_subset_with_average_values(self):
-        self.tempSubset = dp.temporal_subset(1, 3,
-                                             self.ten_year_dataset,
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset,
+                                             1, 3,
                                              average_each_year=True)
         self.dataset_values = np.ones([len(self.tempSubset.times),
                                        len(self.ten_year_dataset.lats),
@@ -61,8 +61,8 @@ class TestTemporalSubset(unittest.TestCase):
                                       self.tempSubset.values)
 
     def test_temporal_subset_attributes(self):
-        self.tempSubset = dp.temporal_subset(1, 3,
-                                             self.ten_year_dataset,
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset,
+                                             1, 3,
                                              average_each_year=True)
         self.assertEqual(self.tempSubset.name, self.ten_year_dataset.name)
         self.assertEqual(self.tempSubset.variable,
@@ -76,8 +76,8 @@ class TestTemporalSubset(unittest.TestCase):
     def test_temporal_subset_equal_start_end_month(self):
         self.dataset_times = np.array([datetime.datetime(year, 1, 1)
                                        for year in range(2000, 2010)])
-        self.tempSubset = dp.temporal_subset(1, 1,
-                                             self.ten_year_dataset,
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset,
+                                             1, 1,
                                              average_each_year=True)
         np.testing.assert_array_equal(self.dataset_times,
                                       self.tempSubset.times)
@@ -86,7 +86,7 @@ class TestTemporalSubset(unittest.TestCase):
         self.dataset_times = np.array([datetime.datetime(year, month, 1)
                                        for year in range(2000, 2010)
                                        for month in [1, 8, 9, 10, 11, 12]])
-        self.tempSubset = dp.temporal_subset(8, 1, self.ten_year_dataset)
+        self.tempSubset = dp.temporal_subset(self.ten_year_dataset, 8, 1)
         np.testing.assert_array_equal(
             self.dataset_times, self.tempSubset.times)
 
