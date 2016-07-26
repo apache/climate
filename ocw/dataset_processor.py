@@ -483,7 +483,7 @@ def temporal_slice(target_dataset, start_time_index, end_time_index):
     return target_dataset
 
 
-def safe_subset(subregion, target_dataset, subregion_name=None):
+def safe_subset(target_dataset, subregion, subregion_name=None):
     '''Safely subset given dataset with subregion information
 
     A standard subset requires that the provided subregion be entirely

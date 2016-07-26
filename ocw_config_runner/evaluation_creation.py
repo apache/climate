@@ -129,10 +129,10 @@ def _prepare_datasets_for_evaluation(reference, targets, config_data):
         bounds = Bounds(subset[0], subset[1], subset[2], subset[3], start, end)
 
         if reference:
-            reference = dsp.safe_subset(bounds, reference)
+            reference = dsp.safe_subset(reference, bounds)
 
         if targets:
-            targets = [dsp.safe_subset(bounds, t) for t in targets]
+            targets = [dsp.safe_subset(t, bounds) for t in targets]
 
     if temporal_time_delta:
         resolution = timedelta(temporal_time_delta)
