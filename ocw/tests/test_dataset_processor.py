@@ -206,9 +206,9 @@ class TestTemporalSlice(unittest.TestCase):
         end_index = 4
         dates = np.array([datetime.datetime(2000, month, 1)
                           for month in range(start_index + 1, end_index + 2)])
-        new_dataset = dp.temporal_slice(start_index,
-                                        end_index,
-                                        self.ten_year_dataset)
+        new_dataset = dp.temporal_slice(self.ten_year_dataset,
+                                        start_index,
+                                        end_index)
         np.testing.assert_array_equal(new_dataset.times, dates)
 
     def test_returned_dataset_values(self):
@@ -217,9 +217,9 @@ class TestTemporalSlice(unittest.TestCase):
         start_index = 1
         end_index = 4
         values = self.ten_year_dataset.values[start_index:end_index + 1]
-        new_dataset = dp.temporal_slice(start_index,
-                                        end_index,
-                                        self.ten_year_dataset)
+        new_dataset = dp.temporal_slice(self.ten_year_dataset,
+                                        start_index,
+                                        end_index)
         np.testing.assert_array_equal(new_dataset.values, values)
 
 

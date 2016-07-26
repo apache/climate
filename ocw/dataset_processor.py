@@ -395,7 +395,7 @@ def subset(target_dataset, subregion, subregion_name=None):
             target_dataset.times == subregion.start)[0][0]
         end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
         target_dataset = temporal_slice(
-            start_time_index, end_time_index, target_dataset)
+            target_dataset, start_time_index, end_time_index)
         nt, ny, nx = target_dataset.values.shape
         y_index, x_index = np.where(
             (target_dataset.lats >= subregion.lat_max) | (
@@ -455,7 +455,7 @@ def subset(target_dataset, subregion, subregion_name=None):
         )
 
 
-def temporal_slice(start_time_index, end_time_index, target_dataset):
+def temporal_slice(target_dataset, start_time_index, end_time_index):
     '''Temporally slice given dataset(s) with subregion information. This does not
     spatially subset the target_Dataset
 
