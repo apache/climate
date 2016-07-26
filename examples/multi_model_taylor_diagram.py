@@ -86,7 +86,7 @@ CRU31 = dsp.temporal_rebin(CRU31, temporal_resolution = 'monthly')
 for member, each_target_dataset in enumerate(target_datasets):
 	target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
 	target_datasets[member] = dsp.temporal_rebin(target_datasets[member], temporal_resolution = 'monthly') 
-	target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])	
+	target_datasets[member] = dsp.subset(target_datasets[member], EVAL_BOUNDS)
 	
 #Regrid
 print("... regrid")

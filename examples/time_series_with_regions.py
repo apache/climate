@@ -74,7 +74,7 @@ CRU31 = dsp.water_flux_unit_conversion(CRU31)
 CRU31 = dsp.normalize_dataset_datetimes(CRU31, 'monthly')
 
 for member, each_target_dataset in enumerate(target_datasets):
-	target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])
+	target_datasets[member] = dsp.subset(target_datasets[member], EVAL_BOUNDS)
 	target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
 	target_datasets[member] = dsp.normalize_dataset_datetimes(target_datasets[member], 'monthly')  		
 	
@@ -122,7 +122,7 @@ for regions in region_list:
 	firstTime = True
 	subset_name = regions[0]+"_CRU31"
 	#labels.append(subset_name) #for legend, uncomment this line
-	subset = dsp.subset(list_of_regions[region_counter], CRU31, subset_name)
+	subset = dsp.subset(CRU31, list_of_regions[region_counter], subset_name)
 	tSeries = utils.calc_time_series(subset)
 	results.append(tSeries)
 	tSeries=[]
@@ -130,7 +130,9 @@ for regions in region_list:
 	for member, each_target_dataset in enumerate(target_datasets):
 		subset_name = regions[0]+"_"+target_datasets[member].name
 		#labels.append(subset_name) #for legend, uncomment this line
-		subset = dsp.subset(list_of_regions[region_counter],target_datasets[member],subset_name)
+		subset = dsp.subset(target_datasets[member],
+							list_of_regions[region_counter],
+							subset_name)
 		tSeries = utils.calc_time_series(subset)
 		results.append(tSeries)
 		tSeries=[]

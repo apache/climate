@@ -272,11 +272,11 @@ class Evaluation(object):
 
     def _run_subregion_evaluation(self):
         results = []
-        new_refs = [DSP.subset(s, self.ref_dataset) for s in self.subregions]
+        new_refs = [DSP.subset(self.ref_dataset, s) for s in self.subregions]
 
         for target in self.target_datasets:
             results.append([])
-            new_targets = [DSP.subset(s, target) for s in self.subregions]
+            new_targets = [DSP.subset(target, s) for s in self.subregions]
 
             for metric in self.metrics:
                 results[-1].append([])
@@ -313,10 +313,11 @@ class Evaluation(object):
     def _run_subregion_unary_evaluation(self):
         unary_results = []
         if self.ref_dataset:
-            new_refs = [DSP.subset(s, self.ref_dataset) for s in self.subregions]
+            new_refs = [DSP.subset(self.ref_dataset, s)
+                        for s in self.subregions]
 
         new_targets = [
-            [DSP.subset(s, t) for s in self.subregions]
+            [DSP.subset(t, s) for s in self.subregions]
             for t in self.target_datasets
         ]
 

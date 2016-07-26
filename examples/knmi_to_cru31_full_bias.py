@@ -112,7 +112,7 @@ print("Our two datasets have a mis-match in time. We will subset on time to %s y
 
 # Create a Bounds object to use for subsetting
 new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
-knmi_dataset = dsp.subset(new_bounds, knmi_dataset)
+knmi_dataset = dsp.subset(knmi_dataset, new_bounds)
 
 print("CRU31_Dataset.values shape: (times, lats, lons) - %s" % (cru31_dataset.values.shape,))
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.values.shape,))

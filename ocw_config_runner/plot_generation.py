@@ -163,8 +163,8 @@ def _draw_time_series_plot(evaluation, plot_config):
             labels = []
 
             subset = dsp.subset(
-                bound,
                 ref_ds,
+                bound,
                 subregion_name="R{}_{}".format(bound_count, ref_ds.name)
             )
 
@@ -173,8 +173,8 @@ def _draw_time_series_plot(evaluation, plot_config):
 
             for t in target_ds:
                 subset = dsp.subset(
-                    bound,
                     t,
+                    bound,
                     subregion_name="R{}_{}".format(bound_count, t.name)
                 )
                 results.append(utils.calc_time_series(subset))

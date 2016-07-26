@@ -35,7 +35,7 @@ Subsetting is a great way to speed up your processing and keep useless data out 
 
 >>> import ocw.dataset_processor as dsp
 >>> new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
->>> knmi_dataset = dsp.subset(new_bounds, knmi_dataset)
+>>> knmi_dataset = dsp.subset(knmi_dataset, new_bounds)
 
 Temporally re-binning a dataset is great when the time step of the data is too fine grain for the desired use. For instance, perhaps we want to see a yearly trend but we have daily data. We would need to make the following call to adjust our dataset::
 

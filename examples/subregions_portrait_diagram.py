@@ -76,7 +76,7 @@ print("... on units")
 CRU31 = dsp.water_flux_unit_conversion(CRU31)
 
 for member, each_target_dataset in enumerate(target_datasets):
-	target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])	
+	target_datasets[member] = dsp.subset(target_datasets[member], EVAL_BOUNDS)
 	target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
 	target_datasets[member] = dsp.normalize_dataset_datetimes(target_datasets[member], 'monthly') 		
 		

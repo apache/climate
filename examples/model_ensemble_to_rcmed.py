@@ -131,8 +131,8 @@ cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution = 'annual'
 new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
 # Subset our model datasets so they are the same size
-knmi_dataset = dsp.subset(new_bounds, knmi_dataset)
-wrf311_dataset = dsp.subset(new_bounds, wrf311_dataset)
+knmi_dataset = dsp.subset(knmi_dataset, new_bounds)
+wrf311_dataset = dsp.subset(wrf311_dataset, new_bounds)
 
 """ Spatially Regrid the Dataset Objects to a 1/2 degree grid """
 # Using the bounds we will create a new set of lats and lons on 1/2 degree step

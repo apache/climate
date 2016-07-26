@@ -62,8 +62,8 @@ wrf_dataset = dsp.normalize_dataset_datetimes(wrf_dataset, 'monthly')
 # make a Bounds object and use it to subset our datasets.
 ################################################################################
 subset = Bounds(-45, 42, -24, 60, datetime.datetime(1989, 1, 1), datetime.datetime(1989, 12, 1))
-knmi_dataset = dsp.subset(subset, knmi_dataset)
-wrf_dataset = dsp.subset(subset, wrf_dataset)
+knmi_dataset = dsp.subset(knmi_dataset, subset)
+wrf_dataset = dsp.subset(wrf_dataset, subset)
 
 # Temporally re-bin the data into a monthly timestep.
 ################################################################################

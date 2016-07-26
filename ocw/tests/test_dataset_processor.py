@@ -450,7 +450,7 @@ class TestSubset(unittest.TestCase):
         )
 
     def test_subset(self):
-        subset = dp.subset(self.subregion, self.target_dataset)
+        subset = dp.subset(self.target_dataset, self.subregion)
         self.assertEqual(subset.lats.shape[0], 82)
         self.assertSequenceEqual(list(np.array(range(-81, 82, 2))),
                                  list(subset.lats))
@@ -459,12 +459,12 @@ class TestSubset(unittest.TestCase):
         self.assertEqual(subset.values.shape, (37, 82, 162))
 
     def test_subset_name(self):
-        subset = dp.subset(self.subregion, self.target_dataset)
+        subset = dp.subset(self.target_dataset, self.subregion)
         self.assertEqual(subset.name, self.name)
 
     def test_subset_name_propagation(self):
         subset_name = 'foo_subset_name'
-        subset = dp.subset(self.subregion, self.target_dataset, subset_name)
+        subset = dp.subset(self.target_dataset, self.subregion, subset_name)
         self.assertEqual(subset.name, subset_name)
 
     def test_subset_using_non_exact_spatial_bounds(self):
@@ -494,7 +494,7 @@ class TestSubset(unittest.TestCase):
             -81, 81,
             -161, 161,
         )
-        subset = dp.subset(self.subregion, self.target_dataset)
+        subset = dp.subset(self.target_dataset, self.subregion)
         times = np.array([datetime.datetime(year, month, 1)
                           for year in range(2000, 2010)
                           for month in range(1, 13)])
@@ -594,32 +594,32 @@ class TestFailingSubset(unittest.TestCase):
     def test_out_of_dataset_bounds_lat_min(self):
         self.subregion.lat_min = -90
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lat_max(self):
         self.subregion.lat_max = 90
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lon_min(self):
         self.subregion.lon_min = -180
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lon_max(self):
         self.subregion.lon_max = 180
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_start(self):
         self.subregion.start = datetime.datetime(1999, 1, 1)
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_end(self):
         self.subregion.end = datetime.datetime(2011, 1, 1)
         with self.assertRaises(ValueError):
-            dp.subset(self.subregion, self.target_dataset)
+            dp.subset(self.target_dataset, self.subregion)
 
 
 class TestNetCDFWrite(unittest.TestCase):

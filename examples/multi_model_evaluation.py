@@ -91,7 +91,7 @@ CRU31 = dsp.water_flux_unit_conversion(CRU31)
 CRU31 = dsp.temporal_rebin(CRU31, datetime.timedelta(days=30))
 
 for member, each_target_dataset in enumerate(target_datasets):
-  target_datasets[member] = dsp.subset(EVAL_BOUNDS, target_datasets[member])
+  target_datasets[member] = dsp.subset(target_datasets[member], EVAL_BOUNDS)
   target_datasets[member] = dsp.water_flux_unit_conversion(target_datasets[member])
   target_datasets[member] = dsp.temporal_rebin(target_datasets[member], datetime.timedelta(days=30))    
     

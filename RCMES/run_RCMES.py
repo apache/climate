@@ -146,11 +146,11 @@ if ref_data_info['data_source'] == 'rcmed':
     max_lon = np.min([max_lon, ref_dataset.lons.max()])
 bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
-ref_dataset = dsp.subset(bounds,ref_dataset)
+ref_dataset = dsp.subset(ref_dataset, bounds)
 if ref_dataset.temporal_resolution() != temporal_resolution:
     ref_dataset = dsp.temporal_rebin(ref_dataset, temporal_resolution)
 for idata,dataset in enumerate(model_datasets):
-    model_datasets[idata] = dsp.subset(bounds,dataset)
+    model_datasets[idata] = dsp.subset(dataset, bounds)
     if dataset.temporal_resolution() != temporal_resolution:
         model_datasets[idata] = dsp.temporal_rebin(dataset, temporal_resolution)
 

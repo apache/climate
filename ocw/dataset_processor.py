@@ -362,7 +362,7 @@ def ensemble(datasets):
     return ensemble_dataset
 
 
-def subset(subregion, target_dataset, subregion_name=None):
+def subset(target_dataset, subregion, subregion_name=None):
     '''Subset given dataset(s) with subregion information
 
     :param subregion: The Bounds with which to subset the target Dataset.
