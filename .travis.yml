@@ -24,6 +24,7 @@ install:
   - source easy-ocw/install-ubuntu.sh
   - pip install python-coveralls
 script:
-  - nosetests --with-coverage --cover-package=ocw --nocapture -v
+   - chmod a+x test.sh
+   - ./test.sh
 after_script:
   - coveralls
