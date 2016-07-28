@@ -15,9 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-numpy>=1.10.4
-scipy>=0.17.0
-matplotlib>=1.5.1
-basemap>=1.0.7
-netcdf4>=1.2.2
-h5py>=2.6.0
+set -e  # causes the shell to exit if any subcommand or pipeline returns a non-zero status.
+echo ""
+echo "---------------- Running Smoke Tests ---------------"
+python test_smoke.py
+echo "---------------- Smoke Tests Successfully Completed---------------"
+echo ""
+echo "---------------- Running Unit Tests ---------------"
+nosetests -v --with-coverage --cover-package=ocw --nocapture
+echo "---------------- All Tests successfully completed ---------------"
+
