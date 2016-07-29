@@ -25,6 +25,7 @@ import ocw.data_source.esgf as esgf
 import ocw.data_source.rcmed as rcmed
 import ocw.data_source.dap as dap
 
+
 class DatasetLoader:
     '''Generate OCW Dataset objects from a variety of sources.'''
 
@@ -99,13 +100,13 @@ class DatasetLoader:
 
         # Default loaders
         self._source_loaders = {
-                    'local':local.load_file,
-                    'local_split':local.load_dataset_from_multiple_netcdf_files,
-                    'local_multiple':local.load_multiple_files,
-                    'esgf':esgf.load_dataset,
-                    'rcmed':rcmed.parameter_dataset,
-                    'dap':dap.load
-                    }
+            'local': local.load_file,
+            'local_split': local.load_dataset_from_multiple_netcdf_files,
+            'local_multiple': local.load_multiple_files,
+            'esgf': esgf.load_dataset,
+            'rcmed': rcmed.parameter_dataset,
+            'dap': dap.load
+        }
 
     def add_source_loader(self, source_name, loader_func):
         '''
