@@ -13,6 +13,7 @@ Contents:
 
    ocw/overview
    ocw/dataset
+   ocw/dataset_loader
    ocw/dataset_processor
    ocw/evaluation
    ocw/metrics
@@ -33,4 +34,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
