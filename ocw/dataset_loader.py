@@ -70,9 +70,9 @@ class DatasetLoader:
                         Evaluation System Database
         * ``'dap'`` - Download the dataset from an OPeNDAP URL
 
-        Users who wish to download datasets from loaders not described above
-        may define their own custom dataset loader function and incorporate it
-        as follows:
+        Users who wish to load datasets from loaders not described above may
+        define their own custom dataset loader function and incorporate it as
+        follows:
         >>> loader.add_source_loader('my_loader_name', my_loader_func)
 
         :param loader_opts: Dictionaries containing the each dataset loader
@@ -85,7 +85,7 @@ class DatasetLoader:
         :raises KeyError: If an invalid argument is passed to a data source
         loader function.
         '''
-        # Reference dataset config
+        # dataset loader config
         self.set_loader_opts(*loader_opts)
 
         # Default loaders
@@ -101,11 +101,12 @@ class DatasetLoader:
         '''
         Add a custom source loader.
 
-        :param source_name: The name of the data source.
-        :type source_name: :mod:`string`
+        :param loader_name: The name of the data source.
+        :type loader_name: :mod:`string`
 
         :param loader_func: Reference to a custom defined function. This should
-        return an OCW Dataset object.
+        return an OCW Dataset object, and have an origin which satisfies
+        origin['source'] == loader_name.
         :type loader_func: :class:`callable`
         '''
         self._source_loaders[loader_name] = loader_func
@@ -113,8 +114,7 @@ class DatasetLoader:
     def add_loader_opts(self, *loader_opts):
         '''
         A convenient means of adding loader options for each dataset to the
-        loader. If 'loader_name' is not entered as a keyword argument, then
-        'local' is used by default.
+        loader.
 
         :param loader_opts: Dictionaries containing the each dataset loader
                             configuration, representing the keyword arguments of
@@ -150,7 +150,7 @@ class DatasetLoader:
         # prevent duplicates.
         self.datasets = []
 
-        # Load the target datasets
+        # Load the datasets
         for loader_opt in self._config:
             output = self._load(**loader_opt)
 
