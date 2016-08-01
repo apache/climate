@@ -39,7 +39,7 @@ from getpass import getpass
 
 from metrics_and_plots import *
 
-import ssl 
+import ssl
 
 if hasattr(ssl, '_create_unverified_context'):
   ssl._create_default_https_context = ssl._create_unverified_context
@@ -107,12 +107,13 @@ if 'longitude_name' in model_data_info.keys():
 boundary_check_model = True
 if 'GCM_data' in model_data_info.keys():
     if model_data_info['GCM_data']:
-        boundary_check_model = False                                           
+        boundary_check_model = False
 print 'Loading model datasets:\n',model_data_info
 if model_data_info['data_source'] == 'local':
-    model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
-                                                            variable_name =model_data_info['variable'], 
-                                                            lat_name=model_lat_name, lon_name=model_lon_name)
+    model_datasets = local.load_multiple_files(file_path=model_data_info['path'],
+                                               variable_name =model_data_info['variable'],
+                                               lat_name=model_lat_name, lon_name=model_lon_name)
+    model_names = [dataset.name for dataset in model_datasets]
 elif model_data_info['data_source'] == 'ESGF':
       md = esgf.load_dataset(dataset_id=model_data_info['dataset_id'],
                              variable=model_data_info['variable'],
@@ -166,7 +167,7 @@ for idata,dataset in enumerate(model_datasets):
 # generate grid points for regridding
 if config['regrid']['regrid_on_reference']:
     new_lat = ref_dataset.lats
-    new_lon = ref_dataset.lons 
+    new_lon = ref_dataset.lons
 else:
     delta_lat = config['regrid']['regrid_dlat']
     delta_lon = config['regrid']['regrid_dlon']
@@ -178,7 +179,7 @@ else:
 # number of models
 nmodel = len(model_datasets)
 print 'Dataset loading completed'
-print 'Observation data:', ref_name 
+print 'Observation data:', ref_name
 print 'Number of model datasets:',nmodel
 for model_name in model_names:
     print model_name
@@ -200,7 +201,7 @@ print 'Checking and converting variable units'
 ref_dataset = dsp.variable_unit_conversion(ref_dataset)
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.variable_unit_conversion(dataset)
-    
+
 
 print 'Generating multi-model ensemble'
 if len(model_datasets) >= 2.:
@@ -217,8 +218,8 @@ if config['use_subregions']:
 
     print 'Calculating spatial averages and standard deviations of ',str(nsubregion),' subregions'
 
-    ref_subregion_mean, ref_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std([ref_dataset], subregions) 
-    model_subregion_mean, model_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std(model_datasets, subregions) 
+    ref_subregion_mean, ref_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std([ref_dataset], subregions)
+    model_subregion_mean, model_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std(model_datasets, subregions)
 
 """ Step 7: Write a netCDF file """
 workdir = config['workdir']
@@ -231,7 +232,7 @@ if not os.path.exists(workdir):
 if config['use_subregions']:
     dsp.write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, model_datasets, model_names,
                                                        path=workdir+config['output_netcdf_filename'],
-                                                       subregions=subregions, subregion_array = subregion_array, 
+                                                       subregions=subregions, subregion_array = subregion_array,
                                                        ref_subregion_mean=ref_subregion_mean, ref_subregion_std=ref_subregion_std,
                                                        model_subregion_mean=model_subregion_mean, model_subregion_std=model_subregion_std)
 else:
@@ -279,5 +280,3 @@ if nmetrics > 0:
                                       file_name)
         else:
             print 'please check the currently supported metrics'
-
-
