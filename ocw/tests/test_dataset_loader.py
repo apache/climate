@@ -17,7 +17,6 @@
 
 import unittest
 import os
-import copy
 import netCDF4
 import numpy as np
 from ocw.dataset import Dataset
@@ -37,13 +36,8 @@ class TestDatasetLoader(unittest.TestCase):
         self.values2 = self.values + 1
 
         # Set up config
-        self.reference_config = {'data_source': 'local',
-                                 'file_path': self.file_path,
-                                 'variable_name': 'value'}
-        self.target_config = copy.deepcopy(self.reference_config)
-        self.no_data_source_config = {'file_path': self.file_path,
-                                      'variable_name': 'value'}
-        self.new_data_source_config = {'data_source': 'foo',
+        self.config = {'file_path': self.file_path, 'variable_name': 'value'}
+        self.new_data_source_config = {'loader_name': 'foo',
                                        'lats': self.latitudes,
                                        'lons': self.longitudes,
                                        'times': self.times,
@@ -53,77 +47,45 @@ class TestDatasetLoader(unittest.TestCase):
     def tearDown(self):
         os.remove(self.file_path)
 
-    def testInputHasDataSource(self):
-        '''
-        Make sure input data source is specified for each dataset to be loaded
-        '''
-        with self.assertRaises(KeyError):
-            self.loader = DatasetLoader(self.reference_config,
-                                        self.no_data_source_config)
-
-    def testReferenceHasDataSource(self):
-        '''
-        Make sure ref data source is specified for each dataset to be loaded
-        '''
-        with self.assertRaises(KeyError):
-            self.loader = DatasetLoader(self.reference_config,
-                                        self.target_config)
-            self.loader.set_reference(**self.no_data_source_config)
-
-    def testTargetHasDataSource(self):
-        '''
-        Make sure target data source is specified for each dataset to be loaded
-        '''
-        with self.assertRaises(KeyError):
-            self.loader = DatasetLoader(self.reference_config,
-                                        self.target_config)
-            self.loader.add_target(**self.no_data_source_config)
-
     def testNewDataSource(self):
         '''
         Ensures that custom data source loaders can be added
         '''
-        self.loader = DatasetLoader(self.new_data_source_config,
-                                    self.target_config)
+        self.loader = DatasetLoader(self.new_data_source_config)
 
-        # Here the the data_source "foo" represents the Dataset constructor
+        # Here the data_source "foo" represents the Dataset constructor
         self.loader.add_source_loader('foo', build_dataset)
         self.loader.load_datasets()
-        self.assertEqual(self.loader.reference_dataset.origin['source'],
-                         'foo')
-        np.testing.assert_array_equal(self.loader.reference_dataset.values,
+        self.assertEqual(self.loader.datasets[0].origin['source'], 'foo')
+        np.testing.assert_array_equal(self.loader.datasets[0].values,
                                       self.values2)
 
     def testExistingDataSource(self):
         '''
         Ensures that existing data source loaders can be added
         '''
-        self.loader = DatasetLoader(self.reference_config,
-                                    self.target_config)
+        self.loader = DatasetLoader(self.config)
         self.loader.load_datasets()
-        self.assertEqual(self.loader.reference_dataset.origin['source'],
-                         'local')
-        np.testing.assert_array_equal(self.loader.reference_dataset.values,
+        self.assertEqual(self.loader.datasets[0].origin['source'], 'local')
+        np.testing.assert_array_equal(self.loader.datasets[0].values,
                                       self.values)
 
-    def testMultipleTargets(self):
+    def testMultipleDataSources(self):
         '''
-        Test for when multiple target dataset configs are specified
+        Test for when multiple dataset configs are specified
         '''
-        self.loader = DatasetLoader(self.reference_config,
-                                    [self.target_config,
-                                     self.new_data_source_config])
+        self.loader = DatasetLoader(self.config, self.new_data_source_config)
 
-        # Here the the data_source "foo" represents the Dataset constructor
+        # Here the data_source "foo" represents the Dataset constructor
         self.loader.add_source_loader('foo', build_dataset)
         self.loader.load_datasets()
-        self.assertEqual(self.loader.target_datasets[0].origin['source'],
+        self.assertEqual(self.loader.datasets[0].origin['source'],
                          'local')
-        self.assertEqual(self.loader.target_datasets[1].origin['source'],
+        self.assertEqual(self.loader.datasets[1].origin['source'],
                          'foo')
-        np.testing.assert_array_equal(self.loader.target_datasets[0].values,
+        np.testing.assert_array_equal(self.loader.datasets[0].values,
                                       self.values)
-        np.testing.assert_array_equal(self.loader.target_datasets[1].values,
+        np.testing.assert_array_equal(self.loader.datasets[1].values,
                                       self.values2)
 
 def build_dataset(*args, **kwargs):
