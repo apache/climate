@@ -144,7 +144,7 @@ if ref_data_info['data_source'] == 'rcmed':
     max_lat = np.min([max_lat, ref_dataset.lats.max()])
     min_lon = np.max([min_lon, ref_dataset.lons.min()])
     max_lon = np.min([max_lon, ref_dataset.lons.max()])
-bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
+bounds = Bounds(lat_min=min_lat, lat_max=max_lat, lon_min=min_lon, lon_max=max_lon, start=start_time, end=end_time)
 
 ref_dataset = dsp.subset(ref_dataset, bounds)
 if ref_dataset.temporal_resolution() != temporal_resolution:

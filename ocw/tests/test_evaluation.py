@@ -98,9 +98,9 @@ class TestEvaluation(unittest.TestCase):
 
     def test_valid_subregion(self):
         bound = Bounds(
-            -10, 10,
-            -20, 20,
-            dt.datetime(2000, 1, 1), dt.datetime(2001, 1, 1))
+            lat_min=-10, lat_max=10,
+            lon_min=-20, lon_max=20,
+            start=dt.datetime(2000, 1, 1), end=dt.datetime(2001, 1, 1))
 
         self.eval.subregions = [bound, bound]
         self.assertEquals(len(self.eval.subregions), 2)
@@ -198,9 +198,9 @@ class TestEvaluation(unittest.TestCase):
 
     def test_subregion_result_shape(self):
         bound = Bounds(
-            10, 18,
-            100, 108,
-            dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+            lat_min=10, lat_max=18,
+            lon_min=100, lon_max=108,
+            start=dt.datetime(2000, 1, 1), end=dt.datetime(2000, 3, 1))
 
         bias_eval = Evaluation(
             self.test_dataset,
@@ -223,9 +223,9 @@ class TestEvaluation(unittest.TestCase):
 
     def test_subregion_unary_result_shape(self):
         bound = Bounds(
-            10, 18,
-            100, 108,
-            dt.datetime(2000, 1, 1), dt.datetime(2000, 3, 1))
+            lat_min=10, lat_max=18,
+            lon_min=100, lon_max=108,
+            start=dt.datetime(2000, 1, 1), end=dt.datetime(2000, 3, 1))
 
         new_eval = Evaluation(
             self.test_dataset,

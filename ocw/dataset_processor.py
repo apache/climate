@@ -383,57 +383,58 @@ def subset(target_dataset, subregion, subregion_name=None):
     if not subregion.start:
         subregion.start = target_dataset.times[0]
         subregion.end = target_dataset.times[-1]
-
-    # Ensure that the subregion information is well formed
-    _are_bounds_contained_by_dataset(target_dataset, subregion)
-
+    
     if not subregion_name:
         subregion_name = target_dataset.name
 
-    if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
-        start_time_index = np.where(
-            target_dataset.times == subregion.start)[0][0]
-        end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
-        target_dataset = temporal_slice(
-            target_dataset, start_time_index, end_time_index)
-        nt, ny, nx = target_dataset.values.shape
-        y_index, x_index = np.where(
-            (target_dataset.lats >= subregion.lat_max) | (
-                target_dataset.lats <= subregion.lat_min) |
-            (target_dataset.lons >= subregion.lon_max) | (
-                target_dataset.lons <= subregion.lon_min))
-        for it in np.arange(nt):
-            target_dataset.values[it, y_index, x_index] = 1.e+20
-        target_dataset.values = ma.masked_equal(target_dataset.values, 1.e+20)
-        return target_dataset
+    if subregion.lat_min:
+        # If boundary_type is 'rectangular' or 'CORDEX ***', ensure that the subregion information is well formed
+        _are_bounds_contained_by_dataset(target_dataset, subregion)
 
-    elif target_dataset.lats.ndim == 1 and target_dataset.lons.ndim == 1:
-        # Get subregion indices into subregion data
-        dataset_slices = _get_subregion_slice_indices(target_dataset,
-                                                      subregion)
-        # Slice the values array with our calculated slice indices
-        if target_dataset.values.ndim == 2:
-            subset_values = ma.zeros([len(target_dataset.values[
-                dataset_slices["lat_start"]:dataset_slices["lat_end"]]),
-                len(target_dataset.values[
-                    dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+        if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
+            start_time_index = np.where(
+                target_dataset.times == subregion.start)[0][0]
+            end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
+            target_dataset = temporal_slice(
+                target_dataset, start_time_index, end_time_index)
+            nt, ny, nx = target_dataset.values.shape
+            y_index, x_index = np.where(
+                (target_dataset.lats >= subregion.lat_max) | (
+                    target_dataset.lats <= subregion.lat_min) |
+                (target_dataset.lons >= subregion.lon_max) | (
+                    target_dataset.lons <= subregion.lon_min))
+            for it in np.arange(nt):
+                target_dataset.values[it, y_index, x_index] = 1.e+20
+            target_dataset.values = ma.masked_equal(target_dataset.values, 1.e+20)
+            return target_dataset
 
-            subset_values = target_dataset.values[
-                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
-
-        elif target_dataset.values.ndim == 3:
-            subset_values = ma.zeros([len(target_dataset.values[
-                dataset_slices["time_start"]:dataset_slices["time_end"]]),
-                len(target_dataset.values[
+        elif target_dataset.lats.ndim == 1 and target_dataset.lons.ndim == 1:
+            # Get subregion indices into subregion data
+            dataset_slices = _get_subregion_slice_indices(target_dataset,
+                                                          subregion)
+            # Slice the values array with our calculated slice indices
+            if target_dataset.values.ndim == 2:
+                subset_values = ma.zeros([len(target_dataset.values[
                     dataset_slices["lat_start"]:dataset_slices["lat_end"]]),
-                len(target_dataset.values[
-                    dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+                    len(target_dataset.values[
+                        dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
 
-            subset_values = target_dataset.values[
-                dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
-                dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
-                dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+                subset_values = target_dataset.values[
+                    dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                    dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
+
+            elif target_dataset.values.ndim == 3:
+                subset_values = ma.zeros([len(target_dataset.values[
+                    dataset_slices["time_start"]:dataset_slices["time_end"]]),
+                    len(target_dataset.values[
+                        dataset_slices["lat_start"]:dataset_slices["lat_end"]]),
+                    len(target_dataset.values[
+                        dataset_slices["lon_start"]:dataset_slices["lon_end"]])])
+
+                subset_values = target_dataset.values[
+                    dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
+                    dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
+                    dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
 
         # Build new dataset with subset information
         return ds.Dataset(
@@ -505,18 +506,18 @@ def safe_subset(target_dataset, subregion, subregion_name=None):
 
     lat_min, lat_max, lon_min, lon_max = target_dataset.spatial_boundaries()
     start, end = target_dataset.temporal_boundaries()
+    if subregion.lat_min:
+        if subregion.lat_min < lat_min:
+            subregion.lat_min = lat_min
 
-    if subregion.lat_min < lat_min:
-        subregion.lat_min = lat_min
+        if subregion.lat_max > lat_max:
+            subregion.lat_max = lat_max
 
-    if subregion.lat_max > lat_max:
-        subregion.lat_max = lat_max
+        if subregion.lon_min < lon_min:
+            subregion.lon_min = lon_min
 
-    if subregion.lon_min < lon_min:
-        subregion.lon_min = lon_min
-
-    if subregion.lon_max > lon_max:
-        subregion.lon_max = lon_max
+        if subregion.lon_max > lon_max:
+            subregion.lon_max = lon_max
 
     if subregion.start:
         if subregion.start < start:

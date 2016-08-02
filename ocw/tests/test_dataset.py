@@ -214,120 +214,58 @@ class TestDatasetFunctions(unittest.TestCase):
 
 class TestBounds(unittest.TestCase):
     def setUp(self):
-        self.bounds = Bounds(-80, 80,                # Lats
-                             -160, 160,               # Lons
-                             dt.datetime(2000, 1, 1),  # Start time
-                             dt.datetime(2002, 1, 1))  # End time
-        self.another_bounds = Bounds(-80, 80,                # Lats
-                                     -160, 160)
+        self.bounds_rectangular = Bounds(lat_min=-80, lat_max=80,                # Lats
+                             lon_min=-160, lon_max=160,               # Lons
+                             start=dt.datetime(2000, 1, 1),  # Start time
+                             end=dt.datetime(2002, 1, 1))  # End time
+        self.bounds_CORDEX = Bounds(boundary_type='CORDEX South Asia')
+        self.bounds_us_states = Bounds(boundary_type='us_states', us_states=['CA','NV','AZ'])
+        self.bounds_countries = Bounds(boundary_type='countries', countries=['United States','Canada','Mexico'])
 
-    def test_setter_methods(self):
-        self.bounds.lat_min = -10
-        self.bounds.lat_max = 10
-        self.bounds.lon_min = -120
-        self.bounds.lon_max = 120
-        self.bounds.start = dt.datetime(2000, 1, 2)
-        self.bounds.end = dt.datetime(2002, 1, 4)
+    def test_keywords(self):
+        self.assertEqual(self.bounds_rectangular.boundary_type, 'rectangular')
+        self.assertEqual(self.bounds_rectangular.lat_min, -80)
+        self.assertEqual(self.bounds_rectangular.lat_max, 80)
+        self.assertEqual(self.bounds_rectangular.lon_min, -160)
+        self.assertEqual(self.bounds_rectangular.lon_max, 160)
+        self.assertEqual(self.bounds_rectangular.start, dt.datetime(2000,1,1))
+        self.assertEqual(self.bounds_rectangular.end, dt.datetime(2002,1,1))
 
-        self.assertEqual(self.bounds.lat_min, -10)
-        self.assertEqual(self.bounds.lat_max, 10)
-        self.assertEqual(self.bounds.lon_min, -120)
-        self.assertEqual(self.bounds.lon_max, 120)
-        self.assertEqual(self.bounds.start, dt.datetime(2000, 1, 2))
-        self.assertEqual(self.bounds.end, dt.datetime(2002, 1, 4))
-
-    # Latitude tests
-    def test_inverted_min_max_lat(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lat_min = 81
-
-        with self.assertRaises(ValueError):
-            self.bounds.lat_max = -81
-
-    # Lat Min
-    def test_out_of_bounds_lat_min(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lat_min = -91
-
-        with self.assertRaises(ValueError):
-            self.bounds.lat_min = 91
-
-    # Lat Max
-    def test_out_of_bounds_lat_max(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lat_max = -91
-
-        with self.assertRaises(ValueError):
-            self.bounds.lat_max = 91
-
-    # Longitude tests
-    def test_inverted_max_max_lon(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lon_min = 161
-
-        with self.assertRaises(ValueError):
-            self.bounds.lon_max = -161
-
-    # Lon Min
-    def test_out_of_bounds_lon_min(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lon_min = -181
-
-        with self.assertRaises(ValueError):
-            self.bounds.lon_min = 181
-
-    # Lon Max
-    def test_out_of_bounds_lon_max(self):
-        with self.assertRaises(ValueError):
-            self.bounds.lon_max = -181
-
-        with self.assertRaises(ValueError):
-            self.bounds.lon_max = 181
+        self.assertEqual(self.bounds_CORDEX.boundary_type, 'CORDEX South Asia')
+        self.assertEqual(self.bounds_CORDEX.lat_min, -15.23)
+        self.assertEqual(self.bounds_CORDEX.lat_max, 45.07)
+        self.assertEqual(self.bounds_CORDEX.lon_min, 19.88)
+        self.assertEqual(self.bounds_CORDEX.lon_max, 115.55)
+        
+        self.assertEqual(self.bounds_us_states.boundary_type, 'us_states')
+        
+        self.assertEqual(self.bounds_countries.boundary_type, 'countries')
 
     # Temporal tests
     def test_inverted_start_end_times(self):
         with self.assertRaises(ValueError):
-            self.bounds.start = dt.datetime(2003, 1, 1)
+            self.bounds_rectangular.start = dt.datetime(2003, 1, 1)
 
         with self.assertRaises(ValueError):
-            self.bounds.end = dt.datetime(1999, 1, 1)
+            self.bounds_rectangular.end = dt.datetime(1999, 1, 1)
 
     # Start tests
     def test_invalid_start(self):
         with self.assertRaises(ValueError):
-            self.bounds.start = "This is not a date time object"
+            self.bounds_rectangular.start = "This is not a date time object"
 
     # End tests
     def test_invalid_end(self):
         with self.assertRaises(ValueError):
-            self.bounds.end = "This is not a date time object"
+            self.bounds_rectangular.end = "This is not a date time object"
 
     # Start tests
     def test_none_value_start(self):
-        self.assertEqual(self.another_bounds.start, None)
+        self.assertEqual(self.bounds_CORDEX.start, None)
 
     # End tests
     def test_none_value_end(self):
-        self.assertEqual(self.another_bounds.end, None)
-
-    def test__str__(self):
-        lat_range = "({}, {})".format(self.bounds.lat_min, self.bounds.lat_max)
-        lon_range = "({}, {})".format(self.bounds.lon_min, self.bounds.lon_max)
-        temporal_boundaries = "({}, {})".format(self.bounds.start, self.bounds.end)
-
-        formatted_repr = (
-            "<Bounds - "
-            "lat-range: {}, "
-            "lon-range: {}, "
-            "temporal_boundaries: {}> "
-        )
-
-        output = formatted_repr.format(
-            lat_range,
-            lon_range,
-            temporal_boundaries,
-        )
-        self.assertEqual(str(self.bounds), output)
+        self.assertEqual(self.bounds_CORDEX.end, None)
 
 if __name__ == '__main__':
     unittest.main()

@@ -28,6 +28,7 @@ import datetime as dt
 from mpl_toolkits.basemap import Basemap
 import netCDF4
 
+import ocw
 import ocw.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -295,32 +296,6 @@ class Bounds(object):
         else:
             self._end = None
 
-        @property
-        def start(self):
-            return self._start
-
-        @start.setter
-        def start(self, value):
-            if self._end:
-                if not (type(value) is dt.datetime and value < self._end):
-                    error = "Attempted to set start to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
-
-            self._start = value
-
-        @property
-        def end(self):
-            return self._end
-
-        @end.setter
-        def end(self, value):
-            if self._start:
-                if not (type(value) is dt.datetime and value > self._start):
-                    error = "Attempted to set end to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
-
         if boundary_type == 'us_states':
             self.masked_regions = shapefile_boundary(boundary_type, us_states)
         if boundary_type == 'countries':
@@ -331,91 +306,62 @@ class Bounds(object):
             mask_longitude = file_object.variables[longitude_name][:]
             mask_latitude = file_object.variables[latitude_name][:]
             if mask_longitude.ndim == 1 and mask_latitude.ndim == 1:
-                self.mask_longitude, self.mask_latitude = np.meshgrid(mask_longitude, mask_latitude)
+                self.mask_longitude, self.mask_latitude = numpy.meshgrid(mask_longitude, mask_latitude)
             elif mask_longitude.ndim == 2 and mask_latitude.ndim == 2:
                 self.mask_longitude = mask_longitude
                 self.mask_latitude = mask_latitude  
-        if boundary_type == 'rectangular' or boundary_type[:6].upper() == 'CORDEX':
-            if boundary_type == 'rectangular':
-                self._lat_min = float(lat_min)
-                self._lat_max = float(lat_max)
-                self._lon_min = float(lon_min)
-                self._lon_max = float(lon_max)
-            if boundary_type[:6].upper() == 'CORDEX':
-                self._lat_min, self._lat_max, self._lon_min, self._lon_max = CORDEX_boundary(boundary_type[6:].replace(" ","").lower())
+        if boundary_type == 'rectangular':
+            if not (-90 <= float(lat_min) <=90) or float(lat_min) > float(lat_max):
+                error = "Attempted to set lat_min to invalid value: %s" % (lat_min)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-90 <= float(lat_max) <=90):
+                error = "Attempted to set lat_max to invalid value: %s" % (lat_max)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-180 <= float(lon_min) <=180) or float(lon_min) > float(lon_max):
+                error = "Attempted to set lon_min to invalid value: %s" % (lon_min)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-180 <= float(lon_max) <=180):
+                error = "Attempted to set lat_max to invalid value: %s" % (lon_max)
+                logger.error(error)
+                raise ValueError(error)
+ 
+            self.lat_min = float(lat_min)
+            self.lat_max = float(lat_max)
+            self.lon_min = float(lon_min)
+            self.lon_max = float(lon_max)
+        if boundary_type[:6].upper() == 'CORDEX':
+            self.lat_min, self.lat_max, self.lon_min, self.lon_max = CORDEX_boundary(boundary_type[6:].replace(" ","").lower())
 
+    @property
+    def start(self):
+        return self._start
 
-            @property
-            def lat_min(self):
-                return self._lat_min
+    @start.setter
+    def start(self, value):
+        if self._end:
+            if not (type(value) is dt.datetime and value < self._end):
+                error = "Attempted to set start to invalid value: %s" % (value)
+                logger.error(error)
+                raise ValueError(error)
 
-            @lat_min.setter
-            def lat_min(self, value):
-                if not (-90 <= value <= 90 and value < self._lat_max):
-                    error = "Attempted to set lat_min to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
+        self._start = value
 
-                self._lat_min = value
+    @property
+    def end(self):
+        return self._end
 
-            @property
-            def lat_max(self):
-                return self._lat_max
+    @end.setter
+    def end(self, value):
+        if self._start:
+            if not (type(value) is dt.datetime and value > self._start):
+                error = "Attempted to set end to invalid value: %s" % (value)
+                logger.error(error)
+                raise ValueError(error)
 
-            @lat_max.setter
-            def lat_max(self, value):
-                if not (-90 <= value <= 90 and value > self._lat_min):
-                    error = "Attempted to set lat_max to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
-
-                self._lat_max = value
-
-            @property
-            def lon_min(self):
-                return self._lon_min
-
-            @lon_min.setter
-            def lon_min(self, value):
-                if not (-180 <= value <= 180 and value < self._lon_max):
-                    error = "Attempted to set lon_min to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
-
-                self._lon_min = value
-
-            @property
-            def lon_max(self):
-                return self._lon_max
-
-            @lon_max.setter
-            def lon_max(self, value):
-                if not (-180 <= value <= 180 and value > self._lon_min):
-                    error = "Attempter to set lon_max to invalid value: %s" % (value)
-                    logger.error(error)
-                    raise ValueError(error)
-
-                self._lon_max = value
-
-
-            def __str__(self):
-                lat_range = "({}, {})".format(self._lat_min, self._lat_max)
-                lon_range = "({}, {})".format(self._lon_min, self._lon_max)
-                temporal_boundaries = "({}, {})".format(self._start, self._end)
-
-                formatted_repr = (
-                    "<Bounds - "
-                    "lat-range: {}, "
-                    "lon-range: {}, "
-                    "temporal_boundaries: {}> "
-                )
-
-                return formatted_repr.format(
-                    lat_range,
-                    lon_range,
-                    temporal_boundaries,
-                )
-
+        self._end = value
 
 def shapefile_boundary(boundary_type, region_names):
     '''
@@ -426,22 +372,22 @@ def shapefile_boundary(boundary_type, region_names):
     :type region_names: :mod:'list'
     '''
 
-    map_read = Basemap
+    map_read = Basemap()
     regions =[]
     if boundary_type == 'us_states':
-        #map_read.readshapefile(ocw.__path__[0]+'/shape/usa_states','usa_states')
-        map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/usa_states','usa_states')
+        map_read.readshapefile(ocw.__path__[0]+'/shape/usa_states','usa_states')
+        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/usa_states','usa_states')
         for region_name in region_names:
             for iregion, region_info in enumerate(map_read.usa_states_info):
                 if region_info['st'] == region_name:
-                    regions.append(np.array(map_read.usa_states[iregion]))
+                    regions.append(numpy.array(map_read.usa_states[iregion]))
     if boundary_type == 'countries':
-        #map_read.readshapefile(ocw.__path__[0]+'/shape/countries','countries')
-        map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/countries','countries')
+        map_read.readshapefile(ocw.__path__[0]+'/shape/countries','countries')
+        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/countries','countries')
         for region_name in region_names:
             for iregion, region_info in enumerate(map_read.countries_info):
                 if region_info['COUNTRY'] == region_name:
-                    regions.append(np.array(map_read.countries[iregion]))
+                    regions.append(numpy.array(map_read.countries[iregion]))
     return regions
 
 def CORDEX_boundary(domain_name):

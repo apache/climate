@@ -652,8 +652,8 @@ class FullExportTest(unittest.TestCase):
         )
 
         self.subregions = [
-            Bounds(-10, 10, -20, 20),
-            Bounds(-5, 5, -15, 15)
+            Bounds(lat_min=-10, lat_max=10, lon_min=-20, lon_max=20),
+            Bounds(lat_min=-5, lat_max=5, lon_min=-15, lon_max=15)
         ]
 
         self.evaluation = Evaluation(

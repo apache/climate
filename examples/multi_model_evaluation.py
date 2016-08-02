@@ -50,7 +50,7 @@ LON_MIN = -24.0
 LON_MAX = 60.0 
 START = datetime.datetime(2000, 1, 1)
 END = datetime.datetime(2007, 12, 31)
-EVAL_BOUNDS = Bounds(LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, START, END)
+EVAL_BOUNDS = Bounds(lat_min=LAT_MIN, lat_max=LAT_MAX, lon_min=LON_MIN, lon_max=LON_MAX, start=START, end=END)
 
 #regridding parameters
 gridLonStep=0.5

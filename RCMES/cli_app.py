@@ -634,7 +634,7 @@ def run_screen(model_datasets, models_info, observations_info,
              screen.addstr(4, 4, "--> Data retrieved.")
              screen.refresh()
 
-             EVAL_BOUNDS = Bounds(overlap_min_lat, overlap_max_lat, overlap_min_lon, overlap_max_lon, overlap_start_time, overlap_end_time)
+             EVAL_BOUNDS = Bounds(lat_min=overlap_min_lat, lat_max=overlap_max_lat, lon_min=overlap_min_lon, lon_max=overlap_max_lon, start=overlap_start_time, end=overlap_end_time)
 
              screen.addstr(5, 4, "Temporally regridding...")
              screen.refresh()
