@@ -22,6 +22,7 @@ Classes:
                 for operations on a Dataset.
 '''
 
+import os
 import numpy
 import logging
 import datetime as dt
@@ -237,9 +238,9 @@ class Bounds(object):
     boundary_type may be one of the following:
     * 'rectangular'
     * 'CORDEX (CORDEX region name)': pre-defined CORDEX boundary
-    * 'us_states': an array of US states abbreviation is required (ex) us_states = ['CA','NV']) 
+    * 'us_states': an array of US states abbreviation is required (ex) us_states = ['CA','NV'])
     * 'countries': an array of county names is required (ex) countries = ['United States','Canada','Mexico']
-    * 'user': user_mask_file in a netCDF format with two dimensional mask variable is required.  
+    * 'user': user_mask_file in a netCDF format with two dimensional mask variable is required.
 
     If boundary_type == 'rectangular', spatial and temporal bounds must follow the following guidelines.
 
@@ -251,10 +252,10 @@ class Bounds(object):
     Temporal bounds must a valid datetime object
     '''
 
-    def __init__(self, boundary_type='rectangular', 
-                       us_states=None, countries=None, 
-                       user_mask_file=None, mask_variable_name=None, longitude_name=None, latitude_name=None, 
-                       lat_min=-90, lat_max=90, lon_min=-180, lon_max=180, 
+    def __init__(self, boundary_type='rectangular',
+                       us_states=None, countries=None,
+                       user_mask_file=None, mask_variable_name=None, longitude_name=None, latitude_name=None,
+                       lat_min=-90, lat_max=90, lon_min=-180, lon_max=180,
                        start=None, end=None):
         '''Default Bounds constructor
         :param boundary_type: The type of spatial subset boundary.
@@ -309,7 +310,7 @@ class Bounds(object):
                 self.mask_longitude, self.mask_latitude = numpy.meshgrid(mask_longitude, mask_latitude)
             elif mask_longitude.ndim == 2 and mask_latitude.ndim == 2:
                 self.mask_longitude = mask_longitude
-                self.mask_latitude = mask_latitude  
+                self.mask_latitude = mask_latitude
         if boundary_type == 'rectangular':
             if not (-90 <= float(lat_min) <=90) or float(lat_min) > float(lat_max):
                 error = "Attempted to set lat_min to invalid value: %s" % (lat_min)
@@ -327,7 +328,7 @@ class Bounds(object):
                 error = "Attempted to set lat_max to invalid value: %s" % (lon_max)
                 logger.error(error)
                 raise ValueError(error)
- 
+
             self.lat_min = float(lat_min)
             self.lat_max = float(lat_max)
             self.lon_min = float(lon_min)
@@ -371,19 +372,18 @@ def shapefile_boundary(boundary_type, region_names):
     :param region_names: An array of regions for spatial subset
     :type region_names: :mod:'list'
     '''
-
+    # Read the shapefile
     map_read = Basemap()
-    regions =[]
+    regions = []
+    shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
+    map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
+                           boundary_type)
     if boundary_type == 'us_states':
-        map_read.readshapefile(ocw.__path__[0]+'/shape/usa_states','usa_states')
-        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/usa_states','usa_states')
         for region_name in region_names:
-            for iregion, region_info in enumerate(map_read.usa_states_info):
+            for iregion, region_info in enumerate(map_read.us_states_info):
                 if region_info['st'] == region_name:
-                    regions.append(numpy.array(map_read.usa_states[iregion]))
-    if boundary_type == 'countries':
-        map_read.readshapefile(ocw.__path__[0]+'/shape/countries','countries')
-        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/countries','countries')
+                    regions.append(numpy.array(map_read.us_states[iregion]))
+    elif boundary_type == 'countries':
         for region_name in region_names:
             for iregion, region_info in enumerate(map_read.countries_info):
                 if region_info['COUNTRY'] == region_name:
@@ -402,24 +402,24 @@ def CORDEX_boundary(domain_name):
     if domain_name =='northamerica':
         return  12.55, 75.88, 189.26-360., 336.74-360.
     if domain_name =='europe':
-        return  22.20, 71.84, 338.23-360., 64.4      
+        return  22.20, 71.84, 338.23-360., 64.4
     if domain_name =='africa':
-        return -45.76, 42.24, 335.36-360., 60.28     
+        return -45.76, 42.24, 335.36-360., 60.28
     if domain_name =='southasia':
-        return -15.23, 45.07, 19.88, 115.55    
+        return -15.23, 45.07, 19.88, 115.55
     if domain_name =='eastasia':
-        return  -0.10, 61.90, 51.59, 179.99    
+        return  -0.10, 61.90, 51.59, 179.99
     if domain_name =='centralasia':
-        return  18.34, 69.37, 11.05, 139.13    
+        return  18.34, 69.37, 11.05, 139.13
     if domain_name =='australasia':
-        return -52.36, 12.21, 89.25, 179.99    
+        return -52.36, 12.21, 89.25, 179.99
     if domain_name =='antartica':
-        return -89.48,-56.00, -179.00, 179.00    
+        return -89.48,-56.00, -179.00, 179.00
     if domain_name =='artic':
-        return 46.06, 89.50, -179.00, 179.00    
+        return 46.06, 89.50, -179.00, 179.00
     if domain_name =='mediterranean':
-        return  25.63, 56.66, 339.79-360.00, 50.85     
+        return  25.63, 56.66, 339.79-360.00, 50.85
     if domain_name =='middleeastnorthafrica':
-        return  -7.00, 45.00, 333.00-360.00, 76.00     
+        return  -7.00, 45.00, 333.00-360.00, 76.00
     if domain_name =='southeastasia':
-        return  -15.14, 27.26, 89.26, 146.96     
+        return  -15.14, 27.26, 89.26, 146.96

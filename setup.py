@@ -15,7 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os.path
+import os
+import glob
 from setuptools import find_packages, setup
 
 # Package data
@@ -45,8 +46,8 @@ _name         = 'ocw'
 _namespaces   = []
 _testSuite    = 'ocw.tests'
 _url          = 'http://climate.apache.org/'
-_version      = '1.1.0'
-_zipSafe      = True
+_version      = '1.2.0'
+_zipSafe      = False
 
 # Setup Metadata
 # --------------
@@ -60,6 +61,12 @@ _longDescription = '\n\n'.join([
     _read('README.md')
 ])
 open('doc.txt', 'w').write(_longDescription)
+
+# Include shapefiles
+_pathout = os.path.join('ocw', 'shape')
+_shapefiles = glob.glob(os.path.join(_pathout, '*'))
+_shapefiles = [os.path.join('shape', os.path.basename(f)) for f in _shapefiles]
+_package_data = {'ocw': _shapefiles}
 
 setup(
     author=_author,
@@ -79,4 +86,5 @@ setup(
     url=_url,
     version=_version,
     zip_safe=_zipSafe,
+    package_data=_package_data
 )
