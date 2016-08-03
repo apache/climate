@@ -25,13 +25,13 @@ regrid:
 
 datasets:
     reference:
-        data_source: rcmed
+        loader_name: rcmed
         data_name: CRU  
         dataset_id: 10
         parameter_id: 41
 
     targets:
-        data_source: local
+        loader_name: local
         path: ./data/CORDEX-Africa_data/AFRICA*tasmin.nc                                
         variable: tasmin    
         latitude_name: lat

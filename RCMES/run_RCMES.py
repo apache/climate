@@ -16,13 +16,10 @@
 # under the License.
 
 #Apache OCW lib immports
-import ocw.dataset_processor as dsp
-import ocw.data_source.local as local
-import ocw.data_source.rcmed as rcmed
-import ocw.data_source.esgf as esgf
 import ocw.plotter as plotter
 import ocw.utils as utils
 from ocw.dataset import Bounds
+from ocw.dataset_loader import DatasetLoader
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -39,7 +36,7 @@ from getpass import getpass
 
 from metrics_and_plots import *
 
-import ssl 
+import ssl
 
 if hasattr(ssl, '_create_unverified_context'):
   ssl._create_default_https_context = ssl._create_unverified_context
@@ -60,42 +57,42 @@ max_lat = space_info['max_lat']
 min_lon = space_info['min_lon']
 max_lon = space_info['max_lon']
 
-ref_data_info = config['datasets']['reference']
+obs_data_info = config['datasets']['reference']
 model_data_info = config['datasets']['targets']
-if ref_data_info['data_source'] == 'ESGF' or model_data_info['data_source'] == 'ESGF':
+if obs_data_info['loader_name'] == 'ESGF' or model_data_info['loader_name'] == 'ESGF':
     username=raw_input('Enter your ESGF OpenID:\n')
     password=getpass(prompt='Enter your ESGF password:\n')
 
 """ Step 1: Load the reference data """
-ref_lat_name = None
-ref_lon_name = None
-if 'latitude_name' in ref_data_info.keys():
-    ref_lat_name = ref_data_info['latitude_name']
-if 'longitude_name' in ref_data_info.keys():
-    ref_lon_name = ref_data_info['longitude_name']
-print 'Loading observation dataset:\n',ref_data_info
-ref_name = ref_data_info['data_name']
-if ref_data_info['data_source'] == 'local':
-    ref_dataset = local.load_file(ref_data_info['path'],
-                                  ref_data_info['variable'], name=ref_name,
-                                  lat_name=ref_lat_name, lon_name=ref_lon_name)
-elif ref_data_info['data_source'] == 'rcmed':
-      ref_dataset = rcmed.parameter_dataset(ref_data_info['dataset_id'],
-                                            ref_data_info['parameter_id'],
+obs_lat_name = None
+obs_lon_name = None
+if 'lat_name' in obs_data_info.keys():
+    obs_lat_name = obs_data_info['lat_name']
+if 'lon_name' in obs_data_info.keys():
+    obs_lon_name = obs_data_info['long_name']
+print 'Loading observation dataset:\n',obs_data_info
+obs_name = obs_data_info['data_name']
+if obs_data_info['loader_name'] == 'local':
+    obs_dataset = local.load_file(obs_data_info['path'],
+                                  obs_data_info['variable'], name=obs_name,
+                                  lat_name=obs_lat_name, lon_name=obs_lon_name)
+elif obs_data_info['loader_name'] == 'rcmed':
+      obs_dataset = rcmed.parameter_dataset(obs_data_info['dataset_id'],
+                                            obs_data_info['parameter_id'],
                                             min_lat, max_lat, min_lon, max_lon,
                                             start_time, end_time)
-elif ref_data_info['data_source'] == 'ESGF':
-      ds = esgf.load_dataset(dataset_id = ref_data_info['dataset_id'],
-                             variable = ref_data_info['variable'],
+elif obs_data_info['loader_name'] == 'ESGF':
+      ds = esgf.load_dataset(dataset_id = obs_data_info['dataset_id'],
+                             variable = obs_data_info['variable'],
                              esgf_username=username,
                              esgf_password=password)
-      ref_dataset = ds[0]
+      obs_dataset = ds[0]
 else:
     print ' '
 if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
-    ref_dataset =  dsp.normalize_dataset_datetimes(ref_dataset, temporal_resolution)
-if 'multiplying_factor' in ref_data_info.keys():
-    ref_dataset.values = ref_dataset.values*ref_data_info['multiplying_factor']
+    obs_dataset =  dsp.normalize_dataset_datetimes(obs_dataset, temporal_resolution)
+if 'multiplying_factor' in obs_data_info.keys():
+    obs_dataset.values = obs_dataset.values*obs_data_info['multiplying_factor']
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
 model_lat_name = None
@@ -107,13 +104,13 @@ if 'longitude_name' in model_data_info.keys():
 boundary_check_model = True
 if 'GCM_data' in model_data_info.keys():
     if model_data_info['GCM_data']:
-        boundary_check_model = False                                           
+        boundary_check_model = False
 print 'Loading model datasets:\n',model_data_info
-if model_data_info['data_source'] == 'local':
+if model_data_info['loader_name'] == 'local':
     model_datasets, model_names = local.load_multiple_files(file_path = model_data_info['path'],
-                                                            variable_name =model_data_info['variable'], 
+                                                            variable_name =model_data_info['variable'],
                                                             lat_name=model_lat_name, lon_name=model_lon_name)
-elif model_data_info['data_source'] == 'ESGF':
+elif model_data_info['loader_name'] == 'ESGF':
       md = esgf.load_dataset(dataset_id=model_data_info['dataset_id'],
                              variable=model_data_info['variable'],
                              esgf_username=username,
@@ -132,23 +129,23 @@ if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
 """ Step 3: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
 if time_info['maximum_overlap_period']:
-    start_time, end_time = utils.get_temporal_overlap([ref_dataset]+model_datasets)
+    start_time, end_time = utils.get_temporal_overlap([obs_dataset]+model_datasets)
     print 'Maximum overlap period'
     print 'start_time:', start_time
     print 'end_time:', end_time
 
 if temporal_resolution == 'monthly' and end_time.day !=1:
     end_time = end_time.replace(day=1)
-if ref_data_info['data_source'] == 'rcmed':
-    min_lat = np.max([min_lat, ref_dataset.lats.min()])
-    max_lat = np.min([max_lat, ref_dataset.lats.max()])
-    min_lon = np.max([min_lon, ref_dataset.lons.min()])
-    max_lon = np.min([max_lon, ref_dataset.lons.max()])
+if obs_data_info['loader_name'] == 'rcmed':
+    min_lat = np.max([min_lat, obs_dataset.lats.min()])
+    max_lat = np.min([max_lat, obs_dataset.lats.max()])
+    min_lon = np.max([min_lon, obs_dataset.lons.min()])
+    max_lon = np.min([max_lon, obs_dataset.lons.max()])
 bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 
-ref_dataset = dsp.subset(ref_dataset, bounds)
-if ref_dataset.temporal_resolution() != temporal_resolution:
-    ref_dataset = dsp.temporal_rebin(ref_dataset, temporal_resolution)
+obs_dataset = dsp.subset(obs_dataset, bounds)
+if obs_dataset.temporal_resolution() != temporal_resolution:
+    obs_dataset = dsp.temporal_rebin(obs_dataset, temporal_resolution)
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.subset(dataset, bounds)
     if dataset.temporal_resolution() != temporal_resolution:
@@ -159,14 +156,14 @@ month_start = time_info['month_start']
 month_end = time_info['month_end']
 average_each_year = time_info['average_each_year']
 
-ref_dataset = dsp.temporal_subset(ref_dataset,month_start, month_end,average_each_year)
+obs_dataset = dsp.temporal_subset(obs_dataset,month_start, month_end,average_each_year)
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.temporal_subset(dataset,month_start, month_end,average_each_year)
 
 # generate grid points for regridding
 if config['regrid']['regrid_on_reference']:
-    new_lat = ref_dataset.lats
-    new_lon = ref_dataset.lons 
+    new_lat = obs_dataset.lats
+    new_lon = obs_dataset.lons
 else:
     delta_lat = config['regrid']['regrid_dlat']
     delta_lon = config['regrid']['regrid_dlon']
@@ -178,7 +175,7 @@ else:
 # number of models
 nmodel = len(model_datasets)
 print 'Dataset loading completed'
-print 'Observation data:', ref_name 
+print 'Observation data:', obs_name
 print 'Number of model datasets:',nmodel
 for model_name in model_names:
     print model_name
@@ -186,21 +183,21 @@ for model_name in model_names:
 """ Step 4: Spatial regriding of the reference datasets """
 print 'Regridding datasets: ', config['regrid']
 if not config['regrid']['regrid_on_reference']:
-    ref_dataset = dsp.spatial_regrid(ref_dataset, new_lat, new_lon)
+    obs_dataset = dsp.spatial_regrid(obs_dataset, new_lat, new_lon)
     print 'Reference dataset has been regridded'
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.spatial_regrid(dataset, new_lat, new_lon, boundary_check = boundary_check_model)
     print model_names[idata]+' has been regridded'
 print 'Propagating missing data information'
-ref_dataset = dsp.mask_missing_data([ref_dataset]+model_datasets)[0]
-model_datasets = dsp.mask_missing_data([ref_dataset]+model_datasets)[1:]
+obs_dataset = dsp.mask_missing_data([obs_dataset]+model_datasets)[0]
+model_datasets = dsp.mask_missing_data([obs_dataset]+model_datasets)[1:]
 
 """ Step 5: Checking and converting variable units """
 print 'Checking and converting variable units'
-ref_dataset = dsp.variable_unit_conversion(ref_dataset)
+obs_dataset = dsp.variable_unit_conversion(obs_dataset)
 for idata,dataset in enumerate(model_datasets):
     model_datasets[idata] = dsp.variable_unit_conversion(dataset)
-    
+
 
 print 'Generating multi-model ensemble'
 if len(model_datasets) >= 2.:
@@ -217,8 +214,8 @@ if config['use_subregions']:
 
     print 'Calculating spatial averages and standard deviations of ',str(nsubregion),' subregions'
 
-    ref_subregion_mean, ref_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std([ref_dataset], subregions) 
-    model_subregion_mean, model_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std(model_datasets, subregions) 
+    obs_subregion_mean, obs_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std([obs_dataset], subregions)
+    model_subregion_mean, model_subregion_std, subregion_array = utils.calc_subregion_area_mean_and_std(model_datasets, subregions)
 
 """ Step 7: Write a netCDF file """
 workdir = config['workdir']
@@ -229,19 +226,19 @@ if not os.path.exists(workdir):
     os.system("mkdir -p "+workdir)
 
 if config['use_subregions']:
-    dsp.write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, model_datasets, model_names,
+    dsp.write_netcdf_multiple_datasets_with_subregions(obs_dataset, obs_name, model_datasets, model_names,
                                                        path=workdir+config['output_netcdf_filename'],
-                                                       subregions=subregions, subregion_array = subregion_array, 
-                                                       ref_subregion_mean=ref_subregion_mean, ref_subregion_std=ref_subregion_std,
+                                                       subregions=subregions, subregion_array = subregion_array,
+                                                       obs_subregion_mean=obs_subregion_mean, obs_subregion_std=obs_subregion_std,
                                                        model_subregion_mean=model_subregion_mean, model_subregion_std=model_subregion_std)
 else:
-    dsp.write_netcdf_multiple_datasets_with_subregions(ref_dataset, ref_name, model_datasets, model_names,
+    dsp.write_netcdf_multiple_datasets_with_subregions(obs_dataset, obs_name, model_datasets, model_names,
                                                        path=workdir+config['output_netcdf_filename'])
 
 """ Step 8: Calculate metrics and draw plots """
 nmetrics = config['number_of_metrics_and_plots']
 if config['use_subregions']:
-    Map_plot_subregion(subregions, ref_dataset, workdir)
+    Map_plot_subregion(subregions, obs_dataset, workdir)
 
 if nmetrics > 0:
     print 'Calculating metrics and generating plots'
@@ -254,30 +251,28 @@ if nmetrics > 0:
         if metrics_name == 'Map_plot_bias_of_multiyear_climatology':
             row, column = plot_info['subplots_array']
             if 'map_projection' in plot_info.keys():
-                Map_plot_bias_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
+                Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets, model_names,
                                           file_name, row, column, map_projection=plot_info['map_projection'])
             else:
-                Map_plot_bias_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
+                Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets, model_names,
                                           file_name, row, column)
         elif metrics_name == 'Taylor_diagram_spatial_pattern_of_multiyear_climatology':
-            Taylor_diagram_spatial_pattern_of_multiyear_climatology(ref_dataset, ref_name, model_datasets, model_names,
+            Taylor_diagram_spatial_pattern_of_multiyear_climatology(obs_dataset, obs_name, model_datasets, model_names,
                                       file_name)
         elif config['use_subregions']:
             if metrics_name == 'Timeseries_plot_subregion_interannual_variability' and average_each_year:
                 row, column = plot_info['subplots_array']
-                Time_series_subregion(ref_subregion_mean, ref_name, model_subregion_mean, model_names, False,
+                Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, False,
                                       file_name, row, column, x_tick=['Y'+str(i+1) for i in np.arange(model_subregion_mean.shape[1])])
             if metrics_name == 'Timeseries_plot_subregion_annual_cycle' and not average_each_year and month_start==1 and month_end==12:
                 row, column = plot_info['subplots_array']
-                Time_series_subregion(ref_subregion_mean, ref_name, model_subregion_mean, model_names, True,
+                Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, True,
                                       file_name, row, column, x_tick=['J','F','M','A','M','J','J','A','S','O','N','D'])
             if metrics_name == 'Portrait_diagram_subregion_interannual_variability' and average_each_year:
-                Portrait_diagram_subregion(ref_subregion_mean, ref_name, model_subregion_mean, model_names, False,
+                Portrait_diagram_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, False,
                                       file_name)
             if metrics_name == 'Portrait_diagram_subregion_annual_cycle' and not average_each_year and month_start==1 and month_end==12:
-                Portrait_diagram_subregion(ref_subregion_mean, ref_name, model_subregion_mean, model_names, True,
+                Portrait_diagram_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, True,
                                       file_name)
         else:
             print 'please check the currently supported metrics'
-
-

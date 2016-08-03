@@ -24,14 +24,14 @@ regrid:
 
 datasets:
     reference:
-        data_source: rcmed
+        loader_name: rcmed
         data_name: TRMM
         dataset_id: 3
         parameter_id: 36
         variable: pr      
 
     targets:
-        data_source: local
+        loader_name: local
         path: ./data/dscale/obs/prmo*.nc
         variable: pr
 

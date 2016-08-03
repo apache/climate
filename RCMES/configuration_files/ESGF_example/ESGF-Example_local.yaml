@@ -39,13 +39,13 @@ regrid:
 
 datasets:
     reference:
-        data_source: local
+        loader_name: local
         data_name: AVISO
         path: ./data/ESGF_data/zos_AVISO_L4_199210-201012.nc                          
         variable: zos
 
     targets:
-        data_source: local
+        loader_name: local
         path: ./data/ESGF_data/zos_Omon_MPI-ESM-LR_decadal1994_r1i1p1_199501-200412.nc                                               
         variable: zos
         GCM_data: True

@@ -24,13 +24,13 @@ regrid:
 
 datasets:
     reference:
-        data_source: rcmed
+        loader_name: rcmed
         data_name: CRU
         dataset_id: 10
         parameter_id: 38
 
     targets:
-        data_source: local
+        loader_name: local
         path: ./data/NARCCAP_data/temp.*ncep.monavg.nc                                                    
         variable: temp    
 

@@ -41,14 +41,14 @@ regrid:
 
 datasets:
     reference:
-        data_source: local
+        loader_name: local
         data_name: SRB
         path: ./data/CORDEX-Arctic_data/srb_rel3.0_shortwave_from_1983_to_2007.nc                           
         variable: cld_frac
         multiplying_factor: 100.0
 
     targets:
-        data_source: local
+        loader_name: local
         path: ./data/CORDEX-Arctic_data/clt*.nc                                                    
         variable: clt     
 
