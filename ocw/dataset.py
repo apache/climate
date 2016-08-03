@@ -25,7 +25,10 @@ Classes:
 import numpy
 import logging
 import datetime as dt
+from mpl_toolkits.basemap import Basemap
+import netCDF4
 
+import ocw
 import ocw.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -231,18 +234,35 @@ class Bounds(object):
     correct functioning. Bounds guarantees that a function receives well
     formed information without the need to do the validation manually.
 
-    Spatial and temporal bounds must follow the following guidelines.
+    boundary_type may be one of the following:
+    * 'rectangular'
+    * 'CORDEX (CORDEX region name)': pre-defined CORDEX boundary
+    * 'us_states': an array of US states abbreviation is required (ex) us_states = ['CA','NV']) 
+    * 'countries': an array of county names is required (ex) countries = ['United States','Canada','Mexico']
+    * 'user': user_mask_file in a netCDF format with two dimensional mask variable is required.  
+
+    If boundary_type == 'rectangular', spatial and temporal bounds must follow the following guidelines.
 
     * Latitude values must be in the range [-90, 90]
     * Longitude values must be in the range [-180, 180]
     * Lat/Lon Min values must be less than the corresponding Lat/Lon Max
       values.
-    * Temporal bounds must a valid datetime object
+
+    Temporal bounds must a valid datetime object
     '''
 
-    def __init__(self, lat_min, lat_max, lon_min,
-                 lon_max, start=None, end=None):
+    def __init__(self, boundary_type='rectangular', 
+                       us_states=None, countries=None, 
+                       user_mask_file=None, mask_variable_name=None, longitude_name=None, latitude_name=None, 
+                       lat_min=-90, lat_max=90, lon_min=-180, lon_max=180, 
+                       start=None, end=None):
         '''Default Bounds constructor
+        :param boundary_type: The type of spatial subset boundary.
+        :type boundary_type: :mod:`string'
+
+
+        :param lat_min: The minimum latitude bound.
+        :type lat_min: :class:`float`
 
         :param lat_min: The minimum latitude bound.
         :type lat_min: :class:`float`
@@ -265,11 +285,7 @@ class Bounds(object):
 
         :raises: ValueError
         '''
-        self._lat_min = float(lat_min)
-        self._lat_max = float(lat_max)
-        self._lon_min = float(lon_min)
-        self._lon_max = float(lon_max)
-
+        self.boundary_type = boundary_type
         if start:
             self._start = start
         else:
@@ -280,57 +296,44 @@ class Bounds(object):
         else:
             self._end = None
 
-    @property
-    def lat_min(self):
-        return self._lat_min
-
-    @lat_min.setter
-    def lat_min(self, value):
-        if not (-90 <= value <= 90 and value < self._lat_max):
-            error = "Attempted to set lat_min to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
-
-        self._lat_min = value
-
-    @property
-    def lat_max(self):
-        return self._lat_max
-
-    @lat_max.setter
-    def lat_max(self, value):
-        if not (-90 <= value <= 90 and value > self._lat_min):
-            error = "Attempted to set lat_max to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
-
-        self._lat_max = value
-
-    @property
-    def lon_min(self):
-        return self._lon_min
-
-    @lon_min.setter
-    def lon_min(self, value):
-        if not (-180 <= value <= 180 and value < self._lon_max):
-            error = "Attempted to set lon_min to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
-
-        self._lon_min = value
-
-    @property
-    def lon_max(self):
-        return self._lon_max
-
-    @lon_max.setter
-    def lon_max(self, value):
-        if not (-180 <= value <= 180 and value > self._lon_min):
-            error = "Attempter to set lon_max to invalid value: %s" % (value)
-            logger.error(error)
-            raise ValueError(error)
-
-        self._lon_max = value
+        if boundary_type == 'us_states':
+            self.masked_regions = shapefile_boundary(boundary_type, us_states)
+        if boundary_type == 'countries':
+            self.masked_regions = shapefile_boundary(boundary_type, countries)
+        if boundary_type == 'user':
+            file_object = netCDF4.Dataset(user_mask_file)
+            self.mask_variable = file_object.variables[mask_variable_name][:]
+            mask_longitude = file_object.variables[longitude_name][:]
+            mask_latitude = file_object.variables[latitude_name][:]
+            if mask_longitude.ndim == 1 and mask_latitude.ndim == 1:
+                self.mask_longitude, self.mask_latitude = numpy.meshgrid(mask_longitude, mask_latitude)
+            elif mask_longitude.ndim == 2 and mask_latitude.ndim == 2:
+                self.mask_longitude = mask_longitude
+                self.mask_latitude = mask_latitude  
+        if boundary_type == 'rectangular':
+            if not (-90 <= float(lat_min) <=90) or float(lat_min) > float(lat_max):
+                error = "Attempted to set lat_min to invalid value: %s" % (lat_min)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-90 <= float(lat_max) <=90):
+                error = "Attempted to set lat_max to invalid value: %s" % (lat_max)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-180 <= float(lon_min) <=180) or float(lon_min) > float(lon_max):
+                error = "Attempted to set lon_min to invalid value: %s" % (lon_min)
+                logger.error(error)
+                raise ValueError(error)
+            if not (-180 <= float(lon_max) <=180):
+                error = "Attempted to set lat_max to invalid value: %s" % (lon_max)
+                logger.error(error)
+                raise ValueError(error)
+ 
+            self.lat_min = float(lat_min)
+            self.lat_max = float(lat_max)
+            self.lon_min = float(lon_min)
+            self.lon_max = float(lon_max)
+        if boundary_type[:6].upper() == 'CORDEX':
+            self.lat_min, self.lat_max, self.lon_min, self.lon_max = CORDEX_boundary(boundary_type[6:].replace(" ","").lower())
 
     @property
     def start(self):
@@ -360,20 +363,63 @@ class Bounds(object):
 
         self._end = value
 
-    def __str__(self):
-        lat_range = "({}, {})".format(self._lat_min, self._lat_max)
-        lon_range = "({}, {})".format(self._lon_min, self._lon_max)
-        temporal_boundaries = "({}, {})".format(self._start, self._end)
+def shapefile_boundary(boundary_type, region_names):
+    '''
+    :param boundary_type: The type of spatial subset boundary
+    :type boundary_type: :mod:'string'
 
-        formatted_repr = (
-            "<Bounds - "
-            "lat-range: {}, "
-            "lon-range: {}, "
-            "temporal_boundaries: {}> "
-        )
+    :param region_names: An array of regions for spatial subset
+    :type region_names: :mod:'list'
+    '''
 
-        return formatted_repr.format(
-            lat_range,
-            lon_range,
-            temporal_boundaries,
-        )
+    map_read = Basemap()
+    regions =[]
+    if boundary_type == 'us_states':
+        map_read.readshapefile(ocw.__path__[0]+'/shape/usa_states','usa_states')
+        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/usa_states','usa_states')
+        for region_name in region_names:
+            for iregion, region_info in enumerate(map_read.usa_states_info):
+                if region_info['st'] == region_name:
+                    regions.append(numpy.array(map_read.usa_states[iregion]))
+    if boundary_type == 'countries':
+        map_read.readshapefile(ocw.__path__[0]+'/shape/countries','countries')
+        #map_read.readshapefile('/home/huikyole/climate/ocw'+'/shape/countries','countries')
+        for region_name in region_names:
+            for iregion, region_info in enumerate(map_read.countries_info):
+                if region_info['COUNTRY'] == region_name:
+                    regions.append(numpy.array(map_read.countries[iregion]))
+    return regions
+
+def CORDEX_boundary(domain_name):
+    '''
+    :param domain_name: CORDEX domain name (http://www.cordex.org/)
+    :type domain_name: :mod:'string'
+    '''
+    if domain_name =='southamerica':
+        return -57.61, 18.50, 254.28-360., 343.02-360.
+    if domain_name =='centralamerica':
+        return -19.46, 34.83, 235.74-360., 337.78-360.
+    if domain_name =='northamerica':
+        return  12.55, 75.88, 189.26-360., 336.74-360.
+    if domain_name =='europe':
+        return  22.20, 71.84, 338.23-360., 64.4      
+    if domain_name =='africa':
+        return -45.76, 42.24, 335.36-360., 60.28     
+    if domain_name =='southasia':
+        return -15.23, 45.07, 19.88, 115.55    
+    if domain_name =='eastasia':
+        return  -0.10, 61.90, 51.59, 179.99    
+    if domain_name =='centralasia':
+        return  18.34, 69.37, 11.05, 139.13    
+    if domain_name =='australasia':
+        return -52.36, 12.21, 89.25, 179.99    
+    if domain_name =='antartica':
+        return -89.48,-56.00, -179.00, 179.00    
+    if domain_name =='artic':
+        return 46.06, 89.50, -179.00, 179.00    
+    if domain_name =='mediterranean':
+        return  25.63, 56.66, 339.79-360.00, 50.85     
+    if domain_name =='middleeastnorthafrica':
+        return  -7.00, 45.00, 333.00-360.00, 76.00     
+    if domain_name =='southeastasia':
+        return  -15.14, 27.26, 89.26, 146.96     
