@@ -254,7 +254,7 @@ class Bounds(object):
     def __init__(self, boundary_type='rectangular', 
                        us_states=None, countries=None, 
                        user_mask_file=None, mask_variable_name=None, longitude_name=None, latitude_name=None, 
-                       lat_min=None, lat_max=None, lon_min=None, lon_max=None, 
+                       lat_min=-90, lat_max=90, lon_min=-180, lon_max=180, 
                        start=None, end=None):
         '''Default Bounds constructor
         :param boundary_type: The type of spatial subset boundary.
