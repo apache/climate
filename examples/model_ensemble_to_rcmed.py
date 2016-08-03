@@ -128,7 +128,7 @@ cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution = 'annual'
 # Running Temporal Rebin early helps negate the issue of datasets being on different 
 # days of the month (1st vs. 15th)
 # Create a Bounds object to use for subsetting
-new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
+new_bounds = Bounds(lat_min=min_lat, lat_max=max_lat, lon_min=min_lon, lon_max=max_lon, start=start_time, end=end_time)
 
 # Subset our model datasets so they are the same size
 knmi_dataset = dsp.subset(knmi_dataset, new_bounds)

@@ -431,22 +431,22 @@ class TestSubset(unittest.TestCase):
         self.name = 'foo'
 
         self.subregion = ds.Bounds(
-            -81, 81,
-            -161, 161,
-            datetime.datetime(2001, 1, 1),
-            datetime.datetime(2004, 1, 1)
+            lat_min=-81, lat_max=81,
+            lon_min=-161, lon_max=161,
+            start=datetime.datetime(2001, 1, 1),
+            end=datetime.datetime(2004, 1, 1)
         )
         self.non_exact_spatial_subregion = ds.Bounds(
-            -80.25, 80.5,
-            -160.25, 160.5,
-            datetime.datetime(2001, 1, 1),
-            datetime.datetime(2004, 1, 1)
+            lat_min=-80.25, lat_max=80.5,
+            lon_min=-160.25, lon_max=160.5,
+            start=datetime.datetime(2001, 1, 1),
+            end=datetime.datetime(2004, 1, 1)
         )
         self.non_exact_temporal_subregion = ds.Bounds(
-            -80.25, 80.5,
-            -160.25, 160.5,
-            datetime.datetime(2001, 1, 15),
-            datetime.datetime(2004, 2, 15)
+            lat_min=-80.25, lat_max=80.5,
+            lon_min=-160.25, lon_max=160.5,
+            start=datetime.datetime(2001, 1, 15),
+            end=datetime.datetime(2004, 2, 15)
         )
 
     def test_subset(self):
@@ -491,8 +491,8 @@ class TestSubset(unittest.TestCase):
 
     def test_subset_without_start_index(self):
         self.subregion = ds.Bounds(
-            -81, 81,
-            -161, 161,
+            lat_min=-81, lat_max=81,
+            lon_min=-161, lon_max=161,
         )
         subset = dp.subset(self.target_dataset, self.subregion)
         times = np.array([datetime.datetime(year, month, 1)
@@ -524,24 +524,24 @@ class TestSafeSubset(unittest.TestCase):
                                          name='foo')
 
         self.spatial_out_of_bounds = ds.Bounds(
-            -165, 165,
-            -180, 180,
-            datetime.datetime(2001, 1, 1),
-            datetime.datetime(2004, 1, 1)
+            lat_min=-65, lat_max=65,
+            lon_min=-180, lon_max=180,
+            start=datetime.datetime(2001, 1, 1),
+            end=datetime.datetime(2004, 1, 1)
         )
 
         self.temporal_out_of_bounds = ds.Bounds(
-            -40, 40,
-            -160.25, 160.5,
-            datetime.datetime(1999, 1, 15),
-            datetime.datetime(2222, 2, 15)
+            lat_min=-40, lat_max=40,
+            lon_min=-160.25, lon_max=160.5,
+            start=datetime.datetime(1999, 1, 15),
+            end=datetime.datetime(2222, 2, 15)
         )
 
         self.everything_out_of_bounds = ds.Bounds(
-            -165, 165,
-            -180, 180,
-            datetime.datetime(1999, 1, 15),
-            datetime.datetime(2222, 2, 15)
+            lat_min=-65, lat_max=65,
+            lon_min=-180, lon_max=180,
+            start=datetime.datetime(1999, 1, 15),
+            end=datetime.datetime(2222, 2, 15)
         )
 
     def test_partial_spatial_overlap(self):
@@ -556,7 +556,7 @@ class TestSafeSubset(unittest.TestCase):
     def test_partial_temporal_overlap(self):
         '''Ensure that safe_subset can handle out of bounds temporal values'''
         ds = dp.safe_subset(self.target_dataset, self.temporal_out_of_bounds)
-        temporal_bounds = ds.time_range()
+        temporal_bounds = ds.temporal_boundaries()
         start = datetime.datetime(2000, 1, 1)
         end = datetime.datetime(2009, 12, 1)
 
@@ -585,10 +585,10 @@ class TestFailingSubset(unittest.TestCase):
         self.target_dataset.lons = np.array(range(-179, 178, 2))
 
         self.subregion = ds.Bounds(
-            -81, 81,
-            -161, 161,
-            datetime.datetime(2001, 1, 1),
-            datetime.datetime(2004, 1, 1)
+            lat_min=-81, lat_max=81,
+            lon_min=-161, lon_max=161,
+            start=datetime.datetime(2001, 1, 1),
+            end=datetime.datetime(2004, 1, 1)
         )
 
     def test_out_of_dataset_bounds_lat_min(self):
