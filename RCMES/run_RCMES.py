@@ -141,7 +141,7 @@ if obs_data_info['loader_name'] == 'rcmed':
     max_lat = np.min([max_lat, obs_dataset.lats.max()])
     min_lon = np.max([min_lon, obs_dataset.lons.min()])
     max_lon = np.min([max_lon, obs_dataset.lons.max()])
-bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
+bounds = Bounds(lat_min=min_lat, lat_max=max_lat, lon_min=min_lon, lon_max=max_lon, start=start_time, end=end_time)
 
 obs_dataset = dsp.subset(obs_dataset, bounds)
 if obs_dataset.temporal_resolution() != temporal_resolution:

@@ -350,7 +350,7 @@ def load_multiple_files(file_path,
         datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
                         lat_name=lat_name, lon_name=lon_name, time_name=time_name))
 
-    return datasets, data_name
+    return datasets
 
 def load_WRF_2d_files_RAIN(file_path=None,
                       filename_pattern=None,

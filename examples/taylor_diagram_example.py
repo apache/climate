@@ -61,7 +61,7 @@ wrf_dataset = dsp.normalize_dataset_datetimes(wrf_dataset, 'monthly')
 # We're only going to run this evaluation over a years worth of data. We'll
 # make a Bounds object and use it to subset our datasets.
 ################################################################################
-subset = Bounds(-45, 42, -24, 60, datetime.datetime(1989, 1, 1), datetime.datetime(1989, 12, 1))
+subset = Bounds(lat_min=-45, lat_max=42, lon_min=-24, lon_max=60, start=datetime.datetime(1989, 1, 1), end=datetime.datetime(1989, 12, 1))
 knmi_dataset = dsp.subset(knmi_dataset, subset)
 wrf_dataset = dsp.subset(wrf_dataset, subset)
 
