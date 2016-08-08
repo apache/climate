@@ -1,16 +1,16 @@
 workdir: ./
 output_netcdf_filename: Fig3b_winter.nc
 
-# (RCMES will temporally subset data between month_start and month_end. 
+# (RCMES will temporally subset data between month_start and month_end.
 # If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: True 
+    maximum_overlap_period: True
     start_time: 1990-01-01
     end_time: 2007-12-31
     temporal_resolution: monthly
     month_start: 12
     month_end: 2
-    average_each_year: True  
+    average_each_year: True
 
 space:
     min_lat: -45.76
@@ -25,15 +25,15 @@ regrid:
 
 datasets:
     reference:
-        loader_name: rcmed
-        data_name: CRU  
-        dataset_id: 10
-        parameter_id: 38
+        - loader_name: rcmed
+          name: CRU
+          dataset_id: 10
+          parameter_id: 38
 
     targets:
-        loader_name: local
-        path: ./data/CORDEX-Africa_data/AFRICA*tas.nc                                
-        variable: tas    
+        - loader_name: local
+          path: ./data/CORDEX-Africa_data/AFRICA*tas.nc
+          variable: tas    
 
 number_of_metrics_and_plots: 1
 
@@ -42,7 +42,7 @@ metrics1: Taylor_diagram_spatial_pattern_of_multiyear_climatology
 plots1:
     file_name: Fig3b_winter
 
-use_subregions: False 
+use_subregions: False
 
 subregions:
 #subregion name (R01, R02, R03,....) followed by an array of boundaries [south, north, west, east]

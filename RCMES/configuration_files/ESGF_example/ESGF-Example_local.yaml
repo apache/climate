@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-workdir: ./results/ESGF_example                                   
+workdir: ./results/ESGF_example
 output_netcdf_filename: zos_annual_mean_local.nc
 
 # (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
@@ -24,7 +24,7 @@ time:
     temporal_resolution: monthly
     month_start: 1
     month_end: 12
-    average_each_year: False  
+    average_each_year: False
 
 space:
     min_lat: -70
@@ -39,16 +39,16 @@ regrid:
 
 datasets:
     reference:
-        loader_name: local
-        data_name: AVISO
-        path: ./data/ESGF_data/zos_AVISO_L4_199210-201012.nc                          
-        variable: zos
+        - loader_name: local
+          name: AVISO
+          path: ./data/ESGF_data/zos_AVISO_L4_199210-201012.nc
+          variable: zos
 
     targets:
-        loader_name: local
-        path: ./data/ESGF_data/zos_Omon_MPI-ESM-LR_decadal1994_r1i1p1_199501-200412.nc                                               
-        variable: zos
-        GCM_data: True
+        - loader_name: local
+          path: ./data/ESGF_data/zos_Omon_MPI-ESM-LR_decadal1994_r1i1p1_199501-200412.nc
+          variable: zos
+          GCM_data: True
 
 number_of_metrics_and_plots: 1
 

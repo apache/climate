@@ -1,10 +1,10 @@
 workdir: ./
 output_netcdf_filename: Fig7e_8be.nc
 
-# (RCMES will temporally subset data between month_start and month_end. 
+# (RCMES will temporally subset data between month_start and month_end.
 # If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: True 
+    maximum_overlap_period: True
     start_time: 1990-01-01
     end_time: 2007-12-31
     temporal_resolution: monthly
@@ -25,15 +25,15 @@ regrid:
 
 datasets:
     reference:
-        loader_name: rcmed
-        data_name: CRU  
-        dataset_id: 10
-        parameter_id: 39
+        - loader_name: rcmed
+          name: CRU
+          dataset_id: 10
+          parameter_id: 39
 
     targets:
-        loader_name: local
-        path: ./data/CORDEX-Africa_data/AFRICA*tasmax.nc                                
-        variable: tasmax    
+        - loader_name: local
+          path: ./data/CORDEX-Africa_data/AFRICA*tasmax.nc
+          variable: tasmax    
 
 number_of_metrics_and_plots: 2
 

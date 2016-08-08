@@ -20,7 +20,7 @@ output_netcdf_filename: cordex-arctic_rlus_JUL.nc
 
 # (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: True 
+    maximum_overlap_period: True
     start_time: 1990-01-01
     end_time: 2007-12-31
     temporal_resolution: monthly
@@ -29,8 +29,8 @@ time:
     average_each_year: False
 
 space:
-    min_lat: 55.00 
-    max_lat: 89.5 
+    min_lat: 55.00
+    max_lat: 89.5
     min_lon: -179.75
     max_lon: 178.50
 
@@ -41,16 +41,16 @@ regrid:
 
 datasets:
     reference:
-        loader_name: local
-        data_name: SRB
-        path: ./data/CORDEX-Arctic_data/srb_rel3.0_longwave_from_1983_to_2007.nc                           
-        variable: lw_sfc_up
-        multiplying_factor: 1
+        - loader_name: local
+          name: SRB
+          path: ./data/CORDEX-Arctic_data/srb_rel3.0_longwave_from_1983_to_2007.nc
+          variable: lw_sfc_up
+          multiplying_factor: 1
 
     targets:
-        loader_name: local
-        path: ./data/CORDEX-Arctic_data/rlus*.nc                                                    
-        variable: rlus    
+        - loader_name: local
+          path: ./data/CORDEX-Arctic_data/rlus*.nc
+          variable: rlus    
 
 number_of_metrics_and_plots: 1
 
@@ -58,8 +58,7 @@ metrics1: Map_plot_bias_of_multiyear_climatology
 
 plots1:
     file_name: cordex-arctic_rlus_JUL_mean_bias_to_SRB
-    subplots_array: !!python/tuple [2,2] 
+    subplots_array: !!python/tuple [2,2]
     map_projection: npstere
 
 use_subregions: False
-

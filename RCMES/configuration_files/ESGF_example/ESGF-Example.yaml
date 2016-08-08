@@ -13,24 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-workdir: ./results/ESGF_example                                   
+workdir: ./results/ESGF_example
 output_netcdf_filename: zos_annual_mean.nc
 
 # (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: False 
+    maximum_overlap_period: False
     start_time: 1995-01-01
     end_time: 2004-12-31
     temporal_resolution: monthly
     month_start: 1
     month_end: 12
-    average_each_year: False  
+    average_each_year: False
 
 space:
     min_lat: -70
     max_lat: 70
     min_lon: -178.5
-    max_lon: 178.5 
+    max_lon: 178.5
 
 regrid:
     regrid_on_reference: True
@@ -39,17 +39,17 @@ regrid:
 
 datasets:
     reference:
-        loader_name: ESGF
-        data_name: AVISO    
-        dataset_id: obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov                          
-        variable: zos
+        - loader_name: ESGF
+          name: AVISO
+          dataset_id: obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov
+          variable: zos
 
     targets:
-        loader_name: ESGF
-        data_name: MPI-ESM
-        dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de 
-        variable: zos
-        GCM_data: True
+        - loader_name: ESGF
+          name: MPI-ESM
+          dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de
+          variable: zos
+          boundary_check: False
 
 number_of_metrics_and_plots: 1
 
