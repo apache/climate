@@ -15,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import sys
-sys.path.append('/Users/omkar/Documents/Git/podaacpy/podaac')
 from podaac_data_source import Podaac 
 import numpy as np
 from ocw.dataset import Dataset
