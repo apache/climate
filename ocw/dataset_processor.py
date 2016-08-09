@@ -16,6 +16,7 @@
 #
 
 from ocw import dataset as ds
+import ocw.utils as utils
 
 import datetime
 import numpy as np
@@ -362,7 +363,7 @@ def ensemble(datasets):
     return ensemble_dataset
 
 
-def subset(target_dataset, subregion, subregion_name=None):
+def subset(target_dataset, subregion, subregion_name=None, extract=True):
     '''Subset given dataset(s) with subregion information
 
     :param subregion: The Bounds with which to subset the target Dataset.
@@ -373,6 +374,9 @@ def subset(target_dataset, subregion, subregion_name=None):
 
     :param subregion_name: The subset-ed Dataset name
     :type subregion_name: :mod:`string`
+
+    :param extract: If False, the dataset inside regions will be masked.
+    :type extract: :mod:`boolean`
 
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
@@ -387,7 +391,7 @@ def subset(target_dataset, subregion, subregion_name=None):
     if not subregion_name:
         subregion_name = target_dataset.name
 
-    if subregion.lat_min:
+    if hasattr(subregion, 'lat_min'):
         # If boundary_type is 'rectangular' or 'CORDEX ***', ensure that the subregion information is well formed
         _are_bounds_contained_by_dataset(target_dataset, subregion)
 
@@ -435,27 +439,36 @@ def subset(target_dataset, subregion, subregion_name=None):
                     dataset_slices["time_start"]:dataset_slices["time_end"] + 1,
                     dataset_slices["lat_start"]:dataset_slices["lat_end"] + 1,
                     dataset_slices["lon_start"]:dataset_slices["lon_end"] + 1]
-
-        # Build new dataset with subset information
-        return ds.Dataset(
+            # Build new dataset with subset information
+            return ds.Dataset(
             # Slice the lats array with our calculated slice indices
-            target_dataset.lats[dataset_slices["lat_start"]:
-                                dataset_slices["lat_end"] + 1],
+                target_dataset.lats[dataset_slices["lat_start"]:
+                                    dataset_slices["lat_end"] + 1],
             # Slice the lons array with our calculated slice indices
-            target_dataset.lons[dataset_slices["lon_start"]:
-                                dataset_slices["lon_end"] + 1],
+                target_dataset.lons[dataset_slices["lon_start"]:
+                                    dataset_slices["lon_end"] + 1],
             # Slice the times array with our calculated slice indices
-            target_dataset.times[dataset_slices["time_start"]:
-                                 dataset_slices["time_end"] + 1],
+                target_dataset.times[dataset_slices["time_start"]:
+                                     dataset_slices["time_end"] + 1],
             # Slice the values array with our calculated slice indices
-            subset_values,
-            variable=target_dataset.variable,
-            units=target_dataset.units,
-            name=subregion_name,
-            origin=target_dataset.origin
-        )
+                subset_values,
+                variable=target_dataset.variable,
+                units=target_dataset.units,
+                name=subregion_name,
+                origin=target_dataset.origin
+                )
 
-
+    if subregion.boundary_type == 'us_states' or subregion.boundary_type == 'countries':
+        start_time_index = np.where(
+            target_dataset.times == subregion.start)[0][0]
+        end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
+        target_dataset = temporal_slice(
+            target_dataset, start_time_index, end_time_index)
+        nt, ny, nx = target_dataset.values.shape
+        spatial_mask = utils.mask_using_shapefile_info(target_dataset.lons, target_dataset.lats, subregion.masked_regions, extract = extract)
+        target_dataset.values = utils.propagate_spatial_mask_over_time(target_dataset.values, mask=spatial_mask)
+        return target_dataset
+            
 def temporal_slice(target_dataset, start_time_index, end_time_index):
     '''Temporally slice given dataset(s) with subregion information. This does not
     spatially subset the target_Dataset
