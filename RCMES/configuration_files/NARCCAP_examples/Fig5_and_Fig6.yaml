@@ -31,8 +31,8 @@ datasets:
 
     targets:
         - loader_name: local
-          path: ./data/NARCCAP_data/temp.*ncep.monavg.nc
-          variable: temp    
+          file_path: ./data/NARCCAP_data/temp.*ncep.monavg.nc
+          variable_name: temp    
 
 number_of_metrics_and_plots: 2
 

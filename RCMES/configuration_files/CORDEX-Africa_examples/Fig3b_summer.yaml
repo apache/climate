@@ -32,8 +32,8 @@ datasets:
 
     targets:
         - loader_name: local
-          path: ./data/CORDEX-Africa_data/AFRICA*tas.nc
-          variable: tas    
+          file_path: ./data/CORDEX-Africa_data/AFRICA*tas.nc
+          variable_name: tas    
 
 number_of_metrics_and_plots: 1
 

@@ -43,14 +43,14 @@ datasets:
     reference:
         - loader_name: local
           name: SRB
-          path: ./data/CORDEX-Arctic_data/srb_rel3.0_longwave_from_1983_to_2007.nc
-          variable: lw_sfc_up
+          file_path: ./data/CORDEX-Arctic_data/srb_rel3.0_longwave_from_1983_to_2007.nc
+          variable_name: lw_sfc_up
           multiplying_factor: 1
 
     targets:
         - loader_name: local
-          path: ./data/CORDEX-Arctic_data/rlus*.nc
-          variable: rlus    
+          file_path: ./data/CORDEX-Arctic_data/rlus*.nc
+          variable_name: rlus    
 
 number_of_metrics_and_plots: 1
 

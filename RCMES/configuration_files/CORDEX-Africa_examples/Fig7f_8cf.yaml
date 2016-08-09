@@ -32,8 +32,8 @@ datasets:
 
     targets:
         - loader_name: local
-          path: ./data/CORDEX-Africa_data/AFRICA*tasmin.nc
-          variable: tasmin
+          file_path: ./data/CORDEX-Africa_data/AFRICA*tasmin.nc
+          variable_name: tasmin
           lat_name: lat
           lon_name: lon
 

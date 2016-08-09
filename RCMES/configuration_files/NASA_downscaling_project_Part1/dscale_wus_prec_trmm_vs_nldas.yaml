@@ -28,12 +28,12 @@ datasets:
           name: TRMM
           dataset_id: 3
           parameter_id: 36
-          variable: pr
+          variable_name: pr
 
     targets:
         - loader_name: local
-          path: ./data/dscale/obs/prmo*.nc
-          variable: pr
+          file_path: ./data/dscale/obs/prmo*.nc
+          variable_name: pr
 
 number_of_metrics_and_plots: 2
 

@@ -31,8 +31,8 @@ datasets:
 
     targets:
         - loader_name: local
-          path: ./data/config_training/AFRICA*pr.nc
-          variable: pr
+          file_path: ./data/config_training/AFRICA*pr.nc
+          variable_name: pr
 
 number_of_metrics_and_plots: 1
 

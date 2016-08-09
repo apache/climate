@@ -32,8 +32,8 @@ datasets:
 
     targets:
         - loader_name: local
-          path: ./data/CORDEX-Africa_data/AFRICA*tasmax.nc
-          variable: tasmax    
+          file_path: ./data/CORDEX-Africa_data/AFRICA*tasmax.nc
+          variable_name: tasmax    
 
 number_of_metrics_and_plots: 2
 

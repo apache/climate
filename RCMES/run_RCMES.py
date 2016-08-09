@@ -20,10 +20,12 @@ import sys
 import ssl
 import yaml
 import operator
+from datetime import datetime
 from glob import glob
 from getpass import getpass
 import numpy as np
 import ocw.utils as utils
+import ocw.dataset_processor as dsp
 from ocw.dataset import Bounds
 from ocw.dataset_loader import DatasetLoader
 from metrics_and_plots import *
@@ -82,16 +84,17 @@ model_data_info = config['datasets']['targets']
 
 # Extract info we don't want to put into the loader config
 # Multiplying Factor to scale obs by
-multiplying_factor = np.ones(nobs)
+multiplying_factor = np.ones(len(obs_data_info))
 for i, info in enumerate(obs_data_info):
     if 'multiplying_factor' in info:
         multiplying_factor[i] = info.pop('multiplying_factor')
 
-# GCM Boundary Check for Regridding
-boundary_check = np.ones(nmodels, dtype='bool')
+# If models are GCMs we can skip boundary check. Probably need to find a more
+# elegant way to express this in the config file API.
+boundary_check = True
 for i, info in enumerate(model_data_info):
     if 'boundary_check' in info:
-        boundary_check[i] = info.pop('boundary_check')
+        boundary_check = info.pop('boundary_check')
 
 """ Step 1: Load the observation data """
 print 'Loading observation datasets:\n',obs_data_info
@@ -99,7 +102,7 @@ obs_datasets = load_datasets_from_config(*obs_data_info, **kwargs)
 obs_names = [dataset.name for dataset in obs_datasets]
 for i, dataset in enumerate(obs_datasets):
     if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
-        obs_datasets[i] = dsp.normalize_dataset_datetimes(obs_dataset,
+        obs_datasets[i] = dsp.normalize_dataset_datetimes(dataset,
                                                           temporal_resolution)
 
     if multiplying_factor[i] != 1:
@@ -116,7 +119,7 @@ if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
 """ Step 3: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
 if time_info['maximum_overlap_period']:
-    start_time, end_time = utils.get_temporal_overlap([obs_dataset]+model_datasets)
+    start_time, end_time = utils.get_temporal_overlap(obs_datasets+model_datasets)
     print 'Maximum overlap period'
     print 'start_time:', start_time
     print 'end_time:', end_time
@@ -125,10 +128,10 @@ if temporal_resolution == 'monthly' and end_time.day !=1:
     end_time = end_time.replace(day=1)
 
 for i, dataset in enumerate(obs_datasets):
-    min_lat = np.max([min_lat, obs_dataset.lats.min()])
-    max_lat = np.min([max_lat, obs_dataset.lats.max()])
-    min_lon = np.max([min_lon, obs_dataset.lons.min()])
-    max_lon = np.min([max_lon, obs_dataset.lons.max()])
+    min_lat = np.max([min_lat, dataset.lats.min()])
+    max_lat = np.min([max_lat, dataset.lats.max()])
+    min_lon = np.max([min_lon, dataset.lons.min()])
+    max_lon = np.min([max_lon, dataset.lons.max()])
 
 bounds = Bounds(lat_min=min_lat,
                 lat_max=max_lat,
@@ -174,6 +177,8 @@ else:
     new_lat = np.linspace(min_lat, max_lat, nlat)
     new_lon = np.linspace(min_lon, max_lon, nlon)
 
+# number of models
+nmodel = len(model_datasets)
 print 'Dataset loading completed'
 print 'Observation data:', obs_name
 print 'Number of model datasets:',nmodel
@@ -187,7 +192,7 @@ if not config['regrid']['regrid_on_reference']:
     print 'Reference dataset has been regridded'
 for i, dataset in enumerate(model_datasets):
     model_datasets[i] = dsp.spatial_regrid(dataset, new_lat, new_lon,
-                                           boundary_check=boundary_check[i])
+                                           boundary_check=boundary_check)
     print model_names[i]+' has been regridded'
 print 'Propagating missing data information'
 obs_dataset = dsp.mask_missing_data([obs_dataset]+model_datasets)[0]
@@ -234,8 +239,8 @@ if config['use_subregions']:
         obs_dataset, obs_name, model_datasets, model_names,
         path=workdir+config['output_netcdf_filename'],
         subregions=subregions, subregion_array=subregion_array,
-        obs_subregion_mean=obs_subregion_mean,
-        obs_subregion_std=obs_subregion_std,
+        ref_subregion_mean=obs_subregion_mean,
+        ref_subregion_std=obs_subregion_std,
         model_subregion_mean=model_subregion_mean,
         model_subregion_std=model_subregion_std)
 else:
