@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup
 import requests
 
 def load_dataset(dataset_id,
-                 variable,
+                 variable_name,
                  esgf_username,
                  esgf_password,
                  search_url=DEFAULT_ESGF_SEARCH,
@@ -43,8 +43,8 @@ def load_dataset(dataset_id,
     :param dataset_id: The ESGF ID of the dataset to load.
     :type dataset_id: :mod:`string`
 
-    :param variable: The variable to load.
-    :type variable: :mod:`string`
+    :param variable_name: The variable to load.
+    :type variable_name: :mod:`string`
 
     :param esgf_username: ESGF OpenID value to use for authentication.
     :type esgf_username: :mod:`string`
@@ -79,7 +79,7 @@ def load_dataset(dataset_id,
     '''
     download_data = _get_file_download_data(url=search_url,
                                             dataset_id=dataset_id,
-                                            variable=variable)
+                                            variable=variable_name)
 
     datasets = []
     for url, var in download_data:
@@ -97,7 +97,7 @@ def load_dataset(dataset_id,
     origin = {
         'source': 'esgf',
         'dataset_id': dataset_id,
-        'variable': variable
+        'variable': variable_name
     }
     for ds in datasets:
         ds.origin = origin

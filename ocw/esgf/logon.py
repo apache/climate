@@ -32,16 +32,12 @@ def logon(openid, password):
     The certificate is written in the location ~/.esg/credentials.pem.
     The trusted CA certificates are written in the directory ~/.esg/certificates.
     '''
-    
     # Must configure the DN of the JPL MyProxy server if using a JPL openid
     if JPL_HOSTNAME in openid:
         os.environ['MYPROXY_SERVER_DN'] = JPL_MYPROXY_SERVER_DN
 
     lm = LogonManager()
 
-    lm.logon_with_openid(openid, password)
+    lm.logon_with_openid(openid, password, bootstrap=True)
 
     return lm.is_logged_on()
-    
-    
-    

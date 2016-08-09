@@ -30,28 +30,29 @@ from ocw.dataset import Bounds
 from ocw.dataset_loader import DatasetLoader
 from metrics_and_plots import *
 
-def load_datasets_from_config(*loader_options, **kwargs):
+def load_datasets_from_config(extra_opts, *loader_opts):
     '''
     Generic dataset loading function.
     '''
-    for opt in loader_options:
+    for opt in loader_opts:
         loader_name = opt['loader_name']
-        if loader_name == 'ESGF':
-            if password is None:
-                username=raw_input('Enter your ESGF OpenID:\n')
-                password=getpass(prompt='Enter your ESGF password:\n')
+        if loader_name == 'esgf':
+            if extra_opts['password'] is None:
+                extra_opts['username'] = raw_input('Enter your ESGF OpenID:\n')
+                extra_opts['password'] = getpass(
+                                        prompt='Enter your ESGF password:\n')
 
-            opt['username'] = username
-            opt['password'] = password
+            opt['esgf_username'] = extra_opts['username']
+            opt['esgf_password'] = extra_opts['password']
         elif loader_name == 'rcmed':
-            opt['min_lat'] = kwargs['min_lat']
-            opt['max_lat'] = kwargs['max_lat']
-            opt['min_lon'] = kwargs['min_lon']
-            opt['max_lon'] = kwargs['max_lon']
-            opt['start_time'] = kwargs['start_time']
-            opt['end_time'] = kwargs['end_time']
+            opt['min_lat'] = extra_opts['min_lat']
+            opt['max_lat'] = extra_opts['max_lat']
+            opt['min_lon'] = extra_opts['min_lon']
+            opt['max_lon'] = extra_opts['max_lon']
+            opt['start_time'] = extra_opts['start_time']
+            opt['end_time'] = extra_opts['end_time']
 
-        loader = DatasetLoader(*loader_options)
+        loader = DatasetLoader(*loader_opts)
         loader.load_datasets()
         return loader.datasets
 
@@ -75,8 +76,11 @@ min_lat = space_info['min_lat']
 max_lat = space_info['max_lat']
 min_lon = space_info['min_lon']
 max_lon = space_info['max_lon']
-kwargs = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
-          'max_lon': max_lon, 'start_time': start_time, 'end_time': end_time}
+
+# Additional arguments for the DatasetLoader
+extra_opts = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
+              'max_lon': max_lon, 'start_time': start_time,
+              'end_time': end_time, 'username': None, 'password': None}
 
 # Get the dataset loader options
 obs_data_info = config['datasets']['reference']
@@ -98,7 +102,7 @@ for i, info in enumerate(model_data_info):
 
 """ Step 1: Load the observation data """
 print 'Loading observation datasets:\n',obs_data_info
-obs_datasets = load_datasets_from_config(*obs_data_info, **kwargs)
+obs_datasets = load_datasets_from_config(extra_opts, *obs_data_info)
 obs_names = [dataset.name for dataset in obs_datasets]
 for i, dataset in enumerate(obs_datasets):
     if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
@@ -109,7 +113,7 @@ for i, dataset in enumerate(obs_datasets):
         obs_dataset.values *= multiplying_factor[i]
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
-model_datasets = load_datasets_from_config(*model_data_info, **kwargs)
+model_datasets = load_datasets_from_config(extra_opts, *model_data_info)
 model_names = [dataset.name for dataset in model_datasets]
 if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
     for i, dataset in enumerate(model_datasets):
