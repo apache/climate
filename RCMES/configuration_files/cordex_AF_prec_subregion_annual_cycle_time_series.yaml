@@ -3,7 +3,7 @@ output_netcdf_filename: cordex_AF_prec_monthly_mean_1990-2007.nc
 
 # (RCMES will temporally subset data between month_start and month_end. If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
 time:
-    maximum_overlap_period: True 
+    maximum_overlap_period: True
     start_time: 1998-01-01
     end_time: 2007-12-31
     temporal_resolution: monthly
@@ -24,15 +24,15 @@ regrid:
 
 datasets:
     reference:
-        data_source: rcmed
-        data_name: CRU  
-        dataset_id: 10
-        parameter_id: 37
+        - loader_name: rcmed
+          name: CRU
+          dataset_id: 10
+          parameter_id: 37
 
     targets:
-        data_source: local
-        path: ./data/config_training/AFRICA*pr.nc                                
-        variable: pr    
+        - loader_name: local
+          file_path: ./data/config_training/AFRICA*pr.nc
+          variable_name: pr
 
 number_of_metrics_and_plots: 1
 
@@ -42,7 +42,7 @@ plots1:
     file_name: cordex_AF_prec_subregion_annual_cycle_time_series
     subplots_array: !!python/tuple [7,3]
 
-use_subregions: True 
+use_subregions: True
 
 subregions:
 #subregion name (R01, R02, R03,....) followed by an array of boundaries [south, north, west, east]

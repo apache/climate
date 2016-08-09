@@ -9,7 +9,7 @@ time:
     temporal_resolution: monthly
     month_start: 11
     month_end: 3
-    average_each_year: True  
+    average_each_year: True
 
 space:
     min_lat: 25.063
@@ -24,15 +24,15 @@ regrid:
 
 datasets:
     reference:
-        data_source: local
-        data_name: NLDAS
-        path: ./data/dscale/obs/prmo_lds-lds_1999-2010.nc
-        variable: pr      
+        - loader_name: local
+          name: NLDAS
+          file_path: ./data/dscale/obs/prmo_lds-lds_1999-2010.nc
+          variable_name: pr
 
     targets:
-        data_source: local
-        path: ./data/dscale/prmo*.nc
-        variable: pr
+        - loader_name: local
+          file_path: ./data/dscale/prmo*.nc
+          variable_name: pr
 
 number_of_metrics_and_plots: 2
 
@@ -52,13 +52,13 @@ use_subregions: False
 
 #subregions:
 ##subregion name (R01, R02, R03,....) followed by an array of boundaries [south, north, west, east]
-#    R01: 
+#    R01:
 #      [42.75, 49.75, -123.75, -120.25]
 #   R02:
 #     [42.75, 49.75, -119.75, -112.75]
 #   R03:
 #     [37.25, 42.25, -123.75, -117.75]
-#   R04: 
+#   R04:
 #     [32.25, 37.25, -122.75, -114.75]
 #   R05:
 #     [31.25, 37.25, -113.75, -108.25]
@@ -66,17 +66,17 @@ use_subregions: False
 #     [31.25, 37.25, -108.25, -99.75]
 #   R07:
 #     [37.25, 43.25, -110.25, -103.75]
-#   R08: 
+#   R08:
 #     [45.25, 49.25, -99.75, -90.25]
-#   R09: 
+#   R09:
 #     [34.75, 45.25, -99.75, -90.25]
-#   R10: 
+#   R10:
 #     [29.75, 34.75, -95.75, -84.75]
-#   R11: 
+#   R11:
 #     [38.25, 44.75, -89.75, -80.25]
-#   R12: 
+#   R12:
 #     [38.25, 44.75, -79.75, -70.25]
-#   R13: 
+#   R13:
 #     [30.75, 38.25, -83.75, -75.25]
-#   R14: 
+#   R14:
 #     [24.25, 30.75, -83.75, -80.25]
