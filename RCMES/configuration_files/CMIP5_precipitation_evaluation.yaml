@@ -1,0 +1,43 @@
+workdir: ./CMIP5_examples/Central_America
+output_netcdf_filename: CMIP5_prec.nc
+
+# (RCMES will temporally subset data between month_start and month_end.
+# If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
+time:
+    maximum_overlap_period: False
+    start_time: 1998-01-01
+    end_time: 1999-12-31
+    temporal_resolution: monthly
+    month_start: 1
+    month_end: 12
+    average_each_year: Yes  
+
+space:
+    boundary_type: CORDEX Central America
+
+regrid:
+    regrid_on_reference: False
+    regrid_dlat: 0.44
+    regrid_dlon: 0.44
+
+datasets:
+    reference:
+        - loader_name: rcmed
+          name: TRMM
+          dataset_id: 3
+          parameter_id: 36
+
+    targets:
+        - loader_name: local
+          file_path: ./data/CMIP5/prec/CMIP5_*prec.nc
+          variable_name: prec
+
+number_of_metrics_and_plots: 1
+
+metrics1: Map_plot_bias_of_multiyear_climatology
+
+plots1:
+    file_name: CMIP5_precipitation_evaluation_using_TRMM
+    subplots_array: !!python/tuple [3,4]
+
+use_subregions: False

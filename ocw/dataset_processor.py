@@ -395,8 +395,8 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
         subregion_name = target_dataset.name
 
     if hasattr(subregion, 'lat_min'):
-        # If boundary_type is 'rectangular' or 'CORDEX ***', ensure that the subregion information is well formed
-        _are_bounds_contained_by_dataset(target_dataset, subregion)
+        #_are_bounds_contained_by_dataset(target_dataset, subregion)   
+        # this boundary check is not necessary with the updated Bounds and subset
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             start_time_index = np.where(

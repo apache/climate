@@ -483,32 +483,35 @@ def CORDEX_boundary(domain_name):
     '''
     if domain_name =='southamerica':
         return -57.61, 18.50, 254.28-360., 343.02-360.
-    if domain_name =='centralamerica':
+    elif domain_name =='centralamerica':
         return -19.46, 34.83, 235.74-360., 337.78-360.
-    if domain_name =='northamerica':
+    elif domain_name =='northamerica':
         return  12.55, 75.88, 189.26-360., 336.74-360.
-    if domain_name =='europe':
+    elif domain_name =='europe':
         return  22.20, 71.84, 338.23-360., 64.4
-    if domain_name =='africa':
+    elif domain_name =='africa':
         return -45.76, 42.24, 335.36-360., 60.28
-    if domain_name =='southasia':
+    elif domain_name =='southasia':
         return -15.23, 45.07, 19.88, 115.55
-    if domain_name =='eastasia':
+    elif domain_name =='eastasia':
         return  -0.10, 61.90, 51.59, 179.99
-    if domain_name =='centralasia':
+    elif domain_name =='centralasia':
         return  18.34, 69.37, 11.05, 139.13
-    if domain_name =='australasia':
+    elif domain_name =='australasia':
         return -52.36, 12.21, 89.25, 179.99
-    if domain_name =='antartica':
+    elif domain_name =='antartica':
         return -89.48,-56.00, -179.00, 179.00
-    if domain_name =='artic':
+    elif domain_name =='artic':
         return 46.06, 89.50, -179.00, 179.00
-    if domain_name =='mediterranean':
+    elif domain_name =='mediterranean':
         return  25.63, 56.66, 339.79-360.00, 50.85
-    if domain_name =='middleeastnorthafrica':
+    elif domain_name =='middleeastnorthafrica':
         return  -7.00, 45.00, 333.00-360.00, 76.00
-    if domain_name =='southeastasia':
+    elif domain_name =='southeastasia':
         return  -15.14, 27.26, 89.26, 146.96
+    else:
+        err = "Invalid CORDEX domain name"
+        raise ValueError(err)
 
 def mask_using_shapefile_info(lons, lats, masked_regions, extract = True):
     if lons.ndim == 2 and lats.ndim == 2:
