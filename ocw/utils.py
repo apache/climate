@@ -510,9 +510,9 @@ def CORDEX_boundary(domain_name):
     elif domain_name =='southeastasia':
         return  -15.14, 27.26, 89.26, 146.96
     else:
-        err ="Invalid CORDEX domain name"
+        err = "Invalid CORDEX domain name"
         raise ValueError(err)
-       
+
 def mask_using_shapefile_info(lons, lats, masked_regions, extract = True):
     if lons.ndim == 2 and lats.ndim == 2:
         lons_2d = lons
