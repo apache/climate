@@ -18,11 +18,13 @@
 ''''''
 
 import sys
+import os
 import datetime as dt
 import numpy as np
 import numpy.ma as ma
 
-from mpl_toolkits.basemap import shiftgrid
+from mpl_toolkits.basemap import shiftgrid, Basemap, maskoceans
+from matplotlib.path import Path
 from dateutil.relativedelta import relativedelta
 from netCDF4 import num2date
 
@@ -445,3 +447,91 @@ def calc_area_weighted_spatial_average(dataset, area_weight=False):
             spatial_average[it] = ma.average(dataset.values[it, :])
 
     return spatial_average
+
+def shapefile_boundary(boundary_type, region_names):
+    '''
+    :param boundary_type: The type of spatial subset boundary
+    :type boundary_type: :mod:'string'
+
+    :param region_names: An array of regions for spatial subset
+    :type region_names: :mod:'list'
+    '''
+    # Read the shapefile
+    map_read = Basemap()
+    regions = []
+    shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
+    map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
+                           boundary_type)
+    if boundary_type == 'us_states':
+        for region_name in region_names:
+            for iregion, region_info in enumerate(map_read.us_states_info):
+                if region_info['st'] == region_name:
+                    regions.append(np.array(map_read.us_states[iregion]))
+    elif boundary_type == 'countries':
+        for region_name in region_names:
+            for iregion, region_info in enumerate(map_read.countries_info):
+                if region_info['COUNTRY'].replace(" ","").lower() == region_name.replace(" ","").lower():
+                    regions.append(np.array(map_read.countries[iregion]))
+    return regions
+
+def CORDEX_boundary(domain_name):
+    '''
+    :param domain_name: CORDEX domain name (http://www.cordex.org/)
+    :type domain_name: :mod:'string'
+    '''
+    if domain_name =='southamerica':
+        return -57.61, 18.50, 254.28-360., 343.02-360.
+    if domain_name =='centralamerica':
+        return -19.46, 34.83, 235.74-360., 337.78-360.
+    if domain_name =='northamerica':
+        return  12.55, 75.88, 189.26-360., 336.74-360.
+    if domain_name =='europe':
+        return  22.20, 71.84, 338.23-360., 64.4
+    if domain_name =='africa':
+        return -45.76, 42.24, 335.36-360., 60.28
+    if domain_name =='southasia':
+        return -15.23, 45.07, 19.88, 115.55
+    if domain_name =='eastasia':
+        return  -0.10, 61.90, 51.59, 179.99
+    if domain_name =='centralasia':
+        return  18.34, 69.37, 11.05, 139.13
+    if domain_name =='australasia':
+        return -52.36, 12.21, 89.25, 179.99
+    if domain_name =='antartica':
+        return -89.48,-56.00, -179.00, 179.00
+    if domain_name =='artic':
+        return 46.06, 89.50, -179.00, 179.00
+    if domain_name =='mediterranean':
+        return  25.63, 56.66, 339.79-360.00, 50.85
+    if domain_name =='middleeastnorthafrica':
+        return  -7.00, 45.00, 333.00-360.00, 76.00
+    if domain_name =='southeastasia':
+        return  -15.14, 27.26, 89.26, 146.96
+
+def mask_using_shapefile_info(lons, lats, masked_regions, extract = True):
+    if lons.ndim == 2 and lats.ndim == 2:
+        lons_2d = lons
+        lats_2d = lats
+    else:
+        lons_2d, lats_2d = np.meshgrid(lons, lats)
+
+    points = np.array((lons_2d.flatten(), lats_2d.flatten())).T
+    for iregion, region in enumerate(masked_regions):
+        mpath = Path(region)
+        mask0 = mpath.contains_points(points).reshape(lons_2d.shape)
+        if iregion == 0:
+            mask = mask0
+        else:
+            mask = mask|mask0 
+    if extract:
+        mask = np.invert(mask)
+    return mask
+
+def propagate_spatial_mask_over_time(data_array, mask):
+    if data_array.ndim == 3 and mask.ndim == 2:
+        nt = data_array.shape[0]
+        for it in np.arange(nt):
+            mask_original = data_array[it,:].mask
+            data_array[it,:] = ma.array(data_array[it,:], mask=mask|mask_original)
+        return data_array 
+

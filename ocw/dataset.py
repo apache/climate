@@ -298,9 +298,9 @@ class Bounds(object):
             self._end = None
 
         if boundary_type == 'us_states':
-            self.masked_regions = shapefile_boundary(boundary_type, us_states)
+            self.masked_regions = utils.shapefile_boundary(boundary_type, us_states)
         if boundary_type == 'countries':
-            self.masked_regions = shapefile_boundary(boundary_type, countries)
+            self.masked_regions = utils.shapefile_boundary(boundary_type, countries)
         if boundary_type == 'user':
             file_object = netCDF4.Dataset(user_mask_file)
             self.mask_variable = file_object.variables[mask_variable_name][:]
@@ -334,7 +334,7 @@ class Bounds(object):
             self.lon_min = float(lon_min)
             self.lon_max = float(lon_max)
         if boundary_type[:6].upper() == 'CORDEX':
-            self.lat_min, self.lat_max, self.lon_min, self.lon_max = CORDEX_boundary(boundary_type[6:].replace(" ","").lower())
+            self.lat_min, self.lat_max, self.lon_min, self.lon_max = utils.CORDEX_boundary(boundary_type[6:].replace(" ","").lower())
 
     @property
     def start(self):
@@ -364,62 +364,3 @@ class Bounds(object):
 
         self._end = value
 
-def shapefile_boundary(boundary_type, region_names):
-    '''
-    :param boundary_type: The type of spatial subset boundary
-    :type boundary_type: :mod:'string'
-
-    :param region_names: An array of regions for spatial subset
-    :type region_names: :mod:'list'
-    '''
-    # Read the shapefile
-    map_read = Basemap()
-    regions = []
-    shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
-    map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
-                           boundary_type)
-    if boundary_type == 'us_states':
-        for region_name in region_names:
-            for iregion, region_info in enumerate(map_read.us_states_info):
-                if region_info['st'] == region_name:
-                    regions.append(numpy.array(map_read.us_states[iregion]))
-    elif boundary_type == 'countries':
-        for region_name in region_names:
-            for iregion, region_info in enumerate(map_read.countries_info):
-                if region_info['COUNTRY'] == region_name:
-                    regions.append(numpy.array(map_read.countries[iregion]))
-    return regions
-
-def CORDEX_boundary(domain_name):
-    '''
-    :param domain_name: CORDEX domain name (http://www.cordex.org/)
-    :type domain_name: :mod:'string'
-    '''
-    if domain_name =='southamerica':
-        return -57.61, 18.50, 254.28-360., 343.02-360.
-    if domain_name =='centralamerica':
-        return -19.46, 34.83, 235.74-360., 337.78-360.
-    if domain_name =='northamerica':
-        return  12.55, 75.88, 189.26-360., 336.74-360.
-    if domain_name =='europe':
-        return  22.20, 71.84, 338.23-360., 64.4
-    if domain_name =='africa':
-        return -45.76, 42.24, 335.36-360., 60.28
-    if domain_name =='southasia':
-        return -15.23, 45.07, 19.88, 115.55
-    if domain_name =='eastasia':
-        return  -0.10, 61.90, 51.59, 179.99
-    if domain_name =='centralasia':
-        return  18.34, 69.37, 11.05, 139.13
-    if domain_name =='australasia':
-        return -52.36, 12.21, 89.25, 179.99
-    if domain_name =='antartica':
-        return -89.48,-56.00, -179.00, 179.00
-    if domain_name =='artic':
-        return 46.06, 89.50, -179.00, 179.00
-    if domain_name =='mediterranean':
-        return  25.63, 56.66, 339.79-360.00, 50.85
-    if domain_name =='middleeastnorthafrica':
-        return  -7.00, 45.00, 333.00-360.00, 76.00
-    if domain_name =='southeastasia':
-        return  -15.14, 27.26, 89.26, 146.96
