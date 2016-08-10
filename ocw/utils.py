@@ -23,10 +23,12 @@ import datetime as dt
 import numpy as np
 import numpy.ma as ma
 
-from mpl_toolkits.basemap import shiftgrid, Basemap, maskoceans
+from mpl_toolkits.basemap import shiftgrid, Basemap
 from matplotlib.path import Path
 from dateutil.relativedelta import relativedelta
 from netCDF4 import num2date
+import scipy.interpolate as interpolate
+from scipy.ndimage import map_coordinates
 
 
 def decode_time_values(dataset, time_var_name):
@@ -522,16 +524,61 @@ def mask_using_shapefile_info(lons, lats, masked_regions, extract = True):
         if iregion == 0:
             mask = mask0
         else:
-            mask = mask|mask0 
+            mask = mask | mask0 
     if extract:
         mask = np.invert(mask)
     return mask
+
+def regrid_spatial_mask(target_lon, target_lat, mask_lon, mask_lat, mask_var, 
+                        user_mask_values, extract=True):
+    target_lons, target_lats = convert_lat_lon_2d_array(target_lon, target_lat)
+    mask_lons, mask_lats = convert_lat_lon_2d_array(mask_lon, mask_lat)
+   
+    if target_lons != mask_lons or target_lats != mask_lats:
+        mask_var_regridded = interpolate.griddata((mask_lons.flatten(), mask_lats.flatten()),
+                                                  mask_var.flatten(),
+                                                  (target_lons.flatten(), target_lats.flatten()),
+                                                  method='nearest', 
+                                                  fill_value=-9999.).reshape(target_lons.shape)
+    else:
+        mask_var_regridded = mask_var
+
+    mask_outside = ma.masked_equal(mask_var_regridded, -9999.).mask
+    values_original = ma.array(mask_var)
+    for shift in (-1, 1):
+            for axis in (0, 1):
+                q_shifted = np.roll(values_original, shift=shift, axis=axis)
+                idx = ~q_shifted.mask * values_original.mask
+                values_original.data[idx] = q_shifted[idx]
+    # Make a masking map using nearest neighbour interpolation -use this to
+    # determine locations with MDI and mask these
+    qmdi = np.zeros_like(values_original)
+    qmdi[values_original.mask == True] = 1.
+    qmdi[values_original.mask == False] = 0.
+    qmdi_r = map_coordinates(qmdi, [target_lats.flatten(
+     ), target_lons.flatten()], order=1).reshape(target_lons.shape)
+    mdimask = (qmdi_r != 0.0)
+    
+    for value in user_mask_values:
+        mask_var_regridded = ma.masked_equal(mask_var_regridded, value)
+    
+    if extract:
+        mask_out = np.invert(mask_var_regridded.mask | mdimask)
+        return mask_out | mask_outside
+    else: 
+        mask_out = mask_var_regridded.mask | mdimask 
+        return mask_out | mask_outside
 
 def propagate_spatial_mask_over_time(data_array, mask):
     if data_array.ndim == 3 and mask.ndim == 2:
         nt = data_array.shape[0]
         for it in np.arange(nt):
-            mask_original = data_array[it,:].mask
-            data_array[it,:] = ma.array(data_array[it,:], mask=mask|mask_original)
+            mask_original = data_array[it, :].mask
+            data_array.mask[it,:] =  mask | mask_original
         return data_array 
 
+def convert_lat_lon_2d_array(lon, lat):
+    if lon.ndim == 1 and lat.ndim == 1:
+        return np.meshgrid(lon, lat)
+    if lon.ndim == 2 and lat.ndim == 2:
+        return lon, lat

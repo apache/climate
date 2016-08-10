@@ -363,7 +363,7 @@ def ensemble(datasets):
     return ensemble_dataset
 
 
-def subset(target_dataset, subregion, subregion_name=None, extract=True):
+def subset(target_dataset, subregion, subregion_name=None, extract=True, user_mask_values=[1]):
     '''Subset given dataset(s) with subregion information
 
     :param subregion: The Bounds with which to subset the target Dataset.
@@ -377,6 +377,9 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True):
 
     :param extract: If False, the dataset inside regions will be masked.
     :type extract: :mod:`boolean`
+
+    :param user_mask_value: grid points where mask_variable == user_mask_value will be extracted or masked .
+    :type user_mask_value: :mod:`int`
 
     :returns: The subset-ed Dataset object
     :rtype: :class:`dataset.Dataset`
@@ -465,10 +468,18 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True):
         target_dataset = temporal_slice(
             target_dataset, start_time_index, end_time_index)
         nt, ny, nx = target_dataset.values.shape
-        spatial_mask = utils.mask_using_shapefile_info(target_dataset.lons, target_dataset.lats, subregion.masked_regions, extract = extract)
+        spatial_mask = utils.mask_using_shapefile_info(target_dataset.lons, target_dataset.lats, 
+                                                       subregion.masked_regions, extract = extract)
         target_dataset.values = utils.propagate_spatial_mask_over_time(target_dataset.values, mask=spatial_mask)
         return target_dataset
             
+    if subregion.boundary_type == 'user':
+        spatial_mask = utils.regrid_spatial_mask(target_dataset.lons, target_dataset.lats, 
+                                                 subregion.mask_longitude, subregion.mask_latitude, subregion.mask_variable,
+                                                 user_mask_values, extract = extract)
+        target_dataset.values = utils.propagate_spatial_mask_over_time(target_dataset.values, mask=spatial_mask)
+        return target_dataset
+
 def temporal_slice(target_dataset, start_time_index, end_time_index):
     '''Temporally slice given dataset(s) with subregion information. This does not
     spatially subset the target_Dataset
