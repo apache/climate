@@ -25,7 +25,7 @@ import urllib
 import xml.etree.ElementTree as ET
 
 
-def _convert_times_to_datetime(time):
+def convert_times_to_datetime(time):
     '''Convert the time object's values to datetime objects
 
     The time values are stored as some unit since an epoch. These need to be
@@ -50,10 +50,10 @@ def load_dataset(variable, datasetId='', datasetShortName='', name=''):
     :param variable: The name of the variable to read from the dataset.
     :type variable: :mod:`string`
 
-        :param datasetId: dataset persistent ID. datasetId or \
+    :param datasetId: dataset persistent ID. datasetId or \
         shortName is required for a granule search. Example: \
         PODAAC-ASOP2-25X01
-    :type datasetId: :mod:`string` 
+    :type datasetId: :mod:`string`
 
     :param shortName: the shorter name for a dataset. \
         Either shortName or datasetId is required for a \
@@ -95,7 +95,7 @@ def load_dataset(variable, datasetId='', datasetShortName='', name=''):
     # these values to datetime objects. Note that we use the main object's
     # time object and not the dataset specific reference to it. We need to
     # grab the 'units' from it and it fails on the dataset specific object.
-        times = np.array(_convert_times_to_datetime(d[time]))
+        times = np.array(convert_times_to_datetime(d[time]))
         lats = np.array(d.variables[lat][:])
         lons = np.array(d.variables[lon][:])
         values = np.array(dataset[:])
