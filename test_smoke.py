@@ -84,7 +84,7 @@ def check_some_dataset_functions(dataset):
     ''' Run a subset of dataset functions and check for any exception '''
     try:
         dataset.spatial_boundaries()
-        dataset.time_range()
+        dataset.temporal_boundaries()
         dataset.spatial_resolution()
     except Exception as e:
         fail("\nDataset functions")
