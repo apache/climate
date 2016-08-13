@@ -24,7 +24,7 @@ install:
   - source easy-ocw/install-ubuntu.sh
   - pip install python-coveralls
 script:
-   - chmod a+x test.sh
-   - ./test.sh
-after_script:
+  - chmod a+x test.sh
+  - ./test.sh
+after_success:
   - coveralls
