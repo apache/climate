@@ -346,3 +346,45 @@ def calc_rmse(target_array, reference_array):
     '''
 
     return (ma.mean((calc_bias(target_array, reference_array))**2))**0.5 
+
+def calc_histogram_overlap(hist1, hist2):
+    ''' from Lee et al. (2014)
+    :param hist1: a histogram array
+    :type hist1: :class:'numpy.ndarray'
+    :param hist2: a histogram array with the same size as hist1
+    :type hist2: :class:'numpy.ndarray'
+    '''
+   
+    hist1_flat = hist1.flatten()
+    hist2_flat = hist2.flatten()
+
+    if len(hist1_flat) != len(hist2_flat):
+        err = "The two histograms have different sizes"
+        raise ValueError(err) 
+    overlap = 0.
+    for ii in len(hist1_flat):
+        overlap = overlap + numpy.min(hist1_flat[ii], hist2_flat[ii])
+    return overlap
+
+def calc_joint_histogram(data_array1, data_array2, bins_for_data1, bins_for_data2):
+    ''' Calculate a joint histogram of two variables in data_array1 and data_array2
+    :param data_array1: the first variable
+    :type data_array1: :class:'numpy.ma.core.MaskedArray'
+    :param data_array2: the second variable
+    :type data_array2: :class:'numpy.ma.core.MaskedArray'
+    :param bins_for_data1: histogram bin edges for data_array1
+    :type bins_for_data1: :class:'numpy.ndarray'
+    :param bins_for_data2: histogram bin edges for data_array2
+    :type bins_for_data2: :class:'numpy.ndarray'
+    '''
+    if ma.count_masked(data_array1)!=0 or ma.count_masked(data_array2)!=0:
+        index = numpy.where((data_array1.mask == False) & (data_array2.mask==False)) 
+        new_array1 = data_array1[index]
+        new_array2 = data_array2[index] 
+    else:
+        new_array1 = data_array1.flatten()
+        new_array2 = data_array2.flatten()
+
+    histo2d, xedge, yedge = numpy.histogram2d(new_array1, new_array2, bins=[bins_for_data1, bins_for_data2])
+    return histo2d
+ 
