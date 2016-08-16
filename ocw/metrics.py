@@ -346,3 +346,47 @@ def calc_rmse(target_array, reference_array):
     '''
 
     return (ma.mean((calc_bias(target_array, reference_array))**2))**0.5 
+
+def wet_spell_analysis(reference_array, threshold=0.1, nyear=1, dt=3.):
+    ''' Characterize wet spells using sub-daily (hourly) data
+
+    :param reference_array: an array to be analyzed
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param threshold: the minimum amount of rainfall [mm/hour] 
+    :type threshold: 'float'
+
+    :param nyear: the number of discontinous periods 
+    :type nyear: 'int'
+
+    :param dt: the temporal resolution of reference_array
+    :type dt: 'float'
+    '''
+    nt = reference_array.shape[0]
+    if reference_array.ndim == 3:
+        reshaped_array = reference_array.reshape[nt, reference_array.size/nt]
+    else:
+        reshaped_array = reference_array
+    xy_indices = np.where(reshaped_array.mask[0,:] == False)[0]
+
+    nt_each_year = nt/nyear 
+    spell_duration = []
+    peak_rainfall = []
+    total_rainfall = []
+   
+    for index in xy_indices:
+        for iyear in np.arange(nyear):
+            data0_temp = reshaped_array[nt_each_year*iyear:nt_each_year*(iyear+1),
+                                        index] 
+            # time indices when precipitation rate is smaller than the threshold [mm/hr]
+            t_index = np.where((data0_temp <= threshold) & (data0_temp.mask ==False))[0]
+            t_index = np.insert(t_index, 0, 0)
+            t_index = t_index + nt_each_year*iyear
+            for it in np.arange(t_index.size-1):
+                if t_index[it+1] - t_index[it] >1:
+                    data1_temp = data0_temp[t_index[it]+1:t_index[it+1]]
+                    if not ma.is_masked(data1_temp):
+                        spell_duration.append((t_index[it+1]-t_index[it]-1)*dt)
+                        peak_rainfall.append(data1_temp.max())
+                        total_rainfall.append(data1_temp.sum())
+    return np.array(spell_duration), np.array(peak_rainfall), np.array(total_rainfall)
