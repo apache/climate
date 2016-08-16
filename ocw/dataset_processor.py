@@ -395,8 +395,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
         subregion_name = target_dataset.name
 
     if hasattr(subregion, 'lat_min'):
-        #_are_bounds_contained_by_dataset(target_dataset, subregion)   
-        # this boundary check is not necessary with the updated Bounds and subset
+        _are_bounds_contained_by_dataset(target_dataset, subregion)   
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             start_time_index = np.where(
@@ -1424,28 +1423,14 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry
     # lib instead in the future
-    if not (np.round(lat_min, 3) <= np.round(bounds.lat_min, 3) <=
-            np.round(lat_max, 3)):
-        error = ("bounds.lat_min: %s is not between lat_min: %s and"
-                 " lat_max: %s" % (bounds.lat_min, lat_min, lat_max))
-        errors.append(error)
-
-    if not (np.round(lat_min, 3) <= np.round(bounds.lat_max, 3) <=
-            np.round(lat_max, 3)):
+    if (lat_min > bounds.lat_max):
         error = ("bounds.lat_max: %s is not between lat_min: %s and"
-                 "lat_max: %s" % (bounds.lat_max, lat_min, lat_max))
+                 " lat_max: %s" % (bounds.lat_max, lat_min, lat_max))
         errors.append(error)
 
-    if not (np.round(lon_min, 3) <= np.round(bounds.lon_min, 3) <=
-            np.round(lon_max, 3)):
-        error = ("bounds.lon_min: %s is not between lon_min: %s and"
-                 "lon_max: %s" % (bounds.lon_min, lon_min, lon_max))
-        errors.append(error)
-
-    if not (np.round(lon_min, 3) <= np.round(bounds.lon_max, 3) <=
-            np.round(lon_max, 3)):
+    if (lon_min > bounds.lon_max):
         error = ("bounds.lon_max: %s is not between lon_min: %s and"
-                 "lon_max: %s" % (bounds.lon_max, lon_min, lon_max))
+                 " lon_max: %s" % (bounds.lon_max, lon_min, lon_max))
         errors.append(error)
 
     if not start <= bounds.start <= end:

@@ -592,22 +592,22 @@ class TestFailingSubset(unittest.TestCase):
         )
 
     def test_out_of_dataset_bounds_lat_min(self):
-        self.subregion.lat_min = -90
+        self.subregion.lat_max = -90
         with self.assertRaises(ValueError):
             dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lat_max(self):
-        self.subregion.lat_max = 90
+        self.subregion.lat_min = 90
         with self.assertRaises(ValueError):
             dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lon_min(self):
-        self.subregion.lon_min = -180
+        self.subregion.lon_max = -180
         with self.assertRaises(ValueError):
             dp.subset(self.target_dataset, self.subregion)
 
     def test_out_of_dataset_bounds_lon_max(self):
-        self.subregion.lon_max = 180
+        self.subregion.lon_min = 180
         with self.assertRaises(ValueError):
             dp.subset(self.target_dataset, self.subregion)
 

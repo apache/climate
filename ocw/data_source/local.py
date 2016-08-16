@@ -323,7 +323,7 @@ def load_multiple_files(file_path,
     :param time_name: (Optional) The time variable name to extract from the
         dataset.
     :type time_name: :mod:`string`
-    :returns: An array of OCW Dataset objects, an array of dataset names
+    :returns: An array of OCW Dataset objects
     :rtype: :class:`list`
     '''
 
