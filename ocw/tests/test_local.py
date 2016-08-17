@@ -117,17 +117,17 @@ class TestLoadMultipleFiles(unittest.TestCase):
         os.remove(self.file_path)
 
     def test_function_load_multiple_files_data_name(self):
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
-        self.assertEqual(data_name, ['model'])
+        dataset = local.load_multiple_files(self.file_path, "value")
+        self.assertEqual([dataset[0].name], ['model'])
 
     def test_function_load_multiple_files_lons(self):
         """To test load_multiple_file function for longitudes"""
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        dataset = local.load_multiple_files(self.file_path, "value")
         self.assertItemsEqual(dataset[0].lons, self.longitudes)
 
     def test_function_load_multiple_files_times(self):
         """To test load_multiple_files function for times"""
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        dataset = local.load_multiple_files(self.file_path, "value")
 
         newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
             2001, 02, 01), datetime.datetime(2001, 03, 01)
@@ -136,19 +136,19 @@ class TestLoadMultipleFiles(unittest.TestCase):
     def test_function_load_multiple_files_values(self):
         """To test load_multiple_files function for values"""
         new_values = self.values[:, 0, :, :]
-        dataset, data_name = local.load_multiple_files(
+        dataset = local.load_multiple_files(
             self.file_path, "value")
         self.assertTrue(numpy.allclose(dataset[0].values, new_values))
 
     def test_load_multiple_files_custom_dataset_name(self):
         """Test adding a custom name to a dataset"""
-        dataset, data_name = local.load_multiple_files(self.file_path,
-                                                       "value",
-                                                       dataset_name='foo')
+        dataset = local.load_multiple_files(self.file_path,
+                                                   "value",
+                                                   dataset_name='foo')
         self.assertEqual(dataset[0].name, 'foo')
 
     def test_dataset_origin(self):
-        dataset, data_name = local.load_multiple_files(self.file_path, 'value')
+        dataset = local.load_multiple_files(self.file_path, 'value')
         expected_keys = set(['source', 'path', 'lat_name', 'lon_name',
                              'time_name'])
         self.assertEqual(set(dataset[0].origin.keys()), expected_keys)
