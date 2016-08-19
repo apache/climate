@@ -18,11 +18,16 @@ language: python
 python:
   - "2.7"
 notifications:
-   email: false
+  email: false
 install:
   - sudo apt-get update
   - source easy-ocw/install-ubuntu.sh
   - pip install python-coveralls
+# Workaround to get travis build working with matplotlib
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 script:
   - chmod a+x test.sh
   - ./test.sh
