@@ -22,7 +22,7 @@ from setuptools import find_packages, setup
 # Package data
 # ------------
 _author       = 'Apache Open Climate Workbench'
-_authorEmail  = 'dev@climate.apache.org'
+_author_email  = 'dev@climate.apache.org'
 _classifiers  = [
     'Environment :: Console',
     'Intended Audience :: Developers',
@@ -37,30 +37,32 @@ _classifiers  = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 _description  = 'Apache Open Climate Workbench'
-_downloadURL  = 'http://pypi.python.org/pypi/ocw/'
+_download_url  = 'http://pypi.python.org/pypi/ocw/'
 _requirements = []
 _keywords     = ['climate analysis', 'workbench', 'rebinning', 'metrics', 'computation', 'visualization']
 _license      = 'Apache License, Version 2.0'
 _long_description    = 'The Apache Open Climate Workbench provides tools for the evaluation and analysis of climate models.'
 _name         = 'ocw'
 _namespaces   = []
-_testSuite    = 'ocw.tests'
+_test_suite    = 'ocw.tests'
 _url          = 'http://climate.apache.org/'
 _version      = '1.2.0'
-_zipSafe      = False
+_zip_safe      = False
 
 # Setup Metadata
 # --------------
 
-def _read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+try:
+    import pypandoc
+    _long_description = pypandoc.convert(
+        source='README.md',
+        format='markdown_github',
+        to='rst',
+        outputfile='README.rst')
+except(IOError, ImportError):
+    _long_description = open('README.md').read()
 
-_header = '*' * len(_name) + '\n' + _name + '\n' + '*' * len(_name)
-_longDescription = '\n\n'.join([
-    _header,
-    _read('README.md')
-])
-open('doc.txt', 'w').write(_longDescription)
+open('doc.txt', 'w').write(_long_description)
 
 # Include shapefiles
 _pathout = os.path.join('ocw', 'shape')
@@ -70,21 +72,21 @@ _package_data = {'ocw': _shapefiles}
 
 setup(
     author=_author,
-    author_email=_authorEmail,
+    author_email=_author_email,
     classifiers=_classifiers,
     description=_description,
-    download_url=_downloadURL,
+    download_url=_download_url,
     include_package_data=True,
     install_requires=_requirements,
     keywords=_keywords,
     license=_license,
-    long_description=_longDescription,
+    long_description=_long_description,
     name=_name,
     namespace_packages=_namespaces,
     packages=find_packages(),
-    test_suite=_testSuite,
+    test_suite=_test_suite,
     url=_url,
     version=_version,
-    zip_safe=_zipSafe,
+    zip_safe=_zip_safe,
     package_data=_package_data
 )

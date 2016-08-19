@@ -4,6 +4,8 @@
 [![Requirements Status](https://requires.io/github/apache/climate/requirements.svg?branch=master)](https://requires.io/github/apache/climate/requirements/?branch=master)
 [![Code Health](https://landscape.io/github/apache/climate/master/landscape.svg?style=flat-square)](https://landscape.io/github/apache/climate/master)
 
+![](https://svn.apache.org/repos/asf/climate/site/trunk/content/images/ocw-logo-variant-sm-01-01-new.png)
+
 Apache Open Climate Workbench is an effort to develop software that performs climate model evaluations using model outputs from a variety of different sources (the Earth System Grid Federation, the Coordinated Regional Downscaling Experiment, the U.S. National Climate Assessment and the North American Regional Climate Change Assessment Program) and temporal/spatial scales with remote sensing data from NASA, NOAA and other agencies. The toolkit includes capabilities for rebinning, metrics computation and visualization. For additional project information, please check the [project website](http://climate.apache.org/).
 
 ## Getting Started
