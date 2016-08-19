@@ -29,7 +29,7 @@ OUTPUT_PLOT = "cmc_temporal_std"
 print("Loading %s dataset into an OCW dataset objects" % datasetShortName)
 cmc_dataset = podaac.load_dataset(
     variable=variable, datasetId=datasetId, datasetShortName=datasetShortName, name=name)
-print "CMC_Dataset.values shape: (times, lats, lons) - %s \n" % (cmc_dataset.values.shape,)
+print("CMC_Dataset.values shape: (times, lats, lons) - %s \n" % (cmc_dataset.values.shape,))
 
 # Acessing latittudes and longitudes of netCDF file
 lats = cmc_dataset.lats
@@ -37,7 +37,7 @@ lons = cmc_dataset.lons
 
 """ Step 2:  Build a Metric to use for Evaluation - Temporal STD for this example """
 # You can build your own metrics, but OCW also ships with some common metrics
-print "Setting up a Temporal STD metric to use for evaluation"
+print("Setting up a Temporal STD metric to use for evaluation")
 std = metrics.TemporalStdDev()
 
 """ Step 3: Create an Evaluation Object using Datasets and our Metric """
@@ -45,11 +45,11 @@ std = metrics.TemporalStdDev()
 # Evaluation(reference, targets, metrics, subregions=None)
 # Evaluation can take in multiple targets and metrics, so we need to convert
 # our examples into Python lists.  Evaluation will iterate over the lists
-print "Making the Evaluation definition"
+print("Making the Evaluation definition")
 # Temporal STD Metric gets one target dataset then reference dataset
 # should be None
 std_evaluation = evaluation.Evaluation(None, [cmc_dataset], [std])
-print "Executing the Evaluation using the object's run() method"
+print("Executing the Evaluation using the object's run() method")
 std_evaluation.run()
 
 """ Step 4: Make a Plot from the Evaluation.results """
@@ -60,10 +60,10 @@ std_evaluation.run()
 # The shape of results is (num_metrics, num_target_datasets) if no subregion
 # Accessing the actual results when we have used 1 metric and 1 dataset is
 # done this way:
-print "Accessing the Results of the Evaluation run"
+print("Accessing the Results of the Evaluation run")
 results = std_evaluation.unary_results[0][0]
-print "The results are of type: %s" % type(results)
-print "Generating a contour map using ocw.plotter.draw_contour_map()"
+print("The results are of type: %s" % type(results))
+print("Generating a contour map using ocw.plotter.draw_contour_map()")
 
 fname = OUTPUT_PLOT
 gridshape = (4, 5)  # 20 Years worth of plots. 20 rows in 1 column

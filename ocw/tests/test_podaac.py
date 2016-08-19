@@ -51,8 +51,8 @@ class TestPodaacDataSource(unittest.TestCase):
         self.assertEquals(len(self.dataset.values), 1)
 
     def test_valid_date_conversion(self):
-    start = dt.datetime(2006, 6, 7, 12)
-    self.assertTrue(start == self.dataset.times[0])
+        start = dt.datetime(2006, 6, 7, 12)
+        self.assertTrue(start == self.dataset.times[0])
 
     def test_dataset_origin(self):
         self.assertEquals(self.dataset.origin['source'], 'PO.DAAC')
