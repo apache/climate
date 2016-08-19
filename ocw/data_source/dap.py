@@ -47,18 +47,21 @@ def load(url, variable, name=''):
     # but conventions aren't always followed and all dimensions aren't always present so
     # see if we can make some educated deductions before defaulting to just pulling the first three
     # columns.
-    temp_dimensions = map(lambda x:x.lower(),dataset.dimensions)
+    temp_dimensions = map(lambda x: x.lower(), dataset.dimensions)
 
     dataset_dimensions = dataset.dimensions
-    time = dataset_dimensions[temp_dimensions.index('time') if 'time' in temp_dimensions else 0]
-    lat = dataset_dimensions[temp_dimensions.index('lat') if 'lat' in temp_dimensions else 1]
-    lon = dataset_dimensions[temp_dimensions.index('lon') if 'lon' in temp_dimensions else 2]
+    time = dataset_dimensions[temp_dimensions.index(
+        'time') if 'time' in temp_dimensions else 0]
+    lat = dataset_dimensions[temp_dimensions.index(
+        'lat') if 'lat' in temp_dimensions else 1]
+    lon = dataset_dimensions[temp_dimensions.index(
+        'lon') if 'lon' in temp_dimensions else 2]
 
     # Time is given to us in some units since an epoch. We need to convert
     # these values to datetime objects. Note that we use the main object's
     # time object and not the dataset specific reference to it. We need to
     # grab the 'units' from it and it fails on the dataset specific object.
-    times = np.array(_convert_times_to_datetime(d[time]))
+    times = np.array(convert_times_to_datetime(d[time]))
 
     lats = np.array(dataset[lat][:])
     lons = np.array(dataset[lon][:])
@@ -73,7 +76,7 @@ def load(url, variable, name=''):
                    name=name, origin=origin)
 
 
-def _convert_times_to_datetime(time):
+def convert_times_to_datetime(time):
     '''Convert the OpenDAP time object's values to datetime objects
 
     The time values are stored as some unit since an epoch. These need to be
