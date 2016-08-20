@@ -19,6 +19,7 @@
 import ocw.data_source.podaac as podaac
 import unittest
 import os
+import datetime as dt
 from ocw.dataset import Dataset
 
 
@@ -51,7 +52,7 @@ class TestPodaacDataSource(unittest.TestCase):
         self.assertEquals(len(self.dataset.values), 1)
 
     def test_valid_date_conversion(self):
-        start = dt.datetime(2006, 6, 7, 12)
+        start = dt.datetime(1991, 9, 2, 12)
         self.assertTrue(start == self.dataset.times[0])
 
     def test_dataset_origin(self):

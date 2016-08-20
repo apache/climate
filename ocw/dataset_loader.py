@@ -24,6 +24,7 @@ import ocw.data_source.local as local
 import ocw.data_source.esgf as esgf
 import ocw.data_source.rcmed as rcmed
 import ocw.data_source.dap as dap
+import ocw.data_source.podaac as podaac
 
 
 class DatasetLoader:
@@ -69,6 +70,8 @@ class DatasetLoader:
         * ``'rcmed'`` - Download the dataset from the Regional Climate Model
                         Evaluation System Database
         * ``'dap'`` - Download the dataset from an OPeNDAP URL
+        * ``'podaac'`` - Download the dataset from Physical Oceanography
+                        Distributed Active Archive Center
 
         Users who wish to load datasets from loaders not described above may
         define their own custom dataset loader function and incorporate it as
@@ -94,7 +97,8 @@ class DatasetLoader:
             'local_split': local.load_dataset_from_multiple_netcdf_files,
             'esgf': esgf.load_dataset,
             'rcmed': rcmed.parameter_dataset,
-            'dap': dap.load
+            'dap': dap.load,
+            'podaac': podaac.load_dataset
         }
 
     def add_source_loader(self, loader_name, loader_func):
