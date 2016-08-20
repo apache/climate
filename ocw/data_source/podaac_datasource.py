@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from podaac.podaac_data_source import Podaac
+from podaac.podaac import Podaac
 import numpy as np
 from ocw.dataset import Dataset
 from netCDF4 import Dataset as netcdf_dataset
