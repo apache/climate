@@ -16,7 +16,7 @@
 # under the License.
 
 
-import ocw.data_source.podaac as podaac
+import ocw.data_source.podaac_datasource as podaac
 import unittest
 import os
 import datetime as dt

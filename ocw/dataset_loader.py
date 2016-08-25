@@ -24,7 +24,7 @@ import ocw.data_source.local as local
 import ocw.data_source.esgf as esgf
 import ocw.data_source.rcmed as rcmed
 import ocw.data_source.dap as dap
-import ocw.data_source.podaac as podaac
+import ocw.data_source.podaac_datasource as podaac
 
 
 class DatasetLoader:

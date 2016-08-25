@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import ocw.data_source.podaac as podaac
+import ocw.data_source.podaac_datasource as podaac
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
@@ -29,7 +29,8 @@ OUTPUT_PLOT = "cmc_temporal_std"
 print("Loading %s dataset into an OCW dataset objects" % datasetShortName)
 cmc_dataset = podaac.load_dataset(
     variable=variable, datasetId=datasetId, datasetShortName=datasetShortName, name=name)
-print("CMC_Dataset.values shape: (times, lats, lons) - %s \n" % (cmc_dataset.values.shape,))
+print("CMC_Dataset.values shape: (times, lats, lons) - %s \n" %
+      (cmc_dataset.values.shape,))
 
 # Acessing latittudes and longitudes of netCDF file
 lats = cmc_dataset.lats
