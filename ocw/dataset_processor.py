@@ -63,10 +63,8 @@ def temporal_subset(target_dataset, month_start, month_end,
     months = np.array([d.month for d in dates])
     time_index = []
     for m_value in month_index:
-        time_index = np.append(time_index, np.where(months == m_value)[0])
-    time_index = np.sort(time_index)
-
-    time_index = list(time_index)
+        time_index.extend(list(np.where(months == m_value)[0]))
+    time_index.sort()
 
     new_dataset = ds.Dataset(target_dataset.lats,
                              target_dataset.lons,
