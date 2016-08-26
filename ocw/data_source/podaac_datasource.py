@@ -42,7 +42,7 @@ def convert_times_to_datetime(time):
     return [parsed_time.num2date(x) for x in time[:]]
 
 
-def load_dataset(variable, datasetId='', datasetShortName='', name=''):
+def load_dataset(variable, datasetId='', name=''):
     '''Loads a Dataset from PODAAC
 
     :param variable: The name of the variable to read from the dataset.
@@ -70,7 +70,7 @@ def load_dataset(variable, datasetId='', datasetShortName='', name=''):
     podaac = Podaac()
     path = os.path.dirname(os.path.abspath(__file__))
     granuleName = podaac.extract_l4_granule(
-        dataset_id=datasetId, short_name=datasetShortName, path=path)
+        dataset_id=datasetId, path=path)
     path = path + '/' + granuleName
     d = netcdf_dataset(path, mode='r')
     dataset = d.variables[variable]
@@ -109,4 +109,3 @@ def load_dataset(variable, datasetId='', datasetShortName='', name=''):
     os.remove(path)
 
     return Dataset(lats, lons, times, values, variable, name=name, origin=origin)
-

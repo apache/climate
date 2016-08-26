@@ -28,13 +28,12 @@ class TestPodaacDataSource(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.datasetId = 'PODAAC-GHCMC-4FM02'
-        cls.datasetShortName = 'CMC0.2deg-CMC-L4-GLOB-v2.0'
         cls.variable = 'sea_ice_fraction'
         cls.name = 'PO.DAAC_test_dataset'
         cls.file_path = os.path.dirname(os.path.abspath(__file__))
         cls.format = '.nc'
         cls.dataset = podaac.load_dataset(
-            cls.variable, cls.datasetId, cls.datasetShortName, cls.name)
+            cls.variable, cls.datasetId, cls.name)
 
     def test_is_dataset(self):
         self.assertTrue(isinstance(self.dataset, Dataset))

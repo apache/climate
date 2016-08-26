@@ -21,14 +21,13 @@ import ocw.metrics as metrics
 import ocw.plotter as plotter
 
 datasetId = 'PODAAC-CCF30-01XXX'
-datasetShortName = 'CCMP_MEASURES_ATLAS_L4_OW_L3_0_WIND_VECTORS_FLK'
 variable = 'uwnd'
 name = 'PO.DAAC_test_dataset'
 OUTPUT_PLOT = "ccmp_temporal_std"
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
 print("Loading %s dataset into an OCW dataset objects" % datasetShortName)
 ccmp_dataset = podaac.load_dataset(
-    variable=variable, datasetId=datasetId, datasetShortName=datasetShortName, name=name)
+    variable=variable, datasetId=datasetId, name=name)
 print("CCMP_Dataset.values shape: (times, lats, lons) - %s \n" %
       (ccmp_dataset.values.shape,))
 
