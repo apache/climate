@@ -24,17 +24,17 @@ datasetId = 'PODAAC-CCF30-01XXX'
 datasetShortName = 'CCMP_MEASURES_ATLAS_L4_OW_L3_0_WIND_VECTORS_FLK'
 variable = 'uwnd'
 name = 'PO.DAAC_test_dataset'
-OUTPUT_PLOT = "cmc_temporal_std"
+OUTPUT_PLOT = "ccmp_temporal_std"
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
 print("Loading %s dataset into an OCW dataset objects" % datasetShortName)
-cmc_dataset = podaac.load_dataset(
+ccmp_dataset = podaac.load_dataset(
     variable=variable, datasetId=datasetId, datasetShortName=datasetShortName, name=name)
-print("CMC_Dataset.values shape: (times, lats, lons) - %s \n" %
-      (cmc_dataset.values.shape,))
+print("CCMP_Dataset.values shape: (times, lats, lons) - %s \n" %
+      (ccmp_dataset.values.shape,))
 
 # Acessing latittudes and longitudes of netCDF file
-lats = cmc_dataset.lats
-lons = cmc_dataset.lons
+lats = ccmp_dataset.lats
+lons = ccmp_dataset.lons
 
 """ Step 2:  Build a Metric to use for Evaluation - Temporal STD for this example """
 # You can build your own metrics, but OCW also ships with some common metrics
@@ -49,7 +49,7 @@ std = metrics.TemporalStdDev()
 print("Making the Evaluation definition")
 # Temporal STD Metric gets one target dataset then reference dataset
 # should be None
-std_evaluation = evaluation.Evaluation(None, [cmc_dataset], [std])
+std_evaluation = evaluation.Evaluation(None, [ccmp_dataset], [std])
 print("Executing the Evaluation using the object's run() method")
 std_evaluation.run()
 
@@ -68,7 +68,7 @@ print("Generating a contour map using ocw.plotter.draw_contour_map()")
 
 fname = OUTPUT_PLOT
 gridshape = (4, 5)  # 20 Years worth of plots. 20 rows in 1 column
-plot_title = "CMC Temporal Standard Deviation"
+plot_title = "CCMP Temporal Standard Deviation"
 sub_titles = range(2002, 2010, 1)
 
 plotter.draw_contour_map(results, lats, lons, fname,
