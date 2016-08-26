@@ -15,17 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from podaac_data_source import Podaac
+from podaac.podaac import Podaac
 import numpy as np
 from ocw.dataset import Dataset
 from netCDF4 import Dataset as netcdf_dataset
 from netcdftime import utime
 import os
-import urllib
-import xml.etree.ElementTree as ET
 
 
-def _convert_times_to_datetime(time):
+def convert_times_to_datetime(time):
     '''Convert the time object's values to datetime objects
 
     The time values are stored as some unit since an epoch. These need to be
@@ -44,16 +42,16 @@ def _convert_times_to_datetime(time):
     return [parsed_time.num2date(x) for x in time[:]]
 
 
-def load_dataset(variable, datasetId='', datasetShortName='', name=''):
+def load_dataset(variable, datasetId='', name=''):
     '''Loads a Dataset from PODAAC
 
     :param variable: The name of the variable to read from the dataset.
     :type variable: :mod:`string`
 
-        :param datasetId: dataset persistent ID. datasetId or \
+    :param datasetId: dataset persistent ID. datasetId or \
         shortName is required for a granule search. Example: \
         PODAAC-ASOP2-25X01
-    :type datasetId: :mod:`string` 
+    :type datasetId: :mod:`string`
 
     :param shortName: the shorter name for a dataset. \
         Either shortName or datasetId is required for a \
@@ -69,45 +67,45 @@ def load_dataset(variable, datasetId='', datasetShortName='', name=''):
     :raises: ServerError
     '''
     # Downloading the dataset using podaac toolkit
-        podaac = Podaac()
-        path = os.path.dirname(os.path.abspath(__file__))
-        granuleName = podaac.extract_l4_granule(
-            datasetId=datasetId, shortName=datasetShortName, path=path)
-        path = path + '/' + granuleName
-        d = netcdf_dataset(path, mode='r')
-        dataset = d.variables[variable]
+    podaac = Podaac()
+    path = os.path.dirname(os.path.abspath(__file__))
+    granuleName = podaac.extract_l4_granule(
+        dataset_id=datasetId, path=path)
+    path = path + '/' + granuleName
+    d = netcdf_dataset(path, mode='r')
+    dataset = d.variables[variable]
 
     # By convention, but not by standard, if the dimensions exist, they will be in the order:
     # time (t), altitude (z), latitude (y), longitude (x)
     # but conventions aren't always followed and all dimensions aren't always present so
     # see if we can make some educated deductions before defaulting to just pulling the first three
     # columns.
-        temp_dimensions = map(lambda x: x.lower(), dataset.dimensions)
-        dataset_dimensions = dataset.dimensions
-        time = dataset_dimensions[temp_dimensions.index(
-            'time') if 'time' in temp_dimensions else 0]
-        lat = dataset_dimensions[temp_dimensions.index(
-            'lat') if 'lat' in temp_dimensions else 1]
-        lon = dataset_dimensions[temp_dimensions.index(
-            'lon') if 'lon' in temp_dimensions else 2]
+    temp_dimensions = map(lambda x: x.lower(), dataset.dimensions)
+    dataset_dimensions = dataset.dimensions
+    time = dataset_dimensions[temp_dimensions.index(
+        'time') if 'time' in temp_dimensions else 0]
+    lat = dataset_dimensions[temp_dimensions.index(
+        'lat') if 'lat' in temp_dimensions else 1]
+    lon = dataset_dimensions[temp_dimensions.index(
+        'lon') if 'lon' in temp_dimensions else 2]
 
     # Time is given to us in some units since an epoch. We need to convert
     # these values to datetime objects. Note that we use the main object's
     # time object and not the dataset specific reference to it. We need to
     # grab the 'units' from it and it fails on the dataset specific object.
-        times = np.array(_convert_times_to_datetime(d[time]))
-        lats = np.array(d.variables[lat][:])
-        lons = np.array(d.variables[lon][:])
-        values = np.array(dataset[:])
-        origin = {
-            'source': 'PO.DAAC',
-            'url': 'podaac.jpl.nasa.gov/ws'
-        }
+    times = np.array(convert_times_to_datetime(d[time]))
+    lats = np.array(d.variables[lat][:])
+    lons = np.array(d.variables[lon][:])
+    values = np.array(dataset[:])
+    origin = {
+        'source': 'PO.DAAC',
+        'url': 'podaac.jpl.nasa.gov/ws'
+    }
 
     # Removing the downloaded temporary granule before creating the OCW
     # dataset.
-        d.close()
-        path = os.path.join(os.path.dirname(__file__), granuleName)
-        os.remove(path)
+    d.close()
+    path = os.path.join(os.path.dirname(__file__), granuleName)
+    os.remove(path)
 
-        return Dataset(lats, lons, times, values, variable, name=name, origin=origin)
+    return Dataset(lats, lons, times, values, variable, name=name, origin=origin)
