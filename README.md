@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/apache/climate/badge.svg?branch=master)](https://coveralls.io/github/apache/climate?branch=master)
 [![Requirements Status](https://requires.io/github/apache/climate/requirements.svg?branch=master)](https://requires.io/github/apache/climate/requirements/?branch=master)
 [![Code Health](https://landscape.io/github/apache/climate/master/landscape.svg?style=flat-square)](https://landscape.io/github/apache/climate/master)
+[![PyPI](https://img.shields.io/pypi/v/ocw.svg?maxAge=2592000?style=plastic)](https://pypi.python.org/pypi/ocw)
 
 ![](https://svn.apache.org/repos/asf/climate/site/trunk/content/images/ocw-logo-variant-sm-01-01-new.png)
 
