@@ -15,47 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-package:
-  name: ocw
-  version: 1.2.0
+#!/bin/bash
 
-source:
-  git_url: https://github.com/apache/climate.git
-  # git_rev: 1.2.0
+$PYTHON setup.py install
 
-build:
-  number: 0
+# Add more build steps here, if they are necessary.
 
-requirements:
-  build:
-    - python
-    - setuptools
-
-  run:
-    - python
-    - numpy >=1.10.4
-    - scipy >=0.17.0
-    - matplotlib >=1.5.1
-    - basemap >=1.0.7
-    - netcdf4 >=1.2.2
-    - h5py >=2.6.0
-    - bottle >=0.12.9
-    - pydap >=3.1.1
-    - podaacpy >=1.0.2
-    - python-dateutil >=2.5.3
-    - mock >=2.0.0
-    - myproxyclient >=1.4.3
-    - webtest >=2.0.21
-    - esgf-pyclient >=0.1.6
-
-test:
-  # Python imports
-  imports:
-    - ocw
-    - ocw.data_source
-    - ocw.esgf
-
-about:
-  home: http://climate.apache.org/
-  license: Apache License
-  summary: 'A library for simplifying the process of climate model evaluation.'
+# See
+# http://docs.continuum.io/conda/build.html
+# for a list of environment variables that are set during the build process.
