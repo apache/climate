@@ -293,7 +293,7 @@ def load_file(file_path,
 
 def load_multiple_files(file_path,
                         variable_name,
-                        dataset_name='model',
+                        dataset_name='data',
                         variable_unit=None,
                         lat_name=None,
                         lon_name=None,
@@ -333,8 +333,10 @@ def load_multiple_files(file_path,
 
     # number of files
     ndata = len(data_filenames)
-    if ndata == 1:
+    if type(dataset_name) is str:
         data_name = [dataset_name]
+    elif dataset_name.__name__ == 'list' and len(dataset_name) == ndata:
+        data_name = [name for name in dataset_name]
     else:
         data_name = []
         data_filenames_reversed = []
