@@ -333,10 +333,11 @@ def load_multiple_files(file_path,
 
     # number of files
     ndata = len(data_filenames)
-    if type(dataset_name) is str:
+    if type(dataset_name) is str and ndata == 1:
         data_name = [dataset_name]
-    elif dataset_name.__name__ == 'list' and len(dataset_name) == ndata:
-        data_name = [name for name in dataset_name]
+    elif type(dataset_name).__name__ == 'list':
+        if len(dataset_name) == ndata:
+            data_name = [name for name in dataset_name]
     else:
         data_name = []
         data_filenames_reversed = []

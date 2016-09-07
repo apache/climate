@@ -25,7 +25,7 @@ regrid:
 datasets:
     reference:
         - loader_name: local
-          name: NLDAS
+          dataset_name: NLDAS
           file_path: ./data/dscale/obs/prmo_lds-lds_1999-2010.nc
           variable_name: pr
 
