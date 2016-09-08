@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/ocw.svg?maxAge=2592000?style=plastic)](https://pypi.python.org/pypi/ocw)
 [![Python Badge](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
 
-<img src="https://svn.apache.org/repos/asf/climate/site/trunk/content/images/ocw-logo-variant-sm-01-01.png" width="200" />
+<img src="./docs/source/ocw-logo-variant-sm-01-01-new.png" width="200" />
 
 [Apache Open Climate Workbench](http://climate.apache.org) is an effort to develop software that performs climate model evaluations using model outputs from a variety of different sources (the Earth System Grid Federation, the Coordinated Regional Downscaling Experiment, the U.S. National Climate Assessment and the North American Regional Climate Change Assessment Program) and temporal/spatial scales with remote sensing data from NASA, NOAA and other agencies. The toolkit includes capabilities for rebinning, metrics computation and visualization. For additional project information, please check the [project website](http://climate.apache.org/).
 
