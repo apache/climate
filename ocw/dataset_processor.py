@@ -397,8 +397,9 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             start_time_index = np.where(
-                target_dataset.times == subregion.start)[0][0]
-            end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
+                target_dataset.times >= subregion.start)[0][0]
+            end_time_index = np.where(
+                target_dataset.times <= subregion.end)[0][-1]
             target_dataset = temporal_slice(
                 target_dataset, start_time_index, end_time_index)
             nt, ny, nx = target_dataset.values.shape
