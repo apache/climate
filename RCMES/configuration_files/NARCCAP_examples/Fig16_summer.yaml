@@ -25,7 +25,7 @@ regrid:
 datasets:
     reference:
         - loader_name: local
-          name: SRB
+          dataset_name: SRB
           file_path: ./data/NARCCAP_data/srb_rel3.0_shortwave_from_1983_to_2007.nc
           variable_name: sw_sfc_dn
 

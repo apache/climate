@@ -118,7 +118,7 @@ class TestLoadMultipleFiles(unittest.TestCase):
 
     def test_function_load_multiple_files_data_name(self):
         dataset = local.load_multiple_files(self.file_path, "value")
-        self.assertEqual([dataset[0].name], ['model'])
+        self.assertEqual([dataset[0].name], ['data'])
 
     def test_function_load_multiple_files_lons(self):
         """To test load_multiple_file function for longitudes"""
