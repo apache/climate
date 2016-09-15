@@ -53,7 +53,7 @@ class SearchClient():
         :param constraints: dictionary of (facet name, facet value) constraints.
         """
         for key in constraints:
-            print 'Setting constraint: %s=%s' % (key, constraints[key])
+            print('Setting constraint: %s=%s' % (key, constraints[key]))
             self.constraints[key] = constraints[key]
         self.context = self.context.constrain(**constraints)
         
@@ -78,10 +78,10 @@ class SearchClient():
         datasets = self.context.search()
         urls = []
         for dataset in datasets:
-            print "\nSearching files for dataset=%s with constraints: %s" % (dataset.dataset_id, self.constraints)
+            print("\nSearching files for dataset=%s with constraints: %s" % (dataset.dataset_id, self.constraints))
             files = dataset.file_context().search(**self.constraints)
             for file in files:
-                print 'Found file=%s' % file.download_url
+                print('Found file=%s' % file.download_url)
                 urls.append(file.download_url)
         return urls
         

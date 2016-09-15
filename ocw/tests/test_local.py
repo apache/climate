@@ -60,8 +60,8 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_times(self):
         """To test load_file function for times"""
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(local.load_file(
             self.file_path, "value").times, newTimes)
 
@@ -77,8 +77,8 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_alt_times(self):
         """To test load_file function for times with different variable names"""
-        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
-            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
+            2001, 5, 1), datetime.datetime(2001, 6, 1)
         self.assertItemsEqual(local.load_file(
             self.file_path, "value", time_name="alt_time").times, newTimes)
 
@@ -129,8 +129,8 @@ class TestLoadMultipleFiles(unittest.TestCase):
         """To test load_multiple_files function for times"""
         dataset = local.load_multiple_files(self.file_path, "value")
 
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(dataset[0].times, newTimes)
 
     def test_function_load_multiple_files_values(self):
@@ -199,8 +199,8 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_times(self):
         """To test load_multiple_files function for times"""
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(self.dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lats(self):
@@ -215,8 +215,8 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_times(self):
         """To test load_multiple_files function for non-default times"""
-        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
-            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
+            2001, 5, 1), datetime.datetime(2001, 6, 1)
         self.assertItemsEqual(self.alt_dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_values(self):

@@ -160,7 +160,7 @@ def load_WRF_2d_files(file_path=None,
     times = []
     nfile = len(WRF_files)
     for ifile, file in enumerate(WRF_files):
-        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        print('Reading file '+str(ifile+1)+'/'+str(nfile), file)
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")
         for ihour in numpy.arange(24):
@@ -391,7 +391,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     times = []
     nfile = len(WRF_files)
     for ifile, file in enumerate(WRF_files):
-        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        print('Reading file '+str(ifile+1)+'/'+str(nfile), file)
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-19:],"%Y-%m-%d_%H:%M:%S")
         for ihour in range(24):
@@ -404,7 +404,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     times= numpy.array(times)
     years = numpy.array([d.year for d in times])
     ncycle = numpy.unique(years).size
-    print 'ncycle=',ncycle
+    print('ncycle=',ncycle)
     nt, ny, nx = values0.shape
     values = numpy.zeros([nt-ncycle*24, ny, nx])
     times2 = []
@@ -496,7 +496,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
     times = []
     nfile = len(nc_files)
     for ifile, file in enumerate(nc_files):
-        print 'NC file '+str(ifile+1)+'/'+str(nfile), file
+        print('NC file '+str(ifile+1)+'/'+str(nfile), file)
         file_object0= load_file(file, variable_name, lat_name=lat_name,
                                 lon_name=lon_name, time_name=time_name)
         values0= file_object0.values
@@ -558,7 +558,7 @@ def load_NLDAS_forcingA_files(file_path=None,
     times = []
     nfile = len(NLDAS_files)
     for ifile, file in enumerate(NLDAS_files):
-        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        print('Reading file '+str(ifile+1)+'/'+str(nfile), file)
         file_object = netCDF4.Dataset(file)
         time_struct_parsed = strptime(file[-20:-7],"%Y%m%d.%H%M")
         times.append(datetime(*time_struct_parsed[:6]))
@@ -624,7 +624,7 @@ def load_GPM_IMERG_files(file_path=None,
     times = []
     nfile = len(GPM_files)
     for ifile, file in enumerate(GPM_files):
-        print 'Reading file '+str(ifile+1)+'/'+str(nfile), file
+        print('Reading file '+str(ifile+1)+'/'+str(nfile), file)
         file_object = h5py.File(file)
         time_struct_parsed = strptime(file[-39:-23],"%Y%m%d-S%H%M%S")
         times.append(datetime(*time_struct_parsed[:6]))

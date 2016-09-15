@@ -55,7 +55,7 @@ def download(url, toDirectory="/tmp"):
     
     # download file
     localFilePath = join(toDirectory,url.split('/')[-1])
-    print "\nDownloading url: %s to local path: %s ..." % (url, localFilePath)
+    print("\nDownloading url: %s to local path: %s ..." % (url, localFilePath))
     localFile=open( localFilePath, 'w')
     webFile=opener.open(url)
     localFile.write(webFile.read())
@@ -64,4 +64,4 @@ def download(url, toDirectory="/tmp"):
     localFile.close()
     webFile.close()
     opener.close()
-    print "... done"
+    print("... done")

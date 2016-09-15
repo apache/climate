@@ -148,7 +148,7 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
     if nt % nt_average != 0:
         msg = ('Warning: length of time dimension must '
                'be a multiple of nt_average')
-        print msg
+        print(msg)
     # nt2 is the length of time dimension in the rebinned dataset
     nt2 = nt / nt_average
     binned_dates = target_dataset.times[np.arange(nt2) * nt_average]
@@ -904,11 +904,9 @@ def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
 
     nlat = spatial_values.shape[0]
     nlon = spatial_values.shape[1]
-    # print nlat, nlon, "lats, lons - incoming dataset"
 
     nlat2 = lat2.shape[0]
     nlon2 = lon2.shape[1]
-    # print nlat2, nlon2, "NEW lats, lons - for the new grid output"
 
     # To make our lives easier down the road, let's
     # turn these into arrays of x & y coords
@@ -1050,7 +1048,7 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
     acceptable = ((unit == 'full') | (unit == 'annual') |
                   (unit == 'monthly') | (unit == 'daily'))
     if not acceptable:
-        print 'Error: unknown unit type selected for time averaging: EXIT'
+        print('Error: unknown unit type selected for time averaging: EXIT')
         return - 1, - 1, - 1, - 1
 
     nt, ny, nx = data.shape
@@ -1124,7 +1122,7 @@ def _rcmes_calc_average_on_new_time_unit_K(data, dates, unit):
     acceptable = ((unit == 'full') | (unit == 'annual') |
                   (unit == 'monthly') | (unit == 'daily'))
     if not acceptable:
-        print 'Error: unknown unit type selected for time averaging: EXIT'
+        print('Error: unknown unit type selected for time averaging: EXIT')
         return - 1, - 1, - 1, - 1
 
     # Calculate arrays of: annual timeseries: year (2007,2007),
@@ -1296,9 +1294,9 @@ def _congrid(a, newdims, method='linear', centre=False, minusone=False):
     old = np.array(a.shape)
     ndims = len(a.shape)
     if len(newdims) != ndims:
-        print "[congrid] dimensions error. " \
+        print("[congrid] dimensions error. " \
               "This routine currently only supports " \
-              "rebinning to the same number of dimensions."
+              "rebinning to the same number of dimensions.")
         return None
     newdims = np.asarray(newdims, dtype=float)
     dimlist = []
@@ -1351,9 +1349,9 @@ def _congrid(a, newdims, method='linear', centre=False, minusone=False):
         newa = scipy.ndimage.map_coordinates(a, newcoords)
         return newa
     else:
-        print "Congrid error: Unrecognized interpolation type.\n", \
+        print("Congrid error: Unrecognized interpolation type.\n", \
               "Currently only \'neighbour\', \'nearest\',\'linear\',", \
-              "and \'spline\' are supported."
+              "and \'spline\' are supported.")
         return None
 
 
