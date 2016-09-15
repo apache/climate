@@ -208,10 +208,14 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
     else:
         new_lons = new_longitudes
         new_lats = new_latitudes
-
+    
     ny_old, nx_old = lats.shape
     ny_new, nx_new = new_lats.shape
 
+    for iy in np.arange(ny_old):
+        if not all(x<y for x,y in zip(lons[iy,:], lons[iy,1:])):
+            lons[iy,:][lons[iy,:] <0] = lons[iy,:][lons[iy,:] <0]+360.
+        
     # Make masked array of shape (times, new_latitudes,new_longitudes)
     new_values = ma.zeros([len(target_dataset.times),
                            ny_new, nx_new])
@@ -289,7 +293,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
 
     # Regrid the data on each time slice
     for i in range(len(target_dataset.times)):
-        if len(target_dataset.times) == 1:
+        if len(target_dataset.times) == 1 and target_dataset.values.ndim == 2:
             values_original = ma.array(target_dataset.values)
         else:
             values_original = ma.array(target_dataset.values[i])
@@ -311,7 +315,6 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
         qmdi_r = map_coordinates(qmdi, [new_lats_indices.flatten(
         ), new_lons_indices.flatten()], order=1).reshape(new_lats.shape)
         mdimask = (qmdi_r != 0.0)
-
         # Combine missing data mask, with outside domain mask define above.
         new_values[i].mask = np.logical_or(mdimask, new_values[i].mask)
 
@@ -397,8 +400,9 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             start_time_index = np.where(
-                target_dataset.times == subregion.start)[0][0]
-            end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
+                target_dataset.times >= subregion.start)[0][0]
+            end_time_index = np.where(
+                target_dataset.times <= subregion.end)[0][-1]
             target_dataset = temporal_slice(
                 target_dataset, start_time_index, end_time_index)
             nt, ny, nx = target_dataset.values.shape
