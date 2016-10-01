@@ -15,17 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-set -e  # causes the shell to exit if any subcommand or pipeline returns a non-zero status.
-echo ""
-echo "---------------- Running Smoke Tests ---------------"
-python test_smoke.py
-echo "---------------- Smoke Tests Successfully Completed---------------"
-echo ""
+#!/bin/bash
 
-# nosetests config file should be in home directory
-cp .noserc $HOME/.noserc
+$PYTHON setup.py install
 
-echo "---------------- Running Unit Tests ---------------"
-nosetests
-echo "---------------- All Tests successfully completed ---------------"
+# Add more build steps here, if they are necessary.
 
+# See
+# http://docs.continuum.io/conda/build.html
+# for a list of environment variables that are set during the build process.

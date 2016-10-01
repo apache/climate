@@ -106,9 +106,9 @@ header "Installing Miniconda Python distribution ..."
 
 MACHINE_TYPE=`uname -m`
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-	link="https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh"
+	link="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 else
-	link="https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh"
+	link="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86.sh"
 fi
 
 header "Checking for conda ..."

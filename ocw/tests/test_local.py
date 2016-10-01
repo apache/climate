@@ -26,6 +26,7 @@ import ocw.data_source.local as local
 
 
 class test_load_file(unittest.TestCase):
+
     def setUp(self):
         # Read netCDF file
         self.file_path = create_netcdf_object()
@@ -60,8 +61,8 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_times(self):
         """To test load_file function for times"""
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(local.load_file(
             self.file_path, "value").times, newTimes)
 
@@ -77,8 +78,8 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_alt_times(self):
         """To test load_file function for times with different variable names"""
-        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
-            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
+            2001, 5, 1), datetime.datetime(2001, 6, 1)
         self.assertItemsEqual(local.load_file(
             self.file_path, "value", time_name="alt_time").times, newTimes)
 
@@ -102,6 +103,7 @@ class test_load_file(unittest.TestCase):
 
 
 class TestLoadMultipleFiles(unittest.TestCase):
+
     def setUp(self):
         # Read netCDF file
         self.file_path = create_netcdf_object()
@@ -117,38 +119,38 @@ class TestLoadMultipleFiles(unittest.TestCase):
         os.remove(self.file_path)
 
     def test_function_load_multiple_files_data_name(self):
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
-        self.assertEqual(data_name, ['model'])
+        dataset = local.load_multiple_files(self.file_path, "value")
+        self.assertEqual([dataset[0].name], ['data'])
 
     def test_function_load_multiple_files_lons(self):
         """To test load_multiple_file function for longitudes"""
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        dataset = local.load_multiple_files(self.file_path, "value")
         self.assertItemsEqual(dataset[0].lons, self.longitudes)
 
     def test_function_load_multiple_files_times(self):
         """To test load_multiple_files function for times"""
-        dataset, data_name = local.load_multiple_files(self.file_path, "value")
+        dataset = local.load_multiple_files(self.file_path, "value")
 
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(dataset[0].times, newTimes)
 
     def test_function_load_multiple_files_values(self):
         """To test load_multiple_files function for values"""
         new_values = self.values[:, 0, :, :]
-        dataset, data_name = local.load_multiple_files(
+        dataset = local.load_multiple_files(
             self.file_path, "value")
         self.assertTrue(numpy.allclose(dataset[0].values, new_values))
 
     def test_load_multiple_files_custom_dataset_name(self):
         """Test adding a custom name to a dataset"""
-        dataset, data_name = local.load_multiple_files(self.file_path,
-                                                       "value",
-                                                       dataset_name='foo')
+        dataset = local.load_multiple_files(self.file_path,
+                                            "value",
+                                            dataset_name='foo')
         self.assertEqual(dataset[0].name, 'foo')
 
     def test_dataset_origin(self):
-        dataset, data_name = local.load_multiple_files(self.file_path, 'value')
+        dataset = local.load_multiple_files(self.file_path, 'value')
         expected_keys = set(['source', 'path', 'lat_name', 'lon_name',
                              'time_name'])
         self.assertEqual(set(dataset[0].origin.keys()), expected_keys)
@@ -156,6 +158,7 @@ class TestLoadMultipleFiles(unittest.TestCase):
 
 
 class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
+
     def setUp(self):
         self.file_path = create_netcdf_object()
         self.netCDF_file = netCDF4.Dataset(self.file_path, 'r+')
@@ -199,8 +202,8 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_times(self):
         """To test load_multiple_files function for times"""
-        newTimes = datetime.datetime(2001, 01, 01), datetime.datetime(
-            2001, 02, 01), datetime.datetime(2001, 03, 01)
+        newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
+            2001, 2, 1), datetime.datetime(2001, 3, 1)
         self.assertItemsEqual(self.dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lats(self):
@@ -215,8 +218,8 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_times(self):
         """To test load_multiple_files function for non-default times"""
-        newTimes = datetime.datetime(2001, 04, 01), datetime.datetime(
-            2001, 05, 01), datetime.datetime(2001, 06, 01)
+        newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
+            2001, 5, 1), datetime.datetime(2001, 6, 1)
         self.assertItemsEqual(self.alt_dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_values(self):
@@ -315,7 +318,8 @@ def create_netcdf_object():
     values[:] = values_data
     # Assign time info to time variable
     netCDF_file.variables['time'].units = 'months since 2001-01-01 00:00:00'
-    netCDF_file.variables['alt_time'].units = 'months since 2001-04-01 00:00:00'
+    netCDF_file.variables[
+        'alt_time'].units = 'months since 2001-04-01 00:00:00'
     netCDF_file.variables['value'].units = 'foo_units'
     netCDF_file.close()
     return file_path

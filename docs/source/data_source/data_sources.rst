@@ -20,3 +20,8 @@ ESGF Module
 ===========
 .. automodule:: esgf
     :members:
+
+PODAAC Module
+=============
+.. automodule:: podaac_datasource
+    :members:

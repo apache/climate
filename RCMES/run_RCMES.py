@@ -57,7 +57,7 @@ def load_datasets_from_config(extra_opts, *loader_opts):
         return loader.datasets
 
 if hasattr(ssl, '_create_unverified_context'):
-  ssl._create_default_https_context = ssl._create_unverified_context
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 config_file = str(sys.argv[1])
 
@@ -72,10 +72,13 @@ end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
 
 # Read space info
 space_info = config['space']
-min_lat = space_info['min_lat']
-max_lat = space_info['max_lat']
-min_lon = space_info['min_lon']
-max_lon = space_info['max_lon']
+if not 'boundary_type' in space_info:
+    min_lat = space_info['min_lat']
+    max_lat = space_info['max_lat']
+    min_lon = space_info['min_lon']
+    max_lon = space_info['max_lon']
+else:
+    min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(space_info['boundary_type'][6:].replace(" ","").lower())
 
 # Additional arguments for the DatasetLoader
 extra_opts = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
@@ -137,12 +140,17 @@ for i, dataset in enumerate(obs_datasets):
     min_lon = np.max([min_lon, dataset.lons.min()])
     max_lon = np.min([max_lon, dataset.lons.max()])
 
-bounds = Bounds(lat_min=min_lat,
-                lat_max=max_lat,
-                lon_min=min_lon,
-                lon_max=max_lon,
-                start=start_time,
-                end=end_time)
+if not 'boundary_type' in space_info:
+    bounds = Bounds(lat_min=min_lat,
+                    lat_max=max_lat,
+                    lon_min=min_lon,
+                    lon_max=max_lon,
+                    start=start_time,
+                    end=end_time)
+else:
+    bounds = Bounds(boundary_type=space_info['boundary_type'], 
+                    start=start_time,
+                    end=end_time)
 
 for i, dataset in enumerate(obs_datasets):
     obs_datasets[i] = dsp.subset(dataset, bounds)
