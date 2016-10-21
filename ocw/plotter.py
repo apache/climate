@@ -146,10 +146,10 @@ def _fig_size(gridshape, aspect=None):
     nrows, ncols = gridshape
     if nrows >= ncols:
         # If more rows keep width constant
-        width, height = (aspect * 5.5), 5.5 * (nrows / ncols)
+        width, height = (aspect * 5.5), 5.5 * (nrows // ncols)
     else:
         # If more columns keep height constant
-        width, height = (aspect * 5.5) * (ncols / nrows), 5.5
+        width, height = (aspect * 5.5) * (ncols // nrows), 5.5
 
     return width, height
 
@@ -509,7 +509,7 @@ def draw_barchart(results, yvalues, fname, ptitle='', fmt='png',
     :type results: :class:`numpy.ndarray`
 
     :param yvalues: List of y-axis labels
-    :type times: :class:`list` 
+    :type times: :class:`list`
 
     :param fname: Filename of the plot.
     :type fname: :mod:`string`

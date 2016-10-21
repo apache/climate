@@ -16,13 +16,13 @@
 # under the License.
 
 '''
-Classes: 
+Classes:
     Evaluation - Container for running an evaluation
 '''
 
 import logging
-from metrics import Metric, UnaryMetric, BinaryMetric
-from dataset import Dataset, Bounds
+from ocw.metrics import Metric, UnaryMetric, BinaryMetric
+from ocw.dataset import Dataset, Bounds
 import ocw.dataset_processor as DSP
 
 import numpy.ma as ma
@@ -33,14 +33,14 @@ logger = logging.getLogger(__name__)
 class Evaluation(object):
     '''Container for running an evaluation
 
-    An *Evaluation* is the running of one or more metrics on one or more 
+    An *Evaluation* is the running of one or more metrics on one or more
     target datasets and a (possibly optional) reference dataset. Evaluation
     can handle two types of metrics, ``unary`` and ``binary``. The validity
     of an Evaluation is dependent upon the number and type of metrics as well
     as the number of datasets.
 
     A ``unary`` metric is a metric that runs over a single dataset. If you add
-    a ``unary`` metric to the Evaluation you are only required to add a 
+    a ``unary`` metric to the Evaluation you are only required to add a
     reference dataset or a target dataset. If there are multiple datasets
     in the evaluation then the ``unary`` metric is run over all of them.
 
@@ -50,7 +50,7 @@ class Evaluation(object):
     are run over every (reference dataset, target dataset) pair in the
     Evaluation.
 
-    An Evaluation must have at least one metric to be valid. 
+    An Evaluation must have at least one metric to be valid.
     '''
 
     def __init__(self, reference, targets, metrics, subregions=None):
@@ -59,11 +59,11 @@ class Evaluation(object):
         :param reference: The reference Dataset for the evaluation.
         :type reference: :class:`dataset.Dataset`
 
-        :param targets: A list of one or more target datasets for the 
+        :param targets: A list of one or more target datasets for the
                 evaluation.
         :type targets: :class:`list` of :class:`dataset.Dataset`
 
-        :param metrics: A list of one or more Metric instances to run 
+        :param metrics: A list of one or more Metric instances to run
                 in the evaluation.
         :type metrics: :class:`list` of :mod:`metrics`
 
@@ -71,7 +71,7 @@ class Evaluation(object):
                 evaluation. A subregion is specified with a Bounds object.
         :type subregions: :class:`list` of :class:`dataset.Bounds`
 
-        :raises: ValueError 
+        :raises: ValueError
         '''
         #: The reference dataset.
         self._ref_dataset = reference
@@ -140,7 +140,7 @@ class Evaluation(object):
     def add_dataset(self, target_dataset):
         '''Add a Dataset to the Evaluation.
 
-        A target Dataset is compared against the reference dataset when the 
+        A target Dataset is compared against the reference dataset when the
         Evaluation is run with one or more metrics.
 
         :param target_dataset: The target Dataset to add to the Evaluation.
@@ -161,7 +161,7 @@ class Evaluation(object):
     def add_datasets(self, target_datasets):
         '''Add multiple Datasets to the Evaluation.
 
-        :param target_datasets: The list of datasets that should be added to 
+        :param target_datasets: The list of datasets that should be added to
             the Evaluation.
         :type target_datasets: :class:`list` of :class:`dataset.Dataset`
 
@@ -217,7 +217,7 @@ class Evaluation(object):
         target dataset.
 
         If there is subregion information provided then each dataset is subset
-        before being run through the binary metrics. 
+        before being run through the binary metrics.
 
         ..note:: Only the binary metrics are subset with subregion information.
 

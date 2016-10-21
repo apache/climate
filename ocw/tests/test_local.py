@@ -15,12 +15,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# Needed Python 2/3 urllib compatability
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
+    
 import datetime
 import unittest
 import os
-import urllib
-import numpy
 import netCDF4
+import numpy as np
 
 import ocw.data_source.local as local
 
@@ -51,42 +56,42 @@ class test_load_file(unittest.TestCase):
 
     def test_function_load_file_lats(self):
         """To test load_file function for latitudes"""
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value").lats, self.latitudes)
 
     def test_function_load_file_lons(self):
         """To test load_file function for longitudes"""
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value").lons, self.longitudes)
 
     def test_function_load_file_times(self):
         """To test load_file function for times"""
         newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
             2001, 2, 1), datetime.datetime(2001, 3, 1)
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value").times, newTimes)
 
     def test_function_load_file_alt_lats(self):
         """To test load_file function for lats with different variable names"""
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value", lat_name="alt_lat").lats, self.alt_lats)
 
     def test_function_load_file_alt_lons(self):
         """To test load_file function for lons with different variable names"""
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value", lon_name="alt_lon").lons, self.alt_lons)
 
     def test_function_load_file_alt_times(self):
         """To test load_file function for times with different variable names"""
         newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
             2001, 5, 1), datetime.datetime(2001, 6, 1)
-        self.assertItemsEqual(local.load_file(
+        np.testing.assert_array_equal(local.load_file(
             self.file_path, "value", time_name="alt_time").times, newTimes)
 
     def test_function_load_file_values(self):
         """To test load_file function for values"""
         new_values = self.values[:, 0, :, :]
-        self.assertTrue(numpy.allclose(local.load_file(
+        self.assertTrue(np.allclose(local.load_file(
             self.file_path, "value").values, new_values))
 
     def test_custom_dataset_name(self):
@@ -125,7 +130,7 @@ class TestLoadMultipleFiles(unittest.TestCase):
     def test_function_load_multiple_files_lons(self):
         """To test load_multiple_file function for longitudes"""
         dataset = local.load_multiple_files(self.file_path, "value")
-        self.assertItemsEqual(dataset[0].lons, self.longitudes)
+        np.testing.assert_array_equal(dataset[0].lons, self.longitudes)
 
     def test_function_load_multiple_files_times(self):
         """To test load_multiple_files function for times"""
@@ -133,14 +138,14 @@ class TestLoadMultipleFiles(unittest.TestCase):
 
         newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
             2001, 2, 1), datetime.datetime(2001, 3, 1)
-        self.assertItemsEqual(dataset[0].times, newTimes)
+        np.testing.assert_array_equal(dataset[0].times, newTimes)
 
     def test_function_load_multiple_files_values(self):
         """To test load_multiple_files function for values"""
         new_values = self.values[:, 0, :, :]
         dataset = local.load_multiple_files(
             self.file_path, "value")
-        self.assertTrue(numpy.allclose(dataset[0].values, new_values))
+        self.assertTrue(np.allclose(dataset[0].values, new_values))
 
     def test_load_multiple_files_custom_dataset_name(self):
         """Test adding a custom name to a dataset"""
@@ -192,40 +197,40 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_lats(self):
         """To test load_multiple_files function for times"""
-        _, self.latitudes = numpy.meshgrid(self.longitudes, self.latitudes)
-        numpy.testing.assert_array_equal(self.dataset.lats, self.latitudes)
+        _, self.latitudes = np.meshgrid(self.longitudes, self.latitudes)
+        np.testing.assert_array_equal(self.dataset.lats, self.latitudes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_lons(self):
         """To test load_multiple_files function for times"""
-        self.longitudes, _ = numpy.meshgrid(self.longitudes, self.latitudes)
-        numpy.testing.assert_array_equal(self.dataset.lons, self.longitudes)
+        self.longitudes, _ = np.meshgrid(self.longitudes, self.latitudes)
+        np.testing.assert_array_equal(self.dataset.lons, self.longitudes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_times(self):
         """To test load_multiple_files function for times"""
         newTimes = datetime.datetime(2001, 1, 1), datetime.datetime(
             2001, 2, 1), datetime.datetime(2001, 3, 1)
-        self.assertItemsEqual(self.dataset.times, newTimes)
+        np.testing.assert_array_equal(self.dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lats(self):
         """To test load_multiple_files function for non-default lats"""
-        _, self.alt_lats = numpy.meshgrid(self.alt_lons, self.alt_lats)
-        numpy.testing.assert_array_equal(self.alt_dataset.lats, self.alt_lats)
+        _, self.alt_lats = np.meshgrid(self.alt_lons, self.alt_lats)
+        np.testing.assert_array_equal(self.alt_dataset.lats, self.alt_lats)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lons(self):
         """To test load_multiple_files function for non-default lons"""
-        self.alt_lons, _ = numpy.meshgrid(self.alt_lons, self.alt_lats)
-        numpy.testing.assert_array_equal(self.alt_dataset.lons, self.alt_lons)
+        self.alt_lons, _ = np.meshgrid(self.alt_lons, self.alt_lats)
+        np.testing.assert_array_equal(self.alt_dataset.lons, self.alt_lons)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_times(self):
         """To test load_multiple_files function for non-default times"""
         newTimes = datetime.datetime(2001, 4, 1), datetime.datetime(
             2001, 5, 1), datetime.datetime(2001, 6, 1)
-        self.assertItemsEqual(self.alt_dataset.times, newTimes)
+        np.testing.assert_array_equal(self.alt_dataset.times, newTimes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_values(self):
         """To test load_multiple_files function for values"""
         new_values = self.values[:, 0, :, :]
-        self.assertTrue(numpy.allclose(self.dataset.values, new_values))
+        self.assertTrue(np.allclose(self.dataset.values, new_values))
 
 
 class test_get_netcdf_variable_names(unittest.TestCase):
@@ -233,7 +238,7 @@ class test_get_netcdf_variable_names(unittest.TestCase):
     test_model = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 
     def setUp(self):
-        urllib.urlretrieve(self.file_path + self.test_model, self.test_model)
+        urlretrieve(self.file_path + self.test_model, self.test_model)
         self.invalid_netcdf_path = create_invalid_dimensions_netcdf_object()
         self.netcdf = netCDF4.Dataset(self.test_model, mode='r')
 
@@ -295,14 +300,14 @@ def create_netcdf_object():
                                         )
 
     # To latitudes and longitudes for five values
-    latitudes_data = numpy.arange(5.)
-    longitudes_data = numpy.arange(150., 155.)
+    latitudes_data = np.arange(5.)
+    longitudes_data = np.arange(150., 155.)
     # Three months of data.
-    times_data = numpy.arange(3)
+    times_data = np.arange(3)
     # Two levels
     levels_data = [100, 200]
     # Create 150 values
-    values_data = numpy.array([i for i in range(150)])
+    values_data = np.array([i for i in range(150)])
     # Reshape values to 4D array (level, time, lats, lons)
     values_data = values_data.reshape(len(times_data), len(
         levels_data), len(latitudes_data), len(longitudes_data))
@@ -347,23 +352,23 @@ def create_invalid_dimensions_netcdf_object():
                                          'lon_dim')
                                         )
     # To latitudes and longitudes for five values
-    latitudes = range(0, 5)
-    longitudes = range(200, 205)
+    flatitudes = list(range(0, 5))
+    flongitudes = list(range(200, 205))
     # Three months of data
-    times = range(3)
+    ftimes = list(range(3))
     # Two levels
-    levels = [100, 200]
+    flevels = [100, 200]
     # Create 150 values
-    values = numpy.array([i for i in range(150)])
+    fvalues = np.array([i for i in range(150)])
     # Reshape values to 4D array (level, time, lats, lons)
-    values = values.reshape(len(levels), len(
-        times), len(latitudes), len(longitudes))
+    fvalues = fvalues.reshape(len(flevels), len(
+        times), len(flatitudes), len(flongitudes))
     # Ingest values to netCDF file
-    latitudes[:] = latitudes
-    longitudes[:] = longitudes
-    times[:] = times
-    levels[:] = levels
-    values[:] = values
+    latitudes[:] = flatitudes
+    longitudes[:] = flongitudes
+    times[:] = ftimes
+    levels[:] = flevels
+    values[:] = fvalues
     # Assign time info to time variable
     netCDF_file.variables['time'].units = 'months since 2001-01-01 00:00:00'
     netCDF_file.close()

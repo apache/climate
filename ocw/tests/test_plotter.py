@@ -98,7 +98,7 @@ class TestFigshapeFunction(unittest.TestCase):
         gridshape = (2, 2)
         expected_width = 5.5
         expected_height = 5.5
-        width, height = plotter._fig_size(gridshape, aspect=(4 / 3))
+        width, height = plotter._fig_size(gridshape, aspect=(4 // 3))
         self.assertEqual(width, expected_width)
         self.assertEqual(height, expected_height)
 
@@ -106,7 +106,7 @@ class TestFigshapeFunction(unittest.TestCase):
         gridshape = (567, 1223)
         expected_width = 11.0
         expected_height = 5.5
-        width, height = plotter._fig_size(gridshape, aspect=(16 / 9))
+        width, height = plotter._fig_size(gridshape, aspect=(16 // 9))
         self.assertEqual(width, expected_width)
         self.assertEqual(height, expected_height)
 

@@ -54,8 +54,8 @@ def temporal_subset(target_dataset, month_start, month_end,
     """
 
     if month_start > month_end:
-        month_index = range(month_start, 13)
-        month_index.extend(range(1, month_end + 1))
+        month_index = list(range(month_start, 13))
+        month_index.extend(list(range(1, month_end + 1)))
     else:
         month_index = range(month_start, month_end + 1)
 
@@ -150,7 +150,7 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
                'be a multiple of nt_average')
         print(msg)
     # nt2 is the length of time dimension in the rebinned dataset
-    nt2 = nt / nt_average
+    nt2 = nt // nt_average
     binned_dates = target_dataset.times[np.arange(nt2) * nt_average]
     binned_values = ma.zeros(
         np.insert(target_dataset.values.shape[1:], 0, nt2))
@@ -1069,7 +1069,7 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
     nt, ny, nx = data.shape
     if unit == 'full':
         new_data = ma.mean(data, axis=0)
-        new_date = [dates[dates.size / 2]]
+        new_date = [dates[dates.size // 2]]
     if unit == 'annual':
         years = [d.year for d in dates]
         years_sorted = np.unique(years)
@@ -1108,8 +1108,8 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
         for day in days_sorted:
             index = np.where(days == day)[0]
             new_data[it, :] = ma.mean(data[index, :], axis=0)
-            y = int(day / 10000)
-            m = int(day % 10000) / 100
+            y = int(day // 10000)
+            m = int(day % 10000) // 100
             d = int(day % 100)
             new_date.append(datetime.datetime(year=y, month=m, day=d))
             it = it + 1

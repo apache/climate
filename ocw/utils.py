@@ -364,7 +364,7 @@ def calc_time_series(dataset):
     '''
 
     t_series = []
-    for t in xrange(dataset.values.shape[0]):
+    for t in range(dataset.values.shape[0]):
         t_series.append(dataset.values[t, :, :].mean())
 
     return t_series
@@ -468,15 +468,25 @@ def shapefile_boundary(boundary_type, region_names):
     shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
     map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
                            boundary_type)
+                           
+    # Note: The shapefile may contain countries or states with latin letters.
+    # Hence, the output of readshapefile can be a mix of ascii and unicode
+    # strings. Because python 2 and 3 treat them differently, we must
+    # explicitly check.
     if boundary_type == 'us_states':
         for region_name in region_names:
+            region_name = _force_unicode(region_name)
             for iregion, region_info in enumerate(map_read.us_states_info):
-                if region_info['st'] == region_name:
+                state = _force_unicode(region_info['st'], 'latin-1')
+                if state == region_name:
                     regions.append(np.array(map_read.us_states[iregion]))
     elif boundary_type == 'countries':
         for region_name in region_names:
+            region_name = _force_unicode(region_name)
             for iregion, region_info in enumerate(map_read.countries_info):
-                if region_info['COUNTRY'].replace(" ", "").lower() == region_name.replace(" ", "").lower():
+                country = _force_unicode(region_info['COUNTRY'], 'latin-1')
+                if (country.replace(" ", "").lower() ==
+                    region_name.replace(" ", "").lower()):
                     regions.append(np.array(map_read.countries[iregion]))
     return regions
 
@@ -595,3 +605,12 @@ def convert_lat_lon_2d_array(lon, lat):
         return np.meshgrid(lon, lat)
     if lon.ndim == 2 and lat.ndim == 2:
         return lon, lat
+
+def _force_unicode(s, encoding='utf-8'):
+    '''
+    If the input is bytes, convert to unicode, otherwise return the input
+    '''
+    if hasattr(s, 'decode'):
+        s = s.decode(encoding=encoding)
+        
+    return s

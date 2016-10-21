@@ -43,13 +43,13 @@ class TestDatasetAttributes(unittest.TestCase):
                                     origin=self.origin)
 
     def test_lats(self):
-        self.assertItemsEqual(self.test_dataset.lats, self.lat)
+        np.testing.assert_array_equal(self.test_dataset.lats, self.lat)
 
     def test_lons(self):
-        self.assertItemsEqual(self.test_dataset.lons, self.lon)
+        np.testing.assert_array_equal(self.test_dataset.lons, self.lon)
 
     def test_times(self):
-        self.assertItemsEqual(self.test_dataset.times, self.time)
+        np.testing.assert_array_equal(self.test_dataset.times, self.time)
 
     def test_values(self):
         self.assertEqual(self.test_dataset.values.all(), self.value.all())

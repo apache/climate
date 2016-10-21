@@ -99,16 +99,16 @@ class TestTemporalRebinWithTimeIndex(unittest.TestCase):
 
     def test_time_dimension_multiple_of_orig_time_dimension(self):
         # ten_year_dataset.times.size is 120
-        nt_avg = self.ten_year_dataset.times.size / 2
+        nt_avg = self.ten_year_dataset.times.size // 2
         # Temporal Rebin to exactly 2 (time) values
         dataset = dp.temporal_rebin_with_time_index(
             self.ten_year_dataset, nt_avg)
         start_time = self.ten_year_dataset.times[0]
         # First month of the middle year
-        middle_element = self.ten_year_dataset.times.size / 2
+        middle_element = self.ten_year_dataset.times.size // 2
         end_time = self.ten_year_dataset.times[middle_element]
         self.assertEqual(dataset.times.size,
-                         self.ten_year_dataset.times.size / nt_avg)
+                         self.ten_year_dataset.times.size // nt_avg)
         np.testing.assert_array_equal(dataset.times, [start_time, end_time])
 
     def test_time_dimension_not_multiple_of_orig_time_dimension(self):
@@ -119,7 +119,7 @@ class TestTemporalRebinWithTimeIndex(unittest.TestCase):
             self.ten_year_dataset, nt_avg)
         new_times = self.ten_year_dataset.times[::11][:-1]
         self.assertEqual(dataset.times.size,
-                         self.ten_year_dataset.times.size / nt_avg)
+                         self.ten_year_dataset.times.size // nt_avg)
         np.testing.assert_array_equal(dataset.times, new_times)
 
     def test_returned_dataset_attributes(self):

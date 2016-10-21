@@ -21,9 +21,14 @@ Classes:
     More information about the RCMED Query Specification can be found below:
     https://rcmes.jpl.nasa.gov/query-api/query.php?
 '''
+# Needed Python 2/3 urllib compatability
+try:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import urlopen
 
-import urllib
-import urllib2
 import re
 import json
 import numpy as np
@@ -45,8 +50,8 @@ def get_parameters_metadata():
 
     param_info_list = []
     url = URL + "&param_info=yes"
-    string = urllib2.urlopen(url)
-    data_string = string.read()
+    string = urlopen(url)
+    data_string = string.read().decode('utf-8')
     json_format_data = json.loads(data_string)
     fields_name = json_format_data['fields_name']
     data = json_format_data['data']
@@ -74,7 +79,8 @@ def _make_mask_array(values, parameter_id, parameters_metadata):
     '''
 
     for each in parameters_metadata:
-        if each['parameter_id'].encode() == str(parameter_id):
+        if str(each['parameter_id']) == str(parameter_id):
+            print('ok')
             missing_values = each['missingdataflag'].encode()
             break
     missing_values = float(missing_values)
@@ -89,7 +95,7 @@ def _reshape_values(values, unique_values):
     :param values: Raw values data
     :type values: numpy array
     :param unique_values: Tuple of unique latitudes, longitudes and times data.
-    :type unique_values: Tuple 
+    :type unique_values: Tuple
 
     :returns: Reshaped values data
     :rtype: Numpy array
@@ -118,7 +124,8 @@ def _calculate_time(unique_times, time_step):
 
     time_format = "%Y-%m-%d %H:%M:%S"
     unique_times = np.array(
-        [datetime.strptime(time, time_format) for time in unique_times])
+        [datetime.strptime(time.decode('utf-8'), time_format)
+                           for time in unique_times])
     # There is no need to sort time.
     # This function may required still in RCMES
     # unique_times.sort()
@@ -158,11 +165,11 @@ def _get_data(url):
     :rtype: (Numpy array, Numpy array, Numpy array, Numpy array)
     '''
 
-    string = urllib2.urlopen(url)
+    string = urlopen(url)
     data_string = string.read()
-    index_of_data = re.search('data: \r\n', data_string)
+    index_of_data = re.search(b'data: \r\n', data_string)
     data = data_string[index_of_data.end():len(data_string)]
-    data = data.split('\r\n')
+    data = data.split(b'\r\n')
 
     lats = []
     lons = []
@@ -172,7 +179,7 @@ def _get_data(url):
 
     # Because the last row is empty, "len(data)-1" is used.
     for i in range(len(data) - 1):
-        row = data[i].split(',')
+        row = data[i].split(b',')
         lats.append(np.float32(row[0]))
         lons.append(np.float32(row[1]))
         # Level is not currently supported in Dataset class.
@@ -248,7 +255,7 @@ def _generate_query_url(dataset_id, parameter_id, min_lat, max_lat, min_lon, max
     :type max_lon: Float
     :param start_time: Start time
     :type start_time: Datetime
-    :param end_time: End time 
+    :param end_time: End time
     :type end_time: Datetime
     :param time_step: Time step
     :type time_step: String
@@ -265,7 +272,7 @@ def _generate_query_url(dataset_id, parameter_id, min_lat, max_lat, min_lon, max
     query = [('datasetId', dataset_id), ('parameterId', parameter_id), ('latMin', min_lat), ('latMax', max_lat),
              ('lonMin', min_lon), ('lonMax', max_lon), ('timeStart', start_time), ('timeEnd', end_time)]
 
-    query_url = urllib.urlencode(query)
+    query_url = urlencode(query)
     url_request = URL + query_url
 
     return url_request
@@ -320,7 +327,7 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     :param start_time: Start time
     :type start_time: :class:`datetime.datetime`
 
-    :param end_time: End time 
+    :param end_time: End time
     :type end_time: :class:`datetime.datetime`
 
     :param name: (Optional) A name for the loaded dataset.
