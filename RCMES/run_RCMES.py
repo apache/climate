@@ -113,7 +113,7 @@ for i, dataset in enumerate(obs_datasets):
                                                           temporal_resolution)
 
     if multiplying_factor[i] != 1:
-        obs_dataset.values *= multiplying_factor[i]
+        obs_datasets[i].values *= multiplying_factor[i]
 
 """ Step 2: Load model NetCDF Files into OCW Dataset Objects """
 model_datasets = load_datasets_from_config(extra_opts, *model_data_info)
@@ -148,7 +148,7 @@ if not 'boundary_type' in space_info:
                     start=start_time,
                     end=end_time)
 else:
-    bounds = Bounds(boundary_type=space_info['boundary_type'], 
+    bounds = Bounds(boundary_type=space_info['boundary_type'],
                     start=start_time,
                     end=end_time)
 
