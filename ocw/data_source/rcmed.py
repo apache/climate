@@ -80,7 +80,6 @@ def _make_mask_array(values, parameter_id, parameters_metadata):
 
     for each in parameters_metadata:
         if str(each['parameter_id']) == str(parameter_id):
-            print('ok')
             missing_values = each['missingdataflag'].encode()
             break
     missing_values = float(missing_values)
