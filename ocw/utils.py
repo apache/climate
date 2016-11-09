@@ -69,6 +69,9 @@ def decode_time_values(dataset, time_var_name):
 
         times = num2date(
             time_data[:], units=time_format, calendar=times_calendar)
+        if times_calendar == '360_day':
+            for it, t in enumerate(times):
+                times[it] = dt.datetime.strptime(str(t), '%Y-%m-%d 00:00:00')
     return times
 
 
