@@ -49,6 +49,9 @@ install:
   - source activate test-environment
   - python setup.py install
   
+  # Install coverage plugin
+  - pip install coverage
+
 # Workaround to get travis build working with matplotlib
 before_script:
   - "export DISPLAY=:99.0"

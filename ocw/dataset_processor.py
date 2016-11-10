@@ -146,9 +146,8 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
     """
     nt = target_dataset.times.size
     if nt % nt_average != 0:
-        msg = ('Warning: length of time dimension must '
-               'be a multiple of nt_average')
-        print(msg)
+        logger.warning('Length of time dimension must '
+                       'be a multiple of nt_average')
     # nt2 is the length of time dimension in the rebinned dataset
     nt2 = nt // nt_average
     binned_dates = target_dataset.times[np.arange(nt2) * nt_average]
@@ -301,7 +300,8 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
             for axis in (0, 1):
                 q_shifted = np.roll(values_original, shift=shift, axis=axis)
                 idx = ~q_shifted.mask * values_original.mask
-                values_original.data[idx] = q_shifted[idx]
+                indices = np.where(idx)[0]
+                values_original.data[indices] = q_shifted[indices]
         new_values[i] = map_coordinates(values_original,
                                         [new_lats_indices.flatten(),
                                          new_lons_indices.flatten()],
@@ -310,8 +310,10 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
         # Make a masking map using nearest neighbour interpolation -use this to
         # determine locations with MDI and mask these
         qmdi = np.zeros_like(values_original)
-        qmdi[values_original.mask == True] = 1.
-        qmdi[values_original.mask == False] = 0.
+        values_true_indices = np.where(values_original.mask == True)[0]
+        values_false_indices = np.where(values_original.mask == False)[0]
+        qmdi[values_true_indices] = 1.
+        qmdi[values_false_indices] = 0.
         qmdi_r = map_coordinates(qmdi, [new_lats_indices.flatten(
         ), new_lons_indices.flatten()], order=1).reshape(new_lats.shape)
         mdimask = (qmdi_r != 0.0)
@@ -932,13 +934,17 @@ def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
     lati = lati.copy()
 
     # Now, we'll set points outside the boundaries to lie along an edge
-    loni[loni > lon.max()] = lon.max()
-    loni[loni < lon.min()] = lon.min()
+    loni_max_indices = np.where(loni > lon.max())
+    loni_min_indices = np.where(loni < lon.min())
+    loni[loni_max_indices] = lon.max()
+    loni[loni_min_indices] = lon.min()
 
     # To deal with the "hard" break, we'll have to treat y differently,
     # so we're just setting the min here...
-    lati[lati > lat.max()] = lat.max()
-    lati[lati < lat.min()] = lat.min()
+    lati_max_indices = np.where(lati > lat.max())
+    lati_min_indices = np.where(lati < lat.min())
+    lati[lati_max_indices] = lat.max()
+    lati[lati_min_indices] = lat.min()
 
     # We need to convert these to (float) indicies
     #   (xi should range from 0 to (nx - 1), etc)
@@ -972,7 +978,8 @@ def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
         for axis in (0, 1):
             q_shifted = np.roll(spatial_values, shift=shift, axis=axis)
             idx = ~q_shifted.mask * spatial_values.mask
-            spatial_values.data[idx] = q_shifted[idx]
+            indices = np.where(idx)
+            spatial_values.data[indices] = q_shifted[indices]
 
     # Now we actually interpolate
     # map_coordinates does cubic interpolation by default,
@@ -994,8 +1001,10 @@ def _rcmes_spatial_regrid(spatial_values, lat, lon, lat2, lon2, order=1):
     # Make second map using nearest neighbour interpolation -use this to
     # determine locations with MDI and mask these
     qmdi = np.zeros_like(spatial_values)
-    qmdi[spatial_values.mask == True] = 1.
-    qmdi[spatial_values.mask == False] = 0.
+    spatial_indices_true = np.where(spatial_values.mask)
+    spatial_indices_false = np.where(not spatial_values.mask)
+    qmdi[spatial_indices_true] = 1.
+    qmdi[spatial_indices_false] = 0.
     qmdi_r = map_coordinates(qmdi, [lati, loni], order=order)
     qmdi_r = qmdi_r.reshape([nlat2, nlon2])
     mdimask = (qmdi_r != 0.0)
@@ -1057,14 +1066,15 @@ def _rcmes_calc_average_on_new_time_unit(data, dates, unit):
     :returns: meanstorem, newTimesList
     :rtype: 3D numpy masked array the same shape as the input array,
             list of python datetime objects
+    :raises: ValueError
     """
 
     # Check if the user-selected temporal grid is valid. If not, EXIT
     acceptable = ((unit == 'full') | (unit == 'annual') |
                   (unit == 'monthly') | (unit == 'daily'))
     if not acceptable:
-        print('Error: unknown unit type selected for time averaging: EXIT')
-        return - 1, - 1, - 1, - 1
+        raise ValueError('Error: unknown unit type selected '
+                         'for time averaging: EXIT')
 
     nt, ny, nx = data.shape
     if unit == 'full':
@@ -1131,14 +1141,15 @@ def _rcmes_calc_average_on_new_time_unit_K(data, dates, unit):
     :returns: meanstorem, newTimesList
     :rtype: 3D numpy masked array the same shape as the input array,
             list of python datetime objects
+    :raises: ValueError
     """
 
     # Check if the user-selected temporal grid is valid. If not, EXIT
     acceptable = ((unit == 'full') | (unit == 'annual') |
                   (unit == 'monthly') | (unit == 'daily'))
     if not acceptable:
-        print('Error: unknown unit type selected for time averaging: EXIT')
-        return - 1, - 1, - 1, - 1
+        raise ValueError('Error: unknown unit type selected '
+                         'for time averaging: EXIT')
 
     # Calculate arrays of: annual timeseries: year (2007,2007),
     #                      monthly time series: year-month (200701,200702),

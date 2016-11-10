@@ -509,9 +509,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
         y_index, x_index = numpy.where(mask_dataset.values == mask_value)
 
     times = []
-    nfile = len(nc_files)
     for ifile, file in enumerate(nc_files):
-        print('NC file ' + str(ifile + 1) + '/' + str(nfile), file)
         file_object0 = load_file(file, variable_name, lat_name=lat_name,
                                  lon_name=lon_name, time_name=time_name)
         values0 = file_object0.values
