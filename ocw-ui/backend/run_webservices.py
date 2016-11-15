@@ -20,14 +20,12 @@ from bottle import Bottle, response, static_file
 from local_file_metadata_extractors import lfme_app
 from directory_helpers import dir_app
 from rcmed_helpers import rcmed_app
-from podaac_helpers import podaac_app
 from processing import processing_app
 
 app = Bottle()
 app.mount('/lfme/', lfme_app)
 app.mount('/dir/', dir_app)
 app.mount('/rcmed/', rcmed_app)
-app.mount('/podaac/', podaac_app)
 app.mount('/processing/', processing_app)
 
 @app.route('/')

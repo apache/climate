@@ -56,7 +56,6 @@ angular.module('ocwUiApp')
       $scope.templates = [
         {title:'Local File', url: 'views/selectobservation.html'},
         {title:'RCMED', url: 'views/selectrcmed.html'},
-        {title:'PODAAC', url: 'views/selectpodaac.html'},
         {title:'ESG', disabled: true}
       ];
 
