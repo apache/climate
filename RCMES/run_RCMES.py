@@ -53,9 +53,9 @@ def load_datasets_from_config(extra_opts, *loader_opts):
             opt['start_time'] = extra_opts['start_time']
             opt['end_time'] = extra_opts['end_time']
 
-        loader = DatasetLoader(*loader_opts)
-        loader.load_datasets()
-        return loader.datasets
+    loader = DatasetLoader(*loader_opts)
+    loader.load_datasets()
+    return loader.datasets
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context

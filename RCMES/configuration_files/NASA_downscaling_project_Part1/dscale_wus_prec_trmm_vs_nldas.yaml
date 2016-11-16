@@ -23,17 +23,15 @@ regrid:
     regrid_dlon: 0.125
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: TRMM
-          dataset_id: 3
-          parameter_id: 36
-          variable_name: pr
+  - loader_name: rcmed
+    name: TRMM
+    dataset_id: 3
+    parameter_id: 36
+    variable_name: pr
 
-    targets:
-        - loader_name: local
-          file_path: ./data/dscale/obs/prmo*.nc
-          variable_name: pr
+  - loader_name: local
+    file_path: ./data/dscale/obs/prmo*.nc
+    variable_name: pr
 
 number_of_metrics_and_plots: 2
 

@@ -24,16 +24,14 @@ regrid:
     regrid_dlon: 0.44
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: CRU
-          dataset_id: 10
-          parameter_id: 37
+  - loader_name: rcmed
+    name: CRU
+    dataset_id: 10
+    parameter_id: 37
 
-    targets:
-        - loader_name: local
-          file_path: ./data/CORDEX-Africa_data/AFRICA*pr.nc
-          variable_name: pr    
+  - loader_name: local
+    file_path: ./data/CORDEX-Africa_data/AFRICA*pr.nc
+    variable_name: pr
 
 number_of_metrics_and_plots: 1
 

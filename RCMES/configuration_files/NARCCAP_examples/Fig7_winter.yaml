@@ -23,16 +23,14 @@ regrid:
     regrid_dlon: 0.50
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: CRU
-          dataset_id: 10
-          parameter_id: 38
+  - loader_name: rcmed
+    name: CRU
+    dataset_id: 10
+    parameter_id: 38
 
-    targets:
-        - loader_name: local
-          file_path: ./data/NARCCAP_data/temp*ncep.monavg.nc
-          variable_name: temp
+  - loader_name: local
+    file_path: ./data/NARCCAP_data/temp*ncep.monavg.nc
+    variable_name: temp
 
 number_of_metrics_and_plots: 1
 

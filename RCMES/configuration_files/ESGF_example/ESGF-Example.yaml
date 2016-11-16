@@ -36,20 +36,18 @@ regrid:
     regrid_on_reference: True
     regrid_dlat: 0.50
     regrid_dlon: 0.50
+    boundary_check: False
 
 datasets:
-    reference:
-        - loader_name: esgf
-          name: AVISO
-          dataset_id: obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov
-          variable_name: zos
+  - loader_name: esgf
+    name: AVISO
+    dataset_id: obs4MIPs.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov
+    variable_name: zos
 
-    targets:
-        - loader_name: esgf
-          name: MPI-ESM
-          dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de
-          variable_name: zos
-          boundary_check: False
+  - loader_name: esgf
+    name: MPI-ESM
+    dataset_id: cmip5.output1.MPI-M.MPI-ESM-LR.decadal1994.mon.ocean.Omon.r1i1p1.v20120529|esgf1.dkrz.de
+    variable_name: zos
 
 number_of_metrics_and_plots: 1
 

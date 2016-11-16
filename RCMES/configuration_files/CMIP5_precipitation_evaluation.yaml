@@ -10,7 +10,7 @@ time:
     temporal_resolution: monthly
     month_start: 1
     month_end: 12
-    average_each_year: Yes  
+    average_each_year: Yes
 
 space:
     boundary_type: CORDEX Central America
@@ -21,16 +21,14 @@ regrid:
     regrid_dlon: 0.44
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: TRMM
-          dataset_id: 3
-          parameter_id: 36
+  - loader_name: rcmed
+    name: TRMM
+    dataset_id: 3
+    parameter_id: 36
 
-    targets:
-        - loader_name: local
-          file_path: ./data/CMIP5/prec/CMIP5_*prec.nc
-          variable_name: prec
+  - loader_name: local
+    file_path: ./data/CMIP5/prec/CMIP5_*prec.nc
+    variable_name: prec
 
 number_of_metrics_and_plots: 1
 

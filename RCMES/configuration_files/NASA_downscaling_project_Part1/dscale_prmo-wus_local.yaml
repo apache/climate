@@ -23,16 +23,14 @@ regrid:
     regrid_dlon: 0.125
 
 datasets:
-    reference:
-        - loader_name: local
-          dataset_name: NLDAS
-          file_path: ./data/dscale/obs/prmo_lds-lds_1999-2010.nc
-          variable_name: pr
+  - loader_name: local
+    name: NLDAS
+    file_path: ./data/dscale/obs/prmo_lds-lds_1999-2010.nc
+    variable_name: pr
 
-    targets:
-        - loader_name: local
-          file_path: ./data/dscale/prmo*.nc
-          variable_name: pr
+  - loader_name: local
+    file_path: ./data/dscale/prmo*.nc
+    variable_name: pr
 
 number_of_metrics_and_plots: 2
 

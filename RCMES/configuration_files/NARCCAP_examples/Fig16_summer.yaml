@@ -23,16 +23,14 @@ regrid:
     regrid_dlon: 0.50
 
 datasets:
-    reference:
-        - loader_name: local
-          dataset_name: SRB
-          file_path: ./data/NARCCAP_data/srb_rel3.0_shortwave_from_1983_to_2007.nc
-          variable_name: sw_sfc_dn
+  - loader_name: local
+    name: SRB
+    file_path: ./data/NARCCAP_data/srb_rel3.0_shortwave_from_1983_to_2007.nc
+    variable_name: sw_sfc_dn
 
-    targets:
-        - loader_name: local
-          file_path: ./data/NARCCAP_data/rsds*ncep.monavg.nc
-          variable_name: rsds    
+  - loader_name: local
+    file_path: ./data/NARCCAP_data/rsds*ncep.monavg.nc
+    variable_name: rsds
 
 number_of_metrics_and_plots: 1
 

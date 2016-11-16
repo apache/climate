@@ -36,20 +36,18 @@ regrid:
     regrid_on_reference: True
     regrid_dlat: 0.50
     regrid_dlon: 0.50
+    boundary_check: False
 
 datasets:
-    reference:
-        - loader_name: local
-          dataset_name: AVISO
-          file_path: ./data/ESGF_data/zos_AVISO_L4_199210-201012.nc
-          variable_name: zos
+  - loader_name: local
+    name: AVISO
+    file_path: ./data/ESGF_data/zos_AVISO_L4_199210-201012.nc
+    variable_name: zos
 
-    targets:
-        - loader_name: local
-          dataset_name: MPI-ESM-LR
-          file_path: ./data/ESGF_data/zos_Omon_MPI-ESM-LR_decadal1994_r1i1p1_199501-200412.nc
-          variable_name: zos
-          GCM_data: True
+  - loader_name: local
+    name: MPI-ESM-LR
+    file_path: ./data/ESGF_data/zos_Omon_MPI-ESM-LR_decadal1994_r1i1p1_199501-200412.nc
+    variable_name: zos
 
 number_of_metrics_and_plots: 1
 

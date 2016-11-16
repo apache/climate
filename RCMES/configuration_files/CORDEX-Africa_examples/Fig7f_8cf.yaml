@@ -24,18 +24,16 @@ regrid:
     regrid_dlon: 0.44
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: CRU
-          dataset_id: 10
-          parameter_id: 41
+  - loader_name: rcmed
+    name: CRU
+    dataset_id: 10
+    parameter_id: 41
 
-    targets:
-        - loader_name: local
-          file_path: ./data/CORDEX-Africa_data/AFRICA*tasmin.nc
-          variable_name: tasmin
-          lat_name: lat
-          lon_name: lon
+  - loader_name: local
+    file_path: ./data/CORDEX-Africa_data/AFRICA*tasmin.nc
+    variable_name: tasmin
+    lat_name: lat
+    lon_name: lon
 
 number_of_metrics_and_plots: 2
 

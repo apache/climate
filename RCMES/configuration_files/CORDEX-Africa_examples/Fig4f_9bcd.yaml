@@ -24,19 +24,17 @@ regrid:
     regrid_dlon: 0.44
 
 datasets:
-    reference:
-        - loader_name: rcmed
-          name: CRU
-          dataset_id: 10
-          parameter_id: 42
-          multiplying_factor: 0.01
+  - loader_name: rcmed
+    name: CRU
+    dataset_id: 10
+    parameter_id: 42
+    multiplying_factor: 0.01
 
-    targets:
-        - loader_name: local
-          file_path: ./data/CORDEX-Africa_data/AFRICA*clt.nc
-          variable_name: clt
-          lat_name: lat
-          lon_name: lon
+  - loader_name: local
+    file_path: ./data/CORDEX-Africa_data/AFRICA*clt.nc
+    variable_name: clt
+    lat_name: lat
+    lon_name: lon
 
 number_of_metrics_and_plots: 3
 
