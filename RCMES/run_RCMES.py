@@ -90,20 +90,23 @@ extra_opts = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
 data_info = config['datasets']
 
 # Extract info we don't want to put into the loader config
-# Multiplying Factor to scale obs by
-multiplying_factor = np.ones(len(data_info))
-for i, info in enumerate(reference_data_info):
-    multiplying_factor[i] = info.pop('multiplying_factor', 1)
+# Multiplying Factor to scale obs by. Currently only supported for reference
+# (first) dataset. We should instead make this a parameter for each
+# loader and Dataset objects.
+fact = data_info[0].pop('multiplying_factor', 1)
     
 """ Step 1: Load the datasets """
 print('Loading datasets:\n{}'.format(data_info))
 datasets = load_datasets_from_config(extra_opts, *data_info)
+multiplying_factor = np.ones(len(datasets))
+multiplying_factor[0] = fact
 names = [dataset.name for dataset in datasets]
 for i, dataset in enumerate(datasets):
     if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
         datasets[i] = dsp.normalize_dataset_datetimes(dataset,
                                                       temporal_resolution)
-        datasets[i].values *= multiplying_factor[i]
+        if multiplying_factor[i] != 1:
+            datasets[i].values *= multiplying_factor[i]
 
 """ Step 2: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
@@ -215,7 +218,7 @@ if config['use_subregions']:
     nsubregion = len(subregions)
 
     print('Calculating spatial averages and standard deviations of {} subregions'
-          .format(nsubregions))
+          .format(nsubregion))
 
     reference_subregion_mean, reference_subregion_std, subregion_array = (
         utils.calc_subregion_area_mean_and_std([reference_dataset], subregions))
@@ -237,8 +240,8 @@ if config['use_subregions']:
         subregions=subregions, subregion_array=subregion_array,
         ref_subregion_mean=reference_subregion_mean,
         ref_subregion_std=reference_subregion_std,
-        target_subregion_mean=target_subregion_mean,
-        target_subregion_std=target_subregion_std)
+        model_subregion_mean=target_subregion_mean,
+        model_subregion_std=target_subregion_std)
 else:
     dsp.write_netcdf_multiple_datasets_with_subregions(
                                 reference_dataset, reference_name, target_datasets,
