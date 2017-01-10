@@ -557,7 +557,7 @@ def regrid_spatial_mask(target_lon, target_lat, mask_lon, mask_lat, mask_var,
     target_lons, target_lats = convert_lat_lon_2d_array(target_lon, target_lat)
     mask_lons, mask_lats = convert_lat_lon_2d_array(mask_lon, mask_lat)
 
-    if target_lons != mask_lons or target_lats != mask_lats:
+    if target_lons.all() != mask_lons.all() or target_lats.all() != mask_lats.all():
         mask_var_regridded = interpolate.griddata((mask_lons.flatten(), mask_lats.flatten()),
                                                   mask_var.flatten(),
                                                   (target_lons.flatten(),
