@@ -330,7 +330,7 @@ def calc_correlation(target_array, reference_array):
     :param reference_array: an array of reference dataset
     :type reference_array: :class:'numpy.ma.core.MaskedArray'
 
-    :returns: pearson's correlation coefficient between the two inumpy.t arrays
+    :returns: pearson's correlation coefficient between the two input arrays
     :rtype: :class:'numpy.ma.core.MaskedArray'
     '''
 
