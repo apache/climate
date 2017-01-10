@@ -643,13 +643,13 @@ def load_GPM_IMERG_files(file_path=None,
         file_object = h5py.File(file)
         time_struct_parsed = strptime(file[-39:-23], "%Y%m%d-S%H%M%S")
         times.append(datetime(*time_struct_parsed[:6]))
-        values0 = numpy.transpose(ma.masked_less(
+        values0 = ma.transpose(ma.masked_less(
             file_object['Grid'][variable_name][:], 0.))
-        values0 = numpy.expand_dims(values0, axis=0)
+        values0 = ma.expand_dims(values0, axis=0)
         if ifile == 0:
             values = values0
         else:
-            values = numpy.concatenate((values, values0))
+            values = ma.concatenate((values, values0))
         file_object.close()
     times = numpy.array(times)
     return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
