@@ -330,7 +330,7 @@ def calc_correlation(target_array, reference_array):
     :param reference_array: an array of reference dataset
     :type reference_array: :class:'numpy.ma.core.MaskedArray'
 
-    :returns: pearson's correlation coefficient between the two input arrays
+    :returns: pearson's correlation coefficient between the two inumpy.t arrays
     :rtype: :class:'numpy.ma.core.MaskedArray'
     '''
 
@@ -418,10 +418,10 @@ def wet_spell_analysis(reference_array, threshold=0.1, nyear=1, dt=3.):
     '''
     nt = reference_array.shape[0]
     if reference_array.ndim == 3:
-        reshaped_array = reference_array.reshape[nt, reference_array.size / nt]
+        reshaped_array = reference_array.reshape([nt, reference_array.size / nt])
     else:
         reshaped_array = reference_array
-    xy_indices = np.where(reshaped_array.mask[0, :] == False)[0]
+    xy_indices = numpy.where(reshaped_array.mask[0, :] == False)[0]
 
     nt_each_year = nt / nyear
     spell_duration = []
@@ -429,16 +429,16 @@ def wet_spell_analysis(reference_array, threshold=0.1, nyear=1, dt=3.):
     total_rainfall = []
 
     for index in xy_indices:
-        for iyear in np.arange(nyear):
+        for iyear in numpy.arange(nyear):
             data0_temp = reshaped_array[nt_each_year * iyear:nt_each_year * (iyear + 1),
                                         index]
             # time indices when precipitation rate is smaller than the
             # threshold [mm/hr]
-            t_index = np.where((data0_temp <= threshold) &
+            t_index = numpy.where((data0_temp <= threshold) &
                                (data0_temp.mask == False))[0]
-            t_index = np.insert(t_index, 0, 0)
+            t_index = numpy.insert(t_index, 0, 0)
             t_index = t_index + nt_each_year * iyear
-            for it in np.arange(t_index.size - 1):
+            for it in numpy.arange(t_index.size - 1):
                 if t_index[it + 1] - t_index[it] > 1:
                     data1_temp = data0_temp[t_index[it] + 1:t_index[it + 1]]
                     if not ma.is_masked(data1_temp):
@@ -446,4 +446,4 @@ def wet_spell_analysis(reference_array, threshold=0.1, nyear=1, dt=3.):
                             (t_index[it + 1] - t_index[it] - 1) * dt)
                         peak_rainfall.append(data1_temp.max())
                         total_rainfall.append(data1_temp.sum())
-    return np.array(spell_duration), np.array(peak_rainfall), np.array(total_rainfall)
+    return numpy.array(spell_duration), numpy.array(peak_rainfall), numpy.array(total_rainfall)
