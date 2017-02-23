@@ -65,20 +65,25 @@ def _nice_intervals(data, nlevs):
     data = data.ravel()
     mn = mstats.scoreatpercentile(data, 5)
     mx = mstats.scoreatpercentile(data, 95)
-    # if there min less than 0 and
-    # or max more than 0
-    # put 0 in center of color bar
+    # if min less than 0 and or max more than 0 put 0 in center of color bar
     if mn < 0 and mx > 0:
         level = max(abs(mn), abs(mx))
         mnlvl = -1 * level
         mxlvl = level
-    # if min is larger than 0 then
-    # have color bar between min and max
+    # if min is larger than 0 then have color bar between min and max
     else:
         mnlvl = mn
         mxlvl = mx
+    
+    # hack to make generated intervals from mpl the same for all versions
+    autolimit_mode = mpl.rcParams.get('axes.autolimit_mode')
+    if autolimit_mode:
+        mpl.rc('axes', autolimit_mode='round_numbers')
+    
     locator = mpl.ticker.MaxNLocator(nlevs)
     clevs = locator.tick_values(mnlvl, mxlvl)
+    if autolimit_mode:
+        mpl.rc('axes', autolimit_mode=autolimit_mode)
 
     # Make sure the bounds of clevs are reasonable since sometimes
     # MaxNLocator gives values outside the domain of the input data
