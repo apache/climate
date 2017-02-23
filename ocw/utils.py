@@ -271,7 +271,7 @@ def reshape_monthly_to_annually(dataset):
     values = dataset.values[:]
     data_shape = values.shape
     num_total_month = data_shape[0]
-    num_year = num_total_month / 12
+    num_year = num_total_month // 12
     num_month = 12
     year_month_shape = num_year, num_month
     lat_lon_shape = data_shape[1:]
