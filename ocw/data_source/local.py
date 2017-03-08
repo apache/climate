@@ -417,7 +417,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
         if ifile == 0:
             values0 = temp_value
         else:
-            values0 = numpy.concatenate((values0, temp_value))
+            values0 = ma.concatenate((values0, temp_value))
         file_object.close()
     times = numpy.array(times)
     years = numpy.array([d.year for d in times])
