@@ -168,11 +168,14 @@ def load_WRF_2d_files(file_path=None,
             times.append(
                 datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
         values0 = file_object.variables[variable_name][:]
+        if isinstance(values0, numpy.ndarray):
+            values0 = ma.array(values0,
+                               mask=numpy.zeros(values0.shape))   
         if ifile == 0:
             values = values0
             variable_unit = file_object.variables[variable_name].units
         else:
-            values = numpy.concatenate((values, values0))
+            values = ma.concatenate((values, values0))
         file_object.close()
     times = numpy.array(times)
     return Dataset(lats, lons, times, values, variable_name, units=variable_unit, name=name)
@@ -407,12 +410,14 @@ def load_WRF_2d_files_RAIN(file_path=None,
         for ihour in range(24):
             times.append(
                 datetime(*time_struct_parsed[:6]) + timedelta(hours=ihour))
+        temp_value = file_object.variables['RAINC'][:] + file_object.variables['RAINNC'][:]
+        if isinstance(temp_value, numpy.ndarray):
+            temp_value = ma.array(temp_value,
+                          mask=numpy.zeros(temp_value.shape))
         if ifile == 0:
-            values0 = file_object.variables['RAINC'][
-                :] + file_object.variables['RAINNC'][:]
+            values0 = temp_value
         else:
-            values0 = numpy.concatenate((values0, file_object.variables['RAINC'][
-                                        :] + file_object.variables['RAINNC'][:]))
+            values0 = numpy.concatenate((values0, temp_value))
         file_object.close()
     times = numpy.array(times)
     years = numpy.array([d.year for d in times])
@@ -420,6 +425,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     print('ncycle=', ncycle)
     nt, ny, nx = values0.shape
     values = numpy.zeros([nt - ncycle * 24, ny, nx])
+    values = ma.array(values, mask=numpy.zeros(values.shape))
     times2 = []
     nt2 = nt / ncycle
     # remove the first day in each year
