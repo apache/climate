@@ -371,8 +371,8 @@ def calc_histogram_overlap(hist1, hist2):
         err = "The two histograms have different sizes"
         raise ValueError(err)
     overlap = 0.
-    for ii in len(hist1_flat):
-        overlap = overlap + numpy.min(hist1_flat[ii], hist2_flat[ii])
+    for ii in numpy.arange(len(hist1_flat)):
+        overlap = overlap + numpy.min([hist1_flat[ii], hist2_flat[ii]])
     return overlap
 
 
