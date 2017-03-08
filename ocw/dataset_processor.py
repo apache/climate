@@ -77,7 +77,7 @@ def temporal_subset(target_dataset, month_start, month_end,
     if average_each_year:
         nmonth = len(month_index)
         ntime = new_dataset.times.size
-        nyear = ntime // nmonth
+        nyear = ntime/nmonth
         averaged_time = []
         ny, nx = target_dataset.values.shape[1:]
         averaged_values = ma.zeros([nyear, ny, nx])
