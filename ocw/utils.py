@@ -271,7 +271,7 @@ def reshape_monthly_to_annually(dataset):
     values = dataset.values[:]
     data_shape = values.shape
     num_total_month = data_shape[0]
-    num_year = num_total_month // 12
+    num_year = num_total_month/12
     num_month = 12
     year_month_shape = num_year, num_month
     lat_lon_shape = data_shape[1:]
@@ -557,15 +557,12 @@ def regrid_spatial_mask(target_lon, target_lat, mask_lon, mask_lat, mask_var,
     target_lons, target_lats = convert_lat_lon_2d_array(target_lon, target_lat)
     mask_lons, mask_lats = convert_lat_lon_2d_array(mask_lon, mask_lat)
 
-    if target_lons.all() != mask_lons.all() or target_lats.all() != mask_lats.all():
-        mask_var_regridded = interpolate.griddata((mask_lons.flatten(), mask_lats.flatten()),
-                                                  mask_var.flatten(),
-                                                  (target_lons.flatten(),
-                                                   target_lats.flatten()),
-                                                  method='nearest',
-                                                  fill_value=-9999.).reshape(target_lons.shape)
-    else:
-        mask_var_regridded = mask_var
+    mask_var_regridded = interpolate.griddata((mask_lons.flatten(), mask_lats.flatten()),
+                                              mask_var.flatten(),
+                                              (target_lons.flatten(),
+                                               target_lats.flatten()),
+                                              method='nearest',
+                                              fill_value=-9999.).reshape(target_lons.shape)
 
     mask_outside = ma.masked_equal(mask_var_regridded, -9999.).mask
     values_original = ma.array(mask_var)
