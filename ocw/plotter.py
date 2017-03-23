@@ -18,11 +18,15 @@
 from tempfile import TemporaryFile
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 from mpl_toolkits.basemap import Basemap
 from mpl_toolkits.axes_grid1 import ImageGrid
 import scipy.stats.mstats as mstats
 import numpy as np
 import numpy.ma as ma
+
+import ocw.utils as utils
 
 # Set the default colormap to coolwarm
 mpl.rc('image', cmap='coolwarm')
@@ -1087,3 +1091,70 @@ def draw_histogram(dataset_array, data_names, fname, fmt='png', nbins=10):
                      data_max + (data_max - data_min) * 0.15])
 
     fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+
+def fill_US_states_with_color(regions, fname, fmt='png', ptitle='',
+                              colors=False, values=None, region_names=None):
+    
+    ''' Fill the States over the contiguous US with colors 
+   
+    :param regions: The list of subregions(lists of US States) to be filled 
+                    with different colors.
+    :type regions: :class:`list`  
+    :param fname: The filename of the plot.
+    :type fname: :mod:`string`
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+    :param colors: (Optional) : If True, each region will be filled  
+                                with different colors without using values
+    :type colors: :class:`bool` 
+    :param values: (Optional) : If colors==False, color for each region scales 
+                                an associated element in values   
+    :type values: :class:`numpy.ndarray` 
+    '''
+
+    nregion = len(regions)
+    if colors:
+        cmap = plt.cm.rainbow
+    if values:
+        cmap = plt.cm.seismic
+        max_abs = np.abs(values).max()
+
+    # Set up the figure
+    fig = plt.figure()
+    fig.set_size_inches((8.5, 11.))
+    fig.dpi = 300
+    ax = fig.add_subplot(111)
+
+    # create the map
+    m = Basemap(llcrnrlon=-127,llcrnrlat=22,urcrnrlon=-65,urcrnrlat=52,
+                ax=ax)
+
+    for iregion, region in enumerate(regions):
+        shapes = utils.shapefile_boundary('us_states', region)
+        patches=[]
+        lats=np.empty(0)
+        lons=np.empty(0)
+        for shape in shapes:
+            patches.append(Polygon(np.array(shape), True))
+            
+            lons = np.append(lons, shape[:,0])
+            lats = np.append(lats, shape[:,1])
+        if colors:
+            color_to_fill=cmap((iregion+0.5)/nregion)
+        if values:
+            value = values[iregion]
+            color_to_fill = cmap(0.5+np.sign(value)*abs(value)/max_abs*0.45)
+        ax.add_collection(PatchCollection(patches, facecolor=color_to_fill))
+        if region_names:
+            ax.text(lons.mean(), lats.mean(), region_names[iregion],
+                    ha='center', va='center', fontsize=10)
+    m.drawcountries(linewidth=0.)
+
+    # Add the title
+    ax.set_title(ptitle) 
+
+    # Save the figure
+    fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight', dpi=fig.dpi)
+    fig.clf()

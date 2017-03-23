@@ -26,8 +26,9 @@ import numpy.ma as ma
 from mpl_toolkits.basemap import shiftgrid, Basemap
 from matplotlib.path import Path
 from dateutil.relativedelta import relativedelta
-from netCDF4 import num2date
+from netCDF4 import num2date, date2num
 import scipy.interpolate as interpolate
+import scipy.stats as stats
 from scipy.ndimage import map_coordinates
 
 
@@ -470,8 +471,7 @@ def shapefile_boundary(boundary_type, region_names):
     regions = []
     shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
     map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
-                           boundary_type)
-                           
+                           boundary_type, drawbounds=False)
     # Note: The shapefile may contain countries or states with latin letters.
     # Hence, the output of readshapefile can be a mix of ascii and unicode
     # strings. Because python 2 and 3 treat them differently, we must
@@ -480,8 +480,9 @@ def shapefile_boundary(boundary_type, region_names):
         for region_name in region_names:
             region_name = _force_unicode(region_name)
             for iregion, region_info in enumerate(map_read.us_states_info):
-                state = _force_unicode(region_info['st'], 'latin-1')
-                if state == region_name:
+                state1 = _force_unicode(region_info['st'], 'latin-1')
+                state2 = _force_unicode(region_info['state'], 'latin-1')
+                if state1 == region_name or state2 == region_name:
                     regions.append(np.array(map_read.us_states[iregion]))
     elif boundary_type == 'countries':
         for region_name in region_names:
@@ -594,10 +595,19 @@ def regrid_spatial_mask(target_lon, target_lat, mask_lon, mask_lat, mask_var,
 def propagate_spatial_mask_over_time(data_array, mask):
     if data_array.ndim == 3 and mask.ndim == 2:
         nt = data_array.shape[0]
-        for it in np.arange(nt):
-            mask_original = data_array[it, :].mask
-            data_array.mask[it, :] = mask | mask_original
-        return data_array
+        new_data_array = ma.zeros(data_array.shape)
+        if isinstance(data_array.mask, bool):
+            new_mask = mask
+            for it in np.arange(nt):
+                new_data_array[it,:] = ma.array(data_array[it,:],
+                                            mask=new_mask)            
+        else:
+            for it in np.arange(nt):
+                new_mask = data_array[it, :].mask | mask
+                new_data_array[it,:] = ma.array(data_array[it,:],
+                                            mask=new_mask)                
+
+        return new_data_array
 
 
 def convert_lat_lon_2d_array(lon, lat):
@@ -614,3 +624,70 @@ def _force_unicode(s, encoding='utf-8'):
         s = s.decode(encoding=encoding)
         
     return s
+
+def calculate_temporal_trends(dataset):
+    ''' Calculate temporal trends in dataset.values
+    :param dataset: The dataset from which time values should be extracted.
+    :type dataset: :class:`dataset.Dataset'     
+
+    :returns: Arrays of the temporal trend and standard error
+    :rtype: :class:`numpy.ma.core.MaskedArray`
+    '''
+
+    nt, ny, nx = dataset.values.shape
+    x = np.arange(nt)
+
+    trend = np.zeros([ny, nx])-999.
+    slope_err = np.zeros([ny, nx])-999.
+    for iy in np.arange(ny):
+        for ix in np.arange(nx): 
+            if dataset.values[:,iy,ix].count() == nt: 
+                trend[iy,ix], slope_err[iy,ix] = calculate_temporal_trend_of_time_series(
+                                               x, dataset.values[:,iy,ix]) 
+    
+    return ma.masked_equal(trend, -999.), ma.masked_equal(slope_err, -999.)    
+
+def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000):
+    ''' Calculate temporal trends in an ensemble of time series  
+    :param timeseries_array: A list whose elements are one-dimensional numpy arrays 
+    :type timeseries_array: :class:`list'
+
+    :param sampling: A list whose elements are one-dimensional numpy arrays 
+    :type timeseries_array: :class:`list'
+
+    :returns: temporal trend and estimated error from bootstrapping
+    :rtype: :float:`float','float'
+    '''
+   
+    nmodels = len(timeseries_array)
+    nt = len(timeseries_array[0])
+    x = np.arange(nt)
+    merged_array = np.zeros([nmodels, nt])
+    sampled_trend = np.zeros(number_of_samples)
+    for imodel,timeseries in enumerate(timeseries_array):
+        merged_array[imodel,:] = timeseries[:]
+    ensemble_trend, _ = calculate_temporal_trend_of_time_series(
+                        x, np.mean(merged_array, axis=0))
+    
+    for isample in np.arange(number_of_samples):
+        index = np.random.choice(nmodels, size=nmodels, replace=True)
+        random_ensemble = np.mean(merged_array[index, :], axis=0)
+        sampled_trend[isample], _ = calculate_temporal_trend_of_time_series(
+                                    x, random_ensemble)
+    return ensemble_trend, np.std(sample_trend, ddof=1)
+     
+
+def calculate_temporal_trend_of_time_series(x,y):
+    ''' Calculate least-square trends (a) in y = ax+b and a's standard error
+    :param x: time series
+    :type x: :class:`numpy.ndarray'     
+
+    :param x: time series
+    :type x: :class:`numpy.ndarray'     
+
+    :returns: temporal trend and standard error
+    :rtype: :float:`float','float'
+    '''
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+    n = len(x)
+    return slope, std_err/np.std(x)/n**0.5 

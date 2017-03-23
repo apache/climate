@@ -401,23 +401,28 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
         _are_bounds_contained_by_dataset(target_dataset, subregion)
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
-            start_time_index = np.where(
-                target_dataset.times >= subregion.start)[0][0]
-            end_time_index = np.where(
-                target_dataset.times <= subregion.end)[0][-1]
-            target_dataset = temporal_slice(
-                target_dataset, start_time_index, end_time_index)
-            nt, ny, nx = target_dataset.values.shape
+            temporal_subset = temporal_slice(
+                target_dataset, subregion.start, subregion.end)
+            nt, ny, nx = temporal_subset.values.shape
             y_index, x_index = np.where(
                 (target_dataset.lats >= subregion.lat_max) | (
                     target_dataset.lats <= subregion.lat_min) |
                 (target_dataset.lons >= subregion.lon_max) | (
                     target_dataset.lons <= subregion.lon_min))
             for it in np.arange(nt):
-                target_dataset.values[it, y_index, x_index] = 1.e+20
-            target_dataset.values = ma.masked_equal(
-                target_dataset.values, 1.e+20)
-            return target_dataset
+                temporal_subset.values[it, y_index, x_index] = 1.e+20
+            new_values = ma.masked_equal(
+                temporal_subset.values, 1.e+20)
+            return ds.Dataset(
+                target_dataset.lats,
+                target_dataset.lons,
+                temporal_subset.times,
+                new_values,            
+                variable=target_dataset.variable,
+                units=target_dataset.units,
+                name=subregion_name,
+                origin=target_dataset.origin
+                )
 
         elif target_dataset.lats.ndim == 1 and target_dataset.lons.ndim == 1:
             # Get subregion indices into subregion data
@@ -466,36 +471,52 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
             )
 
     if subregion.boundary_type == 'us_states' or subregion.boundary_type == 'countries':
-        start_time_index = np.where(
-            target_dataset.times == subregion.start)[0][0]
-        end_time_index = np.where(target_dataset.times == subregion.end)[0][0]
-        target_dataset = temporal_slice(
-            target_dataset, start_time_index, end_time_index)
-        nt, ny, nx = target_dataset.values.shape
+        temporal_subset = temporal_slice(
+            target_dataset, subregion.start, subregion.end)
         spatial_mask = utils.mask_using_shapefile_info(target_dataset.lons, target_dataset.lats,
                                                        subregion.masked_regions, extract=extract)
-        target_dataset.values = utils.propagate_spatial_mask_over_time(
-            target_dataset.values, mask=spatial_mask)
-        return target_dataset
+        subset_values = utils.propagate_spatial_mask_over_time(
+            temporal_subset.values, mask=spatial_mask)
+        return ds.Dataset(
+            target_dataset.lats,
+            target_dataset.lons,
+            temporal_subset.times,
+            subset_values,
+            variable=target_dataset.variable,
+            units=target_dataset.units,
+            name=subregion_name,
+            origin=target_dataset.origin
+            )
 
     if subregion.boundary_type == 'user':
+        temporal_subset = temporal_slice(
+            target_dataset, subregion.start, subregion.end)
         spatial_mask = utils.regrid_spatial_mask(target_dataset.lons, target_dataset.lats,
                                                  subregion.mask_longitude, subregion.mask_latitude, subregion.mask_variable,
                                                  user_mask_values, extract=extract)
-        target_dataset.values = utils.propagate_spatial_mask_over_time(
-            target_dataset.values, mask=spatial_mask)
-        return target_dataset
+        subset_values = utils.propagate_spatial_mask_over_time(
+            temporal_subset.values, mask=spatial_mask)
+        return ds.Dataset(
+            target_dataset.lats,
+            target_dataset.lons,
+            temporal_subset.times,
+            subset_values,
+            variable=target_dataset.variable,
+            units=target_dataset.units,
+            name=subregion_name,
+            origin=target_dataset.origin
+            )
 
 
-def temporal_slice(target_dataset, start_time_index, end_time_index):
+def temporal_slice(target_dataset, start_time, end_time):
     '''Temporally slice given dataset(s) with subregion information. This does not
     spatially subset the target_Dataset
 
-    :param start_time_index: time index of the start time
-    :type start_time_index: :class:'int'
+    :param start_time: start time
+    :type start_time: :class:'int'
 
-    :param end_time_index: time index of the end time
-    :type end_time_index: :class:'int'
+    :param end_time: end time
+    :type end_time: :class:'datetime.datetime'
 
     :param target_dataset: The Dataset object to subset.
     :type target_dataset: :class:`dataset.Dataset`
@@ -505,14 +526,23 @@ def temporal_slice(target_dataset, start_time_index, end_time_index):
 
     :raises: ValueError
     '''
-    start_date = target_dataset.times[start_time_index]
-    end_date = target_dataset.times[end_time_index]
-    timeStart = min(np.nonzero(target_dataset.times >= start_date)[0])
-    timeEnd = max(np.nonzero(target_dataset.times <= end_date)[0])
-    target_dataset.times = target_dataset.times[timeStart:timeEnd + 1]
-    target_dataset.values = target_dataset.values[timeStart:timeEnd + 1, :]
+    start_time_index = np.where(
+        target_dataset.times >= start_time)[0][0]
+    end_time_index = np.where(
+        target_dataset.times <= end_time)[0][-1]
+    new_times = target_dataset.times[start_time_index:end_time_index + 1]
+    new_values = target_dataset.values[start_time_index:end_time_index + 1, :]
 
-    return target_dataset
+    return ds.Dataset(
+        target_dataset.lats,
+        target_dataset.lons,
+        new_times,
+        new_values,  
+        variable=target_dataset.variable,
+        units=target_dataset.units,
+        origin=target_dataset.origin
+        )
+         
 
 
 def safe_subset(target_dataset, subregion, subregion_name=None):
