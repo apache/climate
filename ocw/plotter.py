@@ -1153,8 +1153,7 @@ def fill_US_states_with_color(regions, fname, fmt='png', ptitle='',
     m.drawcountries(linewidth=0.)
 
     # Add the title
-    ax.set_title(ptitle) 
-
+    ax.set_title(ptitle)
     # Save the figure
     fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight', dpi=fig.dpi)
     fig.clf()

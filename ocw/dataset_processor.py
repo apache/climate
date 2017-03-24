@@ -403,7 +403,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             temporal_subset = temporal_slice(
                 target_dataset, subregion.start, subregion.end)
-            nt, ny, nx = temporal_subset.values.shape
+            nt = temporal_subset.values.shape[0]
             y_index, x_index = np.where(
                 (target_dataset.lats >= subregion.lat_max) | (
                     target_dataset.lats <= subregion.lat_min) |
@@ -417,12 +417,11 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
                 target_dataset.lats,
                 target_dataset.lons,
                 temporal_subset.times,
-                new_values,            
+                new_values,
                 variable=target_dataset.variable,
                 units=target_dataset.units,
                 name=subregion_name,
-                origin=target_dataset.origin
-                )
+                origin=target_dataset.origin)
 
         elif target_dataset.lats.ndim == 1 and target_dataset.lons.ndim == 1:
             # Get subregion indices into subregion data
@@ -485,8 +484,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
             variable=target_dataset.variable,
             units=target_dataset.units,
             name=subregion_name,
-            origin=target_dataset.origin
-            )
+            origin=target_dataset.origin)
 
     if subregion.boundary_type == 'user':
         temporal_subset = temporal_slice(
@@ -504,9 +502,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
             variable=target_dataset.variable,
             units=target_dataset.units,
             name=subregion_name,
-            origin=target_dataset.origin
-            )
-
+            origin=target_dataset.origin)
 
 def temporal_slice(target_dataset, start_time, end_time):
     '''Temporally slice given dataset(s) with subregion information. This does not
@@ -537,17 +533,13 @@ def temporal_slice(target_dataset, start_time, end_time):
         target_dataset.lats,
         target_dataset.lons,
         new_times,
-        new_values,  
+        new_values, 
         variable=target_dataset.variable,
         units=target_dataset.units,
-        origin=target_dataset.origin
-        )
-         
-
+        origin=target_dataset.origin)
 
 def safe_subset(target_dataset, subregion, subregion_name=None):
     '''Safely subset given dataset with subregion information
-
     A standard subset requires that the provided subregion be entirely
     contained within the datasets bounds. `safe_subset` returns the
     overlap of the subregion and dataset without returning an error.
