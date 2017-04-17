@@ -272,7 +272,12 @@ def reshape_monthly_to_annually(dataset):
     values = dataset.values[:]
     data_shape = values.shape
     num_total_month = data_shape[0]
-    num_year = num_total_month/12
+    num_year = num_total_month // 12
+    if num_total_month % 12 != 0:
+        raise ValueError("Number of months in dataset ({}) does not "
+                         "divide evenly into {} year(s)."
+                         .format(num_total_month, num_year))
+
     num_month = 12
     year_month_shape = num_year, num_month
     lat_lon_shape = data_shape[1:]
@@ -600,12 +605,12 @@ def propagate_spatial_mask_over_time(data_array, mask):
             new_mask = mask
             for it in np.arange(nt):
                 new_data_array[it,:] = ma.array(data_array[it,:],
-                                            mask=new_mask)            
+                                            mask=new_mask)
         else:
             for it in np.arange(nt):
                 new_mask = data_array[it, :].mask | mask
                 new_data_array[it,:] = ma.array(data_array[it,:],
-                                            mask=new_mask)                
+                                            mask=new_mask)
 
         return new_data_array
 
@@ -628,7 +633,7 @@ def _force_unicode(s, encoding='utf-8'):
 def calculate_temporal_trends(dataset):
     ''' Calculate temporal trends in dataset.values
     :param dataset: The dataset from which time values should be extracted.
-    :type dataset: :class:`dataset.Dataset'     
+    :type dataset: :class:`dataset.Dataset'
 
     :returns: Arrays of the temporal trend and standard error
     :rtype: :class:`numpy.ma.core.MaskedArray`
@@ -640,19 +645,19 @@ def calculate_temporal_trends(dataset):
     trend = np.zeros([ny, nx])-999.
     slope_err = np.zeros([ny, nx])-999.
     for iy in np.arange(ny):
-        for ix in np.arange(nx): 
-            if dataset.values[:,iy,ix].count() == nt: 
+        for ix in np.arange(nx):
+            if dataset.values[:,iy,ix].count() == nt:
                 trend[iy,ix], slope_err[iy,ix] = calculate_temporal_trend_of_time_series(
-                                               x, dataset.values[:,iy,ix]) 
+                                               x, dataset.values[:,iy,ix])
     
-    return ma.masked_equal(trend, -999.), ma.masked_equal(slope_err, -999.)    
+    return ma.masked_equal(trend, -999.), ma.masked_equal(slope_err, -999.)
 
 def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000):
-    ''' Calculate temporal trends in an ensemble of time series  
-    :param timeseries_array: Two dimensional array. 1st index: model, 2nd index: time. 
+    ''' Calculate temporal trends in an ensemble of time series
+    :param timeseries_array: Two dimensional array. 1st index: model, 2nd index: time.
     :type timeseries_array: :class:`numpy.ndarray'
 
-    :param sampling: A list whose elements are one-dimensional numpy arrays 
+    :param sampling: A list whose elements are one-dimensional numpy arrays
     :type timeseries_array: :class:`list'
 
     :returns: temporal trend and estimated error from bootstrapping
@@ -676,13 +681,13 @@ def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000)
 def calculate_temporal_trend_of_time_series(x,y):
     ''' Calculate least-square trends (a) in y = ax+b and a's standard error
     :param x: time series
-    :type x: :class:`numpy.ndarray'     
+    :type x: :class:`numpy.ndarray'
 
     :param x: time series
-    :type x: :class:`numpy.ndarray'     
+    :type x: :class:`numpy.ndarray'
 
     :returns: temporal trend and standard error
     :rtype: :float:`float','float'
     '''
     slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-    return slope, std_err                   
+    return slope, std_err

@@ -77,7 +77,12 @@ def temporal_subset(target_dataset, month_start, month_end,
     if average_each_year:
         nmonth = len(month_index)
         ntime = new_dataset.times.size
-        nyear = ntime/nmonth
+        nyear = ntime // nmonth
+        if ntime % nmonth != 0:
+            raise ValueError("Number of times in dataset ({}) does not "
+                             "divide evenly into {} year(s)."
+                             .format(ntime, nyear))
+
         averaged_time = []
         ny, nx = target_dataset.values.shape[1:]
         averaged_values = ma.zeros([nyear, ny, nx])
@@ -536,7 +541,7 @@ def temporal_slice(target_dataset, start_time, end_time):
         target_dataset.lats,
         target_dataset.lons,
         new_times,
-        new_values, 
+        new_values,
         variable=target_dataset.variable,
         units=target_dataset.units,
         origin=target_dataset.origin)
