@@ -1466,6 +1466,7 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
     '''
     lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
     start, end = dataset.temporal_boundaries()
+    
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry
@@ -1479,16 +1480,17 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
         error = ("bounds.lon_max: %s is not between lon_min: %s and"
                  " lon_max: %s" % (bounds.lon_max, lon_min, lon_max))
         errors.append(error)
+    if not (bounds.start is None):
+        if not start <= bounds.start <= end:
+            error = ("bounds.start: %s is not between start: %s and end: %s" %
+                     (bounds.start, start, end))
+            errors.append(error)
 
-    if not start <= bounds.start <= end:
-        error = ("bounds.start: %s is not between start: %s and end: %s" %
-                 (bounds.start, start, end))
-        errors.append(error)
-
-    if not start <= bounds.end <= end:
-        error = ("bounds.end: %s is not between start: %s and end: %s" %
-                 (bounds.end, start, end))
-        errors.append(error)
+    if not (bounds.end is None):
+        if not start <= bounds.end <= end:
+            error = ("bounds.end: %s is not between start: %s and end: %s" %
+                     (bounds.end, start, end))
+            errors.append(error)
 
     if len(errors) == 0:
         return True
@@ -1514,8 +1516,12 @@ def _get_subregion_slice_indices(target_dataset, subregion):
     lonStart = min(np.nonzero(target_dataset.lons >= subregion.lon_min)[0])
     lonEnd = max(np.nonzero(target_dataset.lons <= subregion.lon_max)[0])
 
-    timeStart = min(np.nonzero(target_dataset.times >= subregion.start)[0])
-    timeEnd = max(np.nonzero(target_dataset.times <= subregion.end)[0])
+    if not (subregion.start is None):
+        timeStart = min(np.nonzero(target_dataset.times >= subregion.start)[0])
+        timeEnd = max(np.nonzero(target_dataset.times <= subregion.end)[0])
+    else:
+        timeStart = 0
+        timeEnd = len(target_dataset.times) -1
 
     return {
         "lat_start": latStart,
