@@ -125,7 +125,7 @@ class TestLoadMultipleFiles(unittest.TestCase):
 
     def test_function_load_multiple_files_data_name(self):
         dataset = local.load_multiple_files(self.file_path, "value")
-        self.assertEqual([dataset[0].name], ['data'])
+        self.assertEqual([dataset[0].name], [''])
 
     def test_function_load_multiple_files_lons(self):
         """To test load_multiple_file function for longitudes"""
@@ -151,7 +151,8 @@ class TestLoadMultipleFiles(unittest.TestCase):
         """Test adding a custom name to a dataset"""
         dataset = local.load_multiple_files(self.file_path,
                                             "value",
-                                            dataset_name='foo')
+                                            generic_dataset_name=True,
+                                            dataset_name=['foo'])
         self.assertEqual(dataset[0].name, 'foo')
 
     def test_dataset_origin(self):

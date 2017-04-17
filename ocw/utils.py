@@ -649,8 +649,8 @@ def calculate_temporal_trends(dataset):
 
 def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000):
     ''' Calculate temporal trends in an ensemble of time series  
-    :param timeseries_array: A list whose elements are one-dimensional numpy arrays 
-    :type timeseries_array: :class:`list'
+    :param timeseries_array: Two dimensional array. 1st index: model, 2nd index: time. 
+    :type timeseries_array: :class:`numpy.ndarray'
 
     :param sampling: A list whose elements are one-dimensional numpy arrays 
     :type timeseries_array: :class:`list'
@@ -659,22 +659,18 @@ def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000)
     :rtype: :float:`float','float'
     '''
    
-    nmodels = len(timeseries_array)
-    nt = len(timeseries_array[0])
+    nmodels, nt = timeseries_array.shape
     x = np.arange(nt)
-    merged_array = np.zeros([nmodels, nt])
     sampled_trend = np.zeros(number_of_samples)
-    for imodel,timeseries in enumerate(timeseries_array):
-        merged_array[imodel,:] = timeseries[:]
     ensemble_trend, _ = calculate_temporal_trend_of_time_series(
-                        x, np.mean(merged_array, axis=0))
+                        x, np.mean(timeseries_array, axis=0))
     
     for isample in np.arange(number_of_samples):
         index = np.random.choice(nmodels, size=nmodels, replace=True)
-        random_ensemble = np.mean(merged_array[index, :], axis=0)
+        random_ensemble = np.mean(timeseries_array[index, :], axis=0)
         sampled_trend[isample], _ = calculate_temporal_trend_of_time_series(
                                     x, random_ensemble)
-    return ensemble_trend, np.std(sample_trend, ddof=1)
+    return ensemble_trend, np.std(sampled_trend, ddof=1)
      
 
 def calculate_temporal_trend_of_time_series(x,y):
@@ -689,5 +685,4 @@ def calculate_temporal_trend_of_time_series(x,y):
     :rtype: :float:`float','float'
     '''
     slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-    n = len(x)
-    return slope, std_err/np.std(x)/n**0.5 
+    return slope, std_err                   

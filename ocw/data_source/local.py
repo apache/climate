@@ -302,27 +302,24 @@ def load_file(file_path,
 
 def load_multiple_files(file_path,
                         variable_name,
-                        dataset_name='data',
+                        generic_dataset_name=False,
+                        dataset_name=None,
                         variable_unit=None,
                         lat_name=None,
                         lon_name=None,
                         time_name=None):
     ''' load multiple netcdf files with common filename pattern and return an array of OCW datasets
 
-    :param file_path: directory name and common file name patterns where the NetCDF files to load are stored.
+    :param file_path: directory name and (optionally common file name patterns) where the NetCDF files to load are stored.
     :type file_path: :mod:`string`
-    :param dataset_name: a name of dataset when reading a single file
-    :type dataset_name: :mod:'string'
+    :param dataset_name: a list of dataset names. Data filenames must include the elements of dataset_name list.
+    :type dataset_name: :mod:'list'
+    :param generic_dataset_name: If false, data filenames must include the elements of dataset_name list. 
+    :type generic_dataset_name: :mod:'bool'
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
     :param variable_unit: (Optional) The variable unit to load from the NetCDF file.
     :type variable_unit: :mod:`string`
-    :param elevation_index: (Optional) The elevation index for which data should
-        be returned. Climate data is often times 4 dimensional data. Some
-        datasets will have readins at different height/elevation levels. OCW
-        expects 3D data so a single layer needs to be stripped out when loading.
-        By default, the first elevation layer is used. If desired you may
-        specify the elevation value to use.
     :param lat_name: (Optional) The latitude variable name to extract from the
         dataset.
     :type lat_name: :mod:`string`
@@ -335,32 +332,41 @@ def load_multiple_files(file_path,
     :returns: An array of OCW Dataset objects
     :rtype: :class:`list`
     '''
-
-    data_filenames = []
-    data_filenames.extend(glob(file_path))
-    data_filenames.sort()
-
-    # number of files
-    ndata = len(data_filenames)
-    if type(dataset_name) is str and ndata == 1:
-        data_name = [dataset_name]
-    elif type(dataset_name).__name__ == 'list':
-        if len(dataset_name) == ndata:
-            data_name = [name for name in dataset_name]
-    else:
-        data_name = []
-        data_filenames_reversed = []
-        for element in data_filenames:
-            data_filenames_reversed.append(element[::-1])
-        prefix = os.path.commonprefix(data_filenames)
-        postfix = os.path.commonprefix(data_filenames_reversed)[::-1]
-        for element in data_filenames:
-            data_name.append(element.replace(prefix, '').replace(postfix, ''))
-
     datasets = []
-    for ifile, filename in enumerate(data_filenames):
-        datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
+
+    if not dataset_name:
+        data_filename = glob(file_path)
+        data_filename.sort()
+        ndata = len(data_filename)
+        data_name = []
+        data_filename_reversed = [i[::-1] for i in data_filename]
+        prefix = os.path.commonprefix(data_filename)
+        postfix = os.path.commonprefix(data_filename_reversed)[::-1]
+        data_name = [i.replace(prefix,'').replace(postfix,'') for i in data_filename]
+
+        for ifile, filename in enumerate(data_filename):
+            datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
                                   lat_name=lat_name, lon_name=lon_name, time_name=time_name))
+    elif generic_dataset_name:
+        data_name = [i for i in dataset_name]
+        data_filename = glob(file_path)
+        data_filename.sort()
+        for ifile, filename in enumerate(data_filename):
+            datasets.append(load_file(filename, variable_name, variable_unit, name=data_name[ifile],
+                                  lat_name=lat_name, lon_name=lon_name, time_name=time_name))
+
+    else:
+        data_name = [i for i in dataset_name]    
+        pattern = [['*'+i+'*'] for i in dataset_name]
+        if file_path[-1] != '/':
+            file_path = file_path+'/'
+        
+        ndata = len(dataset_name)
+        for idata in numpy.arange(ndata):
+            datasets.append(load_dataset_from_multiple_netcdf_files(variable_name,
+                                variable_unit=variable_unit, name=data_name[idata],
+                                lat_name=lat_name, lon_name=lon_name, time_name=time_name,
+                                file_path=file_path, filename_pattern=pattern[idata]))
 
     return datasets
 
@@ -443,7 +449,7 @@ def load_WRF_2d_files_RAIN(file_path=None,
     return Dataset(lats, lons, times2, values, variable_name, units=variable_unit, name=name)
 
 
-def load_dataset_from_multiple_netcdf_files(variable_name,
+def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
                                             lat_name=None, lon_name=None, time_name=None,
                                             name='', file_list=None, file_path=None, filename_pattern=None,
                                             mask_file=None, mask_variable=None, mask_value=0):
@@ -455,6 +461,9 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
     :type filelist: :mod:`string`
 
     :param variable_name: The variable name to load from the NetCDF file.
+    :type variable_name: :mod:`string`
+
+    :param variable_name: The variable's unit to load from the NetCDF file.
     :type variable_name: :mod:`string`
 
     :param lat_name: (Optional) The latitude variable name to extract from the \
@@ -527,7 +536,8 @@ def load_dataset_from_multiple_netcdf_files(variable_name,
         else:
             data_values = numpy.concatenate((data_values, values0))
     times = numpy.array(times)
-    return Dataset(lats, lons, times, data_values, variable_name, name=name)
+    return Dataset(lats, lons, times, data_values, 
+                   variable_name, units=variable_unit,name=name)
 
 
 def load_NLDAS_forcingA_files(file_path=None,
