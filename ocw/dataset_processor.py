@@ -391,8 +391,11 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
     '''
 
     if not subregion.start:
-        subregion.start = target_dataset.times[0]
-        subregion.end = target_dataset.times[-1]
+        time_start = target_dataset.times[0]
+        time_end = target_dataset.times[-1]
+    else:
+        time_start = subregion.start
+        time_end = subregion.end
 
     if not subregion_name:
         subregion_name = target_dataset.name
@@ -402,7 +405,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
             temporal_subset = temporal_slice(
-                target_dataset, subregion.start, subregion.end)
+                target_dataset, time_start, time_end)
             nt = temporal_subset.values.shape[0]
             y_index, x_index = np.where(
                 (target_dataset.lats >= subregion.lat_max) | (
@@ -471,7 +474,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
 
     if subregion.boundary_type == 'us_states' or subregion.boundary_type == 'countries':
         temporal_subset = temporal_slice(
-            target_dataset, subregion.start, subregion.end)
+            target_dataset, time_start, time_end)
         spatial_mask = utils.mask_using_shapefile_info(target_dataset.lons, target_dataset.lats,
                                                        subregion.masked_regions, extract=extract)
         subset_values = utils.propagate_spatial_mask_over_time(
@@ -488,7 +491,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
 
     if subregion.boundary_type == 'user':
         temporal_subset = temporal_slice(
-            target_dataset, subregion.start, subregion.end)
+            target_dataset, time_start, time_end)
         spatial_mask = utils.regrid_spatial_mask(target_dataset.lons, target_dataset.lats,
                                                  subregion.mask_longitude, subregion.mask_latitude, subregion.mask_variable,
                                                  user_mask_values, extract=extract)
@@ -1463,6 +1466,7 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
     '''
     lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
     start, end = dataset.temporal_boundaries()
+    
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry
@@ -1476,16 +1480,17 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
         error = ("bounds.lon_max: %s is not between lon_min: %s and"
                  " lon_max: %s" % (bounds.lon_max, lon_min, lon_max))
         errors.append(error)
+    if not (bounds.start is None):
+        if not start <= bounds.start <= end:
+            error = ("bounds.start: %s is not between start: %s and end: %s" %
+                     (bounds.start, start, end))
+            errors.append(error)
 
-    if not start <= bounds.start <= end:
-        error = ("bounds.start: %s is not between start: %s and end: %s" %
-                 (bounds.start, start, end))
-        errors.append(error)
-
-    if not start <= bounds.end <= end:
-        error = ("bounds.end: %s is not between start: %s and end: %s" %
-                 (bounds.end, start, end))
-        errors.append(error)
+    if not (bounds.end is None):
+        if not start <= bounds.end <= end:
+            error = ("bounds.end: %s is not between start: %s and end: %s" %
+                     (bounds.end, start, end))
+            errors.append(error)
 
     if len(errors) == 0:
         return True
@@ -1511,8 +1516,12 @@ def _get_subregion_slice_indices(target_dataset, subregion):
     lonStart = min(np.nonzero(target_dataset.lons >= subregion.lon_min)[0])
     lonEnd = max(np.nonzero(target_dataset.lons <= subregion.lon_max)[0])
 
-    timeStart = min(np.nonzero(target_dataset.times >= subregion.start)[0])
-    timeEnd = max(np.nonzero(target_dataset.times <= subregion.end)[0])
+    if not (subregion.start is None):
+        timeStart = min(np.nonzero(target_dataset.times >= subregion.start)[0])
+        timeEnd = max(np.nonzero(target_dataset.times <= subregion.end)[0])
+    else:
+        timeStart = 0
+        timeEnd = len(target_dataset.times) -1
 
     return {
         "lat_start": latStart,

@@ -1117,7 +1117,7 @@ def fill_US_states_with_color(regions, fname, fmt='png', ptitle='',
     nregion = len(regions)
     if colors:
         cmap = plt.cm.rainbow
-    if values:
+    if not (values is None):
         cmap = plt.cm.seismic
         max_abs = np.abs(values).max()
 
@@ -1143,7 +1143,7 @@ def fill_US_states_with_color(regions, fname, fmt='png', ptitle='',
             lats = np.append(lats, shape[:,1])
         if colors:
             color_to_fill=cmap((iregion+0.5)/nregion)
-        if values:
+        if not (values is None):
             value = values[iregion]
             color_to_fill = cmap(0.5+np.sign(value)*abs(value)/max_abs*0.45)
         ax.add_collection(PatchCollection(patches, facecolor=color_to_fill))
@@ -1157,3 +1157,52 @@ def fill_US_states_with_color(regions, fname, fmt='png', ptitle='',
     # Save the figure
     fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight', dpi=fig.dpi)
     fig.clf()
+
+def draw_plot_to_compare_trends(obs_data, ens_data, model_data,
+                          fname, fmt='png', ptitle='', data_labels=None,
+                          xlabel='', ylabel=''):
+
+    ''' Fill the States over the contiguous US with colors 
+   
+    :param obs_data: An array of observed trend and standard errors for regions
+    :type obs_data: :class:'numpy.ndarray'
+    :param ens_data: An array of trend and standard errors from a multi-model ensemble for regions 
+    :type ens_data: : class:'numpy.ndarray'
+    :param model_data: An array of trends from models for regions 
+    :type model_data: : class:'numpy.ndarray'
+    :param fname: The filename of the plot.
+    :type fname: :mod:`string`
+    :param fmt: (Optional) filetype for the output.
+    :type fmt: :mod:`string`
+    :param ptitle: (Optional) plot title.
+    :type ptitle: :mod:`string`
+    :param data_labels: (Optional) names of the regions
+    :type data_labels: :mod:`list`
+    :param xlabel: (Optional) a label for x-axis
+    :type xlabel: :mod:`string`
+    :param ylabel: (Optional) a label for y-axis  
+    :type ylabel: :mod:`string`
+    '''
+    nregions = obs_data.shape[1] 
+
+    # Set up the figure
+    fig = plt.figure()
+    fig.set_size_inches((8.5, 11.))
+    fig.dpi = 300
+    ax = fig.add_subplot(111)
+  
+    b_plot = ax.boxplot(model_data, widths=np.repeat(0.2, nregions), positions=np.arange(nregions)+1.3) 
+    plt.setp(b_plot['medians'], color='black')
+    plt.setp(b_plot['whiskers'], color='black')
+    plt.setp(b_plot['boxes'], color='black')
+    plt.setp(b_plot['fliers'], color='black')
+    ax.errorbar(np.arange(nregions)+0.8, obs_data[0,:], yerr=obs_data[1,:], 
+                fmt='o', color='r', ecolor='r')    
+    ax.errorbar(np.arange(nregions)+1., ens_data[0,:], yerr=ens_data[1,:], 
+                fmt='o', color='b', ecolor='b')    
+    ax.set_xticks(np.arange(nregions)+1)
+    ax.set_xlim([0, nregions+1])
+    
+    if data_labels:
+        ax.set_xticklabels(data_labels)
+    fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight') 
