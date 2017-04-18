@@ -18,6 +18,8 @@
 from tempfile import TemporaryFile
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
+from matplotlib import rcParams, cm
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 from mpl_toolkits.basemap import Basemap
@@ -1206,3 +1208,69 @@ def draw_plot_to_compare_trends(obs_data, ens_data, model_data,
     if data_labels:
         ax.set_xticklabels(data_labels)
     fig.savefig('%s.%s' % (fname, fmt), bbox_inches='tight') 
+
+def draw_precipitation_JPDF (plot_data, plot_level, x_ticks, x_names,y_ticks,y_names, 
+               output_file, title=None, diff_plot=False, cmap = cm.BrBG, 
+               cbar_ticks=[0.01, 0.10, 0.5, 2, 5, 25], 
+               cbar_label=['0.01', '0.10', '0.5', '2', '5', '25']):
+    '''
+    :param plot_data: a numpy array of data to plot (dimY, dimX)
+    :type plot_data: :class:'numpy.ndarray'
+    :param plot_level: levels to plot
+    :type plot_level: :class:'numpy.ndarray'
+    :param x_ticks: x values where tick makrs are located
+    :type x_ticks: :class:'numpy.ndarray'                 
+    :param x_names: labels for the ticks on x-axis (dimX)
+    :type x_names: :class:'list'
+    :param y_ticks: y values where tick makrs are located
+    :type y_ticks: :class:'numpy.ndarray'                 
+    :param y_names: labels for the ticks on y-axis (dimY)
+    :type y_names: :class:'list'
+    :param output_file: name of output png file
+    :type output_file: :mod:'string'
+    :param title: (Optional) title of the plot
+    :type title: :mod:'string'
+    :param diff_plot: (Optional) if true, a difference plot will be generated
+    :type diff_plot: :mod:'bool'
+    :param cbar_ticks: (Optional) tick marks for the color bar
+    :type cbar_ticks: :class:'list'
+    :param cbar_label: (Optional) lables for the tick marks of the color bar
+    :type cbar_label: :class:'list'
+    '''
+
+    if diff_plot:
+        cmap = cm.RdBu_r
+
+    fig = plt.figure()
+    sb = fig.add_subplot(111)
+    dimY, dimX = plot_data.shape
+    plot_data2 = np.zeros([dimY,dimX]) # sectioned array for plotting
+
+    # fontsize 
+    rcParams['axes.labelsize'] = 8
+    rcParams['xtick.labelsize'] = 8
+    rcParams['ytick.labelsize'] = 8
+    # assign the values in plot_level to plot_data
+    for iy in range(dimY):
+         for ix in range(dimX):
+             if plot_data[iy,ix] <= np.min(plot_level):
+                 plot_data2[iy,ix] = -1.
+             else:
+                 plot_data2[iy,ix] = plot_level[np.where(plot_level <= plot_data[iy,ix])].max()
+    sb.set_xticks(x_ticks)
+    sb.set_xticklabels(x_names)
+    sb.set_yticks(y_ticks)
+    sb.set_yticklabels(y_names)
+
+    norm = BoundaryNorm(plot_level[1:], cmap.N)
+    a=sb.pcolor(plot_data2, edgecolors = 'k', linewidths=0.5, cmap = cmap, norm = norm)
+    a.cmap.set_under('w')
+    sb.set_xlabel('Spell duration [hrs]')
+    sb.set_ylabel('Peak rainfall [mm/hr]')
+    cax = fig.add_axes([0.2, -0.06, 0.6, 0.02])
+    cbar = plt.colorbar(a, cax=cax, orientation = 'horizontal', extend='both')
+    cbar.set_ticks(cbar_ticks)
+    cbar.set_ticklabels(cbar_label)
+    if title:
+        fig.suptitle(title)
+    fig.savefig(output_file, dpi=600,bbox_inches='tight')

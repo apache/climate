@@ -421,7 +421,10 @@ def wet_spell_analysis(reference_array, threshold=0.1, nyear=1, dt=3.):
         reshaped_array = reference_array.reshape([nt, reference_array.size / nt])
     else:
         reshaped_array = reference_array
-    xy_indices = numpy.where(reshaped_array.mask[0, :] == False)[0]
+    if ma.count_masked(reshaped_array[0,:]) != 0:
+        xy_indices = numpy.where(reshaped_array.mask[0, :] == False)[0]
+    else:
+        xy_indices = numpy.arange(reshaped_array.shape[1])
 
     nt_each_year = nt / nyear
     spell_duration = []
