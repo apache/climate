@@ -739,7 +739,7 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
         file_object = h5py.File(file)
         values0 = ma.transpose(ma.masked_less(
             file_object['Grid'][variable_name][:], 0.))
-        values_masked = values0[y_index, x_index]
+        values_masked = values0[y_index, x_index] 
         values_masked = ma.expand_dims(values_masked, axis=0)
         if ifile == 0:
             values = values_masked
