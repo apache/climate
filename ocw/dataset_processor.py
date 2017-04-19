@@ -89,7 +89,7 @@ def temporal_subset(target_dataset, month_start, month_end,
         for iyear in np.arange(nyear):
             # centered time index of the season between month_start and
             # month_end in each year
-            center_index = int(nmonth / 2) + iyear * nmonth
+            center_index = int(nmonth / 2 + iyear * nmonth)
             if nmonth == 1:
                 center_index = iyear
             averaged_time.append(new_dataset.times[center_index])
