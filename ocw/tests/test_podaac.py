@@ -33,15 +33,19 @@ class TestPodaacDataSource(unittest.TestCase):
         cls.file_path = os.path.dirname(os.path.abspath(__file__))
         cls.format = '.nc'
         cls.dataset = podaac.extract_l4_granule(cls.variable, cls.datasetId, cls.name)
-        cls.json = 'subset.json'
-        cls.subset_datasetId = 'PODAAC-GHRAM-4FA01'
-        cls.subset_variable = 'analysed_sst'
-        cls.subset_name = 'GHRSST Level 4 RAMSSA Australian Regional Foundation Sea Surface Temperature Analysis'
-        cls.granule_subset = podaac.subset_granule(
-            cls.subset_variable,
-            cls.subset_datasetId,
-            name=cls.subset_name,
-            input_file_path=cls.json)
+        # Currently the PO.DAAC subsetting is only available for Level2 granules,
+        # plans are underway to extend this to Level3 and 4 granules and OCW can make use
+        # of this when that functionality becomes available. More information about Level2
+        # subsetting can be found at https://podaac.jpl.nasa.gov/ws/subset/granule/index.html
+        #cls.json = 'subset.json'
+        #cls.subset_datasetId = 'PODAAC-GHRAM-4FA01'
+        #cls.subset_variable = 'analysed_sst'
+        #cls.subset_name = 'GHRSST Level 4 RAMSSA Australian Regional Foundation Sea Surface Temperature Analysis'
+        #cls.granule_subset = podaac.subset_granule(
+        #    cls.subset_variable,
+        #    cls.subset_datasetId,
+        #    name=cls.subset_name,
+        #    input_file_path=cls.json)
 
     def test_is_dataset(self):
         print('in test_is_dataset')
@@ -71,15 +75,15 @@ class TestPodaacDataSource(unittest.TestCase):
     def test_dataset_origin(self):
         print('in test_dataset_origin')
         self.assertEquals(self.dataset.origin['source'], 'PO.DAAC')
-        self.assertEquals(self.dataset.origin['url'], 'podaac.jpl.nasa.gov/ws')
+        self.assertEquals(self.dataset.origin['url'], 'podaac.jpl.nasa.gov')
 
     def test_custom_name(self):
         print('in test_custom_name')
         self.assertEquals(self.dataset.name, self.name)
 
-    def test_granule_subset(self):
-        print('in test_granule_subset')
-        self.assertEquals(self.granule_subset.name, self.subset_name)
+    #def test_granule_subset(self):
+    #    print('in test_granule_subset')
+    #    self.assertEquals(self.granule_subset.name, self.subset_name)
 
 if __name__ == '__main__':
     unittest.main()
