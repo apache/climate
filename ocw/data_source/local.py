@@ -457,14 +457,11 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
         (an observation or a model) into a Dataset. \
     The dataset can be spatially subset.
 
-    :param filelist: A text file including a list of filenames
-    :type filelist: :mod:`string`
-
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
 
-    :param variable_name: The variable's unit to load from the NetCDF file.
-    :type variable_name: :mod:`string`
+    :param variable_unit: The variable's unit to load from the NetCDF file.
+    :type variable_unit: :mod:`string`
 
     :param lat_name: (Optional) The latitude variable name to extract from the \
         dataset.
@@ -480,6 +477,9 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
 
     :param name: (Optional) A name for the loaded dataset.
     :type name: :mod:`string`
+
+    :param file_list: A text file including a list of filenames
+    :type file_list: :mod:`string`
 
     :param file_path: Directory to the NetCDF file to load.
     :type file_path: :mod:`string`

@@ -32,45 +32,54 @@ class TestPodaacDataSource(unittest.TestCase):
         cls.name = 'PO.DAAC_test_dataset'
         cls.file_path = os.path.dirname(os.path.abspath(__file__))
         cls.format = '.nc'
-        cls.dataset = podaac.load_level4_granule(
-            cls.variable, cls.datasetId, cls.name)
-        #Until we can retrieve the subset data download link programmatically,
-        #we will need to skip this test. More information can be see at 
-        #https://podaac.jpl.nasa.gov/forum/viewtopic.php?f=53&t=424&p=790
-        #cls.json = 'subset.json'
-        #cls.granule_subset = podaac.subset_granule(cls.json)
+        cls.dataset = podaac.extract_l4_granule(cls.variable, cls.datasetId, cls.name)
+        cls.json = 'subset.json'
+        cls.subset_datasetId = 'PODAAC-GHRAM-4FA01'
+        cls.subset_variable = 'analysed_sst'
+        cls.subset_name = 'GHRSST Level 4 RAMSSA Australian Regional Foundation Sea Surface Temperature Analysis'
+        cls.granule_subset = podaac.subset_granule(
+            cls.subset_variable,
+            cls.subset_datasetId,
+            name=cls.subset_name,
+            input_file_path=cls.json)
 
     def test_is_dataset(self):
+        print('in test_is_dataset')
         self.assertTrue(isinstance(self.dataset, Dataset))
 
     def test_dataset_lats(self):
+        print('in test_dataset_lats')
         self.assertEquals(len(self.dataset.lats), 901)
 
     def test_dataset_lons(self):
+        print('in test_dataset_lons')
         self.assertEquals(len(self.dataset.lons), 1800)
 
     def test_dataset_times(self):
+        print('in test_dataset_times')
         self.assertEquals(len(self.dataset.times), 1)
 
     def test_dataset_values(self):
+        print('in test_dataset_values')
         self.assertEquals(len(self.dataset.values), 1)
 
     def test_valid_date_conversion(self):
+        print('in test_valid_date_conversion')
         start = dt.datetime(1991, 9, 2, 12)
         self.assertTrue(start == self.dataset.times[0])
 
     def test_dataset_origin(self):
+        print('in test_dataset_origin')
         self.assertEquals(self.dataset.origin['source'], 'PO.DAAC')
         self.assertEquals(self.dataset.origin['url'], 'podaac.jpl.nasa.gov/ws')
 
     def test_custom_name(self):
+        print('in test_custom_name')
         self.assertEquals(self.dataset.name, self.name)
 
     def test_granule_subset(self):
-        #Until we can retrieve the subset data download link programmatically,
-        #we will need to skip this test. More information can be see at 
-        #https://podaac.jpl.nasa.gov/forum/viewtopic.php?f=53&t=424&p=790
-        pass
+        print('in test_granule_subset')
+        self.assertEquals(self.granule_subset.name, self.subset_name)
 
 if __name__ == '__main__':
     unittest.main()

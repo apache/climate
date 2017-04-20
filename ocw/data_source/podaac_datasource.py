@@ -22,6 +22,9 @@ from ocw.dataset import Dataset
 from netCDF4 import Dataset as netcdf_dataset
 from netcdftime import utime
 import os
+import sys
+import time
+import itertools
 
 
 def convert_times_to_datetime(time):
@@ -53,13 +56,27 @@ def list_available_extract_granule_dataset_ids():
     podaac_utils = PodaacUtils()
     return podaac_utils.list_available_extract_granule_dataset_ids()
 
-def subset_granule(input_file_path=''):
+def subset_granule(variable, dataset_id='', name='', path='/tmp', input_file_path=''):
     '''Subset Granule service allows users to Submit subset jobs. \
         Use of this service should be preceded by a Granule Search in \
         order to identify and generate a list of granules to be subsetted.
 
+    :param variable: The name of the variable to read from the dataset.
+    :type variable: :mod:`string`
+
+    :param dataset_id: dataset persistent ID. datasetId or \
+        shortName is required for a granule search. Example: \
+        PODAAC-ASOP2-25X01
+    :type dataset_id: :mod:`string`
+
+    :param name: (Optional) A name for the loaded dataset.
+    :type name: :mod:`string`
+
+    :param path: (Optional) a path on the filesystem to store the granule.
+    :type path: :mod:`string`
+
     :param input_file_path: path to a json file which contains the \
-        the request that you want to send to PO.DAAC
+        the subset request that you want to send to PO.DAAC
     :type input_file_path: :mod:`string`
 
     :returns: a token on successful request reception. This can be \
@@ -67,41 +84,43 @@ def subset_granule(input_file_path=''):
 
     '''
     podaac = Podaac()
-    status = podaac.subset_status(podaac.granule_subset(input_file_path))
-    print("Granule subsetting initiated with request tracking token '%s'." % status)
-    while status is not "done":
-        print('...')
-    return status
+    if path is not None:
+        path = os.path.dirname(os.path.abspath(__file__))
+    granule_name = podaac.granule_subset(input_file_path, path)
+    path = path + '/' + granule_name
+    return read_dataset(name, granule_name, variable, path)
 
-def load_level4_granule(variable, datasetId='', name=''):
+def extract_l4_granule(variable, dataset_id='', name='', path='/tmp'):
     '''Loads a Level4 gridded Dataset from PODAAC
     :param variable: The name of the variable to read from the dataset.
     :type variable: :mod:`string`
 
-    :param datasetId: dataset persistent ID. datasetId or \
+    :param dataset_id: dataset persistent ID. datasetId or \
         shortName is required for a granule search. Example: \
         PODAAC-ASOP2-25X01
-    :type datasetId: :mod:`string`
-
-    :param shortName: the shorter name for a dataset. \
-        Either shortName or datasetId is required for a \
-        granule search. Example: ASCATA-L2-25km
-    :type shortName: :mod:`string`
+    :type dataset_id: :mod:`string`
 
     :param name: (Optional) A name for the loaded dataset.
     :type name: :mod:`string`
+
+    :param path: a path on the filesystem to store the granule.
+    :type path: :mod:`string`
 
     :returns: A :class:`dataset.Dataset` containing the dataset pointed to by
         the OpenDAP URL.
 
     :raises: ServerError
     '''
-    # Downloading the dataset using podaac toolkit
     podaac = Podaac()
-    path = os.path.dirname(os.path.abspath(__file__))
-    granuleName = podaac.extract_l4_granule(
-        dataset_id=datasetId, path=path)
-    path = path + '/' + granuleName
+    if path is not None:
+        path = os.path.dirname(os.path.abspath(__file__))
+    granule_name = podaac.extract_l4_granule(
+        dataset_id=dataset_id, path=path)
+    print("Downloaded Level4 Granule '%s' to %s" % (granule_name, path))
+    path = path + '/' + granule_name
+    return read_dataset(name, granule_name, variable, path)
+
+def read_dataset(name='', granule_name ='', variable=None, path='/tmp'):
     d = netcdf_dataset(path, mode='r')
     dataset = d.variables[variable]
 
@@ -129,13 +148,13 @@ def load_level4_granule(variable, datasetId='', name=''):
     values = np.array(dataset[:])
     origin = {
         'source': 'PO.DAAC',
-        'url': 'podaac.jpl.nasa.gov/ws'
+        'url': 'podaac.jpl.nasa.gov'
     }
 
     # Removing the downloaded temporary granule before creating the OCW
     # dataset.
     d.close()
-    path = os.path.join(os.path.dirname(__file__), granuleName)
+    path = os.path.join(os.path.dirname(__file__), granule_name)
     os.remove(path)
 
     return Dataset(lats, lons, times, values, variable, name=name, origin=origin)

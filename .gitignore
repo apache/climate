@@ -11,3 +11,8 @@ examples/*.png
 build/
 docs/build/
 Apache_Open_Climate_Workbench.egg-info/
+.project
+.pydevproject
+dist/
+doc.txt
+ocw.egg-info/
