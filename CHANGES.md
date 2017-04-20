@@ -1,8 +1,84 @@
 Apache Open Climate Workbench Change Log
-============================================
+========================================
 
-Release Notes - Apache Open Climate Workbench - Version 1.1.0
-Release Report - https://s.apache.org/110report
+# Release Notes - Apache Open Climate Workbench - Version 1.2.0
+# Release Report - https://s.apache.org/120release
+
+Sub-task
+
+    [CLIMATE-880] - Delete conda_recipes directory
+
+Bug
+
+    [CLIMATE-798] - Redundant code in evaluations.py
+    [CLIMATE-835] - Fix documentation warnings
+    [CLIMATE-842] - Add shape files to package installation
+    [CLIMATE-844] - Attribute Error in test_smoke.py
+    [CLIMATE-846] - ESGF loader fails with new changes to run_RCMES.py
+    [CLIMATE-852] - [OCW Documentation] Theme not found error
+    [CLIMATE-853] - Broken documentation in dap.py
+    [CLIMATE-855] - Fix test_local and test_dataset_processor
+    [CLIMATE-857] - Using SonarQube.com with Travis CI
+    [CLIMATE-858] - Fix Travis Build
+    [CLIMATE-862] - More updates to conda recipe files
+    [CLIMATE-864] - Disable podaac until dataset_loader and data_source are fixed
+    [CLIMATE-882] - local data source is not Python 3 compatible
+    [CLIMATE-883] - Ensure python 3 builds pass unit tests
+    [CLIMATE-884] - Cannot run grunt serve in frontend of ocw gui
+    [CLIMATE-886] - Upgrade Frontend Dependencies
+    [CLIMATE-889] - Fix Travis Build
+    [CLIMATE-892] - Fix GPM IMERG data loader
+    [CLIMATE-893] - Debugging wet_spell_analysis
+    [CLIMATE-894] - Debugging regrid_spatial_mask
+    [CLIMATE-895] - Make plotter compatible with matplotlib 2.0
+    [CLIMATE-897] - Make sure shapes of numpy arrays contain only integer values
+    [CLIMATE-899] - Update the GPM loader
+    [CLIMATE-906] - Fix tests in master (podaacpy integration)
+    [CLIMATE-910] - Throw an exception for inconsistent temporal reshaping / rebinning operatations
+
+Improvement
+
+    [CLIMATE-486] - Normalize DSP function parameter ordering
+    [CLIMATE-488] - Change Dataset.time_range to Dataset.temporal_boundaries
+    [CLIMATE-825] - Coalesce data sources into one module
+    [CLIMATE-827] - Adding spatial masking options
+    [CLIMATE-832] - Add smoke tests
+    [CLIMATE-833] - Update travis.yml to use smoke tests
+    [CLIMATE-838] - Update configuration files and example scripts to use new DatasetLoader
+    [CLIMATE-839] - Further improvements to DatasetLoader
+    [CLIMATE-841] - ocw.dataset_processor.subset
+    [CLIMATE-847] - Support multiple observation / reference datasets in run_RCMES.py
+    [CLIMATE-848] - Support CORDEX boundary options in RCMES
+    [CLIMATE-851] - Have nosetests log to STDOUT
+    [CLIMATE-854] - Ensure that ocw runs with Python 3.X
+    [CLIMATE-859] - Enable restructured text markdown for Pypi uploads
+    [CLIMATE-865] - Update dataset_name argument in local.load_multiple_files
+    [CLIMATE-873] - easy-ocw install-ubun.sh should use miniconda3
+    [CLIMATE-874] - Remove Easy-OCW
+    [CLIMATE-875] - Upgrade to Podaacpy 1.4.0
+    [CLIMATE-879] - Move OCW recipes to conda-forge
+    [CLIMATE-885] - Upgrade to Podaacpy 1.9.0
+    [CLIMATE-907] - Fix VisibleDeprecationWarning's in ocw.tests.test_dataset_processor.TestTemporalSubset
+    [CLIMATE-909] - An example script to evaluate joint PDF of precipitation intensity and duration
+
+New Feature
+
+    [CLIMATE-769] - Create data source input for NASA JPL PO.DAAC
+    [CLIMATE-784] - Smoke Tests and Continuous Integration Infrastructure
+    [CLIMATE-861] - An example to plot aerosol optical depth climatology from NASA MISR instrument
+    [CLIMATE-903] - Adding a module to calculate the least square trend and standard error
+    [CLIMATE-905] - Box whisker plot to evaluate simulate trends
+
+Task
+
+    [CLIMATE-763] - Include instructions in webapp documentation on how to use yo
+    [CLIMATE-866] - Create ocw conda package against Python3.x as well as Python 2.7
+    [CLIMATE-868] - Move podaacpy conda recipie to official podaacpy repository
+    [CLIMATE-878] - Add LICENSE file to MANIFEST.in
+    [CLIMATE-896] - Patch code updates for matplotlib 2.0 compatibility in 1.1.0 conda recipe
+
+# Release Notes - Apache Open Climate Workbench - Version 1.1.0
+# Release Report - https://s.apache.org/110report
 
 Sub-task
 
