@@ -173,8 +173,8 @@ def run_evaluation():
     ref_dataset = _process_dataset_object(data['reference_dataset'], eval_bounds)
 
     target_datasets = [_process_dataset_object(obj, eval_bounds)
-					   for obj
-					   in data['target_datasets']]
+                       for obj
+                       in data['target_datasets']]
 
     # Normalize the dataset time values so they break on consistent days of the
     # month or time of the day, depending on how they will be rebinned.
@@ -218,20 +218,20 @@ def run_evaluation():
     # Do temporal re-bin based off of passed resolution
     ref_dataset = dsp.temporal_rebin(ref_dataset, time_delta)
     target_datasets = [dsp.temporal_rebin(ds, time_delta)
-					   for ds
-					   in target_datasets]
+                       for ds
+                       in target_datasets]
 
     # Do spatial re=bin based off of reference dataset + lat/lon steps
     lat_step = data['spatial_rebin_lat_step']
     lon_step = data['spatial_rebin_lon_step']
     lat_bins, lon_bins = _calculate_new_latlon_bins(eval_bounds,
-													lat_step,
-													lon_step)
+                                                    lat_step,
+                                                    lon_step)
 
     ref_dataset = dsp.spatial_regrid(ref_dataset, lat_bins, lon_bins)
     target_datasets =  [dsp.spatial_regrid(ds, lat_bins, lon_bins)
-						for ds
-						in target_datasets]
+                        for ds
+                        in target_datasets]
 
     # Load metrics
     loaded_metrics = _load_metrics(data['metrics'])
@@ -426,11 +426,11 @@ def _calculate_new_latlon_bins(eval_bounds, lat_grid_step, lon_grid_step):
     :returns: The new lat/lon value lists as a tuple of the form (new_lats, new_lons)
     '''
     new_lats = np.arange(eval_bounds['lat_min'],
-						 eval_bounds['lat_max'],
-						 lat_grid_step)
+                         eval_bounds['lat_max'],
+                         lat_grid_step)
     new_lons = np.arange(eval_bounds['lon_min'],
-						 eval_bounds['lon_max'],
-						 lon_grid_step)
+                         eval_bounds['lon_max'],
+                         lon_grid_step)
     return (new_lats, new_lons)
 
 def _load_metrics(metric_names):
@@ -503,7 +503,7 @@ def _generate_evaluation_plots(evaluation, lat_bins, lon_bins, eval_time_stamp):
     if evaluation.results == [] and evaluation.unary_results == []:
         cur_frame = sys._getframe().f_code
         err = "{}.{}: No results to graph".format(cur_frame.co_filename,
-												  cur_frame.co_name)
+                                                  cur_frame.co_name)
         raise ValueError(err)
 
     if evaluation.ref_dataset:
@@ -518,36 +518,36 @@ def _generate_evaluation_plots(evaluation, lat_bins, lon_bins, eval_time_stamp):
             for metric_index, metric in enumerate(evaluation.metrics):
                 results = evaluation.results[dataset_index][metric_index]
                 file_name = _generate_binary_eval_plot_file_path(evaluation,
-																 dataset_index,
-																 metric_index,
+                                                                 dataset_index,
+                                                                 metric_index,
                                                                  eval_time_stamp)
                 plot_title = _generate_binary_eval_plot_title(evaluation,
-															  dataset_index,
-															  metric_index)
+                                                              dataset_index,
+                                                              metric_index)
                 plotter.draw_contour_map(results,
-										 lat_bins,
-										 lon_bins,
-										 fname=file_name,
-										 ptitle=plot_title,
+                                         lat_bins,
+                                         lon_bins,
+                                         fname=file_name,
+                                         ptitle=plot_title,
                                          gridshape=grid_shape)
 
     if evaluation.unary_results != []:
         for metric_index, metric in enumerate(evaluation.unary_metrics):
-			cur_unary_results = evaluation.unary_results[metric_index]
-			for result_index, result in enumerate(cur_unary_results):
-				file_name = _generate_unary_eval_plot_file_path(evaluation,
-																result_index,
-																metric_index,
+            cur_unary_results = evaluation.unary_results[metric_index]
+            for result_index, result in enumerate(cur_unary_results):
+                file_name = _generate_unary_eval_plot_file_path(evaluation,
+                                                                result_index,
+                                                                metric_index,
                                                                 eval_time_stamp)
-				plot_title = _generate_unary_eval_plot_title(evaluation,
-															 result_index,
-															 metric_index)
+                plot_title = _generate_unary_eval_plot_title(evaluation,
+                                                             result_index,
+                                                             metric_index)
 
-				plotter.draw_contrough_map(results,
-										   lat_bins,
-										   lon_bins,
-										   fname=file_name,
-										   ptitle=plot_title,
+                plotter.draw_contrough_map(results,
+                                           lat_bins,
+                                           lon_bins,
+                                           fname=file_name,
+                                           ptitle=plot_title,
                                            gridshape=grid_shape)
 
 def _calculate_grid_shape(reference_dataset, max_cols=6):
@@ -637,13 +637,13 @@ def _generate_binary_eval_plot_file_path(evaluation, dataset_index,
     :param evaluation: The Evaluation object from which to pull name information.
     :type evaluation: ocw.evaluation.Evaluation
     :param dataset_index: The index of the target dataset to use when
-		generating the name.
+        generating the name.
     :type dataset_index: Integer >= 0 < len(evaluation.target_datasets)
     :param metric_index: The index of the metric to use when generating the name.
     :type metric_index: Integer >= 0 < len(evaluation.metrics)
 
     :returns: The full path for the requested metric run. The paths will always
-		be placed in the WORK_DIR set for the web services.
+        be placed in the WORK_DIR set for the web services.
     '''
     plot_name = "{}_compared_to_{}_{}".format(
         evaluation.ref_dataset.name.lower(),
@@ -661,13 +661,13 @@ def _generate_unary_eval_plot_file_path(evaluation, dataset_index,
     :param evaluation: The Evaluation object from which to pull name information.
     :type evaluation: ocw.evaluation.Evaluation
     :param dataset_index: The index of the target dataset to use when
-		generating the name.
+        generating the name.
     :type dataset_index: Integer >= 0 < len(evaluation.target_datasets)
     :param metric_index: The index of the metric to use when generating the name.
     :type metric_index: Integer >= 0 < len(evaluation.metrics)
 
     :returns: The full path for the requested metric run. The paths will always
-		be placed in the WORK_DIR set for the web services.
+        be placed in the WORK_DIR set for the web services.
     '''
     metric = evaluation.unary_metrics[metric_index]
     timestamped_workdir = os.path.join(WORK_DIR, time_stamp)
@@ -702,7 +702,7 @@ def _generate_binary_eval_plot_title(evaluation, dataset_index, metric_index):
     :param evaluation: The Evaluation object from which to pull name information.
     :type evaluation: ocw.evaluation.Evaluation
     :param dataset_index: The index of the target dataset to use when
-		generating the name.
+        generating the name.
     :type dataset_index: Integer >= 0 < len(evaluation.target_datasets)
     :param metric_index: The index of the metric to use when generating the name.
     :type metric_index: Integer >= 0 < len(evaluation.metrics)
