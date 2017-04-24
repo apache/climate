@@ -5,7 +5,9 @@
 [![Code Health](https://landscape.io/github/apache/climate/master/landscape.svg?style=flat-square)](https://landscape.io/github/apache/climate/master)
 [![PyPI](https://img.shields.io/pypi/v/ocw.svg?maxAge=2592000?style=plastic)](https://pypi.python.org/pypi/ocw)
 [![Python Badge](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
-[![Anaconda-Server Badge](https://anaconda.org/agoodman/ocw/badges/installer/conda.svg)](https://anaconda.org/agoodman/ocw)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/ocw/badges/installer/conda.svg)](https://anaconda.org/conda-forge/ocw)
+[![Anaconda-Server Downloads Badge](https://anaconda.org/conda-forge/ocw/badges/downloads.svg)](https://anaconda.org/conda-forge/ocw)
+[![Anaconda-Server Version Badge](https://anaconda.org/conda-forge/ocw/badges/version.svg)](https://anaconda.org/conda-forge/ocw)
 
 <img src="./docs/source/ocw-logo-variant-sm-01-01-new.png" width="200" />
 
