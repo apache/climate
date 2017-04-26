@@ -1,3 +1,3 @@
-#Graph-based Search for the Identification and Chatacterization of Mesoscale Convective Complexes
+# Graph-based Search for the Identification and Chatacterization of Mesoscale Convective Complexes
 
-Please see /docs/mccsearch.md document for all current documentation relating to this module.
+Please see the [mccsearch documentation](https://github.com/apache/climate/blob/master/mccsearch/docs/mccsearch.md) for all current documentation relating to this module.
