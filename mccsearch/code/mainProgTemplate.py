@@ -20,7 +20,7 @@
 
 import sys
 import networkx as nx
-import mccSearch
+from . import mccSearch
 import numpy as np
 import numpy.ma as ma
 import files
@@ -59,36 +59,36 @@ def main():
     # -------------------------------------------------------------------------------------------------
 
     # let's go!
-    print "\n -------------- Read MERG Data ----------"
+    print("\n -------------- Read MERG Data ----------")
     mergImgs, timeList = mccSearch.readMergData(CEoriDirName)
-    print ("-" * 80)
+    print(("-" * 80))
 
-    print 'in main', len(mergImgs)
+    print('in main', len(mergImgs))
     # print 'timeList', timeList
-    print 'TRMMdirName ', TRMMdirName
-    print "\n -------------- TESTING findCloudElements ----------"
+    print('TRMMdirName ', TRMMdirName)
+    print("\n -------------- TESTING findCloudElements ----------")
     CEGraph = mccSearch.findCloudElements(mergImgs, timeList, TRMMdirName)
     # if the TRMMdirName wasnt entered for whatever reason, you can still get the TRMM data this way
     # CEGraph = mccSearch.findCloudElements(mergImgs,timeList)
     # allCETRMMList=mccSearch.findPrecipRate(TRMMdirName,timeList)
     # ----------------------------------------------------------------------------------------------
-    print ("-" * 80)
-    print "number of nodes in CEGraph is: ", CEGraph.number_of_nodes()
-    print ("-" * 80)
-    print "\n -------------- TESTING findCloudClusters ----------"
+    print(("-" * 80))
+    print("number of nodes in CEGraph is: ", CEGraph.number_of_nodes())
+    print(("-" * 80))
+    print("\n -------------- TESTING findCloudClusters ----------")
     prunedGraph = mccSearch.findCloudClusters(CEGraph)
-    print ("-" * 80)
-    print "number of nodes in prunedGraph is: ", prunedGraph.number_of_nodes()
-    print ("-" * 80)
+    print(("-" * 80))
+    print("number of nodes in prunedGraph is: ", prunedGraph.number_of_nodes())
+    print(("-" * 80))
     # sys.exit()
-    print "\n -------------- TESTING findMCCs ----------"
+    print("\n -------------- TESTING findMCCs ----------")
     MCCList, MCSList = mccSearch.findMCC(prunedGraph)
-    print ("-" * 80)
-    print "MCC List has been acquired ", len(MCCList)
-    print "MCS List has been acquired ", len(MCSList)
-    print ("-" * 80)
+    print(("-" * 80))
+    print("MCC List has been acquired ", len(MCCList))
+    print("MCS List has been acquired ", len(MCSList))
+    print(("-" * 80))
     # now ready to perform various calculations/metrics
-    print "\n -------------- TESTING METRICS ----------"
+    print("\n -------------- TESTING METRICS ----------")
 
     # some calculations/metrics that work that work
     # print "creating the MCC userfile ", mccSearch.createTextFile(MCCList,1)
@@ -109,6 +109,7 @@ def main():
     # mccSearch.displayPrecip(MCCList)
     # mccSearch.plotHistogram(MCCList)
     #
-    print ("-" * 80)
+    print(("-" * 80))
+
 
 main()

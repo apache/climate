@@ -12,3 +12,4 @@ webtest
 myproxyclient
 esgf-pyclient
 podaacpy
+networkx
