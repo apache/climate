@@ -21,7 +21,7 @@ import ocw.utils as utils
 import datetime
 import numpy as np
 import numpy.ma as ma
-import scipy.interpolate
+from scipy.interpolate import griddata
 import scipy.ndimage
 from scipy.stats import rankdata
 from scipy.ndimage import map_coordinates
@@ -222,10 +222,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
 
     # Make masked array of shape (times, new_latitudes,new_longitudes)
     new_values = ma.zeros([len(target_dataset.times),
-                           ny_new, nx_new])
-    # Make masked array of shape (times, new_latitudes,new_longitudes)
-    new_values = ma.zeros([len(target_dataset.times),
-                           ny_new, nx_new])
+                           ny_new, nx_new])+1.e+20
 
     # Boundary vertices of target_dataset
     vertices = []
@@ -249,81 +246,54 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
         for ix in np.arange(nx_old)[::-1]:
             vertices.append([lons[0, ix], lats[0, ix]])
     path = Path(vertices)
-
-    # Convert new_lats and new_lons to float indices
-    new_lons_indices = np.zeros(new_lons.shape)
-    new_lats_indices = np.zeros(new_lats.shape)
+    new_xy_mask = np.ones(new_lats.shape)
 
     for iy in np.arange(ny_new):
         for ix in np.arange(nx_new):
             if path.contains_point([new_lons[iy, ix],
                                     new_lats[iy, ix]]) or not boundary_check:
-                if regular_grid:
-                    mn = lats.min()
-                    mx = lats.max()
-                    new_lats_indices[iy, ix] = (
-                        ny_old - 1.) * (new_lats[iy, ix] - mn) / (mx - mn)
-                    mn = lons.min()
-                    mx = lons.max()
-                    new_lons_indices[iy, ix] = (
-                        nx_old - 1.) * (new_lons[iy, ix] - mn) / (mx - mn)
-                else:
-                    distance_from_original_grids = (
-                        (lons - new_lons[iy, ix])**2. +
-                        (lats - new_lats[iy, ix])**2.)**0.5
-                    if np.min(distance_from_original_grids) == 0.:
-                        new_lats_indices[iy, ix], new_lons_indices[
-                            iy, ix] = np.where(
-                                distance_from_original_grids == 0)
-                    else:
-                        distance_rank = rankdata(
-                            distance_from_original_grids.flatten(),
-                            method='ordinal').reshape(lats.shape)
-                        # the nearest grid point's indices
-                        iy1, ix1 = np.where(distance_rank == 1)
-                        # point [iy2, ix] is diagonally across from [iy1, ix1]
-                        iy2, ix2 = np.where(distance_rank == 4)
-                        dist1 = distance_from_original_grids[iy1, ix1]
-                        dist2 = distance_from_original_grids[iy2, ix2]
-                        new_lats_indices[iy, ix] = (
-                            dist1 * iy2 + dist2 * iy1) / (dist1 + dist2)
-                        new_lons_indices[iy, ix] = (
-                            dist1 * ix2 + dist2 * ix1) / (dist1 + dist2)
-            else:
-                new_lats_indices[iy, ix] = -999.
-                new_lats_indices[iy, ix] = -999.
-    new_lats_indices = ma.masked_less(new_lats_indices, 0.)
-    new_lons_indices = ma.masked_less(new_lons_indices, 0.)
-
+               new_xy_mask[iy, ix] = 0.
+            
+    new_index = np.where(new_xy_mask == 0.)
     # Regrid the data on each time slice
     for i in range(len(target_dataset.times)):
         if len(target_dataset.times) == 1 and target_dataset.values.ndim == 2:
             values_original = ma.array(target_dataset.values)
         else:
             values_original = ma.array(target_dataset.values[i])
+        new_mask = np.copy(values_original.mask)
         for shift in (-1, 1):
             for axis in (0, 1):
                 q_shifted = np.roll(values_original, shift=shift, axis=axis)
-                idx = ~q_shifted.mask * values_original.mask
-                indices = np.where(idx)[0]
-                values_original.data[indices] = q_shifted[indices]
-        new_values[i] = map_coordinates(values_original,
-                                        [new_lats_indices.flatten(),
-                                         new_lons_indices.flatten()],
-                                        order=1).reshape(new_lats.shape)
-        new_values[i] = ma.array(new_values[i], mask=new_lats_indices.mask)
+                if (np.where((values_original.mask == True) & (q_shifted.mask == False)))[0].size !=0:
+                    index1 =np.where((values_original.mask == True) & (q_shifted.mask == False))
+                    n_indices = len(index1[0])
+                    values_original.data[index1] = q_shifted[index1]
+                    new_mask[index1] = np.repeat(False, n_indices)
+                    mask_index = np.where(~new_mask)
+        if new_mask.size != 1:
+            mask_index = np.where(~new_mask)
+        else:
+            mask_index = np.where(~np.isnan(values_original))
+        new_values_temp = griddata((lons[mask_index], lats[mask_index]), values_original[mask_index],
+                              (new_lons[new_index],
+                               new_lats[new_index]),
+                               method='linear')
         # Make a masking map using nearest neighbour interpolation -use this to
         # determine locations with MDI and mask these
         qmdi = np.zeros_like(values_original)
-        values_true_indices = np.where(values_original.mask == True)[0]
-        values_false_indices = np.where(values_original.mask == False)[0]
+        values_true_indices = np.where(values_original.mask == True)
+        values_false_indices = np.where(values_original.mask == False)
         qmdi[values_true_indices] = 1.
         qmdi[values_false_indices] = 0.
-        qmdi_r = map_coordinates(qmdi, [new_lats_indices.flatten(
-        ), new_lons_indices.flatten()], order=1).reshape(new_lats.shape)
-        mdimask = (qmdi_r != 0.0)
+        qmdi_r = griddata((lons.flatten(), lats.flatten()), qmdi.flatten(), 
+                             (new_lons[new_index],
+                              new_lats[new_index]),
+                              method='nearest')
+        new_values_temp = ma.masked_where(qmdi_r != 0.0, new_values_temp)
         # Combine missing data mask, with outside domain mask define above.
-        new_values[i].mask = np.logical_or(mdimask, new_values[i].mask)
+        new_values[i, new_index[0], new_index[1]] = new_values_temp[:]
+        new_values[i,:] = ma.masked_equal(new_values[i,:], 1.e+20)
 
     # TODO:
     # This will call down to the _congrid() function and the lat and lon
