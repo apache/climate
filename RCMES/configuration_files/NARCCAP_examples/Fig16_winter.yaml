@@ -22,9 +22,11 @@ regrid:
     regrid_dlat: 0.50
     regrid_dlon: 0.50
 
+# generic_dataset_name: If false, data filenames must include the elements of dataset_name list.
 datasets:
   - loader_name: local
-    name: SRB
+    generic_dataset_name: True
+    dataset_name: ['SRB']
     file_path: ./data/NARCCAP_data/srb_rel3.0_shortwave_from_1983_to_2007.nc
     variable_name: sw_sfc_dn
 
