@@ -391,10 +391,8 @@ class TestSpatialRegrid(unittest.TestCase):
                           self.regridded_dataset.variable)
 
     def test_two_dimensional_lats_lons(self):
-        self.input_dataset.lats = np.array(range(-89, 90, 2))
-        self.input_dataset.lons = np.array(range(-179, 180, 4))
-        self.input_dataset.lats = self.input_dataset.lats.reshape(2, 45)
-        self.input_dataset.lons = self.input_dataset.lons.reshape(2, 45)
+        self.input_dataset.lons, self.input_dataset.lats = np.meshgrid(
+                                  np.array(range(-179, 180, 2)), np.array(range(-89, 90, 2)))
         new_dataset = dp.spatial_regrid(
             self.input_dataset, self.new_lats, self.new_lons)
         np.testing.assert_array_equal(new_dataset.lats, self.new_lats)
