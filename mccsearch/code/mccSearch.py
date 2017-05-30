@@ -644,17 +644,10 @@ def findPrecipRate(TRMMdirName, timelist):
 		
 		brightnesstemp = np.squeeze(brightnesstemp1, axis=0)
 		
-		if int(fileHr1) % temporalRes == 0:
-			fileHr = fileHr1
-		else:
-			fileHr = (int(fileHr1)/temporalRes) * temporalRes
-		
-		if fileHr < 10:
-			fileHr = '0'+str(fileHr)
-		else:
-			str(fileHr)
+		fileHr = fileHr1 if int(fileHr1) % temporalRes == 0 else (int(fileHr1) / temporalRes) * temporalRes
+		fileHr = '0' + str(fileHr) if fileHr < 10 else str(fileHr)
 
-		TRMMfileName = TRMMdirName+"/3B42."+ str(fileDate) + "."+str(fileHr)+".7A.nc"
+		TRMMfileName = TRMMdirName+"/3B42."+ str(fileDate) + "."+ fileHr +".7A.nc"
 		TRMMData = Dataset(TRMMfileName,'r', format='NETCDF4')
 		precipRate = TRMMData.variables['pcp'][:,:,:]
 		latsrawTRMMData = TRMMData.variables['latitude'][:]
@@ -724,12 +717,10 @@ def findPrecipRate(TRMMdirName, timelist):
 		finalCETRMMvalues = ma.zeros((brightnesstemp1.shape))
 		#-----------End most of NETCDF file stuff ------------------------------------	
 		for index,value in np.ndenumerate(brightnesstemp):
-			lat_index, lon_index = index
-			currTimeValue = 0
 			if value > 0:
-
+				lat_index, lon_index = index
+				currTimeValue = 0
 				finalCETRMMvalues[0,lat_index,lon_index] = regriddedTRMM[int(np.where(LAT[:,0]==LAT[lat_index,0])[0]), int(np.where(LON[0,:]==LON[0,lon_index])[0])]
-				
 
 		rainFallacc[:] = finalCETRMMvalues
 		currNetCDFTRMMData.close()
@@ -918,7 +909,7 @@ def findMCC (prunedGraph):
 
 			#Do the first part of checking for the MCC feature
 			#find the path
-			treeTraversalList = traverseTree(aSubGraph, orderedPath[0],[],[])
+			treeTraversalList = traverseTree(aSubGraph, orderedPath[0],[], set(), [])
 			#print "treeTraversalList is ", treeTraversalList
 			#check the nodes to determine if a MCC on just the area criteria (consecutive nodes meeting the area and temp requirements)
 			MCCList = checkedNodesMCC(prunedGraph, treeTraversalList)
@@ -1004,7 +995,7 @@ def findMCC (prunedGraph):
 		
 	return definiteMCC, definiteMCS
 #******************************************************************
-def traverseTree(subGraph,node, stack, checkedNodes=None):
+def traverseTree(subGraph,node, stack, bookkeeper_stack, checkedNodes=None):
 	'''
 	Purpose:: 
 		To traverse a tree using a modified depth-first iterative deepening (DFID) search algorithm 
@@ -1029,30 +1020,30 @@ def traverseTree(subGraph,node, stack, checkedNodes=None):
 
 	if not checkedNodes:
 		stack =[]
+		bookkeeper_stack = set()
 		checkedNodes.append(node)
 		
 	#check one level infront first...if something does exisit, stick it at the front of the stack
 	upOneLevel = subGraph.predecessors(node)
 	downOneLevel = subGraph.successors(node)
 	for parent in upOneLevel:
-		if parent not in checkedNodes and parent not in stack:
+		if parent not in checkedNodes and parent not in bookkeeper_stack:
 			for child in downOneLevel:
-				if child not in checkedNodes and child not in stack:
+				if child not in checkedNodes and child not in bookkeeper_stack:
 					stack.insert(0,child)
-		
-			stack.insert(0,parent)	
+					bookkeeper_stack.add(child)
+			stack.insert(0,parent)
+			bookkeeper_stack.add(parent)
 
 	for child in downOneLevel:
-		if child not in checkedNodes and child not in stack:
-			if len(subGraph.predecessors(child)) > 1 or node in checkedNodes:
-				stack.insert(0,child)
-			else:
-				stack.append(child)		
-	
+		if child not in checkedNodes and child not in bookkeeper_stack:
+			stack.insert(0,child)
+			bookkeeper_stack.add(child)
+
 	for eachNode in stack:
 		if eachNode not in checkedNodes:
 			checkedNodes.append(eachNode)
-			return traverseTree(subGraph, eachNode, stack, checkedNodes)
+			return traverseTree(subGraph, eachNode, stack, bookkeeper_stack, checkedNodes)
 	
 	return checkedNodes 
 #******************************************************************
