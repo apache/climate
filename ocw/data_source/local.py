@@ -31,8 +31,8 @@ import h5py
 import numpy
 import numpy.ma as ma
 
-LAT_NAMES = [b'y', b'rlat', b'rlats', b'lat', b'lats', b'latitude', b'latitudes']
-LON_NAMES = [b'x', b'rlon', b'rlons', b'lon', b'lons', b'longitude', b'longitudes']
+LAT_NAMES = [b'lat', b'lats', b'latitude', b'latitudes',b'rlat']
+LON_NAMES = [b'lon', b'lons', b'longitude', b'longitudes',b'rlon']
 TIME_NAMES = [b'time', b'times', b'date', b'dates', b'julian']
 
 
