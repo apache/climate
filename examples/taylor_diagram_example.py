@@ -18,7 +18,14 @@
 import datetime
 import sys
 from os import path
-import urllib
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 import numpy
 
@@ -36,10 +43,10 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Download some example NetCDF files for the evaluation
 ##########################################################################
 if not path.exists(FILE_1):
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+    urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
 if not path.exists(FILE_2):
-    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+    urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
 # Load the example datasets into OCW Dataset objects. We want to load
 # the 'tasmax' variable values. We'll also name the datasets for use

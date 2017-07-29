@@ -12,7 +12,15 @@ import datetime
 import numpy as np
 import numpy.ma as ma
 from os import path
-import urllib
+import sys
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 import ssl
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -29,7 +37,7 @@ LAT_MIN = -45.0
 LAT_MAX = 42.24
 LON_MIN = -24.0
 LON_MAX = 60.0
-START = datetime.datetime(2000, 01, 1)
+START = datetime.datetime(2000, 1, 1)
 END = datetime.datetime(2007, 12, 31)
 
 EVAL_BOUNDS = Bounds(lat_min=LAT_MIN, lat_max=LAT_MAX,
@@ -48,13 +56,16 @@ region_counter = 0
 
 # Download necessary NetCDF file if not present
 if not path.exists(FILE_1):
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+    print("Downloading %s" % (FILE_LEADER + FILE_1))
+    urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
 if not path.exists(FILE_2):
-    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+    print("Downloading %s" % (FILE_LEADER + FILE_2))
+    urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
 if not path.exists(FILE_3):
-    urllib.urlretrieve(FILE_LEADER + FILE_3, FILE_3)
+    print("Downloading %s" % (FILE_LEADER + FILE_3))
+    urlretrieve(FILE_LEADER + FILE_3, FILE_3)
 
 """ Step 1: Load Local NetCDF File into OCW Dataset Objects and store in list"""
 target_datasets.append(local.load_file(FILE_1, varName, name="KNMI"))
