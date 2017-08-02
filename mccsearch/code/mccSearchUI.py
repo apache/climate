@@ -18,6 +18,7 @@
 # Wizard for running the mccSearch program
 '''
 
+import os
 import networkx as nx
 #mccSearch modules
 import mccSearch
