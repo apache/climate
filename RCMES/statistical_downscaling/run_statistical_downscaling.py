@@ -76,9 +76,9 @@ def extract_data_at_nearest_grid_point(target_dataset, longitude, latitude):
     :rtype: Open Climate Workbench Dataset Object
     """
 
-    if target_dataset.lons.ndim == 1 and target_dataset.lats.ndim == 1:
+    if target_dataset.lons.ndim == target_dataset.lats.ndim == 1:
         new_lon, new_lat = np.meshgrid(target_dataset.lons, target_dataset.lats)
-    elif target_dataset.lons.ndim == 2 and target_dataset.lats.ndim == 2:
+    elif target_dataset.lons.ndim == target_dataset.lats.ndim == 2:
         new_lon = target_datasets.lons
         new_lat = target_datasets.lats
     distance = (new_lon - longitude)**2. + (new_lat - latitude)**2.
@@ -155,16 +155,9 @@ downscale = down.Downscaling(ref_subset, model_subset_present, model_subset_futu
 
 print(downscale_option_names[DOWNSCALE_OPTION]+": Downscaling model output")
 
-if DOWNSCALE_OPTION == 1:
-    downscaled_model_present, downscaled_model_future = downscale.Delta_addition()
-elif DOWNSCALE_OPTION == 2:
-    downscaled_model_present, downscaled_model_future = downscale.Delta_correction()
-elif DOWNSCALE_OPTION == 3:
-    downscaled_model_present, downscaled_model_future = downscale.Quantile_mapping()
-elif DOWNSCALE_OPTION == 4:
-    downscaled_model_present, downscaled_model_future = downscale.Asynchronous_regression()
-else:
-    sys.exit("DOWNSCALE_OPTION must be an integer between 1 and 4")
+xdownscale = [downscale.Delta_addition, downscale.Delta_correction, downscale.Quantile_mapping, downscale.Asynchronous_regression]
+if 0 < DOWNSCALE_OPTION <= len(xdownscale): xdownscale[DOWNSCALE_OPTION - 1]()
+else: sys.exit("DOWNSCALE_OPTION must be an integer between 1 and " + len(xdownscale))
 
 
 """ Step 5: Create plots and spreadsheet """
