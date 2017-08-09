@@ -90,6 +90,7 @@ CLOUD_ELEMENT_GRAPH = nx.DiGraph()
 # graph meeting the CC criteria
 PRUNED_GRAPH = nx.DiGraph()
 #------------------------ End GLOBAL VARS -------------------------
+
 #************************ Begin Functions *************************
 #******************************************************************
 
@@ -123,7 +124,6 @@ def readMergData(dirname, filelist=None):
     mergTimeVarName = 'time'
     mergLatVarName = 'latitude'
     mergLonVarName = 'longitude'
-
     filelistInstructions = dirname + '/*'
     if filelist is None:
         filelist = glob.glob(filelistInstructions)
@@ -285,6 +285,7 @@ def findCloudElements(mergImgs, timelist, TRMMdirName=None):
     # NB in the TRMM files the info is hours since the time thus 00Z file has
     # in 01, 02 and 03 times
     for t in range(mergImgs.shape[0]):
+
         #-------------------------------------------------
         # #textfile name for saving the data for arcgis
         # thisFileName = MAINDIRECTORY+'/' + (str(timelist[t])).replace(" ", "_") + '.txt'
@@ -513,7 +514,6 @@ def findCloudElements(mergImgs, timelist, TRMMdirName=None):
                                                finalCETRMMvalues[0,
                                                                  cloudElementLat[lat_index],
                                                                  cloudElementLon[lon_index]]))
-
                 brightnesstemp[:] = brightnesstemp1[:]
                 currNetCDFCEData.close()
 
@@ -964,7 +964,6 @@ def findCloudClusters(CEGraph):
 
     Output::
             PRUNED_GRAPH: a Networkx directed graph of with CCs/ MCSs
-
     '''
 
     seenNode = []
@@ -1253,7 +1252,6 @@ def traverseTree(subGraph, node, stack, checkedNodes=None):
 
     Assumptions:
             frames are ordered and are equally distributed in time e.g. hrly satellite images
-
     '''
     if len(checkedNodes) == len(subGraph):
         return checkedNodes
@@ -1273,7 +1271,6 @@ def traverseTree(subGraph, node, stack, checkedNodes=None):
                     stack.insert(0, child)
 
             stack.insert(0, parent)
-
     for child in downOneLevel:
         if child not in checkedNodes and child not in stack:
             if len(subGraph.predecessors(child)) > 1 or node in checkedNodes:
@@ -1612,6 +1609,7 @@ def updateMCCList(
                     potentialMCCList[index]["possMCCList"].append(
                         (node, stage))
                     potentialMCCList[index]["fullMCSMCC"].append((node, stage))
+
                     if frameNum > potentialMCCList[index]["frameNum"] or potentialMCCList[index]["frameNum"] == 0:
                         potentialMCCList[index]["frameNum"] = frameNum
                         potentialMCCList[index]["highestMCCnode"] = node
@@ -1678,6 +1676,7 @@ def updateMCCList(
                             (node, 'M'))
                         potentialMCCList[index]["fullMCSMCC"].append(
                             (node, 'M'))
+
                         potentialMCCList[index]["durationAandB"] += 1
                         if frameNum > potentialMCCList[index]["frameNum"]:
                             potentialMCCList[index]["frameNum"] = frameNum
@@ -2088,7 +2087,6 @@ def addInfothisDict(thisNode, cloudElementArea, criteriaB):
             criteriaB: a masked array of floating-point numbers representing the lat,lons meeting the criteria
 
     Output:: None
-
     '''
     for eachdict in CLOUD_ELEMENT_GRAPH.nodes(thisNode):
         if eachdict[1]['uniqueID'] == thisNode:
@@ -3323,7 +3321,6 @@ def displaySize(finalMCCList):
             ax.set_title(title)
             ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d%H:%M:%S')
             fig.autofmt_xdate()
-
             plt.subplots_adjust(bottom=0.2)
 
             imgFilename = MAINDIRECTORY + '/images/' + str(count) + 'MCS.gif'
@@ -3748,7 +3745,6 @@ def plotAccuInTimeRange(starttime, endtime):
     latitude[:] = LATTRMM[:, 0]
     latitude.units = "degrees_north"
     latitude.long_name = "Latitude"
-
     rainFallacc[:] = accuPrecipRate[:]
 
     accuTRMMData.close()
@@ -4251,6 +4247,7 @@ def colorbar_index(ncolors, nlabels, cmap):
     Purpose::
             Utility script for crating a colorbar
             Taken from http://stackoverflow.com/questions/18704353/correcting-matplotlib-colorbar-ticks
+
     '''
     cmap = cmap_discretize(cmap, ncolors)
     mappable = cm.ScalarMappable(cmap=cmap)
@@ -4297,13 +4294,10 @@ def cmap_discretize(cmap, N):
 # 		NETCDF format. The files end up in a folder called mergNETCDF in the directory
 # 		where the raw MERG data is
 # 		NOTE: VERY RAW AND DIRTY
-
 # 	Input::
 # 		Directory to the location of the raw MERG files, preferably zipped
-
 # 	Output::
 # 	   none
-
 # 	Assumptions::
 # 	   1 GrADS (http://www.iges.org/grads/gadoc/) and lats4D (http://opengrads.org/doc/scripts/lats4d/)
 # 		 have been installed on the system and the user can access

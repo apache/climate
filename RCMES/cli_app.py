@@ -1185,8 +1185,6 @@ def settings_screen(header):
          screen.addstr(11, x/2, "6 - Change Target dataset/s")
          screen.addstr(12, x/2, "7 - Change Metric")
          screen.addstr(13, x/2, "8 - Change Working Directory")
-         #screen.addstr(14, x/2, "9 - Change Plot Title [Coming Soon....]")
-         #screen.addstr(15, x/2, "10 - Save the processed data [Coming Soon....]")
          screen.addstr(14, x/2, "9 - Show Temporal Boundaries")
          screen.addstr(15, x/2, "10 - Show Spatial Boundaries")
          screen.addstr(16, x/2, "0 - Return to Main Menu")
@@ -1378,18 +1376,11 @@ def settings_screen(header):
                    note = "Working directory has not changed"
 
          if option == '9':
-              screen.addstr(25, x/2, "Please enter plot title:")
-              plot_title = screen.getstr()
-
-         #if option == '10':
-         #     screen.addstr(25, x/2, "Please enter plot title:")
-         #     plot_title = screen.getstr()
-
-         if option == '9':
               models_start_time, models_end_time = get_models_temp_bound()
               line = 25
               for i, model in enumerate(model_datasets):
-                   mode_name = models_info[i]['directory'].split("/")[-1]
+                   #mode_name = models_info[i]['directory'].split("/")[-1]
+                   mode_name = 'model %d' %(i+1)
                    line += 1
                    screen.addstr(line, x/2, "{0}".format(mode_name))
                    line += 1
@@ -1407,7 +1398,8 @@ def settings_screen(header):
               models_bound = get_models_spatial_bound()
               line = 25
               for i, model in enumerate(model_datasets):
-                   mode_name = models_info[i]['directory'].split("/")[-1]
+                   #mode_name = models_info[i]['directory'].split("/")[-1]
+                   mode_name = 'model %d' %(i+1)
                    line += 1
                    screen.addstr(line, x/2, "{0}".format(mode_name))
                    line += 1

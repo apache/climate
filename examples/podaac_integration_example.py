@@ -24,8 +24,9 @@ datasetId = 'PODAAC-CCF30-01XXX'
 variable = 'uwnd'
 name = 'PO.DAAC_test_dataset'
 OUTPUT_PLOT = "ccmp_temporal_std"
-""" Step 1: Load Local NetCDF Files into OCW Dataset Objects """
-print("Extracting Level4 granule %s and converting it into a OCW dataset object." % datasetId)
+""" Step 1: Download remote PO.DAAC Dataset and read it into an OCW Dataset Object"""
+print("Available Level4 PO.DAAC Granules: %s" % podaac.list_available_extract_granule_dataset_ids())
+print("Extracting variable '%s' from  Level4 granule '%s' and converting it into a OCW dataset object." % (variable, datasetId))
 ccmp_dataset = podaac.extract_l4_granule(
     variable=variable, dataset_id=datasetId, name=name)
 print("CCMP_Dataset.values shape: (times, lats, lons) - %s \n" %
@@ -67,7 +68,7 @@ print("Generating a contour map using ocw.plotter.draw_contour_map()")
 
 fname = OUTPUT_PLOT
 gridshape = (4, 5)  # 20 Years worth of plots. 20 rows in 1 column
-plot_title = "CCMP Temporal Standard Deviation"
+plot_title = "Cross-Calibrated Multi-Platform Temporal Standard Deviation"
 sub_titles = range(2002, 2010, 1)
 
 plotter.draw_contour_map(results, lats, lons, fname,

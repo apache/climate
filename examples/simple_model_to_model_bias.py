@@ -17,7 +17,15 @@
 
 import datetime
 from os import path
-import urllib
+import sys
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 import numpy as np
 
@@ -39,9 +47,9 @@ FILE_1_PATH = path.join('/tmp', FILE_1)
 FILE_2_PATH = path.join('/tmp', FILE_2)
 
 if not path.exists(FILE_1_PATH):
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1_PATH)
+    urlretrieve(FILE_LEADER + FILE_1, FILE_1_PATH)
 if not path.exists(FILE_2_PATH):
-    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2_PATH)
+    urlretrieve(FILE_LEADER + FILE_2, FILE_2_PATH)
 
 """ Step 1: Load Local NetCDF Files into OCW Dataset Objects """
 print("Loading %s into an OCW Dataset Object" % (FILE_1_PATH,))

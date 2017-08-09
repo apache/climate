@@ -17,7 +17,7 @@
 
 from pkg_resources import VersionConflict, DistributionNotFound, \
     require
-from ocw.tests.test_local import create_netcdf_object
+from ocw.tests.test_local import create_netcdf_file
 from ocw.data_source import local
 from ocw import dataset_processor as dsp
 import os
@@ -73,7 +73,7 @@ def check_dataset_loading():
     ''' Try loading test dataset '''
     dataset = None
     try:
-        file_path = create_netcdf_object()
+        file_path = create_netcdf_file()
         dataset = local.load_file(file_path, variable_name='value')
     except Exception as e:
         fail("\nDataset loading")

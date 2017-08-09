@@ -54,12 +54,12 @@ def decode_time_values(dataset, time_var_name):
         time_format = time_format[:-3]
 
     time_units = parse_time_units(time_format)
-    time_base = parse_time_base(time_format)
 
     times = []
     if time_units == 'months':
         # datetime.timedelta doesn't support a 'months' option. To remedy
         # this, a month == 30 days for our purposes.
+        time_base = parse_time_base(time_format)
         for time_val in time_data:
             times.append(time_base + relativedelta(months=int(time_val)))
     else:

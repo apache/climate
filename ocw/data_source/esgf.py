@@ -18,7 +18,14 @@
 #
 
 import os
-import urllib2
+import sys
+if sys.version_info[0] >= 3:
+    from urllib.error import HTTPError
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib2 import HTTPError
 
 from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
 from ocw.esgf.download import download
@@ -137,7 +144,7 @@ def _download_files(file_urls, username, password, download_directory='/tmp'):
     ''''''
     try:
         logon(username, password)
-    except urllib2.HTTPError:
+    except HTTPError:
         raise ValueError('esgf._download_files: Invalid login credentials')
 
     for url in file_urls:
