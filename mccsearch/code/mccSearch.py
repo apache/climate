@@ -806,18 +806,10 @@ def findPrecipRate(TRMMdirName, timelist):
 
         brightnesstemp = np.squeeze(brightnesstemp1, axis=0)
 
-        if int(fileHr1) % temporalRes == 0:
-            fileHr = fileHr1
-        else:
-            fileHr = (int(fileHr1) / temporalRes) * temporalRes
+        fileHr = fileHr1 if int(fileHr1) % temporalRes == 0 else (int(fileHr1) / temporalRes) * temporalRes
+        fileHr = '0' + str(fileHr) if fileHr < 10 else str(fileHr)
 
-        if fileHr < 10:
-            fileHr = '0' + str(fileHr)
-        else:
-            str(fileHr)
-
-        TRMMfileName = TRMMdirName + "/3B42." + \
-            str(fileDate) + "." + str(fileHr) + ".7A.nc"
+        TRMMfileName = TRMMdirName + "/3B42." + str(fileDate) + "." + fileHr + ".7A.nc"
         TRMMData = Dataset(TRMMfileName, 'r', format='NETCDF4')
         precipRate = TRMMData.variables['pcp'][:, :, :]
         latsrawTRMMData = TRMMData.variables['latitude'][:]
@@ -949,7 +941,6 @@ def findPrecipRate(TRMMdirName, timelist):
         TRMMdataDict = {}
 
     return allCEnodesTRMMdata
-#******************************************************************
 
 
 def findCloudClusters(CEGraph):
@@ -1009,9 +1000,9 @@ def findCloudClusters(CEGraph):
                 seenNode.append(shortestPath)
 
     print("pruned graph")
-    print(("number of nodes are: %s", PRUNED_GRAPH.number_of_nodes()))
-    print(("number of edges are: %s", PRUNED_GRAPH.number_of_edges()))
-    print(("*" * 80))
+    print("number of nodes are: %s", PRUNED_GRAPH.number_of_nodes())
+    print("number of edges are: %s", PRUNED_GRAPH.number_of_edges())
+    print("*" * 80)
 
     graphTitle = "Cloud Clusters observed over somewhere during sometime"
     #drawGraph(PRUNED_GRAPH, graphTitle, edgeWeight)
@@ -1282,6 +1273,280 @@ def traverseTree(subGraph, node, stack, checkedNodes=None):
         if eachNode not in checkedNodes:
             checkedNodes.append(eachNode)
             return traverseTree(subGraph, eachNode, stack, checkedNodes)
+
+    return checkedNodes
+
+
+def findMCC(prunedGraph):
+    '''
+    Purpose::
+            Determines if subtree is a MCC according to Laurent et al 1998 criteria
+
+    Input::
+            prunedGraph: a Networkx Graph representing the CCs
+
+    Output::
+            finalMCCList: a list of list of tuples representing a MCC
+
+    Assumptions:
+            frames are ordered and are equally distributed in time e.g. hrly satellite images
+
+    '''
+    MCCList = []
+    MCSList = []
+    definiteMCC = []
+    definiteMCS = []
+    eachList = []
+    eachMCCList = []
+    maturing = False
+    decaying = False
+    fNode = ''
+    lNode = ''
+    removeList = []
+    imgCount = 0
+    imgTitle = ''
+
+    maxShieldNode = ''
+    orderedPath = []
+    treeTraversalList = []
+    definiteMCCFlag = False
+    unDirGraph = nx.Graph()
+    aSubGraph = nx.DiGraph()
+    definiteMCSFlag = False
+
+    # connected_components is not available for DiGraph, so generate graph as
+    # undirected
+    unDirGraph = PRUNED_GRAPH.to_undirected()
+    subGraph = nx.connected_component_subgraphs(unDirGraph)
+
+    # for each path in the subgraphs determined
+    for path in subGraph:
+                # definite is a subTree provided the duration is longer than 3
+                # hours
+
+        if len(path.nodes()) > MIN_MCS_DURATION:
+            orderedPath = path.nodes()
+            orderedPath.sort(key=lambda item: (
+                len(item.split('C')[0]), item.split('C')[0]))
+            # definiteMCS.append(orderedPath)
+
+            # build back DiGraph for checking purposes/paper purposes
+            aSubGraph.add_nodes_from(path.nodes())
+            for eachNode in path.nodes():
+                if prunedGraph.predecessors(eachNode):
+                    for node in prunedGraph.predecessors(eachNode):
+                        aSubGraph.add_edge(
+                            node, eachNode, weight=edgeWeight[0])
+
+                if prunedGraph.successors(eachNode):
+                    for node in prunedGraph.successors(eachNode):
+                        aSubGraph.add_edge(
+                            eachNode, node, weight=edgeWeight[0])
+            imgTitle = 'CC' + str(imgCount + 1)
+            # drawGraph(aSubGraph, imgTitle, edgeWeight) #for eachNode in path:
+            imgCount += 1
+            #----------end build back -----------------------------------------
+
+            mergeList, splitList = hasMergesOrSplits(path)
+            # add node behavior regarding neutral, merge, split or both
+            for node in path:
+                if node in mergeList and node in splitList:
+                    addNodeBehaviorIdentifier(node, 'B')
+                elif node in mergeList and node not in splitList:
+                    addNodeBehaviorIdentifier(node, 'M')
+                elif node in splitList and node not in mergeList:
+                    addNodeBehaviorIdentifier(node, 'S')
+                else:
+                    addNodeBehaviorIdentifier(node, 'N')
+
+            # Do the first part of checking for the MCC feature
+            # find the path
+            treeTraversalList = traverseTree(
+                aSubGraph, orderedPath[0], [], set(), [])
+            # print "treeTraversalList is ", treeTraversalList
+            # check the nodes to determine if a MCC on just the area criteria
+            # (consecutive nodes meeting the area and temp requirements)
+            MCCList = checkedNodesMCC(prunedGraph, treeTraversalList)
+            for aDict in MCCList:
+                for eachNode in aDict["fullMCSMCC"]:
+                    addNodeMCSIdentifier(eachNode[0], eachNode[1])
+
+            # do check for if MCCs overlap
+            if MCCList:
+                if len(MCCList) > 1:
+                    # for eachDict in MCCList:
+                    for count in range(len(MCCList)):
+                        # if there are more than two lists
+                        if count >= 1:
+                            # and the first node in this list
+                            eachList = list(
+                                x[0] for x in MCCList[count]["possMCCList"])
+                            eachList.sort(key=lambda nodeID: (
+                                len(nodeID.split('C')[0]), nodeID.split('C')[0]))
+                            if eachList:
+                                fNode = eachList[0]
+                                # get the lastNode in the previous possMCC list
+                                eachList = list(
+                                    x[0] for x in MCCList[(count - 1)]["possMCCList"])
+                                eachList.sort(key=lambda nodeID: (
+                                    len(nodeID.split('C')[0]), nodeID.split('C')[0]))
+                                if eachList:
+                                    lNode = eachList[-1]
+                                    if lNode in CLOUD_ELEMENT_GRAPH.predecessors(
+                                            fNode):
+                                        for aNode in CLOUD_ELEMENT_GRAPH.predecessors(
+                                                fNode):
+                                            if aNode in eachList and aNode == lNode:
+                                                                                                # if
+                                                                                                # edge_data
+                                                                                                # is
+                                                                                                # equal
+                                                                                                # or
+                                                                                                # less
+                                                                                                # than
+                                                                                                # to
+                                                                                                # the
+                                                                                                # exisitng
+                                                                                                # edge
+                                                                                                # in
+                                                                                                # the
+                                                                                                # tree
+                                                                                                # append
+                                                                                                # one
+                                                                                                # to
+                                                                                                # the
+                                                                                                # other
+                                                if CLOUD_ELEMENT_GRAPH.get_edge_data(
+                                                        aNode, fNode)['weight'] <= CLOUD_ELEMENT_GRAPH.get_edge_data(
+                                                        lNode, fNode)['weight']:
+                                                    MCCList[count - 1]["possMCCList"].extend(
+                                                        MCCList[count]["possMCCList"])
+                                                    MCCList[count - 1]["fullMCSMCC"].extend(
+                                                        MCCList[count]["fullMCSMCC"])
+                                                    MCCList[count - 1]["durationAandB"] += MCCList[count]["durationAandB"]
+                                                    MCCList[count -
+                                                            1]["CounterCriteriaA"] += MCCList[count]["CounterCriteriaA"]
+                                                    MCCList[count -
+                                                            1]["highestMCCnode"] = MCCList[count]["highestMCCnode"]
+                                                    MCCList[count - 1]["frameNum"] = MCCList[count]["frameNum"]
+                                                    removeList.append(count)
+                # update the MCCList
+                if removeList:
+                    for i in removeList:
+                        if (len(MCCList) - 1) > i:
+                            del MCCList[i]
+                            removeList = []
+
+            # check if the nodes also meet the duration criteria and the shape
+            # crieria
+            for eachDict in MCCList:
+                # order the fullMCSMCC list, then run maximum extent and
+                # eccentricity criteria
+                if (eachDict["durationAandB"] *
+                    TRES) >= MINIMUM_DURATION and (eachDict["durationAandB"] *
+                                                   TRES) <= MAXIMUM_DURATION:
+                    eachList = list(x[0] for x in eachDict["fullMCSMCC"])
+                    eachList.sort(key=lambda nodeID: (
+                        len(nodeID.split('C')[0]), nodeID.split('C')[0]))
+                    eachMCCList = list(x[0] for x in eachDict["possMCCList"])
+                    eachMCCList.sort(key=lambda nodeID: (
+                        len(nodeID.split('C')[0]), nodeID.split('C')[0]))
+
+                    # update the nodemcsidentifer behavior
+                    # find the first element eachMCCList in eachList, and ensure everything ahead of it is indicated as 'I',
+                    # find last element in eachMCCList in eachList and ensure everything after it is indicated as 'D'
+                    # ensure that everything between is listed as 'M'
+                    for eachNode in eachList[:(
+                            eachList.index(eachMCCList[0]))]:
+                        addNodeMCSIdentifier(eachNode, 'I')
+
+                    addNodeMCSIdentifier(eachMCCList[0], 'M')
+
+                    for eachNode in eachList[(
+                            eachList.index(eachMCCList[-1]) + 1):]:
+                        addNodeMCSIdentifier(eachNode, 'D')
+
+                    # update definiteMCS list
+                    for eachNode in orderedPath[(
+                            orderedPath.index(eachMCCList[-1]) + 1):]:
+                        addNodeMCSIdentifier(eachNode, 'D')
+
+                    # run maximum extent and eccentricity criteria
+                    maxExtentNode, definiteMCCFlag = maxExtentAndEccentricity(
+                        eachList)
+                    # print "maxExtentNode, definiteMCCFlag ", maxExtentNode,
+                    # definiteMCCFlag
+                    if definiteMCCFlag:
+                        definiteMCC.append(eachList)
+
+            definiteMCS.append(orderedPath)
+
+            # reset for next subGraph
+            aSubGraph.clear()
+            orderedPath = []
+            MCCList = []
+            MCSList = []
+            definiteMCSFlag = False
+
+    return definiteMCC, definiteMCS
+#******************************************************************
+
+
+def traverseTree(subGraph, node, stack, bookkeeper_stack, checkedNodes=None):
+    '''
+    Purpose::
+            To traverse a tree using a modified depth-first iterative deepening (DFID) search algorithm
+
+    Input::
+            subGraph: a Networkx DiGraph representing a CC
+                    lengthOfsubGraph: an integer representing the length of the subgraph
+                    node: a string representing the node currently being checked
+                    stack: a list of strings representing a list of nodes in a stack functionality
+                                    i.e. Last-In-First-Out (LIFO) for sorting the information from each visited node
+                    checkedNodes: a list of strings representing the list of the nodes in the traversal
+
+    Output::
+            checkedNodes: a list of strings representing the list of the nodes in the traversal
+
+    Assumptions:
+            frames are ordered and are equally distributed in time e.g. hrly satellite images
+
+    '''
+    if len(checkedNodes) == len(subGraph):
+        return checkedNodes
+
+    if not checkedNodes:
+        stack = []
+        bookkeeper_stack = set()
+        checkedNodes.append(node)
+
+    # check one level infront first...if something does exisit, stick it at
+    # the front of the stack
+    upOneLevel = subGraph.predecessors(node)
+    downOneLevel = subGraph.successors(node)
+    for parent in upOneLevel:
+        if parent not in checkedNodes and parent not in bookkeeper_stack:
+            for child in downOneLevel:
+                if child not in checkedNodes and child not in bookkeeper_stack:
+                    stack.insert(0, child)
+                    bookkeeper_stack.add(child)
+            stack.insert(0, parent)
+            bookkeeper_stack.add(parent)
+
+    for child in downOneLevel:
+        if child not in checkedNodes and child not in bookkeeper_stack:
+            stack.insert(0, child)
+            bookkeeper_stack.add(child)
+
+    for eachNode in stack:
+        if eachNode not in checkedNodes:
+            checkedNodes.append(eachNode)
+            return traverseTree(
+                subGraph,
+                eachNode,
+                stack,
+                bookkeeper_stack,
+                checkedNodes)
 
     return checkedNodes
 #******************************************************************
@@ -1966,8 +2231,8 @@ def checkCriteria(thisCloudElementLatLon, aTemperature):
             cloudElementCriteriaB = criteriaB[loc]
         except BaseException:
             print("YIKESS")
-            print(("CEcounter %s %s" % (CEcounter, criteriaB.shape)))
-            print(("criteriaB %s" % criteriaB))
+            print("CEcounter %s %s" % (CEcounter, criteriaB.shape))
+            print("criteriaB %s" % criteriaB)
 
         for index, value in np.ndenumerate(cloudElementCriteriaB):
             if value != 0:
@@ -2943,8 +3208,9 @@ def temporalAndAreaInfoMetric(finalMCCList):
             starttime = MCCtimes[0]
             endtime = MCCtimes[-1]
             duration = (endtime - starttime) + tdelta
-            print(("starttime: %s endtime: %s tdelta: %s duration: %s MCSAreas %s" % (
-                starttime, endtime, tdelta, duration, MCSArea)))
+            print(
+                "starttime: %s endtime: %s tdelta: %s duration: %s MCSAreas %s" %
+                (starttime, endtime, tdelta, duration, MCSArea))
             allMCCtimes.append({'MCCtimes': MCCtimes,
                                 'starttime': starttime,
                                 'endtime': endtime,
@@ -3176,7 +3442,7 @@ def precipTotals(finalMCCList):
             MCSPrecip = []
             count = 0
 
-        print(("allMCSPrecip %s" % allMCSPrecip))
+        print("allMCSPrecip %s" % allMCSPrecip)
 
     return allMCSPrecip
 #******************************************************************
@@ -3205,12 +3471,12 @@ def precipMaxMin(finalMCCList):
                 eachNode = thisDict(node)
                 CETRMM = eachNode['cloudElementLatLonTRMM']
 
-                print(("all %s" % np.min(CETRMM[np.nonzero(CETRMM)])))
-                print(("minCEprecip %s" %
-                       np.min(eachNode['cloudElementLatLonTRMM'])))
+                print("all %s" % np.min(CETRMM[np.nonzero(CETRMM)]))
+                print("minCEprecip %s" %
+                      np.min(eachNode['cloudElementLatLonTRMM']))
 
-                print(("maxCEprecip %s" % np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(
-                    eachNode['cloudElementLatLonTRMM'])])))
+                print("maxCEprecip %s" % np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(
+                    eachNode['cloudElementLatLonTRMM'])]))
                 sys.exit()
                 maxCEprecip = np.max(eachNode['cloudElementLatLonTRMM'][np.nonzero(
                     eachNode['cloudElementLatLonTRMM'])])
@@ -3717,7 +3983,7 @@ def plotAccuInTimeRange(starttime, endtime):
     # create new netCDF file
     accuTRMMFile = MAINDIRECTORY + '/TRMMnetcdfCEs/accu' + \
         starttime + '-' + endtime + '.nc'
-    print(("accuTRMMFile %s" % accuTRMMFile))
+    print("accuTRMMFile %s" % accuTRMMFile)
     # write the file
     accuTRMMData = Dataset(accuTRMMFile, 'w', format='NETCDF4')
     accuTRMMData.description = 'Accumulated precipitation data'
