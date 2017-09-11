@@ -57,7 +57,7 @@ def main():
     # let's go!
     print("\n -------------- Read MERG Data ----------")
     mergImgs, timeList = mccSearch.readMergData(CEoriDirName)
-    print(("-" * 80))
+    print("-" * 80)
 
     print('in main', len(mergImgs))
     # print 'timeList', timeList
@@ -68,20 +68,20 @@ def main():
     # CEGraph = mccSearch.findCloudElements(mergImgs,timeList)
     # allCETRMMList=mccSearch.findPrecipRate(TRMMdirName,timeList)
     # ----------------------------------------------------------------------------------------------
-    print(("-" * 80))
+    print("-" * 80)
     print("number of nodes in CEGraph is: ", CEGraph.number_of_nodes())
-    print(("-" * 80))
+    print("-" * 80)
     print("\n -------------- TESTING findCloudClusters ----------")
     prunedGraph = mccSearch.findCloudClusters(CEGraph)
-    print(("-" * 80))
+    print("-" * 80)
     print("number of nodes in prunedGraph is: ", prunedGraph.number_of_nodes())
-    print(("-" * 80))
+    print("-" * 80)
     print("\n -------------- TESTING findMCCs ----------")
     MCCList, MCSList = mccSearch.findMCC(prunedGraph)
-    print(("-" * 80))
+    print("-" * 80)
     print("MCC List has been acquired ", len(MCCList))
     print("MCS List has been acquired ", len(MCSList))
-    print(("-" * 80))
+    print("-" * 80)
     # now ready to perform various calculations/metrics
     print("\n -------------- TESTING METRICS ----------")
 
@@ -104,7 +104,7 @@ def main():
     # mccSearch.displayPrecip(MCCList)
     # mccSearch.plotHistogram(MCCList)
     #
-    print(("-" * 80))
+    print("-" * 80)
 
 
 main()
