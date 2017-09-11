@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import sys, os, datetime, urllib, urlparse
+import sys, os, datetime
+from future.standard_library import install_aliases
+install_aliases()
+from urllib.parse import urlparse
 from datetime import timedelta
 import numpy as np
 
@@ -43,7 +46,7 @@ def loadDataset(urlAndVariable, dir=None):
         coords = '(time, lat, lon)'
     elif len(shape) == 2:
         coords = '(lat, lon)'
-    print >>sys.stderr, 'loadDataset: File %s has variable %s with shape %s: %s' % (f, variable, coords, shape) 
+    print('loadDataset: File %s has variable %s with shape %s: %s' % (f, variable, coords, shape), file=sys.stderr) 
     return ds
 
 def loadDatasets(urlAndVariables, dir=None):
@@ -55,7 +58,7 @@ def temporalRegrid(dataset, timeRes=timedelta(days=365)):
     dataset = dsp.temporal_rebin(dataset, timeRes)
     name = dataset.name
     if name is None: name = ''
-    print >>sys.stderr, 'temporalRebin: Dataset %s has new shape %s' % (name, str(dataset.values.shape))
+    print('temporalRebin: Dataset %s has new shape %s' % (name, str(dataset.values.shape)), file=sys.stderr)
     return dataset
 
 def temporalRegrids(datasets, timeRes=timedelta(days=365)):
@@ -71,20 +74,20 @@ def commonSpatialBounds(datasets):
     for i, b in enumerate(bounds):
         name = datasets[i].name
         if name is None or name == '': name = str(i)
-        print >>sys.stderr, 'commonSpatialBounds: Dataset %s has boundaries: lat (%s, %s), lon (%s, %s).' % \
-                                (name, b[0], b[1], b[2], b[3])
+        print('commonSpatialBounds: Dataset %s has boundaries: lat (%s, %s), lon (%s, %s).' % \
+                                (name, b[0], b[1], b[2], b[3]), file=sys.stderr)
     minLat = max([b[0] for b in bounds])
     maxLat = min([b[1] for b in bounds])
     minLon = max([b[2] for b in bounds])
     maxLon = min([b[3] for b in bounds])
-    print >>sys.stderr, 'commonSpatialBounds: Common boundaries are: lat (%s, %s), lon (%s, %s).' % \
-                            (minLat, maxLat, minLon, maxLon)
+    print('commonSpatialBounds: Common boundaries are: lat (%s, %s), lon (%s, %s).' % \
+                            (minLat, maxLat, minLon, maxLon), file=sys.stderr)
     return (minLat, maxLat, minLon, maxLon)
 
 def generateLatLonGrid(latGrid, lonGrid):
     '''Generate a uniform lat/lon grid at set resolutions, where latGrid is a tuple of (latMin, latMax, latRes).'''
-    minLat, maxLat, latRes = map(float, latGrid)
-    minLon, maxLon, lonRes = map(float, lonGrid)
+    minLat, maxLat, latRes = list(map(float, latGrid))
+    minLon, maxLon, lonRes = list(map(float, lonGrid))
     lats = np.arange(minLat, maxLat, float(latRes))
     lons = np.arange(minLon, maxLon, float(lonRes))
     return (lats, lons)
@@ -120,7 +123,7 @@ def lookupMetrics(metricNames,
             m = availableMetrics[name]
             metrics.append(m())
         except:
-            print >>sys.stderr, 'lookupMetrics: Error, No metric named %s' % name
+            print('lookupMetrics: Error, No metric named %s' % name, file=sys.stderr)
     return metrics
 
 def computeMetrics(datasets, metricNames=['Bias'], subregions=None):
@@ -130,9 +133,9 @@ are identical.
     '''
     metrics = lookupMetrics(metricNames)
     if len(metrics) != len(metricNames):
-        print >>sys.stderr, 'computeMetrics: Error, Illegal or misspelled metric name.'
+        print('computeMetrics: Error, Illegal or misspelled metric name.', file=sys.stderr)
     eval = evaluation.Evaluation(datasets[0], datasets[1:], metrics)
-    print >>sys.stderr, 'computeMetrics: Evaluating metrics %s . . .' % str(metricNames)
+    print('computeMetrics: Evaluating metrics %s . . .' % str(metricNames), file=sys.stderr)
     eval.run()
     return eval.results
 
@@ -164,7 +167,7 @@ after temporally rebinning to a common time resolution and a common spatial (lat
 def plotBias(metric, lats, lons, outputName, **config):
     '''Plot the bias of the reference datasets compared to multiple targets.'''
     plotFile = outputName + '.png'
-    print 'plotBias: Writing %s' % plotFile
+    print(('plotBias: Writing %s' % plotFile))
     plotter.draw_contour_map(metric, lats, lons, outputName, **config)
     return plotFile
 
@@ -173,10 +176,10 @@ def plotBias(metric, lats, lons, outputName, **config):
 
 def isLocalFile(url):
     '''Check if URL is a local path.'''
-    u = urlparse.urlparse(url)
+    u = urlparse(url)
     if u.scheme == '' or u.scheme == 'file':
         if not path.exists(u.path):
-            print >>sys.stderr, 'isLocalFile: File at local path does not exist: %s' % u.path
+            print('isLocalFile: File at local path does not exist: %s' % u.path, file=sys.stderr)
         return (True, u.path)
     else:
         return (False, u.path)
@@ -189,13 +192,13 @@ def retrieveFile(url, dir=None):
     outPath = os.path.join(dir, fn)
     if not ok:
         if os.path.exists(outPath):
-            print >>sys.stderr, 'retrieveFile: Using cached file: %s' % outPath
+            print('retrieveFile: Using cached file: %s' % outPath, file=sys.stderr)
         else:
             try:
-                print >>sys.stderr, 'retrieveFile: Retrieving (URL) %s to %s' % (url, outPath)
-                urllib.urlretrieve(url, outPath)
+                print('retrieveFile: Retrieving (URL) %s to %s' % (url, outPath), file=sys.stderr)
+                urllib.request.urlretrieve(url, outPath)
             except:
-                print >>sys.stderr, 'retrieveFile: Cannot retrieve file at URL: %s' % url
+                print('retrieveFile: Cannot retrieve file at URL: %s' % url, file=sys.stderr)
                 return None
     return outPath    
 
@@ -205,11 +208,11 @@ def retrieveFile(url, dir=None):
 def test1(urlsAndVars, outputName, **config):
     '''Test compareManyWithMetrics routine.'''
     lats, lons, metrics = compareVariablesWithMetrics(urlsAndVars, ['Bias'], outputName, timedelta(days=365), 1, 1)
-    print metrics
+    print(metrics)
     
     config = {'gridshape': (4, 5),
               'ptitle': 'TASMAX Bias of WRF Compared to KNMI (1989 - 2008)',
-              'subtitles': range(1989, 2009, 1)}
+              'subtitles': list(range(1989, 2009, 1))}
     plotFile = plotBias(metrics[0][0], lats, lons, outputName, **config)
     return plotFile
 
@@ -229,7 +232,7 @@ def main(args):
         return test2(urlsAndVars, outputName)
 
 if __name__ == '__main__':
-    print main(sys.argv[1:])
+    print(main(sys.argv[1:]))
 
 
 # python functions.py 1 "http://zipper.jpl.nasa.gov/dist/AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc" "tasmax" "wrf_bias_compared_to_knmi" "http://zipper.jpl.nasa.gov/dist/AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc" "tasmax"
