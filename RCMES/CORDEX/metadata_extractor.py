@@ -210,7 +210,7 @@ class CORDEXMetadataExtractor(MetadataExtractor):
         """
         Get the list of models accross all the datasets.
         """
-        return self.get_field('models')
+        return self.get_field('model')
 
     @property
     def fields(self):
