@@ -508,6 +508,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
     '''
     nc_files = []
     if not file_list:
+        filename_pattern = [''] if not filename_pattern else filename_pattern
         for pattern in filename_pattern:
             nc_files.extend(glob(file_path + pattern))
     else:
