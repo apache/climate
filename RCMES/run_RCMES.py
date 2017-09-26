@@ -79,7 +79,10 @@ if not 'boundary_type' in space_info:
     min_lon = space_info['min_lon']
     max_lon = space_info['max_lon']
 else:
-    min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(space_info['boundary_type'][6:].replace(" ","").lower())
+    domain = space_info['boundary_type']
+    if domain.startswith('CORDEX '):
+        domain = domain.replace('CORDEX ', '').lower()
+    min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(domain)
 
 # Additional arguments for the DatasetLoader
 extra_opts = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
