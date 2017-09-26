@@ -94,7 +94,7 @@ data_info = config['datasets']
 # (first) dataset. We should instead make this a parameter for each
 # loader and Dataset objects.
 fact = data_info[0].pop('multiplying_factor', 1)
-    
+
 """ Step 1: Load the datasets """
 print('Loading datasets:\n{}'.format(data_info))
 datasets = load_datasets_from_config(extra_opts, *data_info)
@@ -262,7 +262,7 @@ if nmetrics > 0:
 
         print('metrics {0}/{1}: {2}'.format(imetric, nmetrics, metrics_name))
         if metrics_name == 'Map_plot_bias_of_multiyear_climatology':
-            row, column = plot_info['subplots_array']
+            row, column = plot_info.get('subplots_array', (1, 1))
             if 'map_projection' in plot_info.keys():
                 Map_plot_bias_of_multiyear_climatology(
                     reference_dataset, reference_name, target_datasets, target_names,
@@ -279,7 +279,7 @@ if nmetrics > 0:
         elif config['use_subregions']:
             if (metrics_name == 'Timeseries_plot_subregion_interannual_variability'
                 and average_each_year):
-                row, column = plot_info['subplots_array']
+                row, column = plot_info.get('subplots_array', (1, 1))
                 Time_series_subregion(
                     reference_subregion_mean, reference_name, target_subregion_mean,
                     target_names, False, file_name, row, column,
@@ -288,7 +288,7 @@ if nmetrics > 0:
 
             if (metrics_name == 'Timeseries_plot_subregion_annual_cycle'
                 and not average_each_year and month_start==1 and month_end==12):
-                row, column = plot_info['subplots_array']
+                row, column = plot_info.get('subplots_array', (1, 1))
                 Time_series_subregion(
                     reference_subregion_mean, reference_name,
                     target_subregion_mean, target_names, True,
