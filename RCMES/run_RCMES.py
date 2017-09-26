@@ -68,8 +68,13 @@ time_info = config['time']
 temporal_resolution = time_info['temporal_resolution']
 
 # Read time info
-start_time = datetime.strptime(time_info['start_time'].strftime('%Y%m%d'),'%Y%m%d')
-end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
+maximum_overlap_period = space_info.get('maximum_overlap_period', False)
+if not maximum_overlap_period:
+    start_time = datetime.strptime(time_info['start_time'].strftime('%Y%m%d'),'%Y%m%d')
+    end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
+else:
+    # These values will be determined after datasets are loaded
+    start_time, end_time = None, None
 
 # Read space info
 space_info = config['space']
@@ -113,7 +118,7 @@ for i, dataset in enumerate(datasets):
 
 """ Step 2: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
-if time_info['maximum_overlap_period']:
+if maximum_overlap_period:
     start_time, end_time = utils.get_temporal_overlap(datasets)
     print('Maximum overlap period')
     print('start_time: {}'.format(start_time))
