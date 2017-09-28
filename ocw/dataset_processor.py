@@ -83,9 +83,9 @@ def temporal_subset(target_dataset, month_start, month_end,
             logger.warning("Number of times in dataset ({}) does not "
                            "divide evenly into {} year(s). Trimming data..."
                            .format(ntime, nyear))
-            s_mon = new_times[0].month
-            e_mon = new_times[-1].month
-            new_times = new_times[13-s_mon:-e_mon]
+            slc = utils.trim_dataset(new_dataset)
+            new_dataset.values = new_dataset.values[slc]
+            new_times = new_times[slc]
             nyear = new_times.size // nmonth
 
         averaged_time = []
