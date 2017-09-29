@@ -518,11 +518,8 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
 
     dataset0 = load_file(nc_files[0], variable_name, lat_name=lat_name,
                          lon_name=lon_name, time_name=time_name)
-    if dataset0.lons.ndim == 1 and dataset0.lats.ndim == 1:
-        lons, lats = numpy.meshgrid(dataset0.lons, dataset0.lats)
-    elif dataset0.lons.ndim == 2 and dataset0.lats.ndim == 2:
-        lons = dataset0.lons
-        lats = dataset0.lats
+    lons = dataset0.lons
+    lats = dataset0.lats
 
     if mask_file:
         mask_dataset = load_file(mask_file, mask_variable)
