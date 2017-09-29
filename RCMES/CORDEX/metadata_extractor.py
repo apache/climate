@@ -84,6 +84,13 @@ class MetadataExtractor(object):
         """
         return self.get_field('variable')
 
+    @property
+    def field_filters(self):
+        """
+        Override this to filter out specific characters contained in a field.
+        """
+        return dict()
+
     def query(self, **kwargs):
         """
         Narrow down the list of files by field names.
@@ -95,7 +102,8 @@ class MetadataExtractor(object):
         data = self.data
         for field, value in kwargs.items():
             value = value if isinstance(value, list) else [value]
-            data = [meta for meta in data if meta[field] in value]
+            data = [meta for meta in data
+                    if self._match_filter(meta, field) in value]
         return data
 
     def group(self, extractor, field):
@@ -116,7 +124,7 @@ class MetadataExtractor(object):
 
         groups = []
         for meta in results:
-            val = meta[field]
+            val = self._match_filter(meta, field)
             kwargs.update({field: val})
             match = extractor.query(**kwargs)
             groups.append((meta, match))
@@ -151,6 +159,16 @@ class MetadataExtractor(object):
         pattern = '_'.join(base[:len(self.fields)] + ['*.nc'])
         return pattern
 
+    def _match_filter(self, meta, field):
+        """
+        Filter (ignore) certain character patterns when matching a field.
+        """
+        val = meta[field]
+        if field in self.field_filters:
+            for pattern in self.field_filters[field]:
+                val = val.replace(pattern, '')
+        return val
+
     def _extract(self):
         """
         Do the actual metadata extraction from the list of filename given
@@ -183,6 +201,13 @@ class obs4MIPSMetadataExtractor(MetadataExtractor):
         fields = ['variable', 'instrument', 'processing_level', 'version']
         return fields
 
+    @property
+    def field_filters(self):
+        """
+        Field filters for CALIPSO
+        """
+        return dict(variable=['calipso', 'Lidarsr532'])
+
     def filter_filename(self, fname):
         """
         CALIPSO files have odd naming conventions, so we will use
@@ -190,8 +215,6 @@ class obs4MIPSMetadataExtractor(MetadataExtractor):
         """
         fname = os.path.basename(fname)
         fname = fname.replace('_obs4MIPs_', '_')
-        fname = fname.replace('calipso', '')
-        fname = fname.replace('Lidarsr532', '')
         return fname
 
     def get_pattern(self, fname):
@@ -202,8 +225,8 @@ class obs4MIPSMetadataExtractor(MetadataExtractor):
         offset = -2 if len(base) != 5 else -1
         pattern = '_'.join(base[:offset] + ['*.nc'])
         return pattern
-        
-        
+
+
 class CORDEXMetadataExtractor(MetadataExtractor):
     @property
     def models(self):

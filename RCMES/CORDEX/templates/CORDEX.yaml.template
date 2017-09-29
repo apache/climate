@@ -1,6 +1,6 @@
 {% set domain = models_info[0].domain %}
 {% set instrument = obs_info.instrument %}
-{% set variable = obs_info.variable %}
+{% set variable = models_info[0].variable %}
 {% set basename = [variable, instrument, domain, season]|join('_') %}
 workdir: {{ [output_dir, domain, instrument, variable, season]|join('/') }}
 output_netcdf_filename: {{ basename }}.nc
@@ -23,7 +23,7 @@ time:
     average_each_year: True
 
 space:
-    boundary_type: {{ domain[:3] }}
+    boundary_type: CORDEX {{ domain[:3] }}
 
 regrid:
     regrid_on_reference: True
@@ -32,12 +32,12 @@ datasets:
   - loader_name: local_split
     name: {{ instrument }}
     file_path: {{ obs_info.filename }}
-    variable_name: {{ variable }}
+    variable_name: {{ obs_info.variable }}
 {% for model_info in models_info %}
   - loader_name: local_split
     name: {{ model_info.model }}
     file_path: {{ model_info.filename }}
-    variable_name: {{ variable }}
+    variable_name: {{ model_info.variable }}
     lat_name: lat
     lon_name: lon
 {% endfor %}

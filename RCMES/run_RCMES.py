@@ -25,6 +25,11 @@ from datetime import datetime
 from glob import glob
 from getpass import getpass
 import numpy as np
+
+# Need these lines to run RCMES through SSH without X11
+import matplotlib
+matplotlib.use('Agg')
+
 import ocw.utils as utils
 import ocw.dataset_processor as dsp
 from ocw.dataset import Bounds
@@ -68,7 +73,7 @@ time_info = config['time']
 temporal_resolution = time_info['temporal_resolution']
 
 # Read time info
-maximum_overlap_period = space_info.get('maximum_overlap_period', False)
+maximum_overlap_period = time_info.get('maximum_overlap_period', False)
 if not maximum_overlap_period:
     start_time = datetime.strptime(time_info['start_time'].strftime('%Y%m%d'),'%Y%m%d')
     end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
@@ -86,7 +91,8 @@ if not 'boundary_type' in space_info:
 else:
     domain = space_info['boundary_type']
     if domain.startswith('CORDEX '):
-        domain = domain.replace('CORDEX ', '').lower()
+        domain = domain.replace('CORDEX', '').lower()
+        domain = domain.replace(' ', '')
     min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(domain)
 
 # Additional arguments for the DatasetLoader
@@ -110,9 +116,9 @@ multiplying_factor = np.ones(len(datasets))
 multiplying_factor[0] = fact
 names = [dataset.name for dataset in datasets]
 for i, dataset in enumerate(datasets):
-    if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
-        datasets[i] = dsp.normalize_dataset_datetimes(dataset,
-                                                      temporal_resolution)
+    res = dataset.temporal_resolution()
+    if res == 'daily' or res == 'monthly':
+        datasets[i] = dsp.normalize_dataset_datetimes(dataset, res)
         if multiplying_factor[i] != 1:
             datasets[i].values *= multiplying_factor[i]
 
@@ -148,7 +154,7 @@ else:
 for i, dataset in enumerate(datasets):
     datasets[i] = dsp.subset(dataset, bounds)
     if dataset.temporal_resolution() != temporal_resolution:
-        datasets[i] = dsp.temporal_rebin(dataset, temporal_resolution)
+        datasets[i] = dsp.temporal_rebin(datasets[i], temporal_resolution)
 
 # Temporally subset both observation and model datasets
 # for the user specified season
@@ -269,8 +275,10 @@ if nmetrics > 0:
         file_name = workdir+plot_info['file_name']
 
         print('metrics {0}/{1}: {2}'.format(imetric, nmetrics, metrics_name))
+        default_shape = (int(np.ceil(np.sqrt(ntarget + 2))),
+                         int(np.ceil(np.sqrt(ntarget + 2))))
         if metrics_name == 'Map_plot_bias_of_multiyear_climatology':
-            row, column = plot_info.get('subplots_array', (1, 1))
+            row, column = plot_info.get('subplots_array', default_shape)
             if 'map_projection' in plot_info.keys():
                 Map_plot_bias_of_multiyear_climatology(
                     reference_dataset, reference_name, target_datasets, target_names,
@@ -287,7 +295,7 @@ if nmetrics > 0:
         elif config['use_subregions']:
             if (metrics_name == 'Timeseries_plot_subregion_interannual_variability'
                 and average_each_year):
-                row, column = plot_info.get('subplots_array', (1, 1))
+                row, column = plot_info.get('subplots_array', default_shape)
                 Time_series_subregion(
                     reference_subregion_mean, reference_name, target_subregion_mean,
                     target_names, False, file_name, row, column,

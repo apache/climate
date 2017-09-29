@@ -59,7 +59,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
 
     string_list = list(string.ascii_lowercase)
     nmodels = len(model_datasets)
-    row, column = plotter._best_grid_shape((row, column), nmodels + 1)
+    row, column = plotter._best_grid_shape(nmodels + 1, (row, column))
     ax = fig.add_subplot(row,column,1)
     if map_projection == 'npstere':
         m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
