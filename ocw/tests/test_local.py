@@ -21,7 +21,7 @@ try:
     from urllib.request import urlretrieve
 except ImportError:
     from urllib import urlretrieve
-    
+
 import datetime
 import unittest
 import os
@@ -229,12 +229,10 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_lats(self):
         """Test load_multiple_files function for times."""
-        _, self.latitudes = np.meshgrid(self.longitudes, self.latitudes)
         np.testing.assert_array_equal(self.dataset.lats, self.latitudes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_lons(self):
         """Test load_multiple_files function for times."""
-        self.longitudes, _ = np.meshgrid(self.longitudes, self.latitudes)
         np.testing.assert_array_equal(self.dataset.lons, self.longitudes)
 
     def test_function_load_dataset_from_multiple_netcdf_files_times(self):
@@ -245,12 +243,10 @@ class TestLoadDatasetFromMultipleNetcdfFiles(unittest.TestCase):
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lats(self):
         """Test load_multiple_files function for non-default lats."""
-        _, self.alt_lats = np.meshgrid(self.alt_lons, self.alt_lats)
         np.testing.assert_array_equal(self.alt_dataset.lats, self.alt_lats)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_lons(self):
         """Test load_multiple_files function for non-default lons."""
-        self.alt_lons, _ = np.meshgrid(self.alt_lons, self.alt_lats)
         np.testing.assert_array_equal(self.alt_dataset.lons, self.alt_lons)
 
     def test_function_load_dataset_from_multiple_netcdf_files_alt_times(self):
