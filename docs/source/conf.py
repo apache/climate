@@ -37,7 +37,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
-    'sphinxcontrib.autohttp.bottle',
+    'sphinxcontrib.httpdomain',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Apache Open Climate Workbench'
-copyright = u'2016, Apache Software Foundation'
+copyright = u'2017, Apache Software Foundation'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
