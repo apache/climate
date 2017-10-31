@@ -27,7 +27,7 @@ import ocw.metrics as metrics
 import numpy as np
 import numpy.ma as ma
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap 
+from mpl_toolkits.basemap import Basemap
 from matplotlib import rcParams
 from matplotlib.patches import Polygon
 import string
@@ -46,7 +46,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
                                  model_datasets, # list of target datasets for the evaluation
                                  [map_of_bias, map_of_bias])
     # run the evaluation (bias calculation)
-    bias_evaluation.run() 
+    bias_evaluation.run()
 
     rcm_bias = bias_evaluation.results[0]
 
@@ -57,7 +57,9 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     lon_min = obs_dataset.lons.min()
     lon_max = obs_dataset.lons.max()
 
-    string_list = list(string.ascii_lowercase) 
+    string_list = list(string.ascii_lowercase)
+    nmodels = len(model_datasets)
+    row, column = plotter._best_grid_shape(nmodels + 1, (row, column))
     ax = fig.add_subplot(row,column,1)
     if map_projection == 'npstere':
         m = Basemap(ax=ax, projection ='npstere', boundinglat=lat_min, lon_0=0,
@@ -79,9 +81,9 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
     max = m.contourf(x,y,obs_clim,levels = plotter._nice_intervals(obs_dataset.values, 10), extend='both',cmap='rainbow')
     ax.annotate('(a) \n' + obs_name,xy=(lon_min, lat_min))
     cax = fig.add_axes([0.02, 1.-float(1./row)+1./row*0.25, 0.01, 1./row*0.5])
-    plt.colorbar(max, cax = cax) 
+    plt.colorbar(max, cax = cax)
     clevs = plotter._nice_intervals(rcm_bias, 11)
-    for imodel in np.arange(len(model_datasets)):
+    for imodel in np.arange(nmodels):
 
         ax = fig.add_subplot(row, column,2+imodel)
         if map_projection == 'npstere':
@@ -97,7 +99,7 @@ def Map_plot_bias_of_multiyear_climatology(obs_dataset, obs_name, model_datasets
         ax.annotate('('+string_list[imodel+1]+')  \n '+model_names[imodel],xy=(lon_min, lat_min))
 
     cax = fig.add_axes([0.91, 0.5, 0.015, 0.4])
-    plt.colorbar(max, cax = cax) 
+    plt.colorbar(max, cax = cax)
 
     plt.subplots_adjust(hspace=0.01,wspace=0.05)
 
@@ -122,16 +124,16 @@ def Taylor_diagram_spatial_pattern_of_multiyear_climatology(obs_dataset, obs_nam
                                  [taylor_diagram])
 
     # run the evaluation (bias calculation)
-    taylor_evaluation.run() 
+    taylor_evaluation.run()
 
     taylor_data = taylor_evaluation.results[0]
 
     plotter.draw_taylor_diagram(taylor_data, model_names, obs_name, file_name, pos='upper right',frameon=False)
 
-def Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, seasonal_cycle, 
+def Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, model_names, seasonal_cycle,
                           file_name, row, column, x_tick=['']):
 
-    nmodel, nt, nregion = model_subregion_mean.shape  
+    nmodel, nt, nregion = model_subregion_mean.shape
 
     if seasonal_cycle:
         obs_data = ma.mean(obs_subregion_mean.reshape([1,nt/12,12,nregion]), axis=1)
@@ -140,19 +142,19 @@ def Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, mo
     else:
         obs_data = obs_subregion_mean
         model_data = model_subregion_mean
-        
+
     x_axis = np.arange(nt)
     x_tick_values = x_axis
 
     fig = plt.figure()
     rcParams['xtick.labelsize'] = 6
     rcParams['ytick.labelsize'] = 6
-  
+
     for iregion in np.arange(nregion):
-        ax = fig.add_subplot(row, column, iregion+1) 
+        ax = fig.add_subplot(row, column, iregion+1)
         x_tick_labels = ['']
         if iregion+1  > column*(row-1):
-            x_tick_labels = x_tick 
+            x_tick_labels = x_tick
         else:
             x_tick_labels=['']
         ax.plot(x_axis, obs_data[0, :, iregion], color='r', lw=2, label=obs_name)
@@ -162,8 +164,8 @@ def Time_series_subregion(obs_subregion_mean, obs_name, model_subregion_mean, mo
         ax.set_xticks(x_tick_values)
         ax.set_xticklabels(x_tick_labels)
         ax.set_title('Region %02d' % (iregion+1), fontsize=8)
-    
-    ax.legend(bbox_to_anchor=(-0.2, row/2), loc='center' , prop={'size':7}, frameon=False)  
+
+    ax.legend(bbox_to_anchor=(-0.2, row/2), loc='center' , prop={'size':7}, frameon=False)
 
     fig.subplots_adjust(hspace=0.7, wspace=0.5)
     fig.savefig(file_name, dpi=600, bbox_inches='tight')
@@ -172,7 +174,7 @@ def Portrait_diagram_subregion(obs_subregion_mean, obs_name, model_subregion_mea
                                file_name, normalize=True):
 
     nmodel, nt, nregion = model_subregion_mean.shape
-    
+
     if seasonal_cycle:
         obs_data = ma.mean(obs_subregion_mean.reshape([1,nt/12,12,nregion]), axis=1)
         model_data = ma.mean(model_subregion_mean.reshape([nmodel,nt/12,12,nregion]), axis=1)
@@ -193,35 +195,35 @@ def Portrait_diagram_subregion(obs_subregion_mean, obs_name, model_subregion_mea
             subregion_metrics[2, iregion, imodel] = metrics.calc_rmse(model_data[imodel, :, iregion], obs_data[0, :, iregion])
             # Fourth metric: correlation
             subregion_metrics[3, iregion, imodel] = metrics.calc_correlation(model_data[imodel, :, iregion], obs_data[0, :, iregion])
-   
+
     if normalize:
         for iregion in np.arange(nregion):
-            subregion_metrics[0, iregion, : ] = subregion_metrics[0, iregion, : ]/ma.std(obs_data[0, :, iregion])*100. 
-            subregion_metrics[1, iregion, : ] = subregion_metrics[1, iregion, : ]*100. 
-            subregion_metrics[2, iregion, : ] = subregion_metrics[2, iregion, : ]/ma.std(obs_data[0, :, iregion])*100. 
+            subregion_metrics[0, iregion, : ] = subregion_metrics[0, iregion, : ]/ma.std(obs_data[0, :, iregion])*100.
+            subregion_metrics[1, iregion, : ] = subregion_metrics[1, iregion, : ]*100.
+            subregion_metrics[2, iregion, : ] = subregion_metrics[2, iregion, : ]/ma.std(obs_data[0, :, iregion])*100.
 
     region_names = ['R%02d' % i for i in np.arange(nregion)+1]
 
     for imetric, metric in enumerate(['bias','std','RMSE','corr']):
-        plotter.draw_portrait_diagram(subregion_metrics[imetric, :, :], region_names, model_names, file_name+'_'+metric, 
-                                      xlabel='model',ylabel='region')             
+        plotter.draw_portrait_diagram(subregion_metrics[imetric, :, :], region_names, model_names, file_name+'_'+metric,
+                                      xlabel='model',ylabel='region')
 
 def Map_plot_subregion(subregions, ref_dataset, directory):
-  
-    lons, lats = np.meshgrid(ref_dataset.lons, ref_dataset.lats) 
+
+    lons, lats = np.meshgrid(ref_dataset.lons, ref_dataset.lats)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     m = Basemap(ax=ax, projection='cyl',llcrnrlat = lats.min(), urcrnrlat = lats.max(),
                 llcrnrlon = lons.min(), urcrnrlon = lons.max(), resolution = 'l')
     m.drawcoastlines(linewidth=0.75)
     m.drawcountries(linewidth=0.75)
-    m.etopo()  
-    x, y = m(lons, lats) 
+    m.etopo()
+    x, y = m(lons, lats)
     #subregion_array = ma.masked_equal(subregion_array, 0)
     #max=m.contourf(x, y, subregion_array, alpha=0.7, cmap='Accent')
     for subregion in subregions:
-        draw_screen_poly(subregion[1], m, 'w') 
-        plt.annotate(subregion[0],xy=(0.5*(subregion[1][2]+subregion[1][3]), 0.5*(subregion[1][0]+subregion[1][1])), ha='center',va='center', fontsize=8) 
+        draw_screen_poly(subregion[1], m, 'w')
+        plt.annotate(subregion[0],xy=(0.5*(subregion[1][2]+subregion[1][3]), 0.5*(subregion[1][0]+subregion[1][1])), ha='center',va='center', fontsize=8)
     fig.savefig(directory+'map_subregion', bbox_inches='tight')
 
 def draw_screen_poly(boundary_array, m, linecolor='k'):
@@ -238,10 +240,3 @@ def draw_screen_poly(boundary_array, m, linecolor='k'):
     xy = zip(x,y)
     poly = Polygon( xy, facecolor='none',edgecolor=linecolor )
     plt.gca().add_patch(poly)
-    
-    
-   
-
-    
-
-    

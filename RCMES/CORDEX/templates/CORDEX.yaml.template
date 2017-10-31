@@ -1,0 +1,57 @@
+{% set domain = models_info[0].domain %}
+{% set instrument = obs_info.instrument %}
+{% set variable = models_info[0].variable %}
+{% set basename = [variable, instrument, domain, season]|join('_') %}
+workdir: {{ [output_dir, domain, instrument, variable, season]|join('/') }}
+output_netcdf_filename: {{ basename }}.nc
+
+# (RCMES will temporally subset data between month_start and month_end.
+# If average_each_year is True (False), seasonal mean in each year is (not) calculated and used for metrics calculation.)
+time:
+    maximum_overlap_period: True
+    temporal_resolution: monthly
+{% if season == "winter" %}
+    month_start: 12
+    month_end: 2
+{% elif season == "summer" %}
+    month_start: 6
+    month_end: 8
+{% else %}
+    month_start: 1
+    month_end: 12
+{% endif %}
+    average_each_year: True
+
+space:
+    boundary_type: CORDEX {{ domain[:3] }}
+
+regrid:
+    regrid_on_reference: True
+
+datasets:
+  - loader_name: local_split
+    name: {{ instrument }}
+    file_path: {{ obs_info.filename }}
+    variable_name: {{ obs_info.variable }}
+{% for model_info in models_info %}
+  - loader_name: local_split
+    name: {{ model_info.model }}
+    file_path: {{ model_info.filename }}
+    variable_name: {{ model_info.variable }}
+    lat_name: lat
+    lon_name: lon
+{% endfor %}
+
+number_of_metrics_and_plots: 2
+
+metrics1: Map_plot_bias_of_multiyear_climatology
+
+plots1:
+    file_name: {{ basename }}_bias
+
+metrics2: Taylor_diagram_spatial_pattern_of_multiyear_climatology
+
+plots2:
+    file_name: {{ basename }}_taylor
+
+use_subregions: False

@@ -383,14 +383,34 @@ def get_temporal_overlap(dataset_array):
     ''' Find the maximum temporal overlap across the observation and model datasets
 
     :param dataset_array: an array of OCW datasets
+    :param idx: start and end indices to denote subset of months used.
+    :type idx: class:`tuple`
     '''
-    start_time = []
-    end_time = []
+    start_times = []
+    end_times = []
     for dataset in dataset_array:
-        start_time.append(dataset.temporal_boundaries()[0])
-        end_time.append(dataset.temporal_boundaries()[1])
+        slc = trim_dataset(dataset)
+        times = dataset.times[slc]
+        start_time, end_time = times[0], times[-1]
+        start_times.append(start_time)
+        end_times.append(end_time)
 
-    return np.max(start_time), np.min(end_time)
+    return np.max(start_times), np.min(end_times)
+
+
+def trim_dataset(dataset):
+    ''' Trim datasets such that first and last year of data have all 12 months
+
+    :param dataset: Dataset object
+    :type dataset: :class:`dataset.Dataset
+
+    :returns: Slice index for trimmed dataset
+    '''
+    start_time, end_time = dataset.temporal_boundaries()
+    start_month = 13 if start_time.month == 1 else start_time.month
+    end_month = 0 if end_time.month == 12 else end_time.month
+    slc = slice(13 - start_month, len(dataset.times) - end_month)
+    return slc
 
 
 def calc_subregion_area_mean_and_std(dataset_array, subregions):
@@ -505,33 +525,33 @@ def CORDEX_boundary(domain_name):
     :param domain_name: CORDEX domain name (http://www.cordex.org/)
     :type domain_name: :mod:'string'
     '''
-    if domain_name == 'southamerica':
+    if domain_name == 'southamerica' or domain_name == 'sam':
         return -57.61, 18.50, 254.28 - 360., 343.02 - 360.
-    elif domain_name == 'centralamerica':
+    elif domain_name == 'centralamerica' or domain_name == 'cam':
         return -19.46, 34.83, 235.74 - 360., 337.78 - 360.
-    elif domain_name == 'northamerica':
+    elif domain_name == 'northamerica' or domain_name == 'nam':
         return 12.55, 75.88, 189.26 - 360., 336.74 - 360.
-    elif domain_name == 'europe':
+    elif domain_name == 'europe' or domain_name == 'eur':
         return 22.20, 71.84, 338.23 - 360., 64.4
-    elif domain_name == 'africa':
+    elif domain_name == 'africa' or domain_name == 'afr':
         return -45.76, 42.24, 335.36 - 360., 60.28
-    elif domain_name == 'southasia':
+    elif domain_name == 'southasia' or domain_name == 'was':
         return -15.23, 45.07, 19.88, 115.55
-    elif domain_name == 'eastasia':
+    elif domain_name == 'eastasia' or domain_name == 'eas':
         return -0.10, 61.90, 51.59, 179.99
-    elif domain_name == 'centralasia':
+    elif domain_name == 'centralasia' or domain_name == 'cas':
         return 18.34, 69.37, 11.05, 139.13
-    elif domain_name == 'australasia':
+    elif domain_name == 'australasia' or domain_name == 'aus':
         return -52.36, 12.21, 89.25, 179.99
-    elif domain_name == 'antartica':
+    elif domain_name == 'antartica' or domain_name == 'ant':
         return -89.48, -56.00, -179.00, 179.00
-    elif domain_name == 'artic':
+    elif domain_name == 'artic' or domain_name == 'arc':
         return 46.06, 89.50, -179.00, 179.00
-    elif domain_name == 'mediterranean':
+    elif domain_name == 'mediterranean' or domain_name == 'med':
         return 25.63, 56.66, 339.79 - 360.00, 50.85
-    elif domain_name == 'middleeastnorthafrica':
+    elif domain_name == 'middleeastnorthafrica' or domain_name == 'mna':
         return -7.00, 45.00, 333.00 - 360.00, 76.00
-    elif domain_name == 'southeastasia':
+    elif domain_name == 'southeastasia' or domain_name == 'sea':
         return -15.14, 27.26, 89.26, 146.96
     else:
         err = "Invalid CORDEX domain name"
@@ -627,7 +647,7 @@ def _force_unicode(s, encoding='utf-8'):
     '''
     if hasattr(s, 'decode'):
         s = s.decode(encoding=encoding)
-        
+
     return s
 
 def calculate_temporal_trends(dataset):
@@ -649,7 +669,7 @@ def calculate_temporal_trends(dataset):
             if dataset.values[:,iy,ix].count() == nt:
                 trend[iy,ix], slope_err[iy,ix] = calculate_temporal_trend_of_time_series(
                                                x, dataset.values[:,iy,ix])
-    
+
     return ma.masked_equal(trend, -999.), ma.masked_equal(slope_err, -999.)
 
 def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000):
@@ -663,20 +683,20 @@ def calculate_ensemble_temporal_trends(timeseries_array, number_of_samples=1000)
     :returns: temporal trend and estimated error from bootstrapping
     :rtype: :float:`float','float'
     '''
-   
+
     nmodels, nt = timeseries_array.shape
     x = np.arange(nt)
     sampled_trend = np.zeros(number_of_samples)
     ensemble_trend, _ = calculate_temporal_trend_of_time_series(
                         x, np.mean(timeseries_array, axis=0))
-    
+
     for isample in np.arange(number_of_samples):
         index = np.random.choice(nmodels, size=nmodels, replace=True)
         random_ensemble = np.mean(timeseries_array[index, :], axis=0)
         sampled_trend[isample], _ = calculate_temporal_trend_of_time_series(
                                     x, random_ensemble)
     return ensemble_trend, np.std(sampled_trend, ddof=1)
-     
+
 
 def calculate_temporal_trend_of_time_series(x,y):
     ''' Calculate least-square trends (a) in y = ax+b and a's standard error

@@ -170,7 +170,7 @@ def load_WRF_2d_files(file_path=None,
         values0 = file_object.variables[variable_name][:]
         if isinstance(values0, numpy.ndarray):
             values0 = ma.array(values0,
-                               mask=numpy.zeros(values0.shape))   
+                               mask=numpy.zeros(values0.shape))
         if ifile == 0:
             values = values0
             variable_unit = file_object.variables[variable_name].units
@@ -260,7 +260,11 @@ def load_file(file_path,
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
-    variable_unit = netcdf.variables[variable_name].units
+    if not variable_unit:
+        if hasattr(netcdf.variables[variable_name], 'units'):
+            variable_unit = netcdf.variables[variable_name].units
+        else:
+            variable_unit = '1'
 
     # If the values are 4D then we need to strip out the elevation index
     if len(values.shape) == 4:
@@ -314,7 +318,7 @@ def load_multiple_files(file_path,
     :type file_path: :mod:`string`
     :param dataset_name: a list of dataset names. Data filenames must include the elements of dataset_name list.
     :type dataset_name: :mod:'list'
-    :param generic_dataset_name: If false, data filenames must include the elements of dataset_name list. 
+    :param generic_dataset_name: If false, data filenames must include the elements of dataset_name list.
     :type generic_dataset_name: :mod:'bool'
     :param variable_name: The variable name to load from the NetCDF file.
     :type variable_name: :mod:`string`
@@ -356,11 +360,11 @@ def load_multiple_files(file_path,
                                   lat_name=lat_name, lon_name=lon_name, time_name=time_name))
 
     else:
-        data_name = [i for i in dataset_name]    
+        data_name = [i for i in dataset_name]
         pattern = [['*'+i+'*'] for i in dataset_name]
         if file_path[-1] != '/':
             file_path = file_path+'/'
-        
+
         ndata = len(dataset_name)
         for idata in numpy.arange(ndata):
             datasets.append(load_dataset_from_multiple_netcdf_files(variable_name,
@@ -504,6 +508,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
     '''
     nc_files = []
     if not file_list:
+        filename_pattern = [''] if not filename_pattern else filename_pattern
         for pattern in filename_pattern:
             nc_files.extend(glob(file_path + pattern))
     else:
@@ -513,11 +518,8 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
 
     dataset0 = load_file(nc_files[0], variable_name, lat_name=lat_name,
                          lon_name=lon_name, time_name=time_name)
-    if dataset0.lons.ndim == 1 and dataset0.lats.ndim == 1:
-        lons, lats = numpy.meshgrid(dataset0.lons, dataset0.lats)
-    elif dataset0.lons.ndim == 2 and dataset0.lats.ndim == 2:
-        lons = dataset0.lons
-        lats = dataset0.lats
+    lons = dataset0.lons
+    lats = dataset0.lats
 
     if mask_file:
         mask_dataset = load_file(mask_file, mask_variable)
@@ -536,7 +538,8 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
         else:
             data_values = numpy.concatenate((data_values, values0))
     times = numpy.array(times)
-    return Dataset(lats, lons, times, data_values, 
+    variable_unit = dataset0.units if not variable_unit else variable_unit
+    return Dataset(lats, lons, times, data_values,
                    variable_name, units=variable_unit,name=name)
 
 
@@ -674,7 +677,7 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
                          filename_pattern=None,
                          filelist=None,
                          variable_name='precipitationCal',
-                         user_mask_file=None, 
+                         user_mask_file=None,
                          mask_variable_name='mask',
                          user_mask_values=[10],
                          longitude_name='lon',
@@ -694,11 +697,11 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
     :type name: :mod:`string`
     :user_mask_file: user's own gridded mask file(a netCDF file name)
     :type name: :mod:`string`
-    :mask_variable_name: mask variables in user_mask_file    
+    :mask_variable_name: mask variables in user_mask_file
     :type name: :mod:`string`
-    :longitude_name: longitude variable in user_mask_file    
+    :longitude_name: longitude variable in user_mask_file
     :type name: :mod:`string`
-    :latitude_name: latitude variable in user_mask_file    
+    :latitude_name: latitude variable in user_mask_file
     :type name: :mod:`string`
     :param user_mask_values: grid points where mask_variable == user_mask_value will be extracted.
     :type user_mask_values: list of strings
@@ -731,7 +734,7 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
             mask_longitude = file_object.variables[longitude_name][:]
             mask_latitude = file_object.variables[latitude_name][:]
             spatial_mask = utils.regrid_spatial_mask(lons,lats,
-                                                     mask_longitude, mask_latitude, 
+                                                     mask_longitude, mask_latitude,
                                                      mask_variable,
                                                      user_mask_values)
             y_index, x_index = numpy.where(spatial_mask == 0)
@@ -739,7 +742,7 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
         file_object = h5py.File(file)
         values0 = ma.transpose(ma.masked_less(
             file_object['Grid'][variable_name][:], 0.))
-        values_masked = values0[y_index, x_index] 
+        values_masked = values0[y_index, x_index]
         values_masked = ma.expand_dims(values_masked, axis=0)
         if ifile == 0:
             values = values_masked
@@ -747,5 +750,3 @@ def load_GPM_IMERG_files_with_spatial_filter(file_path=None,
             values = ma.concatenate((values, values_masked))
         file_object.close()
     return values
-
-

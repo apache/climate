@@ -51,14 +51,14 @@ class TestBestGridShapeFunction(unittest.TestCase):
     def test_returned_shape_small(self):
         nplots = 2
         oldshape = (2, 2)
-        expected_shape = (1, 2)
+        expected_shape = (2, 1)
         new_shape = plotter._best_grid_shape(nplots, oldshape)
         self.assertEqual(new_shape, expected_shape)
 
     def test_returned_shape_large(self):
         nplots = 57
-        oldshape = (220, 12)
-        expected_shape = (5, 12)
+        oldshape = (12, 220)
+        expected_shape = (12, 5)
         new_shape = plotter._best_grid_shape(nplots, oldshape)
         self.assertEqual(new_shape, expected_shape)
 
