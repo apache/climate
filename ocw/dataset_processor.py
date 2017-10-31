@@ -75,13 +75,18 @@ def temporal_subset(target_dataset, month_start, month_end,
                              name=target_dataset.name)
 
     if average_each_year:
+        new_times = new_dataset.times
         nmonth = len(month_index)
-        ntime = new_dataset.times.size
+        ntime = new_times.size
         nyear = ntime // nmonth
         if ntime % nmonth != 0:
-            raise ValueError("Number of times in dataset ({}) does not "
-                             "divide evenly into {} year(s)."
-                             .format(ntime, nyear))
+            logger.warning("Number of times in dataset ({}) does not "
+                           "divide evenly into {} year(s). Trimming data..."
+                           .format(ntime, nyear))
+            slc = utils.trim_dataset(new_dataset)
+            new_dataset.values = new_dataset.values[slc]
+            new_times = new_times[slc]
+            nyear = new_times.size // nmonth
 
         averaged_time = []
         ny, nx = target_dataset.values.shape[1:]
@@ -92,7 +97,7 @@ def temporal_subset(target_dataset, month_start, month_end,
             center_index = int(nmonth / 2 + iyear * nmonth)
             if nmonth == 1:
                 center_index = iyear
-            averaged_time.append(new_dataset.times[center_index])
+            averaged_time.append(new_times[center_index])
             averaged_values[iyear, :] = ma.average(new_dataset.values[
                 nmonth * iyear: nmonth * iyear + nmonth, :], axis=0)
         new_dataset = ds.Dataset(target_dataset.lats,
@@ -253,7 +258,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
             if path.contains_point([new_lons[iy, ix],
                                     new_lats[iy, ix]]) or not boundary_check:
                new_xy_mask[iy, ix] = 0.
-            
+
     new_index = np.where(new_xy_mask == 0.)
     # Regrid the data on each time slice
     for i in range(len(target_dataset.times)):
@@ -286,7 +291,7 @@ def spatial_regrid(target_dataset, new_latitudes, new_longitudes,
         values_false_indices = np.where(values_original.mask == False)
         qmdi[values_true_indices] = 1.
         qmdi[values_false_indices] = 0.
-        qmdi_r = griddata((lons.flatten(), lats.flatten()), qmdi.flatten(), 
+        qmdi_r = griddata((lons.flatten(), lats.flatten()), qmdi.flatten(),
                              (new_lons[new_index],
                               new_lats[new_index]),
                               method='nearest')
@@ -1441,7 +1446,7 @@ def _are_bounds_contained_by_dataset(dataset, bounds):
     '''
     lat_min, lat_max, lon_min, lon_max = dataset.spatial_boundaries()
     start, end = dataset.temporal_boundaries()
-    
+
     errors = []
 
     # TODO:  THIS IS TERRIBLY inefficent and we need to use a geometry

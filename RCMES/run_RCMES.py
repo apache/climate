@@ -25,6 +25,11 @@ from datetime import datetime
 from glob import glob
 from getpass import getpass
 import numpy as np
+
+# Need these lines to run RCMES through SSH without X11
+import matplotlib
+matplotlib.use('Agg')
+
 import ocw.utils as utils
 import ocw.dataset_processor as dsp
 from ocw.dataset import Bounds
@@ -68,8 +73,13 @@ time_info = config['time']
 temporal_resolution = time_info['temporal_resolution']
 
 # Read time info
-start_time = datetime.strptime(time_info['start_time'].strftime('%Y%m%d'),'%Y%m%d')
-end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
+maximum_overlap_period = time_info.get('maximum_overlap_period', False)
+if not maximum_overlap_period:
+    start_time = datetime.strptime(time_info['start_time'].strftime('%Y%m%d'),'%Y%m%d')
+    end_time = datetime.strptime(time_info['end_time'].strftime('%Y%m%d'),'%Y%m%d')
+else:
+    # These values will be determined after datasets are loaded
+    start_time, end_time = None, None
 
 # Read space info
 space_info = config['space']
@@ -79,7 +89,12 @@ if not 'boundary_type' in space_info:
     min_lon = space_info['min_lon']
     max_lon = space_info['max_lon']
 else:
-    min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(space_info['boundary_type'][6:].replace(" ","").lower())
+    domain = space_info['boundary_type']
+    if 'CORDEX' in domain:
+        domain = domain.replace('CORDEX', '').lower()
+        domain = domain.strip()          
+    min_lat, max_lat, min_lon, max_lon = utils.CORDEX_boundary(domain)
+
 
 # Additional arguments for the DatasetLoader
 extra_opts = {'min_lat': min_lat, 'max_lat': max_lat, 'min_lon': min_lon,
@@ -94,7 +109,7 @@ data_info = config['datasets']
 # (first) dataset. We should instead make this a parameter for each
 # loader and Dataset objects.
 fact = data_info[0].pop('multiplying_factor', 1)
-    
+
 """ Step 1: Load the datasets """
 print('Loading datasets:\n{}'.format(data_info))
 datasets = load_datasets_from_config(extra_opts, *data_info)
@@ -102,15 +117,15 @@ multiplying_factor = np.ones(len(datasets))
 multiplying_factor[0] = fact
 names = [dataset.name for dataset in datasets]
 for i, dataset in enumerate(datasets):
-    if temporal_resolution == 'daily' or temporal_resolution == 'monthly':
-        datasets[i] = dsp.normalize_dataset_datetimes(dataset,
-                                                      temporal_resolution)
+    res = dataset.temporal_resolution()
+    if res == 'daily' or res == 'monthly':
+        datasets[i] = dsp.normalize_dataset_datetimes(dataset, res)
         if multiplying_factor[i] != 1:
             datasets[i].values *= multiplying_factor[i]
 
 """ Step 2: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
-if time_info['maximum_overlap_period']:
+if maximum_overlap_period:
     start_time, end_time = utils.get_temporal_overlap(datasets)
     print('Maximum overlap period')
     print('start_time: {}'.format(start_time))
@@ -140,7 +155,7 @@ else:
 for i, dataset in enumerate(datasets):
     datasets[i] = dsp.subset(dataset, bounds)
     if dataset.temporal_resolution() != temporal_resolution:
-        datasets[i] = dsp.temporal_rebin(dataset, temporal_resolution)
+        datasets[i] = dsp.temporal_rebin(datasets[i], temporal_resolution)
 
 # Temporally subset both observation and model datasets
 # for the user specified season
@@ -261,8 +276,10 @@ if nmetrics > 0:
         file_name = workdir+plot_info['file_name']
 
         print('metrics {0}/{1}: {2}'.format(imetric, nmetrics, metrics_name))
+        default_shape = (int(np.ceil(np.sqrt(ntarget + 2))),
+                         int(np.ceil(np.sqrt(ntarget + 2))))
         if metrics_name == 'Map_plot_bias_of_multiyear_climatology':
-            row, column = plot_info['subplots_array']
+            row, column = plot_info.get('subplots_array', default_shape)
             if 'map_projection' in plot_info.keys():
                 Map_plot_bias_of_multiyear_climatology(
                     reference_dataset, reference_name, target_datasets, target_names,
@@ -279,7 +296,7 @@ if nmetrics > 0:
         elif config['use_subregions']:
             if (metrics_name == 'Timeseries_plot_subregion_interannual_variability'
                 and average_each_year):
-                row, column = plot_info['subplots_array']
+                row, column = plot_info.get('subplots_array', default_shape)
                 Time_series_subregion(
                     reference_subregion_mean, reference_name, target_subregion_mean,
                     target_names, False, file_name, row, column,
@@ -288,7 +305,7 @@ if nmetrics > 0:
 
             if (metrics_name == 'Timeseries_plot_subregion_annual_cycle'
                 and not average_each_year and month_start==1 and month_end==12):
-                row, column = plot_info['subplots_array']
+                row, column = plot_info.get('subplots_array', (1, 1))
                 Time_series_subregion(
                     reference_subregion_mean, reference_name,
                     target_subregion_mean, target_names, True,
