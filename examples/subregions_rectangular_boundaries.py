@@ -1,16 +1,26 @@
-# Apache OCW lib immports
-from ocw.dataset import Dataset, Bounds
-import ocw.data_source.local as local
-import ocw.data_source.rcmed as rcmed
-import ocw.dataset_processor as dsp
-import ocw.evaluation as evaluation
-import ocw.metrics as metrics
-import ocw.plotter as plotter
-import ocw.utils as utils
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import datetime
 import numpy as np
-import numpy.ma as ma
+
+# Apache OCW lib immports
+from ocw.dataset import Bounds
+import ocw.plotter as plotter
 
 OUTPUT_PLOT = "subregions"
 
@@ -32,19 +42,19 @@ new_lats = np.arange(LAT_MIN, LAT_MAX, gridLatStep)
 new_lons = np.arange(LON_MIN, LON_MAX, gridLonStep)
 
 list_of_regions = [
-    Bounds(-10.0, 0.0, 29.0, 36.5, START_SUB, END_SUB),
-    Bounds(0.0, 10.0,  29.0, 37.5, START_SUB, END_SUB),
-    Bounds(10.0, 20.0, 25.0, 32.5, START_SUB, END_SUB),
-    Bounds(20.0, 33.0, 25.0, 32.5, START_SUB, END_SUB),
-    Bounds(-19.3, -10.2, 12.0, 20.0, START_SUB, END_SUB),
-    Bounds(15.0, 30.0, 15.0, 25.0, START_SUB, END_SUB),
-    Bounds(-10.0, 10.0, 7.3, 15.0, START_SUB, END_SUB),
-    Bounds(-10.9, 10.0, 5.0, 7.3,  START_SUB, END_SUB),
-    Bounds(33.9, 40.0,  6.9, 15.0, START_SUB, END_SUB),
-    Bounds(10.0, 25.0,  0.0, 10.0, START_SUB, END_SUB),
-    Bounds(10.0, 25.0, -10.0,  0.0, START_SUB, END_SUB),
-    Bounds(30.0, 40.0, -15.0,  0.0, START_SUB, END_SUB),
-    Bounds(33.0, 40.0, 25.0, 35.0, START_SUB, END_SUB)]
+    Bounds(lat_min=-10.0, lat_max=0.0, lon_min=29.0, lon_max=36.5, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=0.0, lat_max=10.0, lon_min=29.0, lon_max=37.5, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=10.0, lat_max=20.0, lon_min=25.0, lon_max=32.5, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=20.0, lat_max=33.0, lon_min=25.0, lon_max=32.5, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=-19.3, lat_max=-10.2, lon_min=12.0, lon_max=20.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=15.0, lat_max=30.0, lon_min=15.0, lon_max=25.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=-10.0, lat_max=10.0, lon_min=7.3, lon_max=15.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=-10.9, lat_max=10.0, lon_min=5.0, lon_max=7.3, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=33.9, lat_max=40.0, lon_min=6.9, lon_max=15.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=10.0, lat_max=25.0, lon_min=0.0, lon_max=10.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=10.0, lat_max=25.0, lon_min=-10.0, lon_max=0.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=30.0, lat_max=40.0, lon_min=-15.0, lon_max=0.0, start=START_SUB, end=END_SUB),
+    Bounds(lat_min=33.0, lat_max=40.0, lon_min=25.0, lon_max=35.0, start=START_SUB, end=END_SUB)]
 
 # for plotting the subregions
 plotter.draw_subregions(list_of_regions, new_lats,
