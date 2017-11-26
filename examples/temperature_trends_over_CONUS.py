@@ -15,6 +15,31 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    temperature_trends_over_CONUS.py
+
+    Use OCW to plot the temperature trends over CONUS using the nClimDiv reference data.
+
+    In this example:
+
+    1. Load the local file nClimDiv/nClimDiv_tave_1895-2005.nc into OCW Dataset Objects.
+    *** Note *** It is assume this file exists locally in a subdirectory nClimDiv located
+    in the same directory as the example.
+    2. Load the CMIP5 simulations into a list of OCW Dataset Objects.
+    3. Spatially subset the observed dataset into state and regional boundaries.
+    4. Temporally subset the observed and model datasets.
+    5. Calculate and plot the temperature trend for each region.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset
+    3. dataset_processor
+    4. plotter
+    5. utlis
+
+"""
+
 import numpy as np
 import datetime
 
