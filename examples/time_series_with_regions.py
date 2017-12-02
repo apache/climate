@@ -15,11 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 
-'''
-    Download three netCDF files, process the files to be the same shape,
-    divide the data into subregions and plot a monthly time series for each sub region.
+"""
+    time_series_with_regions.py
 
-'''
+    Use OCW to download and plot (time series) three local datasets against a reference dataset.
+
+    In this example:
+
+    1. Download three netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+        AFRICA_ICTP-REGCM3_CTL_ERAINT_MM_50km-rg_1989-2008_pr.nc
+        AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+    2. Load the local files into OCW dataset objects.
+    3. Interface with the Regional Climate Model Evalutaion Database (https://rcmes.jpl.nasa.gov/)
+       to load the CRU3.1 Daily Precipitation dataset (https://rcmes.jpl.nasa.gov/content/cru31).
+    4. Process each dataset to the same same shape.
+        a.) Restrict the datasets re: geographic and time boundaries.
+        b.) Convert the dataset water flux to common units.
+        c.) Normalize the dataset date / times to monthly.
+        d.) Spatially regrid each dataset.
+    5.  Calculate the mean monthly value for each dataset.
+    6.  Separate each dataset into 13 subregions.
+    7.  Create a time series for each dataset in each subregion.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. datasource/rcmed
+    3. dataset
+    4. dataset_processor
+    5. plotter
+
+"""
 
 import sys
 import datetime
@@ -119,8 +146,8 @@ new_lons = np.arange(LON_MIN, LON_MAX, gridLonStep)
 CRU31 = dsp.spatial_regrid(CRU31, new_lats, new_lons)
 
 for member, each_target_dataset in enumerate(target_datasets):
-    target_datasets[member] = dsp.spatial_regrid(
-        target_datasets[member], new_lats, new_lons)
+    target_datasets[member] =\
+        dsp.spatial_regrid(target_datasets[member], new_lats, new_lons)
 
 # Find climatology monthly for obs and models.
 CRU31.values, CRU31.times = utils.calc_climatology_monthly(CRU31)
@@ -128,11 +155,12 @@ CRU31.values, CRU31.times = utils.calc_climatology_monthly(CRU31)
 # the xticks elegantly when the first date is the epoch and tries to determine
 # the start of the xticks based on a value < 1.
 for index, item in enumerate(CRU31.times):
-    CRU31.times[index] = datetime.date(item.year, item.month, monthrange(item.year, item.month)[1])
+    CRU31.times[index] = \
+        datetime.date(item.year, item.month, monthrange(item.year, item.month)[1])
 
 for member, each_target_dataset in enumerate(target_datasets):
-    target_datasets[member].values, target_datasets[
-        member].times = utils.calc_climatology_monthly(target_datasets[member])
+    target_datasets[member].values, target_datasets[member].times = \
+        utils.calc_climatology_monthly(target_datasets[member])
 
 # make the model ensemble
 target_datasets_ensemble = dsp.ensemble(target_datasets)

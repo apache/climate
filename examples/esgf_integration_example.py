@@ -15,6 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    esgf_integration_example.py
+
+    Use OCW to download an ESGF dataset into the common format of an OCW dataset object.
+
+    In this example:
+
+    1. Download an ESGF (https://esgf.llnl.gov/) dataset and load it into a OCW dataset object.
+
+    OCW modules demonstrated:
+
+    1. datasource/esgf
+
+"""
+
 import ocw.data_source.esgf as esgf
 from getpass import getpass
 import ssl

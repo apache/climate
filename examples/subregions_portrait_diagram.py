@@ -15,6 +15,45 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    subregions_portrait_diagram.py
+
+    Use OCW to download, normalize, evaluate and plot (portrait diagram)
+    three local datasets against a reference dataset.
+
+    In this example:
+
+    1. Download three netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+        AFRICA_ICTP-REGCM3_CTL_ERAINT_MM_50km-rg_1989-2008_pr.nc
+        AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+    2. Load the local files into OCW dataset objects.
+    3. Interface with the Regional Climate Model Evaluation Database (https://rcmes.jpl.nasa.gov/)
+       to load the CRU3.1 Daily Precipitation dataset (https://rcmes.jpl.nasa.gov/content/cru31).
+    4. Process each dataset to the same same shape.
+        a.) Restrict the datasets re: geographic and time boundaries.
+        b.) Convert the dataset water flux to common units.
+        c.) Normalize the dataset date / times to monthly.
+        d.) Spatially regrid each dataset.
+    5.  Calculate the mean annual value for each dataset.
+    6.  Separate each dataset into 13 subregions.
+    7.  Extract the metrics used for the evaluation and evaluate
+        against a reference dataset.
+    8.  Create a portrait diagram of the results of the evaluation.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. datasource/rcmed
+    3. dataset
+    4. dataset_processor
+    5. metrics
+    6. evaluation
+    7. plotter
+    8. utils
+
+"""
+
 from os import path
 import urllib
 import ssl

@@ -15,6 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    subregions_rectangular_boundaries.py
+
+    Use OCW to define a set a sub regions and draw the sub regions.
+
+    In this example:
+
+    1. Subset the data set (lat / lon / start date / end date).
+    2. Draw each sub region.
+
+    OCW modules demonstrated:
+
+    1. dataset (Bounds)
+    2. plotter
+
+"""
+
 import datetime
 import numpy as np
 

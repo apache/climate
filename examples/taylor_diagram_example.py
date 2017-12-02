@@ -15,6 +15,37 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    taylor_diagram_example.py
+
+    Use OCW to download, normalize and evaluate two datasets
+    drawing a Taylor diagram of the results of the evaluation.
+
+    In this example:
+
+    1. Download two netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+        AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc
+    2. Load the local files into OCW dataset objects.
+    3. Process each dataset to the same same shape.
+        a.) Restrict the datasets re: geographic and time boundaries.
+        b.) Temporally rebin the data (monthly).
+        c.) Spatially regrid each dataset.
+    4.  Extract the metrics used for the evaluation and evaluate
+        against a reference dataset.
+    5.  Draw evaluation results Taylor diagram.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset
+    3. dataset_processor
+    4. evaluation
+    5. metrics
+    6. plotter
+
+"""
+
 import datetime
 import sys
 from os import path
