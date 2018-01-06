@@ -113,10 +113,10 @@ under the License.
                 <div class="datasetNameDisplay col-md-8 col-md-offset-1 muted" tooltip="{{dataset.name}}">
                   {{dataset.name}}
                 </div>
-                <div class="col-md-1 col-md-offset-2">
-                  <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Remove Dataset">  
-                    <a class="no-color-link" href="#" ng-click="removeDataset($index)">
-                      <i class="fa fa-remove"></i>
+                <div class="col-md-2 col-md-offset-2">
+                  <span tooltip-placement="left" tooltip-popup-delay="700" tooltip="Remove Dataset">
+                    <a class="no-color-link pull-right" href="#" ng-click="removeDataset($index)">
+                        <i class="fa fa-times"/>
                     </a>
                   </span>
                 </div>
@@ -156,8 +156,8 @@ under the License.
                 <!--Preview Map Section-->
                 <div class="col-md-3">
                   <!--If the dataset is global we show a picture of a globe instead of the actual map-->
-                  <div ng-hide="dataset.latlonVals.lonMin == -180 && dataset.latlonVals.lonMax == 180 && 
-                                dataset.latlonVals.latMin == -90 && dataset.latlonVals.latMax == 90" 
+                  <div ng-hide="dataset.latlonVals.lonMin == -180 && dataset.latlonVals.lonMax == 180 &&
+                                dataset.latlonVals.latMin == -90 && dataset.latlonVals.latMax == 90"
                                 preview-map="dataset" index="$index"></div>
                   <div ng-show="dataset.latlonVals.lonMin == -180 && dataset.latlonVals.lonMax == 180 &&
                                 dataset.latlonVals.latMin == -90 && dataset.latlonVals.latMax == 90">
@@ -180,14 +180,14 @@ under the License.
             <leaflet-map id="map"></leaflet-map>
           </div>
         </div>
-        
+
         <!--Timeline-->
         <div class="row">
           <div class="col-md-12" ng-controller="TimelineCtrl">
             <div class="timeline"></div>
           </div>
         </div>
-        
+
         <div class="row">
           <div class="col-md-12" ng-controller="ParameterSelectCtrl">
             <div class="row top3">
@@ -196,7 +196,7 @@ under the License.
                 <form>
                   <!--This styling HAD to be done inline. Using a class wouldn't work and for some -->
                   <!--reason the input boxes refused to be 100% wide when their span size was set.-->
-                  <input ng-disabled="shouldDisableControls()" on-blur="checkParameters();" ng-model="displayParams.start" ui-date="datepickerSettings" ui-date-format="yy-mm-dd" type="text" class="col-md-4 text-center" style="width:100%" />
+                  <input ng-disabled="shouldDisableControls()" on-blur="checkParameters();" ng-model="displayParams.start" ui-date="datepickerSettings" type="text" class="col-md-4 text-center" style="width:100%" />
                 </form>
               </div>
               <div class="col-md-2 text-center">End Date:</div>
@@ -204,7 +204,7 @@ under the License.
                 <form>
                   <!--This styling HAD to be done inline. Using a class wouldn't work and for some -->
                   <!--reason the input boxes refused to be 100% wide when their span size was set.-->
-                  <input ng-disabled="shouldDisableControls()" on-blur="checkParameters();" ng-model="displayParams.end" ui-date="datepickerSettings" ui-date-format="yy-mm-dd" type="text" class="col-md-4 text-center" style="width:100%"/>
+                  <input ng-disabled="shouldDisableControls()" on-blur="checkParameters();" ng-model="displayParams.end" ui-date="datepickerSettings" type="text" class="col-md-4 text-center" style="width:100%"/>
                 </form>
               </div>
             </div>

@@ -41,7 +41,7 @@ function($rootScope, $scope, selectedDatasetInformation, regionSelectParams) {
 		// Don't process if we don't have any datasets added or if the map doesn't exist!!
 		if ($scope.datasets.length == 0 || !("map" in $rootScope))
 			return;
- 		
+
 		// Create a group that we'll draw overlays to
 		$rootScope.rectangleGroup = L.layerGroup();
 		// Add rectangle Group to map
@@ -78,7 +78,7 @@ function($rootScope, $scope, selectedDatasetInformation, regionSelectParams) {
 		$rootScope.rectangleGroup.addLayer(overlapBorder);
 
 		// Draw user selected region
-		if ($scope.regionParams.areValid) {
+		if (!isNaN($scope.regionParams.lonMin) && !isNaN($scope.regionParams.lonMax) && !isNaN($scope.regionParams.latMin) && !isNaN($scope.regionParams.latMax)) {
 
 			var bounds = [[$scope.regionParams.latMax, $scope.regionParams.lonMin],
 						  [$scope.regionParams.latMin, $scope.regionParams.lonMax]];

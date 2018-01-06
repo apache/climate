@@ -81,16 +81,20 @@ angular.module('ocwUiApp')
       };
 
       $scope.dataSelectUpdated = function() {
-        var urlString = $rootScope.baseURL + '/rcmed/parameters/?dataset=' +
-                        $scope.datasetSelection["shortname"] +
-                        "&callback=JSON_CALLBACK";
-        $http.jsonp(urlString)
-          .success(function(data) {
-            $scope.retrievedObsParams = data;
-            if ($scope.retrievedObsParams.length > 1)
-              $scope.retrievedObsParams.splice(0, 0, {shortname: 'Please select a parameter'});
-            $scope.parameterSelection = $scope.retrievedObsParams[0];
-          });
+        if ($scope.datasetSelection) {
+          var urlString = $rootScope.baseURL + '/rcmed/parameters/dataset/' +
+            $scope.datasetSelection["shortname"] +
+            "?callback=JSON_CALLBACK";
+
+         $http.jsonp(urlString)
+           .success(function(data) {
+             $scope.retrievedObsParams = data;
+             if ($scope.retrievedObsParams.length > 1)
+               $scope.retrievedObsParams.splice(0, 0, {longname: 'Please select a parameter'});
+             $scope.parameterSelection = $scope.retrievedObsParams[0];
+            }
+           );
+        }
       };
 
       $scope.addObservation = function() {
