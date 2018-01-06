@@ -71,12 +71,16 @@ describe('Service: selectedDatasetInformation', function () {
 
   it('should provide the removeDataset function', function() {
     inject(function(selectedDatasetInformation) {
-      selectedDatasetInformation.addDataset(1);
-      selectedDatasetInformation.addDataset(2);
 
-      expect(selectedDatasetInformation.getDatasets()[0]).toEqual(1);
+      var dataset_1 = {name: 'dataset_1', shouldDisplay: false, regrid: false};
+      var dataset_2 = {name: 'dataset_2', shouldDisplay: false, regrid: false};
+
+      selectedDatasetInformation.addDataset(dataset_1);
+      selectedDatasetInformation.addDataset(dataset_2);
+
+      expect(selectedDatasetInformation.getDatasets()[0]).toEqual(dataset_1);
       selectedDatasetInformation.removeDataset(0);
-      expect(selectedDatasetInformation.getDatasets()[0]).toEqual(2);
+      expect(selectedDatasetInformation.getDatasets()[0]).toEqual(dataset_2);
     });
   });
 
