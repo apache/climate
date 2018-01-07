@@ -132,6 +132,14 @@ module.exports = function (grunt) {
       }
     },
 
+    // Supplements jshint with a focus on style.
+    jscs: {
+      src: '<%= yeoman.app %>/scripts/{,*/}*.js',
+      options: {
+        config: ".jscsrc",
+        fix: false
+      }
+    },
     // Empties folders to start fresh
     clean: {
       dist: {
@@ -408,6 +416,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'newer:jshint',
+    'jscs',
     'test',
     'build'
   ]);
