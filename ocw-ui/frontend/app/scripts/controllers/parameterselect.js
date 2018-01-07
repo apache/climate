@@ -166,17 +166,17 @@ angular.module('ocwUiApp')
       data['lon_min'] = $scope.displayParams.lonMin,
       data['lon_max'] = $scope.displayParams.lonMax,
 
-      $http.post(`${$rootScope.baseURL}/processing/run_evaluation/`, data).
-      success((data) => {
-        const evalWorkDir = data.eval_work_dir;
+      $http.post($rootScope.baseURL + '/processing/run_evaluation/', data).
+      success(function(data) {
+        var evalWorkDir = data['eval_work_dir'];
 
         $scope.runningEval = false;
 
-        $timeout(() => {
-          let url = (evalWorkDir) ? `/results/${evalWorkDir}` : '/results';
+        $timeout(function() {
+          var url = (evalWorkDir) ? '/results/' + evalWorkDir : '/results';
           $location.url(url)
         }, 100);
-      }).error(() => {
+      }).error(function() {
         $scope.runningEval = false;
       });
     };
