@@ -14,7 +14,10 @@
 import sys
 import os
 
-autodoc_mock_imports = ["esgf"]
+# esgf is not currently available for Python 3 and will throw an
+# error when building the documents.
+if sys.version_info[0] >= 3:
+    autodoc_mock_imports = ["esgf"]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
