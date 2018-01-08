@@ -15,23 +15,36 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+Classes:
+    Downscaling - Container for applying statistical downscaling.
+"""
 
-import ocw.utils as utils
+
 import numpy as np
-from scipy.stats import percentileofscore, linregress
+from scipy.stats import linregress, percentileofscore
 
 
-class Downscaling:
+class Downscaling(object):
+    """
+    Statistical downscaling infers higher resolution information from lower resolution data.
+    For example, data collected at a more coarse regional level applied to a more refined
+    local level.
+
+    Statistical downscaling establishes a relationship between different variables in the large scale
+    and the local scale and applies that relationship to the local scale.
+    """
 
     def __init__(self, ref_dataset, model_present, model_future):
-        '''
+        """ Default Downscaling constructor.
+
         :param ref_dataset: The Dataset to use as the reference dataset (observation)
         :type ref_dataset: Dataset
         :param model_present: model simulation to be compared with observation
         :type model_present: Dataset
         :param model_future: model simulation to be calibrated for prediction
         :type model_future: Dataset
-        '''
+        """
         self.ref_dataset = ref_dataset[~ref_dataset.mask].ravel()
         self.model_present = model_present.ravel()
         self.model_future = model_future.ravel()
@@ -39,11 +52,11 @@ class Downscaling:
     description = "statistical downscaling methods"
 
     def Delta_addition(self):
-        '''Calculate the mean difference between future and present simulation, 
+        """Calculate the mean difference between future and present simulation,
            then add the difference to the observed distribution
 
         :returns: downscaled model_present and model_future
-        '''
+        """
         ref = self.ref_dataset
         model_present = self.model_present
         model_future = self.model_future
@@ -51,23 +64,26 @@ class Downscaling:
         return model_present, ref + np.mean(model_future - model_present)
 
     def Delta_correction(self):
-        '''Calculate the mean difference between observation and present simulation,
+        """Calculate the mean difference between observation and present simulation,
            then add the difference to the future distribution
 
         :returns: downscaled model_present and model_future
-        '''
+        """
         ref = self.ref_dataset
         model_present = self.model_present
         model_future = self.model_future
 
-        return model_present + np.mean(ref) - np.mean(model_present), model_future + np.mean(ref) - np.mean(model_present)
+        return model_present + np.mean(ref) - np.mean(model_present), model_future + \
+            np.mean(ref) - np.mean(model_present)
 
     def Quantile_mapping(self):
-        '''Remove the biases for each quantile value 
-        Wood et al (2004) HYDROLOGIC IMPLICATIONS OF DYNAMICAL AND STATISTICAL APPROACHES TO DOWNSCALING CLIMATE MODEL OUTPUTS
+        """Remove the biases for each quantile value
+
+        Wood et al (2004) HYDROLOGIC IMPLICATIONS OF DYNAMICAL
+        AND STATISTICAL APPROACHES TO DOWNSCALING CLIMATE MODEL OUTPUTS
 
         :returns: downscaled model_present and model_future
-        '''
+        """
         ref = self.ref_dataset
         model_present = self.model_present
         model_present_corrected = np.zeros(model_present.size)
@@ -86,11 +102,14 @@ class Downscaling:
         return model_present_corrected, model_future_corrected
 
     def Asynchronous_regression(self):
-        '''Remove the biases by fitting a linear regression model with ordered observational and model datasets
-        Stoner et al (2013) An asynchronous regional regression model for statistical downscaling of daily climate variables    
+        """Remove the biases by fitting a linear regression model with ordered observational and
+        model datasets
+
+        Stoner et al (2013) An asynchronous regional regression model for statistical downscaling of
+        daily climate variables
 
         :returns: downscaled model_present and model_future
-        '''
+        """
 
         ref_original = self.ref_dataset
         model_present = self.model_present

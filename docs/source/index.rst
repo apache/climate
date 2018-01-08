@@ -18,6 +18,7 @@ Contents:
    ocw/evaluation
    ocw/metrics
    ocw/plotter
+   ocw/statistical_downscaling
    ocw/utils
    data_source/data_sources
    ui-backend/backend
