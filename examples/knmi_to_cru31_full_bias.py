@@ -15,6 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    knmi_to_cru31_full_bias.py
+
+    Use OCW to download, evaluate and plot (contour map) a dataset
+    against a reference dataset and OCW standard metrics (bias).
+
+    In this example:
+
+    1. Download a netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+    2. Load the local files into OCW dataset objects.
+    3. Interface with the Regional Climate Model Evalutaion Database (https://rcmes.jpl.nasa.gov/)
+       to load the CRU3.1 Daily-Max Temp dataset (https://rcmes.jpl.nasa.gov/content/cru31).
+    4. Process each dataset to the same same shape.
+    5. Temporally rebin the datasets to a single timestep.
+    6. Spatially regrid the dataset objects to a 1/2 degree grid.
+    7. Build a bias metric to use for evaluation use the standard OCW metric set.
+    8. Create an evaluation object using the datasets and metric.
+    9. Plot the results of the evaluation (contour map).
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. datasource/rcmed
+    3. dataset
+    4. dataset_processor
+    5. evaluation
+    6. metrics
+    7. plotter
+
+"""
+
 import datetime
 import urllib
 from os import path

@@ -15,6 +15,27 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    podaac_integration_example.py
+
+    Use OCW to download a PODACC dataset, evaluate and plot (contour map).
+
+    In this example:
+
+    1. Download a remote PO.DAAC (https://podaac.jpl.nasa.gov/) dataset
+       and read it into an OCW dataset object.
+    2. Create a temporal STD metric using one of the OCW standard metrics.
+    3. Evaluate the dataset against the metric and plot a contour map.
+
+    OCW modules demonstrated:
+
+    1. datasource/podaac_datasource
+    2. metrics
+    3. evaluation
+    4. plotter
+
+"""
+
 import ocw.data_source.podaac_datasource as podaac
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics

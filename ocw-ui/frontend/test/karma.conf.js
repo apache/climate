@@ -46,23 +46,54 @@ module.exports = function(config) {
     // web server port
     port: 8080,
 
+
     // Start these browsers, currently available:
     // - Chrome
-    // - ChromeCanary
     // - Firefox
-    // - Opera
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: [
-      'PhantomJS',
-      //'Chrome'
-    ],
+    // Ok to leave this empty as karma-detect-browsers will figure this out based on what is installed.
+    // Either set enabled to false for karma-detect-browsers and fill in a specific list or update
+    // the logic in the karma-detect-browsers config to remove those you don't want to test.
+    browsers: [ ],
+
+    frameworks: ['jasmine', 'detectBrowsers'],
+
+    detectBrowsers: {
+      // enable/disable, default is true
+      enabled: true,
+
+      // enable/disable phantomjs support, default is true
+      usePhantomJS: true,
+
+      // post processing of browsers list
+      // here you can edit the list of browsers used by karma
+      postDetection: function(availableBrowser) {
+
+          var result = availableBrowser;
+
+          //Remove PhantomJS if another browser has been detected
+          //if (availableBrowser.length > 1 && availableBrowser.indexOf('PhantomJS')>-1) {
+          //  var i = result.indexOf('PhantomJS');
+
+          //  if (i !== -1) {
+          //    result.splice(i, 1);
+          //  }
+          //}
+
+          return result;
+        }
+    },
 
     // Which plugins to enable
     plugins: [
       'karma-phantomjs-launcher',
       'karma-chrome-launcher',
+      'karma-firefox-launcher',
+      'karma-safari-launcher',
+      'karma-ie-launcher',
+      'karma-detect-browsers',
       'karma-jasmine'
     ],
 

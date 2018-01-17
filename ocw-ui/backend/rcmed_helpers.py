@@ -15,19 +15,19 @@
 #  limitations under the License.
 #
 
-''' Services for interacting with NASA JPL's Regional Climate Model Evaluation Database. '''
+""" Services for interacting with NASA JPL's Regional Climate Model Evaluation Database. """
+
+import requests
+from bottle import Bottle, request, response
 
 import ocw.data_source.rcmed as rcmed
 
-from bottle import Bottle, request, response
-
-import requests
-
 rcmed_app = Bottle()
 
-@rcmed_app.route('/datasets/')
+
+@rcmed_app.get('/datasets/')
 def get_observation_dataset_data():
-    ''' Return a list of dataset information from JPL's RCMED.
+    """ Return a list of dataset information from JPL's RCMED.
 
     **Example Return JSON Format**
 
@@ -42,20 +42,21 @@ def get_observation_dataset_data():
             },
             ...
         ]
-    '''
-    r = requests.get('http://rcmes.jpl.nasa.gov/query-api/datasets.php')
+    """
+    result = requests.get('http://rcmes.jpl.nasa.gov/query-api/datasets.php')
 
-    if (request.query.callback):
-        return "%s(%s)" % (request.query.callback, r.text)
-    return r.text
+    if hasattr(request.query, 'callback'):
+        return "%s(%s)" % (request.query.callback, result.text)
+    return result.text
 
-@rcmed_app.route('/parameters/')
-def get_dataset_parameters():
-    ''' Return dataset specific parameter information from JPL's RCMED.
+
+@rcmed_app.get('/parameters/dataset/<name>')
+def get_dataset_parameters(name):
+    """ Return dataset specific parameter information from JPL's RCMED.
 
     **Example Call Format**
 
-    .. sourcecode:: javascript
+    .. sourcecode:: text
 
         /parameters/?dataset=<dataset's short name>
 
@@ -73,17 +74,18 @@ def get_dataset_parameters():
             }
         ]
 
-    '''
-    url = 'http://rcmes.jpl.nasa.gov/query-api/parameters.php?dataset=' + request.query.dataset
-    r = requests.get(url)
+    """
 
-    if (request.query.callback):
-        return "%s(%s)" % (request.query.callback, r.text)
-    return r.text
+    url = 'http://rcmes.jpl.nasa.gov/query-api/parameters.php?dataset=' + name
+    result = requests.get(url)
+
+    if hasattr(request.query, 'callback'):
+        return "%s(%s)" % (request.query.callback, result.text)
+    return result.text
 
 
 def extract_bounds(parameter):
-    ''' This will take a parameter dictionary and return the spatial and temporal bounds.
+    """ This will take a parameter dictionary and return the spatial and temporal bounds.
 
     :param parameter: Single parameter that is returned from rcmed.get_parameters_metadata().
     :type parameter: dictionary:
@@ -97,11 +99,9 @@ def extract_bounds(parameter):
               "lon_max": 179.75,
               "lon_min": -179.75
             }
-    '''
-    bounds_data = {}
-    bounds_data['start_date'] = str(parameter['start_date'])
-    bounds_data['end_date'] = str(parameter['end_date'])
-    spatial_bounds = parameter['bounding_box'].replace('(','').replace(')','')
+    """
+    bounds_data = {'start_date': str(parameter['start_date']), 'end_date': str(parameter['end_date'])}
+    spatial_bounds = parameter['bounding_box'].replace('(', '').replace(')', '')
     spatial_bounds = spatial_bounds.split(',')
     # spatial_bounds is in format:
     # [<lat_max>, <lon_max>, <lat_min>, <lon_max>, <lat_min>, <lon_min>, <lat_max>, <lon_min>]
@@ -110,18 +110,18 @@ def extract_bounds(parameter):
     bounds_data['lat_min'] = float(spatial_bounds[2])
     bounds_data['lon_max'] = float(spatial_bounds[1])
     bounds_data['lon_min'] = float(spatial_bounds[5])
-    param_id =str(parameter['parameter_id'])
+    param_id = str(parameter['parameter_id'])
     return param_id, bounds_data
 
 
-@rcmed_app.route('/parameters/bounds/')
-@rcmed_app.route('/parameters/bounds')
+@rcmed_app.get('/parameters/bounds/')
+@rcmed_app.get('/parameters/bounds')
 def get_parameters_bounds():
-    ''' Return temporal and spatial bounds metadata for all of JPL's RCMED parameters.
+    """ Return temporal and spatial bounds metadata for all of JPL's RCMED parameters.
 
     **Example Call Format**
 
-    .. sourcecode:: javascript
+    .. sourcecode:: text
 
         /parameters/bounds/
 
@@ -148,19 +148,18 @@ def get_parameters_bounds():
           }
         }
 
-    '''
+    """
     parameter_bounds = {}
     raw_parameters = rcmed.get_parameters_metadata()
     for parameter in raw_parameters:
-        if parameter['bounding_box'] != None:
+        if parameter['bounding_box'] is not None:
             param_id, bounds_data = extract_bounds(parameter)
             parameter_bounds[param_id] = bounds_data
-
 
     return parameter_bounds
 
 
 @rcmed_app.hook('after_request')
 def enable_cors():
-    ''' Allow Cross-Origin Resource Sharing for all URLs. '''
+    """ Allow Cross-Origin Resource Sharing for all URLs. """
     response.headers['Access-Control-Allow-Origin'] = '*'

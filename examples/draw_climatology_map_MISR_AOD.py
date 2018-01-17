@@ -15,6 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    draw_climatology_map_MISR_AOD.py
+
+    Use OCW to download an MISR dataset, subset the data, calculate the 16 and 5 year
+    mean and draw a countour map of the means and the current values.
+
+    In this example:
+
+    1. Download a dataset from https://dx.doi.org/10.6084/m9.figshare.3753321.v1.
+    ***  Note *** The dataset for this example is not downloaded as part of the example
+    and must be downloaded to examples directory before running the example.
+    *** Note *** Depending on the OS on which the example is being run, the download
+    may remove the - in the filename.  Rename the file appropriately.
+    2. Subset the data set (lat / lon / start date / end date).
+    3. Calculate the 16, 5 and 1 year mean.
+    4. Draw a three contour maps using the calculated means and current values.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset
+    3. dataset_processor
+    4. plotter
+
+"""
+
 import ocw.dataset as ds
 import ocw.data_source.local as local
 import ocw.dataset_processor as dsp
