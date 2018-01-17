@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import jinja2
 from metadata_extractor import CORDEXMetadataExtractor, obs4MIPSMetadataExtractor
@@ -48,7 +49,7 @@ for group in groups:
 
         # TODO: Do this in parallel. Will change this once this approach
         # is well tested.
-        code = subprocess.call(['python', '../run_RCMES.py', configfile_path])
+        code = subprocess.call([sys.executable, '../run_RCMES.py', configfile_path])
         errored = []
         if code:
             errored.append(configfile_path)
