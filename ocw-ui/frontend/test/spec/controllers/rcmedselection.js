@@ -84,9 +84,9 @@ describe('Controller: RcmedSelectionCtrl', function () {
       scope.datasetSelection = {shortname: 'TRMM'}
 
       // Test return with only single parameter
-      $httpBackend.expectJSONP($rootScope.baseURL + '/rcmed/parameters/?dataset=' +
+      $httpBackend.expectJSONP($rootScope.baseURL + '/rcmed/parameters/dataset/' +
                   scope.datasetSelection['shortname'] +
-                  '&callback=JSON_CALLBACK').
+                  '?callback=JSON_CALLBACK').
              respond(200, ['pcp']);
       scope.dataSelectUpdated();
       $httpBackend.flush();
@@ -94,9 +94,9 @@ describe('Controller: RcmedSelectionCtrl', function () {
       expect(scope.parameterSelection).toEqual('pcp');
 
       // Test return with multiple parameters
-      $httpBackend.expectJSONP($rootScope.baseURL + '/rcmed/parameters/?dataset=' +
+      $httpBackend.expectJSONP($rootScope.baseURL + '/rcmed/parameters/dataset/' +
                   scope.datasetSelection['shortname'] +
-                  '&callback=JSON_CALLBACK').
+                  '?callback=JSON_CALLBACK').
              respond(200, ['pcp', 'pcp2']);
       scope.dataSelectUpdated();
       $httpBackend.flush();
