@@ -367,9 +367,24 @@ def draw_subregions(subregions, lats, lons, fname, fmt='png', ptitle='',
     fig.clf()
 
 
+def _get_colors(num_colors):
+    """
+    matplotlib will recycle colors after a certain number.  This can make
+    line type charts confusing as colors will be reused.  This function
+    provides a distribution of colors across the default color map
+    to better approximate uniqueness.
+
+    :param num_colors: The number of unique colors to generate.
+    :return: A color map with num_colors.
+    """
+    cmap = plt.get_cmap()
+    return [cmap(1. * i / num_colors) for i in range(num_colors)]
+
+
 def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
                      xlabel='', ylabel='', ptitle='', subtitles=None,
-                     label_month=False, yscale='linear', aspect=None):
+                     label_month=False, yscale='linear', aspect=None,
+                     cycle_colors=True, cmap=None):
     ''' Draw a time series plot.
 
     :param results: 3D array of time series data.
@@ -415,7 +430,22 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     :param aspect: (Optional) approximate aspect ratio of each subplot
         (width / height). Default is 8.5 / 5.5
     :type aspect: :class:`float`
+
+    :param cycle_colors: (Optional) flag to toggle whether to allow matlibplot
+        to re-use colors when plotting or force an evenly distributed range.
+    :type cycle_colors: :class:`bool`
+
+    :param cmap: (Optional) string or :class:`matplotlib.colors.LinearSegmentedColormap`
+        instance denoting the colormap. This must be able to be recognized by
+        `Matplotlib's get_cmap function <http://matplotlib.org/api/cm_api.html#matplotlib.cm.get_cmap>`_.
+        Maps like rainbow and spectral with wide spectrum of colors are nice choices when used with
+        the cycle_colors option. tab20, tab20b, and tab20c are good if the plot has less than 20 datasets.
+    :type cmap: :mod:`string` or :class:`matplotlib.colors.LinearSegmentedColormap`
+
     '''
+    if cmap is not None:
+        set_cmap(cmap)
+
     # Handle the single plot case.
     if results.ndim == 2:
         results = results.reshape(1, *results.shape)
@@ -448,6 +478,10 @@ def draw_time_series(results, times, labels, fname, fmt='png', gridshape=(1, 1),
     # Make the plots
     for i, ax in enumerate(grid):
         data = results[i]
+
+        if not cycle_colors:
+            ax.set_prop_cycle('color', _get_colors(data.shape[0]))
+
         if label_month:
             xfmt = mpl.dates.DateFormatter('%b')
             xloc = mpl.dates.MonthLocator()
@@ -565,14 +599,23 @@ def draw_barchart(results, yvalues, fname, ptitle='', fmt='png',
 
 
 def draw_marker_on_map(lat, lon, fname, fmt='png', location_name=' ', gridshape=(1, 1)):
-    '''
-    Purpose::
-        Draw a marker on a map
+    '''Draw a marker on a map.
 
-    Input::
-        lat - latitude for plotting a marker
-        lon - longitude for plotting a marker
-        fname  - a string specifying the filename of the plot
+    :param lat: Latitude for plotting a marker.
+    :type lat: :class:`float`
+
+    :param lon: Longitude for plotting a marker.
+    :type lon: :class:`float`
+
+    :param fname: The filename of the plot.
+    :type fname: :class:`string`
+
+    :param fmt: (Optional) Filetype for the output.
+    :type fmt: :class:`string`
+
+    :param location_name: (Optional) A label for the map marker.
+    :type location_name: :class:`string`
+
     '''
     fig = plt.figure()
     fig.dpi = 300
@@ -1063,14 +1106,22 @@ class TaylorDiagram(object):
 
 def draw_histogram(dataset_array, data_names, fname, fmt='png', nbins=10):
     '''
-    Purpose::
-        Draw histograms
+    Purpose:: Draw a histogram for the input dataset.
 
-    Input::
-        dataset_array - a list of data values [data1, data2, ....]
-        data_names    - a list of data names  ['name1','name2',....]
-        fname  - a string specifying the filename of the plot
-        bins - number of bins
+    :param dataset_array: A list of data values [data1, data2, ....].
+    :type dataset_array: :class:`list` of :class:`float`
+
+    :param data_names: A list of data names  ['name1','name2',....].
+    :type data_names: :class:`list` of :class:`string`
+
+    :param fname: The filename of the plot.
+    :type fname: :class:`string`
+
+    :param fmt: (Optional) Filetype for the output.
+    :type fmt: :class:`string`
+
+    :param bins: (Optional) Number of bins.
+    :type bins: :class:`integer`
     '''
     fig = plt.figure()
     fig.dpi = 300

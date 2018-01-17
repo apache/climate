@@ -15,6 +15,35 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    simple_model_to_model_bias.py
+
+    Use OCW to download, normalize and evaluate two datasets
+    against an OCW metric (bias) and plot the results of the
+    evaluation (contour map).
+
+    In this example:
+
+    1. Download two netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+        AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc
+    2. Load the local files into OCW dataset objects.
+    3. Temporally rebin the data anually.
+    4. Spatially regrid the dataset objects to a 1 degree grid.
+    5. Build a bias metric to use for evaluation use the standard OCW metric set.
+    6. Create an evaluation object using the datasets and metric.
+    7. Plot the results of the evaluation (contour map).
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset_processor
+    3. evaluation
+    4. metrics
+    5. plotter
+
+"""
+
 import datetime
 from os import path
 import sys

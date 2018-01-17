@@ -27,9 +27,10 @@
  * Controller of the ocwUiApp
  */
 angular.module('ocwUiApp')
-.controller('ParameterSelectCtrl', ['$rootScope', '$scope', '$http', '$timeout',
+.controller('ParameterSelectCtrl', ['$rootScope', '$scope', '$http', '$timeout', '$location',
 						   'selectedDatasetInformation', 'regionSelectParams', 'evaluationSettings',
-  function($rootScope, $scope, $http, $timeout, selectedDatasetInformation, regionSelectParams, evaluationSettings) {
+  function($rootScope, $scope, $http, $timeout, $location, selectedDatasetInformation, regionSelectParams, evaluationSettings) {
+
     $scope.datasets = selectedDatasetInformation.getDatasets();
 
     // The min/max lat/lon values from the selected datasets
@@ -173,13 +174,9 @@ angular.module('ocwUiApp')
         $scope.runningEval = false;
 
         $timeout(function() {
-          if (evalWorkDir !== undefined) {
-            window.location = "#/results/" + evalWorkDir;
-          } else {
-            window.location = "#/results";
-          }
+          var url = (evalWorkDir) ? '/results/' + evalWorkDir : '/results';
+          $location.url(url)
         }, 100);
-
       }).error(function() {
         $scope.runningEval = false;
       });

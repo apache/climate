@@ -81,9 +81,9 @@ angular.module('ocwUiApp')
       };
 
       $scope.dataSelectUpdated = function() {
-        var urlString = $rootScope.baseURL + '/rcmed/parameters/?dataset=' +
+        var urlString = $rootScope.baseURL + '/rcmed/parameters/dataset/' +
                         $scope.datasetSelection["shortname"] +
-                        "&callback=JSON_CALLBACK";
+                        "?callback=JSON_CALLBACK";
         $http.jsonp(urlString)
           .success(function(data) {
             $scope.retrievedObsParams = data;
