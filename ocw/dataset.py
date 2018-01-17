@@ -117,6 +117,7 @@ class Dataset:
 
            If self.lats and self.lons are from curvilinear coordinates,
            the output resolutions are approximate values.
+
         :returns: The Dataset's latitudinal and longitudinal spatial resolution
             as a tuple of the form (lat_resolution, lon_resolution).
         :rtype: (:class:`float`, :class:`float`)
@@ -264,7 +265,7 @@ class Bounds(object):
                  start=None, end=None):
         '''Default Bounds constructor
         :param boundary_type: The type of spatial subset boundary.
-        :type boundary_type: :mod:`string'
+        :type boundary_type: :mod:`string`
 
 
         :param lat_min: The minimum latitude bound.
