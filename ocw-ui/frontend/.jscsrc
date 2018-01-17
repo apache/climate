@@ -1,0 +1,17 @@
+{
+  "disallowTrailingWhitespace": true,
+  "disallowUnusedParams": true,
+  "disallowUnusedVariables": true,
+   "requireCapitalizedComments": true,
+  "requireCurlyBraces": true,
+  "requireDotNotation": true,
+  "requireLineFeedAtFileEnd": true,
+  "requireSemicolons": true,
+  "requireSpaceAfterComma": true,
+  "requireSpaceAfterLineComment": true,
+  "requireSpaceBetweenArguments": true,
+  "requireSpacesInConditionalExpression": true,
+  "requireTemplateStrings": true,
+  "requireYodaConditions": true,
+  "validateQuoteMarks": "'"
+}
