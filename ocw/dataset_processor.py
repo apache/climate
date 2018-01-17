@@ -867,9 +867,13 @@ def mask_missing_data(dataset_array):
 
     mask_array = np.zeros(dataset_array[0].values.shape)
     for dataset in dataset_array:
-        index = np.where(dataset.values.mask == True)
-        if index[0].size > 0:
-            mask_array[index] = 1
+        # CLIMATE-797 - Not every array passed in will be a masked array.
+        # For those that are, action based on the mask passed in.
+        # For those that are not, take no action (else AttributeError).
+        if hasattr(dataset.values, 'mask'):
+            index = np.where(dataset.values.mask == True)
+            if index[0].size > 0:
+                mask_array[index] = 1
     masked_array = []
     for dataset in dataset_array:
         dataset.values = ma.array(dataset.values, mask=mask_array)
