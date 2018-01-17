@@ -15,6 +15,42 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    multi_model_evaluation.py
+
+    Use OCW to download, evaluate and plot (contour map) two datasets
+    against a reference dataset and OCW standard metrics.
+
+    In this example:
+
+    1. Download two netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+        AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+    2. Load the local files into OCW dataset objects.
+    3. Interface with the Regional Climate Model Evaluation Database (https://rcmes.jpl.nasa.gov/)
+       to load the CRU3.1 Daily Precipitation dataset (https://rcmes.jpl.nasa.gov/content/cru31).
+    4. Process each dataset to the same same shape.
+        a.) Restrict the datasets re: geographic and time boundaries.
+        b.) Convert the dataset water flux to common units.
+        c.) Normalize the dataset date / times to monthly.
+        d.) Spatially regrid each dataset.
+    5.  Calculate the mean annual value for each dataset.
+    6.  Evaluate the datasets against the reference data set and OCW standard metric and plot
+        a contour map.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. datasource/rcmed
+    3. dataset
+    4. dataset_processor
+    5. metrics
+    6. evaluation
+    7. plotter
+    8. utils
+
+"""
+
 import datetime
 import urllib
 import numpy as np

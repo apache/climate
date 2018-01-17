@@ -15,6 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    model_ensemble_to_rcmed.py
+
+    Use OCW to download, evaluate and plot (contour map) two datasets
+    against a reference dataset and OCW standard metrics (bias).
+
+    In this example:
+
+    1. Download two netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+        AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc
+    2. Load the local files into OCW dataset objects.
+    3. Interface with the Regional Climate Model Evaluation Database (https://rcmes.jpl.nasa.gov/)
+       to load the CRU3.1 Daily-Max Temp dataset (https://rcmes.jpl.nasa.gov/content/cru31).
+    4. Temporally rebin the datasets to annual.
+    5. Spatially regrid the dataset objects to a 1/2 degree grid.
+    6. Build a bias metric to use for evaluation use the standard OCW metric set.
+    7. Create an evaluation object using the datasets and metric.
+    8. Plot the results of the evaluation (contour map).
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. datasource/rcmed
+    3. dataset
+    4. dataset_processor
+    5. metrics
+    6. evaluation
+    7. plotter
+
+"""
+
 import datetime
 import math
 import urllib

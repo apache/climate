@@ -15,6 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    GPM_WRF24_JPDF_comparison.py
+
+    This is an example of calculating the joint probability distribution
+    function of rainfall intensity and duration for the Northern Great
+    Plains using GPM IMERG data for June/01/2015
+
+    In this example:
+
+    1. Load the GPM and WRF24 datasets with spatial filter.
+    2. Load the spatial filter (Bukovsky region mask).
+    3. Spatially subset the WRF data.
+    4. Analyze the wet spells.
+    5. Calculate the joint PDF(JPDF) of spell_duration and peak_rainfall.
+    6. Visualize the JPDF.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset
+    3. dataset_processor
+    4. metrics
+    5. plotter
+
+"""
+
 from ocw.dataset import Bounds
 import ocw.data_source.local as local
 import ocw.dataset_processor as dsp

@@ -15,9 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    subset_TRMM_data_for_NCA_regions.py
+
+    Use OCW to subset TRMM data (https://pmm.nasa.gov/trmm) for NCA regions and draw
+    a contour map for the U.S. (CA', 'NV', 'UT', 'AZ', 'NM', 'CO'), Cuba and
+    the Bahamas (https://scenarios.globalchange.gov/regions_nca4).
+
+    In this example:
+
+    1. Interface with the Regional Climate Model Evaluation Database (https://rcmes.jpl.nasa.gov/)
+       to load the TRMM dataset.
+    2. Define the bounds for the U.S. (CA', 'NV', 'UT', 'AZ', 'NM', 'CO'), Cuba and the Bahamas and
+       the start date / end date.
+    3. Create a contour map of the TRMM data for the U.S., Cuba, and Bahamas.
+
+    OCW modules demonstrated:
+
+    1. datasource/rcmed
+    2. dataset (Bounds)
+    3. dataset_processor
+    4. plotter
+
+"""
+
 # Apache OCW lib immports
 import ocw.dataset_processor as dsp
-import ocw.utils as utils
 from ocw.dataset import Bounds
 import ocw.data_source.rcmed as rcmed
 import ocw.plotter as plotter
