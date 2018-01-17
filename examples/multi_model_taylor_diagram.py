@@ -1,3 +1,54 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+"""
+    multi_model_taylor_diagram.py
+
+    Use OCW to download, normalize and evaluate three datasets
+    against a reference dataset and OCW standard metrics
+    drawing a Taylor diagram of the results of the evaluation.
+
+    In this example:
+
+    1. Download three netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+        AFRICA_ICTP-REGCM3_CTL_ERAINT_MM_50km-rg_1989-2008_pr.nc
+        AFRICA_UCT-PRECIS_CTL_ERAINT_MM_50km_1989-2008_pr.nc
+    2. Load the local files into OCW dataset objects.
+    3. Process each dataset to the same same shape.
+        a.) Restrict the datasets re: geographic and time boundaries.
+        b.) Temporally rebin the data (monthly).
+        c.) Spatially regrid each dataset.
+    4.  Extract the metrics used for the evaluation and evaluate
+        against a reference dataset and standard OCW metrics.
+    5.  Draw evaluation results Taylor diagram.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. dataset
+    3. dataset_processor
+    4. evaluation
+    5. metrics
+    6. plotter
+    7. utils
+
+"""
+
 # Apache OCW lib immports
 from ocw.dataset import Dataset, Bounds
 import ocw.data_source.local as local

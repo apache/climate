@@ -37,13 +37,18 @@
     "grunt-usemin": "^2.1.1",
     "grunt-wiredep": "^1.8.0",
     "jshint-stylish": "^0.2.0",
-    "karma": "^1.6.0",
+    "karma": "^2.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-detect-browsers": "^2.2.6",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-ie-launcher": "^1.0.0",
     "karma-jasmine": "^0.1.5",
     "karma-phantomjs-launcher": "^1.0.4",
-    "karma-chrome-launcher": "^2.2.0",
+    "karma-safari-launcher": "^1.0.0",
     "load-grunt-tasks": "^0.4.0",
     "time-grunt": "^0.3.1",
-    "yo": "^1.2.1"
+    "yo": "^1.2.1",
+    "serve-static": "^1.13.1"
   },
   "engines": {
     "node": ">=0.10.0"

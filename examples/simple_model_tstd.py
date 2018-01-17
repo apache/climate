@@ -15,6 +15,30 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""
+    simple_model_tstd.py
+
+    Use OCW to download, evaluate against a OCW standard
+    metrics (temporal STD) and plot the results (contour map).
+
+    In this example:
+
+    1. Download a netCDF files from a local site.
+        AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc
+    2. Load the local file into OCW dataset objects.
+    3. Use the standard OCW metrics to build a metric against which to evaluation (temporal STD).
+    4. Create an evaluation object of the dataset vs. the metric.
+    5. Plot the results of the evaluation using a contour map.
+
+    OCW modules demonstrated:
+
+    1. datasource/local
+    2. metrics
+    3. evaluation
+    4. plotter
+
+"""
+
 from os import path
 import urllib
 
