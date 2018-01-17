@@ -30,6 +30,7 @@ angular.module('ocwUiApp')
 .controller('ParameterSelectCtrl', ['$rootScope', '$scope', '$http', '$timeout', '$location',
 						   'selectedDatasetInformation', 'regionSelectParams', 'evaluationSettings',
   function($rootScope, $scope, $http, $timeout, $location, selectedDatasetInformation, regionSelectParams, evaluationSettings) {
+
     $scope.datasets = selectedDatasetInformation.getDatasets();
 
     // The min/max lat/lon values from the selected datasets
@@ -77,6 +78,20 @@ angular.module('ocwUiApp')
 
       return res;
     }
+
+   let formatDate = function(oldDate) {
+
+        let newDate = new Date(oldDate);
+
+        let year = newDate.getFullYear();
+
+        let month = ((newDate.getMonth() + 1) < 10) ? '0' + (newDate.getMonth() + 1).toString: (newDate.getMonth() + 1);
+
+        let day = (newDate.getDate() < 10) ? '0' + newDate.getDate().toString: newDate.getDate();
+
+        return newDate.getFullYear() + '-' + (newDate.getMonth() + 1) + '-' + newDate.getDate();
+    }
+
 
     $scope.runEvaluation = function() {
       $scope.runningEval = true;
@@ -159,8 +174,8 @@ angular.module('ocwUiApp')
       }
 
       // Set the bound values for the evaluation
-      data['start_time'] =  $scope.displayParams.start + " 00:00:00",
-      data['end_time'] = $scope.displayParams.end + " 00:00:00",
+      data['start_time'] =  formatDate($scope.displayParams.start) + " 00:00:00",
+      data['end_time'] = formatDate($scope.displayParams.end) + " 00:00:00",
       data['lat_min'] = $scope.displayParams.latMin,
       data['lat_max'] = $scope.displayParams.latMax,
       data['lon_min'] = $scope.displayParams.lonMin,
@@ -233,8 +248,8 @@ angular.module('ocwUiApp')
             latMax = (curDataset['latlonVals']['latMax'] < latMax) ? curDataset['latlonVals']['latMax'] : latMax;
             lonMin = (curDataset['latlonVals']['lonMin'] > lonMin) ? curDataset['latlonVals']['lonMin'] : lonMin;
             lonMax = (curDataset['latlonVals']['lonMax'] < lonMax) ? curDataset['latlonVals']['lonMax'] : lonMax;
-            start = (curDataset['timeVals']['start'] > start) ? curDataset['timeVals']['start'] : start;
-            end = (curDataset['timeVals']['end'] < end) ? curDataset['timeVals']['end'] : end;
+            start = (curDataset['timeVals']['start'] > start) ? new Date(curDataset['timeVals']['start']) : start;
+            end = (curDataset['timeVals']['end'] < end) ? new Date(curDataset['timeVals']['end']) : end;
 
             datasetRegrid = datasetRegrid || curDataset.regrid;
 
@@ -248,16 +263,16 @@ angular.module('ocwUiApp')
         $scope.displayParams.latMax = $scope.truncateFloat(latMax);
         $scope.displayParams.lonMin = $scope.truncateFloat(lonMin);
         $scope.displayParams.lonMax = $scope.truncateFloat(lonMax);
-        $scope.displayParams.start = (typeof start == 'undefined') ? "" : start.split(" ")[0];
-        $scope.displayParams.end = (typeof end == 'undefined') ? "" : end.split(" ")[0];
+        $scope.displayParams.start = (typeof start == 'undefined') ? "" : new Date(start);
+        $scope.displayParams.end = (typeof end == 'undefined') ? "" : new Date(end);
 
         // Update the local store values!
         $scope.latMin = latMin;
         $scope.latMax = latMax;
         $scope.lonMin = lonMin;
         $scope.lonMax = lonMax;
-        $scope.start = (typeof start == 'undefined') ? "" : start.split(" ")[0];
-        $scope.end = (typeof end == 'undefined') ? "" : end.split(" ")[0];
+        $scope.start = (typeof start == 'undefined') ? "" : start;
+        $scope.end = (typeof end == 'undefined') ? "" : end;
 
         $scope.displayParams.areValid = true;
         $rootScope.$broadcast('redrawOverlays', []);

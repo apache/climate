@@ -2,14 +2,14 @@
   "name": "ocw-ui",
   "version": "0.0.0",
   "dependencies": {
-    "angular": "1.2.16",
+    "angular": "~1.5.0",
     "json3": "~3.3.1",
     "es5-shim": "~3.1.0",
     "bootstrap": "~3.2.0",
-    "angular-resource": "1.2.16",
-    "angular-cookies": "1.2.16",
-    "angular-animate": "1.2.16",
-    "angular-route": "1.2.16",
+    "angular-resource": "~1.5.0",
+    "angular-cookies": "~1.5.0",
+    "angular-animate": "~1.5.0",
+    "angular-route": "~1.5.0",
     "angular-ui-router": "angular-ui/ui-router#~0.2.10",
     "leaflet": "~0.7.3",
     "chap-links-timeline": "~2.6.1",
@@ -18,8 +18,8 @@
     "angular-ui-date": "~0.0.3"
   },
   "devDependencies": {
-    "angular-mocks": "1.2.16",
-    "angular-scenario": "1.2.16"
+    "angular-mocks": "~1.5.0",
+    "angular-scenario": "~1.5.0"
   },
   "appPath": "app"
 }
