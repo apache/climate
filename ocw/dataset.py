@@ -297,6 +297,10 @@ class Bounds(object):
 
         self._start = None
         self._end = None
+        self.lat_min = None
+        self.lat_max = None
+        self.lon_min = None
+        self.lon_max = None
 
         if start and self._validate_start(start):
             self._start = start
@@ -305,12 +309,15 @@ class Bounds(object):
             self._end = end
 
         if boundary_type == 'us_states':
+
             self.masked_regions = utils.shapefile_boundary(boundary_type, us_states)
 
         if boundary_type == 'countries':
+
             self.masked_regions = utils.shapefile_boundary(boundary_type, countries)
 
         if boundary_type == 'user':
+
             file_object = netCDF4.Dataset(user_mask_file)
             self.mask_variable = file_object.variables[mask_variable_name][:]
             mask_longitude = file_object.variables[longitude_name][:]
@@ -331,8 +338,15 @@ class Bounds(object):
                 self.lon_max = float(lon_max)
 
         if boundary_type[:6].upper() == 'CORDEX':
-            self.lat_min, self.lat_max, self.lon_min, self.lon_max = \
+
+            lat_min, lat_max, lon_min, lon_max = \
                 utils.CORDEX_boundary(boundary_type[6:].replace(" ", "").lower())
+
+            if self._validate_lat_lon(lat_max=lat_max, lat_min=lat_min, lon_max=lon_max, lon_min=lon_min):
+                self.lat_min = float(lat_min)
+                self.lat_max = float(lat_max)
+                self.lon_min = float(lon_min)
+                self.lon_max = float(lon_max)
 
     @property
     def start(self):
