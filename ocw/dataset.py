@@ -25,14 +25,12 @@ Classes:
 
 '''
 
-import os
-import numpy
-import logging
 import datetime as dt
-from mpl_toolkits.basemap import Basemap
-import netCDF4
+import logging
 
-import ocw
+import netCDF4
+import numpy
+
 import ocw.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -235,7 +233,7 @@ class Dataset:
 
 
 class Bounds(object):
-    '''Container for holding spatial and temporal bounds information.
+    """Container for holding spatial and temporal bounds information.
 
     Certain operations require valid bounding information to be present for
     correct functioning. Bounds guarantees that a function receives well
@@ -245,10 +243,11 @@ class Bounds(object):
     * 'rectangular'
     * 'CORDEX (CORDEX region name)': pre-defined CORDEX boundary
     * 'us_states': an array of US states abbreviation is required (ex) us_states = ['CA','NV'])
-    * 'countries': an array of county names is required (ex) countries = ['United States','Canada','Mexico']
+    * 'countries': an array of county names is required (ex) countries = ['United States','Canada']
     * 'user': user_mask_file in a netCDF format with two dimensional mask variable is required.
 
-    If boundary_type == 'rectangular', spatial and temporal bounds must follow the following guidelines.
+    If boundary_type == 'rectangular', spatial and temporal bounds must follow the
+    following guidelines.
 
     * Latitude values must be in the range [-90, 90]
     * Longitude values must be in the range [-180, 180]
@@ -256,14 +255,15 @@ class Bounds(object):
       values.
 
     Temporal bounds must a valid datetime object
-    '''
+    """
 
     def __init__(self, boundary_type='rectangular',
                  us_states=None, countries=None,
-                 user_mask_file=None, mask_variable_name=None, longitude_name=None, latitude_name=None,
+                 user_mask_file=None, mask_variable_name=None,
+                 longitude_name=None, latitude_name=None,
                  lat_min=-90, lat_max=90, lon_min=-180, lon_max=180,
                  start=None, end=None):
-        '''Default Bounds constructor
+        """Default Bounds constructor
         :param boundary_type: The type of spatial subset boundary.
         :type boundary_type: :mod:`string`
 
@@ -291,89 +291,118 @@ class Bounds(object):
         :type end: :class:`datetime.datetime`
 
         :raises: ValueError
-        '''
-        self.boundary_type = boundary_type
-        if start:
-            self._start = start
-        else:
-            self._start = None
+        """
 
-        if end:
+        self.boundary_type = boundary_type
+
+        self._start = None
+        self._end = None
+
+        if start and self._validate_start(start):
+            self._start = start
+
+        if end and self._validate_end(end):
             self._end = end
-        else:
-            self._end = None
 
         if boundary_type == 'us_states':
-            self.masked_regions = utils.shapefile_boundary(
-                boundary_type, us_states)
+            self.masked_regions = utils.shapefile_boundary(boundary_type, us_states)
+
         if boundary_type == 'countries':
-            self.masked_regions = utils.shapefile_boundary(
-                boundary_type, countries)
+            self.masked_regions = utils.shapefile_boundary(boundary_type, countries)
+
         if boundary_type == 'user':
             file_object = netCDF4.Dataset(user_mask_file)
             self.mask_variable = file_object.variables[mask_variable_name][:]
             mask_longitude = file_object.variables[longitude_name][:]
             mask_latitude = file_object.variables[latitude_name][:]
             if mask_longitude.ndim == 1 and mask_latitude.ndim == 1:
-                self.mask_longitude, self.mask_latitude = numpy.meshgrid(
-                    mask_longitude, mask_latitude)
+                self.mask_longitude, self.mask_latitude = \
+                    numpy.meshgrid(mask_longitude, mask_latitude)
             elif mask_longitude.ndim == 2 and mask_latitude.ndim == 2:
                 self.mask_longitude = mask_longitude
                 self.mask_latitude = mask_latitude
-        if boundary_type == 'rectangular':
-            if not (-90 <= float(lat_min) <= 90) or float(lat_min) > float(lat_max):
-                error = "Attempted to set lat_min to invalid value: %s" % (
-                    lat_min)
-                logger.error(error)
-                raise ValueError(error)
-            if not (-90 <= float(lat_max) <= 90):
-                error = "Attempted to set lat_max to invalid value: %s" % (
-                    lat_max)
-                logger.error(error)
-                raise ValueError(error)
-            if not (-180 <= float(lon_min) <= 180) or float(lon_min) > float(lon_max):
-                error = "Attempted to set lon_min to invalid value: %s" % (
-                    lon_min)
-                logger.error(error)
-                raise ValueError(error)
-            if not (-180 <= float(lon_max) <= 180):
-                error = "Attempted to set lat_max to invalid value: %s" % (
-                    lon_max)
-                logger.error(error)
-                raise ValueError(error)
 
-            self.lat_min = float(lat_min)
-            self.lat_max = float(lat_max)
-            self.lon_min = float(lon_min)
-            self.lon_max = float(lon_max)
+        if boundary_type == 'rectangular':
+
+            if self._validate_lat_lon(lat_max=lat_max, lat_min=lat_min, lon_max=lon_max, lon_min=lon_min):
+                self.lat_min = float(lat_min)
+                self.lat_max = float(lat_max)
+                self.lon_min = float(lon_min)
+                self.lon_max = float(lon_max)
+
         if boundary_type[:6].upper() == 'CORDEX':
-            self.lat_min, self.lat_max, self.lon_min, self.lon_max = utils.CORDEX_boundary(
-                boundary_type[6:].replace(" ", "").lower())
+            self.lat_min, self.lat_max, self.lon_min, self.lon_max = \
+                utils.CORDEX_boundary(boundary_type[6:].replace(" ", "").lower())
 
     @property
     def start(self):
+        """ Getter for start attribute. """
         return self._start
 
     @start.setter
     def start(self, value):
-        if self._end:
-            if not (type(value) is dt.datetime and value < self._end):
-                error = "Attempted to set start to invalid value: %s" % (value)
-                logger.error(error)
-                raise ValueError(error)
-
-        self._start = value
+        """ Setter for start attribute. """
+        if value and self._validate_start(value):
+            self._start = value
 
     @property
     def end(self):
+        """ Getter for end attribute. """
         return self._end
 
     @end.setter
     def end(self, value):
+        """ Setter for end attribute. """
+        if value and self._validate_end(value):
+            self._end = value
+
+    def _validate_start(self, value):
+        """ Validate start is both the correct type and less than end. """
+        if not isinstance(value, dt.datetime):
+            error = "Attempted to set start to invalid type: %s" % (type(value))
+            logger.error(error)
+            raise ValueError(error)
+
+        if self._end:
+            if value > self._end:
+                error = "Attempted to set start to invalid value: %s" % (value)
+                logger.error(error)
+                raise ValueError(error)
+
+        return True
+
+    def _validate_end(self, value):
+        """ Validate end is both the correct type and greater than start. """
+        if not isinstance(value, dt.datetime):
+            error = "Attempted to set end to invalid type: %s" % (type(value))
+            logger.error(error)
+            raise ValueError(error)
+
         if self._start:
-            if not (type(value) is dt.datetime and value > self._start):
+            if value < self._start:
                 error = "Attempted to set end to invalid value: %s" % (value)
                 logger.error(error)
                 raise ValueError(error)
 
-        self._end = value
+        return True
+
+    def _validate_lat_lon(self, lat_max, lat_min, lon_max, lon_min):
+        """ Confirm the min / max lat / lon are within expected ranges. """
+        if not (-90 <= float(lat_min) <= 90) or float(lat_min) > float(lat_max):
+            error = "Attempted to set lat_min to invalid value: %s" % (lat_min)
+            logger.error(error)
+            raise ValueError(error)
+        if not -90 <= float(lat_max) <= 90:
+            error = "Attempted to set lat_max to invalid value: %s" % (lat_max)
+            logger.error(error)
+            raise ValueError(error)
+        if not (-180 <= float(lon_min) <= 180) or float(lon_min) > float(lon_max):
+            error = "Attempted to set lon_min to invalid value: %s" % (lon_min)
+            logger.error(error)
+            raise ValueError(error)
+        if not -180 <= float(lon_max) <= 180:
+            error = "Attempted to set lat_max to invalid value: %s" % (lon_max)
+            logger.error(error)
+            raise ValueError(error)
+
+        return True
