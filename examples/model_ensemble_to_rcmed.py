@@ -130,13 +130,9 @@ print("Calculating the Maximum Overlap in Time for the datasets")
 
 cru_start = datetime.datetime.strptime(cru_31['start_date'], "%Y-%m-%d")
 cru_end = datetime.datetime.strptime(cru_31['end_date'], "%Y-%m-%d")
-knmi_start, knmi_end = knmi_dataset.temporal_boundaries()
 # Set the Time Range to be the year 1989
 start_time = datetime.datetime(1989, 1, 1)
 end_time = datetime.datetime(1989, 12, 1)
-
-print("Time Range is: %s to %s" % (start_time.strftime("%Y-%m-%d"),
-                                   end_time.strftime("%Y-%m-%d")))
 
 print("Fetching data from RCMED...")
 cru31_dataset = rcmed.parameter_dataset(dataset_id,
@@ -150,15 +146,29 @@ cru31_dataset = rcmed.parameter_dataset(dataset_id,
 
 """ Step 3: Resample Datasets so they are the same shape """
 
+# Running Temporal Rebin early helps negate the issue of datasets being on different
+# days of the month (1st vs. 15th)
 print("Temporally Rebinning the Datasets to an Annual Timestep")
 # To run annual temporal Rebinning,
 knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution='annual')
+dataset_start, dataset_end = knmi_dataset.temporal_boundaries()
+start_time = max([start_time, dataset_start])
+end_time = min([end_time, dataset_end])
+
 wrf311_dataset = dsp.temporal_rebin(
     wrf311_dataset, temporal_resolution='annual')
-cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution='annual')
+dataset_start, dataset_end = wrf311_dataset.temporal_boundaries()
+start_time = max([start_time, dataset_start])
+end_time = min([end_time, dataset_end])
 
-# Running Temporal Rebin early helps negate the issue of datasets being on different
-# days of the month (1st vs. 15th)
+cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution='annual')
+dataset_start, dataset_end = cru31_dataset.temporal_boundaries()
+start_time = max([start_time, dataset_start])
+end_time = min([end_time, dataset_end])
+
+print("Time Range is: %s to %s" % (start_time.strftime("%Y-%m-%d"),
+                                   end_time.strftime("%Y-%m-%d")))
+
 # Create a Bounds object to use for subsetting
 new_bounds = Bounds(lat_min=min_lat, lat_max=max_lat, lon_min=min_lon,
                     lon_max=max_lon, start=start_time, end=end_time)
@@ -214,7 +224,7 @@ print("Generating a contour map using ocw.plotter.draw_contour_map()")
 lats = new_lats
 lons = new_lons
 fname = OUTPUT_PLOT
-gridshape = (3, 1)  # Using a 3 x 1 since we have a 1 year of data for 3 models
+gridshape = (3, start_time.year - end_time.year + 1)  # Using a 3 x N since we have a N year(s) of data for 3 models
 plotnames = ["KNMI", "WRF311", "ENSEMBLE"]
 for i in np.arange(3):
     plot_title = "TASMAX Bias of CRU 3.1 vs. %s (%s - %s)" % (
