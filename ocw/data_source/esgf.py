@@ -16,9 +16,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+"""
+A set of functions to wrap downloading ESGF datasets into an OCW dataset object.
 
+*** Note *** The ESGF data source requires that the user have certain credentials downloaded from
+the ESG. The current version of the module should download these automatically.  Older versions of
+the library will not download them. The solution is to use the WGET script from the EGS to download
+a test dataset to get the credentials. The data source should work as expected then.
+
+"""
 import os
 import sys
+
+import requests
+from bs4 import BeautifulSoup
+
+import ocw.data_source.local as local
+from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
+from ocw.esgf.download import download
+from ocw.esgf.logon import logon
+
 if sys.version_info[0] >= 3:
     from urllib.error import HTTPError
 else:
@@ -26,15 +43,6 @@ else:
     # But note that this might need an update when Python 4
     # might be around one day
     from urllib2 import HTTPError
-
-from ocw.esgf.constants import DEFAULT_ESGF_SEARCH
-from ocw.esgf.download import download
-from ocw.esgf.logon import logon
-from ocw.esgf.search import SearchClient
-import ocw.data_source.local as local
-
-from bs4 import BeautifulSoup
-import requests
 
 
 def load_dataset(dataset_id,
@@ -44,9 +52,8 @@ def load_dataset(dataset_id,
                  search_url=DEFAULT_ESGF_SEARCH,
                  elevation_index=0,
                  name='',
-                 save_path='/tmp',
-                 **additional_constraints):
-    ''' Load an ESGF dataset.
+                 save_path='/tmp'):
+    """ Load an ESGF dataset.
 
     :param dataset_id: The ESGF ID of the dataset to load.
     :type dataset_id: :mod:`string`
@@ -74,32 +81,24 @@ def load_dataset(dataset_id,
     :param save_path: (Optional) Path to where downloaded files should be saved.
     :type save_path: :mod:`string`
 
-    :param additional_constraints: (Optional) Additional key,value pairs to
-        pass as constraints to the search wrapper. These can be anything found
-        on the ESGF metadata page for a dataset.
-
     :returns: A :class:`list` of :class:`dataset.Dataset` contained the
         requested dataset. If the dataset is stored in multiple files each will
         be loaded into a separate :class:`dataset.Dataset`.
 
     :raises ValueError: If no dataset can be found for the supplied ID and
         variable, or if the requested dataset is a multi-file dataset.
-    '''
-    download_data = _get_file_download_data(url=search_url,
-                                            dataset_id=dataset_id,
-                                            variable=variable_name)
+    """
+    download_data = \
+        _get_file_download_data(url=search_url, dataset_id=dataset_id, variable=variable_name)
 
     datasets = []
+
     for url, var in download_data:
-        _download_files([url],
-                        esgf_username,
-                        esgf_password,
-                        download_directory=save_path)
+        _download_files([url], esgf_username, esgf_password, download_directory=save_path)
 
         file_save_path = os.path.join(save_path, url.split('/')[-1])
-        datasets.append(local.load_file(file_save_path,
-                                        var,
-                                        name=name,
+
+        datasets.append(local.load_file(file_save_path, var, name=name,
                                         elevation_index=elevation_index))
 
     origin = {
@@ -107,19 +106,20 @@ def load_dataset(dataset_id,
         'dataset_id': dataset_id,
         'variable': variable_name
     }
-    for ds in datasets:
-        ds.origin = origin
+
+    for dataset in datasets:
+        dataset.origin = origin
 
     return datasets
 
 
 def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
-    ''''''
+    """"""
     url += '?type=File&dataset_id={}&variable={}'
     url = url.format(dataset_id, variable)
 
-    r = requests.get(url)
-    xml = BeautifulSoup(r.content, "html.parser")
+    raw_data = requests.get(url)
+    xml = BeautifulSoup(raw_data.content, "html.parser")
 
     dont_have_results = not bool(xml.response.result['numfound'])
 
@@ -141,7 +141,7 @@ def _get_file_download_data(dataset_id, variable, url=DEFAULT_ESGF_SEARCH):
 
 
 def _download_files(file_urls, username, password, download_directory='/tmp'):
-    ''''''
+    """"""
     try:
         logon(username, password)
     except HTTPError:
