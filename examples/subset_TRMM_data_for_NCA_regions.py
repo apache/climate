@@ -38,17 +38,17 @@
     4. plotter
 
 """
-
-# Apache OCW lib immports
-import ocw.dataset_processor as dsp
-from ocw.dataset import Bounds
-import ocw.data_source.rcmed as rcmed
-import ocw.plotter as plotter
-
-from datetime import datetime
-import numpy.ma as ma
+from __future__ import print_function
 
 import ssl
+from datetime import datetime
+
+import numpy.ma as ma
+
+import ocw.data_source.rcmed as rcmed
+import ocw.dataset_processor as dsp
+import ocw.plotter as plotter
+from ocw.dataset import Bounds
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -74,8 +74,8 @@ TRMM_dataset2 = dsp.subset(
 plotter.draw_contour_map(ma.mean(TRMM_dataset2.values, axis=0), TRMM_dataset2.lats,
                          TRMM_dataset2.lons, fname='TRMM_without_Cuba_and_Bahamas')
 
-NCA_SW_bounds = Bounds(boundary_type='us_states', us_states=[
-                       'CA', 'NV', 'UT', 'AZ', 'NM', 'CO'])
+NCA_SW_bounds = \
+    Bounds(boundary_type='us_states', us_states=['CA', 'NV', 'UT', 'AZ', 'NM', 'CO'])
 # to mask out the data over Mexico and Canada
 TRMM_dataset3 = dsp.subset(TRMM_dataset2, NCA_SW_bounds, extract=True)
 

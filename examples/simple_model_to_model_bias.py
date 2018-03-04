@@ -43,18 +43,10 @@
     5. plotter
 
 """
+from __future__ import print_function
 
-import datetime
-from os import path
 import sys
-
-if sys.version_info[0] >= 3:
-    from urllib.request import urlretrieve
-else:
-    # Not Python 3 - today, it is most likely to be Python 2
-    # But note that this might need an update when Python 4
-    # might be around one day
-    from urllib import urlretrieve
+from os import path
 
 import numpy as np
 
@@ -63,6 +55,14 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -80,7 +80,7 @@ if not path.exists(FILE_1_PATH):
 if not path.exists(FILE_2_PATH):
     urlretrieve(FILE_LEADER + FILE_2, FILE_2_PATH)
 
-""" Step 1: Load Local NetCDF Files into OCW Dataset Objects """
+# Step 1: Load Local NetCDF Files into OCW Dataset Objects.
 print("Loading %s into an OCW Dataset Object" % (FILE_1_PATH,))
 knmi_dataset = local.load_file(FILE_1_PATH, "tasmax")
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" %
@@ -91,14 +91,14 @@ wrf_dataset = local.load_file(FILE_2_PATH, "tasmax")
 print("WRF_Dataset.values shape: (times, lats, lons) - %s \n" %
       (wrf_dataset.values.shape,))
 
-""" Step 2: Temporally Rebin the Data into an Annual Timestep """
+# Step 2: Temporally Rebin the Data into an Annual Timestep.
 print("Temporally Rebinning the Datasets to an Annual Timestep")
 knmi_dataset = dsp.temporal_rebin(knmi_dataset, temporal_resolution='annual')
 wrf_dataset = dsp.temporal_rebin(wrf_dataset, temporal_resolution='annual')
 print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("WRF_Dataset.values shape: %s \n\n" % (wrf_dataset.values.shape,))
 
-""" Step 3: Spatially Regrid the Dataset Objects to a 1 degree grid """
+# Step 3: Spatially Regrid the Dataset Objects to a 1 degree grid.
 #  The spatial_boundaries() function returns the spatial extent of the dataset
 print("The KNMI_Dataset spatial bounds (min_lat, max_lat, min_lon, max_lon) are: \n"
       "%s\n" % (knmi_dataset.spatial_boundaries(), ))
@@ -121,12 +121,12 @@ wrf_dataset = dsp.spatial_regrid(wrf_dataset, new_lats, new_lons)
 print("Final shape of the WRF_Dataset: \n"
       "%s\n" % (wrf_dataset.values.shape, ))
 
-""" Step 4:  Build a Metric to use for Evaluation - Bias for this example """
+# Step 4:  Build a Metric to use for Evaluation - Bias for this example.
 # You can build your own metrics, but OCW also ships with some common metrics
 print("Setting up a Bias metric to use for evaluation")
 bias = metrics.Bias()
 
-""" Step 5: Create an Evaluation Object using Datasets and our Metric """
+# Step 5: Create an Evaluation Object using Datasets and our Metric.
 # The Evaluation Class Signature is:
 # Evaluation(reference, targets, metrics, subregions=None)
 # Evaluation can take in multiple targets and metrics, so we need to convert
@@ -136,7 +136,7 @@ bias_evaluation = evaluation.Evaluation(knmi_dataset, [wrf_dataset], [bias])
 print("Executing the Evaluation using the object's run() method")
 bias_evaluation.run()
 
-""" Step 6: Make a Plot from the Evaluation.results """
+# Step 6: Make a Plot from the Evaluation.results.
 # The Evaluation.results are a set of nested lists to support many different
 # possible Evaluation scenarios.
 #

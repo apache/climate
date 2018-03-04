@@ -31,13 +31,14 @@
     2. plotter
 
 """
+from __future__ import print_function
 
 import datetime
+
 import numpy as np
 
-# Apache OCW lib immports
-from ocw.dataset import Bounds
 import ocw.plotter as plotter
+from ocw.dataset import Bounds
 
 OUTPUT_PLOT = "subregions"
 
@@ -46,7 +47,7 @@ LAT_MIN = -45.0
 LAT_MAX = 42.24
 LON_MIN = -24.0
 LON_MAX = 60.0
-START_SUB = datetime.datetime(2000, 01, 1)
+START_SUB = datetime.datetime(2000, 1, 1)
 END_SUB = datetime.datetime(2007, 12, 31)
 
 # regridding parameters

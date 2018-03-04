@@ -53,15 +53,15 @@
     8. utils
 
 """
+from __future__ import print_function
 
-from os import path
-import urllib
-import ssl
 import datetime
+import ssl
+import sys
+from os import path
+
 import numpy as np
 
-# Apache OCW lib immports
-from ocw.dataset import Bounds
 import ocw.data_source.local as local
 import ocw.data_source.rcmed as rcmed
 import ocw.dataset_processor as dsp
@@ -69,6 +69,15 @@ import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
 import ocw.utils as utils
+from ocw.dataset import Bounds
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -87,7 +96,7 @@ LAT_MIN = -45.0
 LAT_MAX = 42.24
 LON_MIN = -24.0
 LON_MAX = 60.0
-START = datetime.datetime(2000, 01, 1)
+START = datetime.datetime(2000, 1, 1)
 END = datetime.datetime(2007, 12, 31)
 EVAL_BOUNDS = Bounds(lat_min=LAT_MIN, lat_max=LAT_MAX, lon_min=LON_MIN,
                      lon_max=LON_MAX, start=START, end=END)
@@ -106,13 +115,13 @@ allNames = []
 
 # Download necessary NetCDF file if not present
 if not path.exists(FILE_1):
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+    urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
 if not path.exists(FILE_2):
-    urllib.urlretrieve(FILE_LEADER + FILE_2, FILE_2)
+    urlretrieve(FILE_LEADER + FILE_2, FILE_2)
 
 if not path.exists(FILE_3):
-    urllib.urlretrieve(FILE_LEADER + FILE_3, FILE_3)
+    urlretrieve(FILE_LEADER + FILE_3, FILE_3)
 
 # Step 1: Load Local NetCDF File into OCW Dataset Objects and store in list
 target_datasets.append(local.load_file(FILE_1, varName, name='KNMI'))
@@ -181,7 +190,7 @@ list_of_regions = [
     Bounds(lat_min=30.0, lat_max=40.0, lon_min=-15.0, lon_max=0.0),
     Bounds(lat_min=33.0, lat_max=40.0, lon_min=25.0, lon_max=35.00)]
 
-region_list = ['R' + str(i + 1) for i in xrange(13)]
+region_list = ['R' + str(i + 1) for i in range(13)]
 
 # metrics
 pattern_correlation = metrics.PatternCorrelation()

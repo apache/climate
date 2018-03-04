@@ -29,11 +29,13 @@
     1. datasource/esgf
 
 """
+from __future__ import print_function
 
-import ocw.data_source.esgf as esgf
-from getpass import getpass
 import ssl
 import sys
+from getpass import getpass
+
+import ocw.data_source.esgf as esgf
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context

@@ -46,21 +46,30 @@
     7. plotter
 
 """
+from __future__ import print_function
 
 import datetime
-import urllib
+import ssl
+import sys
 from os import path
 
 import numpy as np
 
 import ocw.data_source.local as local
 import ocw.data_source.rcmed as rcmed
-from ocw.dataset import Bounds as Bounds
 import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
-import ssl
+from ocw.dataset import Bounds as Bounds
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -75,31 +84,29 @@ MODEL = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 OUTPUT_PLOT = "cru_31_tmax_knmi_africa_bias_full"
 
 # Download necessary NetCDF file if not present
-if path.exists(MODEL):
-    pass
-else:
-    urllib.urlretrieve(FILE_LEADER + MODEL, MODEL)
+if not path.exists(MODEL):
+    urlretrieve(FILE_LEADER + MODEL, MODEL)
 
-""" Step 1: Load Local NetCDF File into OCW Dataset Objects """
+# Step 1: Load Local NetCDF File into OCW Dataset Objects.
 print("Loading %s into an OCW Dataset Object" % (MODEL,))
 knmi_dataset = local.load_file(MODEL, "tasmax")
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" %
       (knmi_dataset.values.shape,))
 
-""" Step 2: Fetch an OCW Dataset Object from the data_source.rcmed module """
+# Step 2: Fetch an OCW Dataset Object from the data_source.rcmed module.
 print("Working with the rcmed interface to get CRU3.1 Daily-Max Temp")
 metadata = rcmed.get_parameters_metadata()
 
 cru_31 = [m for m in metadata if m['parameter_id'] == "39"][0]
 
-""" The RCMED API uses the following function to query, subset and return the 
-raw data from the database:
+# The RCMED API uses the following function to query, subset and return the
+# raw data from the database:
+#
+# rcmed.parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon,
+#                        max_lon, start_time, end_time)
+#
+# The first two required params are in the cru_31 variable we defined earlier
 
-rcmed.parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, 
-                        max_lon, start_time, end_time)
-
-The first two required params are in the cru_31 variable we defined earlier
-"""
 # Must cast to int since the rcmed api requires ints
 dataset_id = int(cru_31['dataset_id'])
 parameter_id = int(cru_31['parameter_id'])
@@ -139,7 +146,7 @@ cru31_dataset = rcmed.parameter_dataset(dataset_id,
                                         start_time,
                                         end_time)
 
-""" Step 3: Resample Datasets so they are the same shape """
+# Step 3: Resample Datasets so they are the same shape.
 print("CRU31_Dataset.values shape: (times, lats, lons) - %s" %
       (cru31_dataset.values.shape,))
 print("KNMI_Dataset.values shape: (times, lats, lons) - %s" %
@@ -164,7 +171,7 @@ cru31_dataset = dsp.temporal_rebin(cru31_dataset, temporal_resolution='full')
 print("KNMI_Dataset.values shape: %s" % (knmi_dataset.values.shape,))
 print("CRU31_Dataset.values shape: %s \n\n" % (cru31_dataset.values.shape,))
 
-""" Spatially Regrid the Dataset Objects to a 1/2 degree grid """
+# Spatially Regrid the Dataset Objects to a 1/2 degree grid.
 # Using the bounds we will create a new set of lats and lons on 0.5 degree step
 new_lons = np.arange(min_lon, max_lon, 0.5)
 new_lats = np.arange(min_lat, max_lat, 0.5)
@@ -177,12 +184,12 @@ cru31_dataset = dsp.spatial_regrid(cru31_dataset, new_lats, new_lons)
 print("Final shape of the KNMI_Dataset:%s" % (knmi_dataset.values.shape, ))
 print("Final shape of the CRU31_Dataset:%s" % (cru31_dataset.values.shape, ))
 
-""" Step 4:  Build a Metric to use for Evaluation - Bias for this example """
+# Step 4:  Build a Metric to use for Evaluation - Bias for this example.
 # You can build your own metrics, but OCW also ships with some common metrics
 print("Setting up a Bias metric to use for evaluation")
 bias = metrics.Bias()
 
-""" Step 5: Create an Evaluation Object using Datasets and our Metric """
+# Step 5: Create an Evaluation Object using Datasets and our Metric.
 # The Evaluation Class Signature is:
 # Evaluation(reference, targets, metrics, subregions=None)
 # Evaluation can take in multiple targets and metrics, so we need to convert
@@ -192,7 +199,7 @@ bias_evaluation = evaluation.Evaluation(knmi_dataset, [cru31_dataset], [bias])
 print("Executing the Evaluation using the object's run() method")
 bias_evaluation.run()
 
-""" Step 6: Make a Plot from the Evaluation.results """
+# Step 6: Make a Plot from the Evaluation.results.
 # The Evaluation.results are a set of nested lists to support many different
 # possible Evaluation scenarios.
 #

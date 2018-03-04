@@ -45,10 +45,20 @@
     6. plotter
 
 """
+from __future__ import print_function
 
 import datetime
 import sys
 from os import path
+
+import numpy
+
+import ocw.data_source.local as local
+import ocw.dataset_processor as dsp
+import ocw.evaluation as evaluation
+import ocw.metrics as metrics
+import ocw.plotter as plotter
+from ocw.dataset import Bounds
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -57,15 +67,6 @@ else:
     # But note that this might need an update when Python 4
     # might be around one day
     from urllib import urlretrieve
-
-import numpy
-
-from ocw.dataset import Bounds
-import ocw.data_source.local as local
-import ocw.dataset_processor as dsp
-import ocw.evaluation as evaluation
-import ocw.metrics as metrics
-import ocw.plotter as plotter
 
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
 FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"

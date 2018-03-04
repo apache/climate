@@ -47,22 +47,22 @@
     5. plotter
 
 """
+from __future__ import print_function
 
-import sys
 import datetime
-from os import path
-from calendar import monthrange
 import ssl
+import sys
+from calendar import monthrange
+from os import path
 
 import numpy as np
 
-# Apache OCW lib immports
-from ocw.dataset import Bounds
 import ocw.data_source.local as local
 import ocw.data_source.rcmed as rcmed
 import ocw.dataset_processor as dsp
 import ocw.plotter as plotter
 import ocw.utils as utils
+from ocw.dataset import Bounds
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -185,7 +185,7 @@ list_of_regions = [
     Bounds(lat_min=30.0, lat_max=40.0, lon_min=-15.0, lon_max=0.0),
     Bounds(lat_min=33.0, lat_max=40.0, lon_min=25.0, lon_max=35.0)]
 
-region_list = [['R' + str(i + 1)] for i in xrange(13)]
+region_list = [['R' + str(i + 1)] for i in range(13)]
 
 for regions in region_list:
     firstTime = True

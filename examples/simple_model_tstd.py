@@ -38,14 +38,23 @@
     4. plotter
 
 """
+from __future__ import print_function
 
+import sys
 from os import path
-import urllib
 
 import ocw.data_source.local as local
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlretrieve
 
 # File URL leader
 FILE_LEADER = "http://zipper.jpl.nasa.gov/dist/"
@@ -56,12 +65,10 @@ FILE_1 = "AFRICA_KNMI-RACMO2.2b_CTL_ERAINT_MM_50km_1989-2008_tasmax.nc"
 OUTPUT_PLOT = "knmi_temporal_std"
 
 # Download necessary NetCDF file if needed
-if path.exists(FILE_1):
-    pass
-else:
-    urllib.urlretrieve(FILE_LEADER + FILE_1, FILE_1)
+if not path.exists(FILE_1):
+    urlretrieve(FILE_LEADER + FILE_1, FILE_1)
 
-""" Step 1: Load Local NetCDF File into OCW Dataset Objects """
+# Step 1: Load Local NetCDF File into OCW Dataset Objects.
 print("Loading %s into an OCW Dataset Object" % (FILE_1,))
 # 'tasmax' is variable name of values
 knmi_dataset = local.load_file(FILE_1, "tasmax")
@@ -72,12 +79,12 @@ print("KNMI_Dataset.values shape: (times, lats, lons) - %s \n" % (knmi_dataset.v
 lats = knmi_dataset.lats
 lons = knmi_dataset.lons
 
-""" Step 2:  Build a Metric to use for Evaluation - Temporal STD for this example """
+# Step 2:  Build a Metric to use for Evaluation - Temporal STD for this example.
 # You can build your own metrics, but OCW also ships with some common metrics
 print("Setting up a Temporal STD metric to use for evaluation")
 std = metrics.TemporalStdDev()
 
-""" Step 3: Create an Evaluation Object using Datasets and our Metric """
+# Step 3: Create an Evaluation Object using Datasets and our Metric.
 # The Evaluation Class Signature is:
 # Evaluation(reference, targets, metrics, subregions=None)
 # Evaluation can take in multiple targets and metrics, so we need to convert
@@ -89,7 +96,7 @@ std_evaluation = evaluation.Evaluation(None, [knmi_dataset], [std])
 print("Executing the Evaluation using the object's run() method")
 std_evaluation.run()
 
-""" Step 4: Make a Plot from the Evaluation.results """
+# Step 4: Make a Plot from the Evaluation.results.
 # The Evaluation.results are a set of nested lists to support many different
 # possible Evaluation scenarios.
 #

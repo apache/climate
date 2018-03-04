@@ -38,7 +38,7 @@ _classifiers = [
 ]
 _description = 'Apache Open Climate Workbench'
 _download_url = 'http://pypi.python.org/pypi/ocw/'
-_requirements = []
+_requirements = ['numpy', ]
 _keywords = ['climate analysis', 'workbench', 'rebinning',
              'metrics', 'computation', 'visualization']
 _license = 'Apache License, Version 2.0'

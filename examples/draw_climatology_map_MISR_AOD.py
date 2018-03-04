@@ -41,25 +41,26 @@
 
 """
 
-import ocw.dataset as ds
-import ocw.data_source.local as local
-import ocw.dataset_processor as dsp
-import ocw.plotter as plotter
+from __future__ import print_function
 
 import numpy as np
 import numpy.ma as ma
 
+import ocw.data_source.local as local
+import ocw.dataset as ds
+import ocw.dataset_processor as dsp
+import ocw.plotter as plotter
 
-''' data source: https://dx.doi.org/10.6084/m9.figshare.3753321.v1
-    AOD_monthly_2000-Mar_2016-FEB_from_MISR_L3_JOINT.nc is publicly available.'''
+# data source: https://dx.doi.org/10.6084/m9.figshare.3753321.v1
+#    AOD_monthly_2000-Mar_2016-FEB_from_MISR_L3_JOINT.nc is publicly available.
 dataset = local.load_file('AOD_monthly_2000-MAR_2016-FEB_from_MISR_L3_JOINT.nc',
                           'nonabsorbing_ave')
-''' Subset the data for East Asia'''
+# Subset the data for East Asia.
 Bounds = ds.Bounds(lat_min=20, lat_max=57.7, lon_min=90, lon_max=150)
 dataset = dsp.subset(dataset, Bounds)
 
-'''The original dataset includes nonabsorbing AOD values between March 2000 and February 2015. 
-dsp.temporal_subset will extract data in September-October-November.'''
+# The original dataset includes nonabsorbing AOD values between March 2000 and February 2015.
+# dsp.temporal_subset will extract data in September-October-November.
 dataset_SON = dsp.temporal_subset(
     dataset, month_start=9, month_end=11, average_each_year=True)
 
