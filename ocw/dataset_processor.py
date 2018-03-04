@@ -15,20 +15,19 @@
 #  limitations under the License.
 #
 
-from ocw import dataset as ds
-import ocw.utils as utils
-
 import datetime
+import logging
+
+import netCDF4
 import numpy as np
 import numpy.ma as ma
-from scipy.interpolate import griddata
 import scipy.ndimage
-from scipy.stats import rankdata
-from scipy.ndimage import map_coordinates
-import netCDF4
 from matplotlib.path import Path
+from scipy.interpolate import griddata
+from scipy.ndimage import map_coordinates
 
-import logging
+import ocw.utils as utils
+from ocw import dataset as ds
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +148,7 @@ def temporal_rebin_with_time_index(target_dataset, nt_average):
      It is the same as the number of time indicies to be averaged.
      length of time dimension in the rebinned dataset) =
      (original time dimension length/nt_average)
-    :type temporal_resolution: integer
+    :type nt_average: integer
 
     :returns: A new temporally rebinned Dataset
     :rtype: :class:`dataset.Dataset`
@@ -505,10 +504,27 @@ def temporal_slice(target_dataset, start_time, end_time):
 
     :raises: ValueError
     '''
+    # https://issues.apache.org/jira/browse/CLIMATE-938
+    # netCDF datetimes allow for a variety of calendars while Python has
+    # only one.  This would throw an error about a calendar mismatch when
+    # comparing a Python datetime object to a netcdf datetime object.
+    # Cast the date as best we can so the comparison will compare like
+    # data types  This will still throw an excdeption if the start / end date are
+    # not valid in given calendar.  February 29th in a DatetimeNoLeap calendar for example.
+    slice_start_time =\
+        type(target_dataset.times.item(0))(start_time.year, start_time.month, start_time.day,
+                                           start_time.hour, start_time.minute, start_time.second)
+
+    slice_end_time =\
+        type(target_dataset.times.item(0))(end_time.year, end_time.month, end_time.day,
+                                           end_time.hour, end_time.minute, end_time.second)
+
     start_time_index = np.where(
-        target_dataset.times >= start_time)[0][0]
+        target_dataset.times >= slice_start_time)[0][0]
+
     end_time_index = np.where(
-        target_dataset.times <= end_time)[0][-1]
+        target_dataset.times <= slice_end_time)[0][-1]
+
     new_times = target_dataset.times[start_time_index:end_time_index + 1]
     new_values = target_dataset.values[start_time_index:end_time_index + 1, :]
 
