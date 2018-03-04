@@ -6,16 +6,21 @@ from metadata_extractor import CORDEXMetadataExtractor, obs4MIPSMetadataExtracto
 
 # These should be modified. TODO: domains can also be made into separate group
 # CORDEX domain
-domain = 'NAM-44'
 
-# The output directory
-workdir = '/home/goodman/data_processing/CORDEX/analysis'
+user_input = sys.argv[1:]
+if len(user_input) == 4:
+    domain, workdir, obs_dir, models_dir = user_input[:]
+else:
+    domain = 'NAM-44'
 
-# Location of osb4Mips files
-obs_dir = '/proj3/data/obs4mips'
+    # The output directory
+    workdir = os.getcwd()+'/'+domain+'_analysis'
 
-# Location of CORDEX files
-models_dir = '/proj3/data/CORDEX/{domain}/*'.format(domain=domain)
+    # Location of osb4Mips files
+    obs_dir = '/proj3/data/obs4mips'
+
+    # Location of CORDEX files
+    models_dir = '/proj3/data/CORDEX/{domain}/*'.format(domain=domain)
 
 # Extract metadata from model and obs files, pairing up files with the same
 # variables for separate evaluations
@@ -32,6 +37,7 @@ t = env.get_template('CORDEX.yaml.template')
 # Each group represents a single evaluation. Repeat the evaluation for
 # three seasons: Summer, Winter, and Annual.
 seasons = ['annual', 'winter', 'summer']
+errored = []
 for group in groups:
     obs_info, models_info = group
     instrument = obs_info['instrument']
@@ -50,7 +56,6 @@ for group in groups:
         # TODO: Do this in parallel. Will change this once this approach
         # is well tested.
         code = subprocess.call([sys.executable, '../run_RCMES.py', configfile_path])
-        errored = []
         if code:
             errored.append(configfile_path)
 

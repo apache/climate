@@ -339,9 +339,10 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
     parameters_metadata = get_parameters_metadata()
     parameter_name, time_step, _, _, _, _, parameter_units = _get_parameter_info(
         parameters_metadata, parameter_id)
-    url = _generate_query_url(dataset_id, parameter_id, min_lat,
-                              max_lat, min_lon, max_lon, start_time, end_time, time_step)
-    lats, lons, times, values = _get_data(url)
+
+    lats, lons, times, values = \
+        _coalesce_data(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon,
+                       start_time, end_time, time_step)
 
     unique_lats_lons_times = _make_unique(lats, lons, times)
     unique_times = _calculate_time(unique_lats_lons_times[2], time_step)
@@ -362,3 +363,74 @@ def parameter_dataset(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_l
                    units=parameter_units,
                    name=name,
                    origin=origin)
+
+
+def _coalesce_data(dataset_id, parameter_id, min_lat, max_lat, min_lon, max_lon,
+                       start_time, end_time, time_step):
+
+    """
+    Refer to this JIRA:  https://issues.apache.org/jira/browse/CLIMATE-744
+
+    Sometimes RCMED does not seem to return the entire data set when the requested
+    range of data and / or number of data points are very large.  This method breaks
+    the single large query into several smaller queries and then appends the results.
+
+    :param dataset_id:  The RCMED dataset ID.
+    :param parameter_id:  The parameter ID within the RCMED dataset.
+    :param min_lat: The minimum lat of the dataset boundary.
+    :param max_lat: The maximum lat of the dataset boundary.
+    :param min_lon: The minimum lon of the dataset boundary.
+    :param max_lon: The maximum lon of the dataset boundary.
+    :param start_time: The start datetime of the dataset boundary.
+    :param end_time: The end datetime of the dataset boundary.
+    :param time_step: The timestep to use when segmenting the datetime boundary.
+    :return:  lats, lons, times, and values for the requested dataset / parameter from RCMED.
+    """
+
+    lats = None
+    lons = None
+    times = None
+    values = None
+
+    # This is a magic number which strikes a balance between making an excessive number of
+    # calls to RCMED (e.g. 1) and RCMED not sending back the full data set.
+    step = 4
+
+    current_start = start_time
+    current_end = min(end_time, datetime(current_start.year + step, 12, 31))
+
+    while True:
+
+        url = _generate_query_url(dataset_id, parameter_id, min_lat,
+                                  max_lat, min_lon, max_lon, current_start, current_end, time_step)
+
+        tmp_lats, tmp_lons, tmp_times, tmp_values = _get_data(url)
+
+        if lats is None:
+            lats = tmp_lats
+        else:
+            lats = np.append(lats, tmp_lats)
+
+        if lons is None:
+            lons = tmp_lons
+        else:
+            lons = np.append(lons, tmp_lons)
+
+        if times is None:
+            times = tmp_times
+        else:
+            times = np.append(times, tmp_times)
+
+        if values is None:
+            values = tmp_values
+        else:
+            values = np.append(values, tmp_values)
+
+        if current_end == end_time:
+            break
+
+        current_start = datetime(current_end.year + 1, 1, 1)
+        current_end = min(end_time, datetime(current_start.year + step, 12, 31))
+
+
+    return lats, lons, times, values
