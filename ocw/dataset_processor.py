@@ -504,6 +504,7 @@ def temporal_slice(target_dataset, start_time, end_time):
 
     :raises: ValueError
     '''
+
     # https://issues.apache.org/jira/browse/CLIMATE-938
     # netCDF datetimes allow for a variety of calendars while Python has
     # only one.  This would throw an error about a calendar mismatch when
@@ -511,13 +512,17 @@ def temporal_slice(target_dataset, start_time, end_time):
     # Cast the date as best we can so the comparison will compare like
     # data types  This will still throw an excdeption if the start / end date are
     # not valid in given calendar.  February 29th in a DatetimeNoLeap calendar for example.
-    slice_start_time =\
-        type(target_dataset.times.item(0))(start_time.year, start_time.month, start_time.day,
-                                           start_time.hour, start_time.minute, start_time.second)
+    slice_start_time = start_time
+    slice_end_time = end_time
 
-    slice_end_time =\
-        type(target_dataset.times.item(0))(end_time.year, end_time.month, end_time.day,
-                                           end_time.hour, end_time.minute, end_time.second)
+    if isinstance(target_dataset.times.item(0), netCDF4.netcdftime._netcdftime.datetime):
+        slice_start_time =\
+            type(target_dataset.times.item(0))(start_time.year, start_time.month, start_time.day,
+                                            start_time.hour, start_time.minute, start_time.second)
+
+        slice_end_time =\
+            type(target_dataset.times.item(0))(end_time.year, end_time.month, end_time.day,
+                                            end_time.hour, end_time.minute, end_time.second)
 
     start_time_index = np.where(
         target_dataset.times >= slice_start_time)[0][0]
