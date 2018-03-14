@@ -46,28 +46,23 @@ def convert_times_to_datetime(time):
     return [parsed_time.num2date(x) for x in time[:]]
 
 
-def list_available_extract_granule_dataset_ids():
+def list_available_level4_extract_granule_dataset_ids():
     '''Convenience function which returns an up-to-date \
-        list of available granule dataset id's which can be \
+        list of available level4 blended granule dataset id's which can be \
         used in the granule extraction service.
     :returns: a comma-seperated list of granule dataset id's.
 
     '''
     podaac_utils = PodaacUtils()
-    return podaac_utils.list_available_extract_granule_dataset_ids()
+    return podaac_utils.list_level4_dataset_ids()
 
-def subset_granule(variable, dataset_id='', name='', path='/tmp', input_file_path=''):
+def subset_granule(variable, name='', path='/tmp', input_file_path=''):
     '''Subset Granule service allows users to Submit subset jobs. \
         Use of this service should be preceded by a Granule Search in \
         order to identify and generate a list of granules to be subsetted.
 
     :param variable: The name of the variable to read from the dataset.
     :type variable: :mod:`string`
-
-    :param dataset_id: dataset persistent ID. datasetId or \
-        shortName is required for a granule search. Example: \
-        PODAAC-ASOP2-25X01
-    :type dataset_id: :mod:`string`
 
     :param name: (Optional) A name for the loaded dataset.
     :type name: :mod:`string`
@@ -95,9 +90,9 @@ def extract_l4_granule(variable, dataset_id='', name='', path='/tmp'):
     :param variable: The name of the variable to read from the dataset.
     :type variable: :mod:`string`
 
-    :param dataset_id: dataset persistent ID. datasetId or \
-        shortName is required for a granule search. Example: \
-        PODAAC-ASOP2-25X01
+    :param dataset_id: dataset persistent ID. datasetId \
+        is required for a granule search. Example: \
+        PODAAC-CCF35-01AD5
     :type dataset_id: :mod:`string`
 
     :param name: (Optional) A name for the loaded dataset.
@@ -147,8 +142,8 @@ def read_dataset(name='', granule_name ='', variable=None, path='/tmp'):
     lons = np.array(d.variables[lon][:])
     values = np.array(dataset[:])
     origin = {
-        'source': 'PO.DAAC',
-        'url': 'podaac.jpl.nasa.gov'
+        'source': 'NASA JPL PO.DAAC',
+        'url': 'https://podaac.jpl.nasa.gov'
     }
 
     # Removing the downloaded temporary granule before creating the OCW
