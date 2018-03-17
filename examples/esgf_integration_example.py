@@ -37,31 +37,37 @@ from getpass import getpass
 
 import ocw.data_source.esgf as esgf
 
-if hasattr(ssl, '_create_unverified_context'):
-    ssl._create_default_https_context = ssl._create_unverified_context
+def main():
+    """
+    An example of using the OCW ESGF library.  Connects to an ESGF
+    server and downloads a dataset.
+    """
+    if hasattr(ssl, '_create_unverified_context'):
+        ssl._create_default_https_context = ssl._create_unverified_context
 
-dataset_id = 'obs4mips.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov'
-variable = 'zosStderr'
+    dataset_id = 'obs4mips.CNES.AVISO.zos.mon.v20110829|esgf-data.jpl.nasa.gov'
+    variable = 'zosStderr'
 
-if sys.version_info[0] >= 3:
-    username = input('Enter your ESGF OpenID:\n')
-else:
-    username = raw_input('Enter your ESGF OpenID:\n')
+    if sys.version_info[0] >= 3:
+        username = input('Enter your ESGF OpenID:\n')
+    else:
+        username = raw_input('Enter your ESGF OpenID:\n')
 
-password = getpass(prompt='Enter your ESGF Password:\n')
+    password = getpass(prompt='Enter your ESGF Password:\n')
 
-# Multiple datasets are returned in a list if the ESGF dataset is
-# divided into multiple files.
-datasets = esgf.load_dataset(dataset_id,
-                             variable,
-                             username,
-                             password)
+    # Multiple datasets are returned in a list if the ESGF dataset is
+    # divided into multiple files.
+    datasets = esgf.load_dataset(dataset_id, variable, username, password)
 
-# For this example, our dataset is only stored in a single file so
-# we only need to look at the 0-th value in the returned list.
-ds = datasets[0]
+    # For this example, our dataset is only stored in a single file so
+    # we only need to look at the 0-th value in the returned list.
+    dataset = datasets[0]
 
-print('\n--------\n')
-print('Variable: ', ds.variable)
-print('Shape: ', ds.values.shape)
-print('A Value: ', ds.values[100][100][100])
+    print('\n--------\n')
+    print('Variable: ', dataset.variable)
+    print('Shape: ', dataset.values.shape)
+    print('A Value: ', dataset.values[100][100][100])
+
+
+if __name__ == '__main__':
+    main()
