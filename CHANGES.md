@@ -1,6 +1,73 @@
 Apache Open Climate Workbench Change Log
 ========================================
 
+# Release Notes - Apache Open Climate Workbench - Version 1.3.0
+# Release Report - https://s.apache.org/TSNM
+
+Sub-task
+
+    [CLIMATE-529] - Verify that Nio dependency has been removed from mccsearch
+
+Bug
+
+    [CLIMATE-338] - RCMED data source loads datasets improperly based on day attribute of time values
+    [CLIMATE-353] - Bounds doesn't cast input values into proper format
+    [CLIMATE-374] - UI runEvaluation doesn't use $window or $location for results transition
+    [CLIMATE-413] - Extend browser support for ocw-ui/frontend/config/karma.conf.js
+    [CLIMATE-480] - plotter.draw_subregions requires outdated subregion object
+    [CLIMATE-744] - Cannot load TRMM data from RCMED
+    [CLIMATE-756] - Error: Invalid LatLng object: (NaN, NaN) when queuing APHRODITE v.1101 precipitation for the Monsoon Asia domain from RCMED
+    [CLIMATE-790] - SSL errors in the esgf example
+    [CLIMATE-797] - Attribute error in mask_missing_data
+    [CLIMATE-826] - ValueError in model_ensemble_to_rcmed.py
+    [CLIMATE-891] - Make (non-ESGF and pydap) examples script python 3 compatible
+    [CLIMATE-913] - Bugs in CLI
+    [CLIMATE-914] - Update dataset_processor.spatial_regrid module
+    [CLIMATE-915] - Updates for the NARCCAP example configuration files
+    [CLIMATE-917] - Bocumentation build error with Python3
+    [CLIMATE-919] - load_dataset_from_multiple_netcdf_files() does not have default variable units
+    [CLIMATE-922] - Optimize traversing in mccSearch
+    [CLIMATE-929] - Incorrect indices used for temporal subset after trimming
+    [CLIMATE-930] - multiple file loader forces 2D lats and lons
+    [CLIMATE-931] - Documentation build error - missing module
+    [CLIMATE-943] - TypeError: Cannot set property 'uiDateValidator' of undefined
+    [CLIMATE-945] - Grunt Errors On Build Task
+    [CLIMATE-946] - CORDEX script does not necessarily use correct interpreter when calling RCMES
+
+Epic
+
+    [CLIMATE-924] - Changes to RCMES and ocw for CORDEX pilot project
+
+New Feature
+
+    [CLIMATE-316] - Add ESGF Download Script to repository
+    [CLIMATE-366] - Add 'full' temporal rebin option to UI
+    [CLIMATE-426] - Create documentation for working with OCW in Eclipse
+    [CLIMATE-925] - CORDEX Config File Template
+    [CLIMATE-926] - Metadata Extractors
+    [CLIMATE-927] - RCMES script for running multiple evaluations
+
+Improvement
+
+    [CLIMATE-230] - Line colors in time series cycles through too few colors
+    [CLIMATE-348] - Add better default naming for local files
+    [CLIMATE-388] - Make UI backend 'parameters' endpoint more RESTful
+    [CLIMATE-465] - Add class level documentation to all OCW python examples
+    [CLIMATE-625] - Update draw_histogram and draw_marker_on_map documentation
+    [CLIMATE-626] - Update doc strings in Downscaling class
+    [CLIMATE-863] - Address warning, deprecation, etc. within Travis-CI log output
+    [CLIMATE-887] - test_get_netcdf_variable_names setUp to run only once for the test case
+    [CLIMATE-912] - Upgrade mccSearch code from Python2 > 3
+    [CLIMATE-920] - Make examples Python 3 compatible
+    [CLIMATE-928] - temporal_subset should trim edges of dataset times to ensure months divide evenly into years
+    [CLIMATE-938] - Unify format of the time information from a netCDF file
+
+Task
+
+    [CLIMATE-631] - Add documentation on ESGF credential issues
+    [CLIMATE-762] - Automate symlinking ocw-vm frontend to backend to allow for serving of files with bottle.
+    [CLIMATE-881] - Add podaacpy to ocw-conda-dependencies.txt
+
 # Release Notes - Apache Open Climate Workbench - Version 1.2.0
 # Release Report - https://s.apache.org/120release
 
