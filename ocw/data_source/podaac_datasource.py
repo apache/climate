@@ -54,7 +54,7 @@ def list_available_extract_granule_dataset_ids():
 
     '''
     podaac_utils = PodaacUtils()
-    return podaac_utils.list_available_extract_granule_dataset_ids()
+    return podaac_utils.list_all_available_extract_granule_dataset_ids()
 
 def subset_granule(variable, dataset_id='', name='', path='/tmp', input_file_path=''):
     '''Subset Granule service allows users to Submit subset jobs. \
