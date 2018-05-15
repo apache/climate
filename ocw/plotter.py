@@ -167,7 +167,7 @@ def _fig_size(gridshape, aspect=None):
 
 def draw_taylor_diagram(results, names, refname, fname, fmt='png',
                         gridshape=(1, 1), ptitle='', subtitles=None,
-                        pos='upper right', frameon=True, radmax=1.5):
+                        pos='upper right', frameon=True, radmax=1.5, legend_size=13):
     ''' Draw a Taylor diagram.
 
     :param results: An Nx2 array containing normalized standard deviations,
@@ -209,6 +209,9 @@ def draw_taylor_diagram(results, names, refname, fname, fmt='png',
     :param radmax: (Optional) float to adjust the extent of the axes in terms of
         standard deviation.
     :type radmax: :class:`float`
+
+    :param legend_size: (Optional) float to control the font size of the legend        
+    :type legend_size: :class:`float`
     '''
     # Handle the single plot case.
     if results.ndim == 2:
@@ -239,7 +242,7 @@ def draw_taylor_diagram(results, names, refname, fname, fmt='png',
     # Add legend
     legend = fig.legend(dia.samplePoints,
                         [p.get_label() for p in dia.samplePoints],
-                        handlelength=0., prop={'size': 10}, numpoints=1,
+                        handlelength=0., prop={'size': legend_size}, numpoints=1,
                         loc=pos)
     legend.draw_frame(frameon)
     plt.subplots_adjust(wspace=0)
