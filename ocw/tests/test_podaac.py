@@ -74,8 +74,8 @@ class TestPodaacDataSource(unittest.TestCase):
 
     def test_dataset_origin(self):
         print('in test_dataset_origin')
-        self.assertEquals(self.dataset.origin['source'], 'PO.DAAC')
-        self.assertEquals(self.dataset.origin['url'], 'podaac.jpl.nasa.gov')
+        self.assertEquals(self.dataset.origin['source'], 'NASA JPL PO.DAAC')
+        self.assertEquals(self.dataset.origin['url'], 'https://podaac.jpl.nasa.gov')
 
     def test_custom_name(self):
         print('in test_custom_name')
