@@ -631,31 +631,31 @@ def write_netcdf(dataset, path, compress=True):
     if dataset.lats.ndim == 2:
         lat_len = dataset.lats.shape[0]
         lon_len = dataset.lons.shape[1]
-        lat_dim_info = ('lat', 'lon')
-        lon_dim_info = ('lat', 'lon')
+        lat_dim_info = ('y', 'x')
+        lon_dim_info = ('y', 'x')
 
     else:
         lat_len = len(dataset.lats)
         lon_len = len(dataset.lons)
-        lat_dim_info = ('lat',)
-        lon_dim_info = ('lon',)
+        lat_dim_info = ('y',)
+        lon_dim_info = ('x',)
 
     time_len = len(dataset.times)
 
     # Create attribute dimensions
-    out_file.createDimension('lat', lat_len)
-    out_file.createDimension('lon', lon_len)
-    out_file.createDimension('time', time_len)
+    out_file.createDimension('y', lat_len)
+    out_file.createDimension('x', lon_len)
+    out_file.createDimension('time', None)
 
     # Create variables
     lats = out_file.createVariable('lat', 'f8', lat_dim_info, zlib=compress)
     lons = out_file.createVariable('lon', 'f8', lon_dim_info, zlib=compress)
-    times = out_file.createVariable('time', 'f8', ('time',), zlib=compress)
+    times = out_file.createVariable('time', 'f8', ('time'), zlib=compress)
 
     var_name = dataset.variable if dataset.variable else 'var'
     values = out_file.createVariable(var_name,
                                      'f8',
-                                     ('time', 'lat', 'lon'),
+                                     ('time', 'y', 'x'),
                                      zlib=compress)
 
     # Set the time variable units
