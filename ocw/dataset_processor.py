@@ -909,7 +909,7 @@ def deseasonalize_dataset(dataset):
     :param dataset: The dataset to convert.
     :type dataset: :class:`dataset.Dataset`
 
-    :returns: A Dataset with values converted to new units.
+    :returns: A Dataset with values deseasonalized.
     :rtype: :class:`dataset.Dataset`
     '''
 
