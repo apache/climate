@@ -711,3 +711,21 @@ def calculate_temporal_trend_of_time_series(x,y):
     '''
     slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
     return slope, std_err
+
+def calculate_daily_climatology(dataset):
+    '''Calculate daily climatology from the input dataset
+    :param dataset: The dataset to convert.
+    :type dataset: :class:`dataset.Dataset`
+    :returns: values_clim
+    :rtype: 3d masked numpy array.shape (number of unique days, y, x)
+    '''
+
+    days = [d.month * 100. + d.day for d in dataset.times]
+    days_sorted = np.unique(days)
+    ndays = days_sorted.size
+    nt, ny, nx = dataset.values.shape
+    values_clim = ma.zeros([ndays, ny, nx])
+    for iday, day in enumerate(days_sorted):
+        t_index = np.where(days == day)[0]
+        values_clim[iday, :] = ma.mean(dataset.values[t_index, :], axis=0)
+    return values_clim
