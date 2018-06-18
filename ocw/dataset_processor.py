@@ -379,7 +379,7 @@ def subset(target_dataset, subregion, subregion_name=None, extract=True, user_ma
     if not subregion_name:
         subregion_name = target_dataset.name
 
-    if hasattr(subregion, 'lat_min'):
+    if subregion.lat_min is not None:
         _are_bounds_contained_by_dataset(target_dataset, subregion)
 
         if target_dataset.lats.ndim == 2 and target_dataset.lons.ndim == 2:
