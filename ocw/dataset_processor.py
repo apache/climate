@@ -515,7 +515,7 @@ def temporal_slice(target_dataset, start_time, end_time):
     slice_start_time = start_time
     slice_end_time = end_time
 
-    if isinstance(target_dataset.times.item(0), netCDF4.netcdftime._netcdftime.datetime):
+    if type(target_dataset.times[0]) != datetime.datetime:
         slice_start_time =\
             type(target_dataset.times.item(0))(start_time.year, start_time.month, start_time.day,
                                             start_time.hour, start_time.minute, start_time.second)
