@@ -61,7 +61,7 @@ try:
         to='rst',
         outputfile='README.rst')
 except(IOError, ImportError):
-    _long_description = open('README.md').read()
+    _long_description = open('README.rst').read()
 
 open('doc.txt', 'w').write(_long_description)
 
