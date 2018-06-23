@@ -281,6 +281,29 @@ def calc_bias(target_array, reference_array, average_over_time=False):
         return ma.average(bias, axis=0)
     else:
         return bias
+    
+
+def calc_absbias(target_array, reference_array, average_over_time=False):
+    ''' Calculate absolute difference between two arrays
+
+    :param target_array: an array to be evaluated, as model output
+    :type target_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param reference_array: an array of reference dataset
+    :type reference_array: :class:'numpy.ma.core.MaskedArray'
+
+    :param average_over_time: if True, calculated bias is averaged for the axis=0
+    :type average_over_time: 'bool'
+
+    :returns: Absolute Biases array of the target dataset
+    :rtype: :class:'numpy.ma.core.MaskedArray'
+    '''
+
+    bias = abs(target_array - reference_array)
+    if average_over_time:
+        return ma.average(bias, axis=0)
+    else:
+        return bias
 
 
 def calc_stddev(array, axis=None):
