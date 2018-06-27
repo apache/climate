@@ -6,7 +6,7 @@ basemap
 netcdf4
 h5py
 bottle
-pydap
+Pydap
 python-dateutil
 mock
 webtest
@@ -14,3 +14,4 @@ myproxyclient
 esgf-pyclient
 podaacpy
 networkx
+netcdftime
