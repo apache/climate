@@ -7,6 +7,7 @@ netcdf4
 h5py
 bottle
 Pydap
+lxml
 python-dateutil
 mock
 webtest
