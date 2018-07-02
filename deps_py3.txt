@@ -12,3 +12,4 @@ webtest
 podaacpy
 networkx
 netcdftime
+lxml
