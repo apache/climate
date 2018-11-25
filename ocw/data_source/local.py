@@ -260,7 +260,7 @@ def load_file(file_path,
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
-    values = ma.array(values, mask=np.isnan(values))
+    values = ma.array(values, mask=numpy.isnan(values))
     if not variable_unit:
         if hasattr(netcdf.variables[variable_name], 'units'):
             variable_unit = netcdf.variables[variable_name].units
