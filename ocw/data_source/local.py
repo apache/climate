@@ -260,6 +260,7 @@ def load_file(file_path,
     times = utils.decode_time_values(netcdf, time_name)
     times = numpy.array(times)
     values = ma.array(netcdf.variables[variable_name][:])
+    values = ma.array(values, mask=numpy.isnan(values))
     if not variable_unit:
         if hasattr(netcdf.variables[variable_name], 'units'):
             variable_unit = netcdf.variables[variable_name].units
@@ -536,7 +537,7 @@ def load_dataset_from_multiple_netcdf_files(variable_name, variable_unit=None,
         if ifile == 0:
             data_values = values0
         else:
-            data_values = numpy.concatenate((data_values, values0))
+            data_values = ma.concatenate((data_values, values0))
     times = numpy.array(times)
     variable_unit = dataset0.units if not variable_unit else variable_unit
     return Dataset(lats, lons, times, data_values,

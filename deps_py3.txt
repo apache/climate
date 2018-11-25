@@ -1,3 +1,4 @@
+cython
 numpy
 scipy
 matplotlib
@@ -10,3 +11,5 @@ mock
 webtest
 podaacpy
 networkx
+netcdftime
+lxml
