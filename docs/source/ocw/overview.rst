@@ -160,7 +160,7 @@ Evaluation objects store the results of metrics processing in two lists:
 * The ``results`` list is a multidimensional array that holds the results of all binary metrics.
 * The ``unary_results`` list is a list that holds the results of all unary metrics.
 
- In the example above, one could theoretically replicate the resulting structure of these lists with the following code::
+In the example above, one could theoretically replicate the resulting structure of these lists with the following code::
 
 >>> results = [
 >>>     # Results for target1
