@@ -10,6 +10,7 @@ from metadata_extractor import CORDEXMetadataExtractor, obs4MIPSMetadataExtracto
 user_input = sys.argv[1:]
 if len(user_input) == 4:
     domain, workdir, obs_dir, models_dir = user_input[:]
+    models_dir = (models_dir+'/*').format(domain=domain)
 else:
     domain = 'NAM-44'
 
