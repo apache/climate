@@ -1,27 +1,33 @@
 Overview
 ========
 
-The Apache Open Climate Workbench toolkit aims to provide a suit of tools to make Climate Scientists lives easier. It does this by providing tools for loading and manipulating datasets, running evaluations, and plotting results. Below is a breakdown of many of the OCW components with an explanation of how to use them. An OCW evaluation usually has the following steps:
+The Apache Open Climate Workbench (OCW) toolkit aims to make climate scientists' lives easier by providing a standardized workflow for manipulating datasets and generating metrics from them. This document provides an overview of the OCW components involved in this workflow, along with explanations of how to use them.
 
-1. Load one or more datasets
-2. Perform dataset manipulations (subset, temporal/spatial rebin, etc.)
-3. Load various metrics
-4. Instantiate and run the evaluation
-5. Plot results
+A typical OCW script performs the following steps:
+
+1. Load one or more **datasets** from a variety of sources
+2. Perform manipulations on the datasets (subset, temporal/spatial rebin, etc.)
+3. Load relevant **metrics** to evaluate for the datasets
+4. Instantiate an **evaluation** object that evaluates specified metrics for specified datasets
+5. Plot the evaluation's results
 
 Common Data Abstraction
 -----------------------
 
-The OCW :class:`dataset.Dataset` class is the primary data abstraction used throughout OCW. It facilitates the uniform handling of data throughout the toolkit and provides a few useful helper functions such as :func:`dataset.Dataset.spatial_boundaries` and :func:`dataset.Dataset.temporal_boundaries`. Creating a new dataset object is straightforward but generally you will want to use an OCW data source to load the data for you.
+The :class:`dataset.Dataset` class is the OCW's primary data abstraction. It facilitates the uniform handling of data throughout the toolkit and provides a few useful helper functions, such as :func:`dataset.Dataset.spatial_boundaries` and :func:`dataset.Dataset.temporal_boundaries`. Creating a new dataset object is straightforward, but generally you'll want to use an OCW **data source** to load the data for you.
 
 Data Sources
 ------------
 
-OCW data sources allow users to easily load :class:`dataset.Dataset` objects from a number of places. These data sources help with step 1 of an evaluation above. In general the primary file format that is supported is NetCDF. For instance, the :mod:`local`, :mod:`dap` and :mod:`esgf` data sources only support loading NetCDF files from your local machine, an OpenDAP URL, and the ESGF respectively. Some data sources, such as :mod:`rcmed`, point to externally supported data sources. In the case of the RCMED data source, the Regional Climate Model Evaluation Database is run by NASA's Jet Propulsion Laboratory. 
+OCW data sources allow you to easily load :class:`dataset.Dataset` objects from a variety of places. These data sources help with step 1 of the workflow described above.
 
-Adding additional data sources is quite simple. The only API limitation that we have on a data source is that it returns a valid :class:`dataset.Dataset` object. Please feel free to send patches for adding more data sources. 
+Most OCW data sources primarly use the NetCDF file format. For instance, the :mod:`local`, :mod:`dap`, and :mod:`esgf` data sources support loading only NetCDF files from your local machine, an OpenDAP URL, and the ESGF, respectively.
 
-A simple example using the :mod:`local` data source to load a NetCDF file from your local machine::
+Certain data sources, such as :mod:`rcmed`, point to externally supported data sources. In the case of the RCMED data source, the Regional Climate Model Evaluation Database is run by NASA's Jet Propulsion Laboratory.
+
+Adding support for a new data source is straightforward. The only API requirement is that every data source must return a valid :class:`dataset.Dataset` object. Please feel free to send patches for adding new data sources.
+
+Here's a simple example that uses the :mod:`local` data source to load a NetCDF file from your local machine::
 
 >>> import ocw.data_source.local as local
 >>> ds = local.load_file('/tmp/some_dataset.nc', 'SomeVarInTheDataset')
@@ -29,19 +35,24 @@ A simple example using the :mod:`local` data source to load a NetCDF file from y
 Dataset Manipulations
 ---------------------
 
-All :class:`dataset.Dataset` manipulations are handled by the :mod:`dataset_processor` module. In general, an evaluation will include calls to :func:`dataset_processor.subset`, :func:`dataset_processor.spatial_regrid`, and :func:`dataset_processor.temporal_rebin` to ensure that the datasets can actually be compared. :mod:`dataset_processor` functions take a :class:`dataset.Dataset` object and some various parameters and return a modified :class:`dataset.Dataset` object. The original dataset is never manipulated in the process.
+All :class:`dataset.Dataset` manipulations are handled by the :mod:`dataset_processor` module. Typically, an evaluation includes calls to :func:`dataset_processor.subset`, :func:`dataset_processor.spatial_regrid`, and :func:`dataset_processor.temporal_rebin` to ensure that the datasets can actually be compared.
 
-Subsetting is a great way to speed up your processing and keep useless data out of your plots. Notice that we're using a :class:`dataset.Bounds` objec to represent the area of interest::
+Most :mod:`dataset_processor` functions take in a :class:`dataset.Dataset` object (along with other parameters), perform relevant processing on the data, and return a new :class:`dataset.Dataset` object. The original dataset object is never manipulated in the process.
+
+Common Manipulations
+~~~~~~~~~~~~~~~~~~~~
+
+**Subsetting** is a great way to speed up your processing and keep useless data out of your plots. The following example uses a :class:`dataset.Bounds` object to restrict a dataset to a particular region of interest::
 
 >>> import ocw.dataset_processor as dsp
 >>> new_bounds = Bounds(min_lat, max_lat, min_lon, max_lon, start_time, end_time)
 >>> knmi_dataset = dsp.subset(knmi_dataset, new_bounds)
 
-Temporally re-binning a dataset is great when the time step of the data is too fine grain for the desired use. For instance, perhaps we want to see a yearly trend but we have daily data. We would need to make the following call to adjust our dataset::
+**Temporally re-binning** a dataset is useful when your data's time step is too fine-grained for your use case. For example, if you want to visualize a yearly trend but are working with daily data, you can make the following call to adjust your dataset::
 
 >>> knmi_dataset = dsp.temporal_rebin(knmi_dataset, datetime.timedelta(days=365))
 
-It is critically necessary for our datasets to be on the same lat/lon grid before we try to compare them. That's where spatial re-gridding comes in helpful. Here we re-grid our example dataset onto a 1-degree lat/lon grid within the range that we subsetted the dataset previously::
+It is critical for a collection of datasets to be on the same lat/lon grid before they are compared. That's where **spatial re-gridding** comes in handy. The following example re-grids a dataset onto a 1-degree lat/lon grid within the bounds specified in the example above::
 
 >>> new_lons = np.arange(min_lon, max_lon, 1)
 >>> new_lats = np.arange(min_lat, max_lat, 1)
@@ -50,16 +61,28 @@ It is critically necessary for our datasets to be on the same lat/lon grid befor
 Metrics
 -------
 
-Metrics are the backbone of an evaluation. You'll find a number of (hopefully) useful "default" metrics in the :mod:`metrics` module in the toolkit. In general you won't be too likely to use a metric outside of an evaluation, however you could run a metric manually if you so desired.::
+Metrics are the backbone of an evaluation. The toolkit's :mod:`metrics` module provides a number of (hopefully) useful "default" metrics.
+
+In general, it's uncommon to run a metric outside of an evaluation, however you can do so manually::
 
 >>> import ocw.metrics
 >>> # Load 2 datasets
 >>> bias = ocw.metrics.Bias()
 >>> print bias.run(dataset1, dataset2)
 
-While this might be exactly what you need to get the job done, it is far more likely that you'll need to run a number of metrics over a number of datasets. That's where running an evaluation comes in, but we'll get to that shortly.
+While this can be useful for one-off situations, it's far more likely that you'll need to run a number of metrics over a number of datasets. This is where running metrics within an evaluation comes in (covered in greater detail below).
 
-There are two "types" of metrics that the toolkit supports. A unary metric acts on a single dataset and returns a result. A binary metric acts on a target and reference dataset and returns a result. This is helpful to know if you decide that the included metrics aren't sufficient. We've attempted to make adding a new metric as simple as possible. You simply create a new class that inherits from either the unary or binary base classes and override the `run` function. At this point your metric will behave exactly like the included metrics in the toolkit. Below is an example of how one of the included metrics is implemented. If you need further assistance with your own metrics be sure to email the project's mailing list!::
+Creating Custom Metrics
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The toolkit supports two "types" of metrics: unary metrics and binary metrics.
+
+* **Unary metrics** act on a single dataset and return a result.
+* **Binary metrics** act on two datasets (a **target** and a **reference**) and return a result.
+
+This dichotomy is helpful to know if you decide to create your own custom metric. To do so, simply create a new class that inherits from either the unary or binary base class and overrides its ``run`` function.
+
+The following snippet shows the implementation of the default ``Bias`` metric. If you need further assistance with creating custom metrics, be sure to email the project's mailing list::
 
 >>> class Bias(BinaryMetric):
 >>>     '''Calculate the bias between a reference and target dataset.'''
@@ -81,23 +104,23 @@ There are two "types" of metrics that the toolkit supports. A unary metric acts 
 >>>         '''
 >>>         return ref_dataset.values - target_dataset.values
 
-While this might look a bit scary at first, if we take out all the documentation you'll see that it's really extremely simple.::
+Although this code might look intimidating at first, most of it is documentation markup. The following (much simpler) snippet is the same code with documentation markup removed::
 
 >>> # Our new Bias metric inherits from the Binary Metric base class
 >>> class Bias(BinaryMetric):
->>>     # Since our new metric is a binary metric we need to override
+>>>     # Since our new metric is a binary metric, we need to override
 >>>     # the run funtion in the BinaryMetric base class.
 >>>     def run(self, ref_dataset, target_dataset):
 >>>         # To implement the bias metric we simply return the difference
 >>>         # between the reference and target dataset's values arrays.
 >>>         return ref_dataset.values - target_dataset.values
 
-It is very important to note that you shouldn't change the datasets that are passed into the metric that you're implementing. If you do you might cause unexpected results in future parts of the evaluation. If you need to do manipulations, copy the data first and do manipulations on the copy. Leave the original dataset alone!
+If you create a custom metric, **do not modify any datasets that are passed into it**. If you do, you will probably cause unexpected results in subsequent steps of the evaluation. If you need to manipulate data, first copy it and perform all manipulations on the copy. Leave the original dataset alone!
 
 Handling an Evaluation
 ----------------------
 
-We saw above that it is easy enough to run a metric over a few datasets manually. However, when we have a lot of datasets and/or a lot of metrics to run that can become tedious and error prone. This is where the :class:`evaluation.Evaluation` class comes in handy. It ensures that all the metrics that you choose are run over all combinations of the datasets that you input. Consider the following simple example::
+When you have a large collection of datasets and a large collection of metrics to run on them, you should encapsuate those operations in an :class:`evaluation.Evaluation` to ensure consistency and prevent errors. An evaluation ensures that all of the metrics you choose are evaluated for all valid combinations of the datasets that you specify. Consider the following simple example::
 
 >>> import ocw.evaluation as eval
 >>> import ocw.data_source.local as local
@@ -121,22 +144,23 @@ We saw above that it is easy enough to run a metric over a few datasets manually
 >>> print new_eval.results
 >>> print new_eval.unary_results
 
-First we load all of our datasets and do any manipulations (which we leave out for brevity). Then we load the metrics that we want to run, namely Bias and TemporalStdDev. We then load our evaluation object.::
+First, we load the datasets to process and perform any necessary manipulations (which are omitted for brevity). Then, we load the metrics that we want to run (namely, ``Bias`` and ``TemporalStdDev``). We then load our evaluation object::
 
 >>> new_eval = eval.Evaluation(ref_dataset, target_datasets, metrics)
 
-Notice two things about this. First, we're splitting the datasets into a reference dataset (ref_dataset) and a list of target datasets (target_datasets). Second, one of the metrics that we loaded (:class:`metrics.TemporalStdDev`) is a unary metric. The reference/target dataset split is necessary to handling binary metrics. When an evaluation is run, all the binary metrics are run against every (reference, target) dataset pair. So the above evaluation could be replaced with the following calls. Of course this wouldn't handle the unary metric, but we'll get to that in a second.::
+Note that the evaluation takes a single **reference** dataset (``ref_dataset``) and a list of **target** datasets (``target_datasets``). This is necessary for the processing of any binary metrics. Every binary metric is run against every possible reference-target combination included in the evaluation.
 
->>> result1 = bias.run(ref_dataset, target1)
->>> result2 = bias.run(ref_dataset, target2)
+Note also that one of the metrics included in the evaluation (:class:`metrics.TemporalStdDev`) is a unary metric. Unary metrics are run against *every* dataset included in the evaluation (reference and target alike).
 
-Unary metrics are handled slightly differently but they're still simple. Each unary metric passed into the evaluation is run against *every* dataset in the evaluation. So we could replace the above evaluation with the following calls::
+Evaluation Results
+~~~~~~~~~~~~~~~~~~
 
->>> unary_result1 = tstd(ref_dataset)
->>> unary_result2 = tstd(target1)
->>> unary_result3 = tstd(target2)
+Evaluation objects store the results of metrics processing in two lists:
 
-The only other part that we need to explore to fully understand the :class:`evalution.Evaluation` class is how the results are stored internally from the run. The `results` list is a multidimensional array holding all the binary metric results and the `unary_results` is a list holding all the unary metric results. To more accurately replace the above evaluation with manual calls we would write the following::
+* The ``results`` list is a multidimensional array that holds the results of all binary metrics.
+* The ``unary_results`` list is a list that holds the results of all unary metrics.
+
+In the example above, one could theoretically replicate the resulting structure of these lists with the following code::
 
 >>> results = [
 >>>     # Results for target1
@@ -164,7 +188,7 @@ The only other part that we need to explore to fully understand the :class:`eval
 Plotting
 --------
 
-Plotting can be fairly complicated business. Luckily we have `pretty good documentation <https://cwiki.apache.org/confluence/display/CLIMATE/Guide+to+Plotting+API>`_ on the project wiki that can help you out. There are also fairly simple examples in the project's example folder with the remainder of the code such as the following::
+Plotting the results of an evaluation can be complicated. Luckily, we have `pretty good documentation <https://cwiki.apache.org/confluence/display/CLIMATE/Guide+to+Plotting+API>`_ on the project wiki to help you out. There are also fairly simple examples in the project's ``examples`` folder, such as the following::
 
 >>> # Let's grab the values returned for bias.run(ref_dataset, target1)
 >>> results = bias_evaluation.results[0][0]
@@ -176,4 +200,4 @@ Plotting can be fairly complicated business. Luckily we have `pretty good docume
 >>>  
 >>> plotter.draw_contour_map(results, lats, lons, fname)
 
-This would give you a contour map calls `My_Test_Plot` for the requested bias metric run.
+The above snippet plots a contour map called ``My_Test_Plot`` for the requested bias metric run.
