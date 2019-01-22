@@ -73,6 +73,7 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "wrf_bias_compared_to_knmi"
 
+# Retrieve the local model files into the OS-aware temp directory.
 tempdir = tempfile.gettempdir()
 FILE_1_PATH = path.join(tempdir, FILE_1)
 FILE_2_PATH = path.join(tempdir, FILE_2)
