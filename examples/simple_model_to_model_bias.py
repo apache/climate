@@ -55,6 +55,7 @@ import ocw.dataset_processor as dsp
 import ocw.evaluation as evaluation
 import ocw.metrics as metrics
 import ocw.plotter as plotter
+import tempfile
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -72,8 +73,9 @@ FILE_2 = "AFRICA_UC-WRF311_CTL_ERAINT_MM_50km-rg_1989-2008_tasmax.nc"
 # Filename for the output image/plot (without file extension)
 OUTPUT_PLOT = "wrf_bias_compared_to_knmi"
 
-FILE_1_PATH = path.join('/tmp', FILE_1)
-FILE_2_PATH = path.join('/tmp', FILE_2)
+tempdir = tempfile.gettempdir()
+FILE_1_PATH = path.join(tempdir, FILE_1)
+FILE_2_PATH = path.join(tempdir, FILE_2)
 
 if not path.exists(FILE_1_PATH):
     urlretrieve(FILE_LEADER + FILE_1, FILE_1_PATH)
