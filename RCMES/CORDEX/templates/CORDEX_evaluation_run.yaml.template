@@ -10,7 +10,7 @@ output_netcdf_filename: {{ basename }}.nc
 time:
     maximum_overlap_period: True
     temporal_resolution: monthly
-    adjust_model_years_for_climatology_calculation: True  
+    adjust_model_years_for_climatology_calculation: False 
 {% if season == "winter" %}
     month_start: 12
     month_end: 2

@@ -125,6 +125,9 @@ for i, dataset in enumerate(datasets):
 
 """ Step 2: Subset the data for temporal and spatial domain """
 # Create a Bounds object to use for subsetting
+if 'adjust_model_years_for_climatology_calculation' in time_info:
+    if time_info['adjust_model_years_for_climatology_calculation']:
+        datasets = utils.adjust_model_years_for_climatology_calculation(datasets) 
 if maximum_overlap_period:
     start_time, end_time = utils.get_temporal_overlap(datasets)
     print('Maximum overlap period')
