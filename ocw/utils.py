@@ -383,8 +383,6 @@ def get_temporal_overlap(dataset_array):
     ''' Find the maximum temporal overlap across the observation and model datasets
 
     :param dataset_array: an array of OCW datasets
-    :param idx: start and end indices to denote subset of months used.
-    :type idx: class:`tuple`
     '''
     start_times = []
     end_times = []
@@ -397,6 +395,19 @@ def get_temporal_overlap(dataset_array):
 
     return np.max(start_times), np.min(end_times)
 
+def adjust_model_years_for_climatology_calculation(dataset_array):
+    ''' Using the time length of the first element in the input dataset_array, 
+        adjust years in the rest ofi the dataset_array so that every dataset ends in the same year.
+    :param dataset_array: an array of OCW datasets
+    '''
+    slc = trim_dataset(dataset_array[0])
+    obs_times = dataset_array[0].times[slc]
+    for idata, dataset in enumerate(dataset_array[1:]):
+        year_diff = obs_times[-1].year - dataset.times[-1].year    
+        nt = dataset.times.size
+        for it in np.arange(nt):
+            dataset.times[it] = dataset.times[it].replace(year = dataset.times[it].year + year_diff)
+    return dataset_array                              
 
 def trim_dataset(dataset):
     ''' Trim datasets such that first and last year of data have all 12 months
