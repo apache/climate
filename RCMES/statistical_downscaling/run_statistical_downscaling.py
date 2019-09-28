@@ -91,7 +91,7 @@ if hasattr(ssl, '_create_unverified_context'):
 
 config_file = str(sys.argv[1])
 
-print 'Reading the configuration file ', config_file
+print('Reading the configuration file ', config_file)
 
 config = yaml.load(open(config_file))
 

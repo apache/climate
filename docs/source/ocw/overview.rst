@@ -68,7 +68,7 @@ In general, it's uncommon to run a metric outside of an evaluation, however you 
 >>> import ocw.metrics
 >>> # Load 2 datasets
 >>> bias = ocw.metrics.Bias()
->>> print bias.run(dataset1, dataset2)
+>>> print(bias.run(dataset1, dataset2))
 
 While this can be useful for one-off situations, it's far more likely that you'll need to run a number of metrics over a number of datasets. This is where running metrics within an evaluation comes in (covered in greater detail below).
 
@@ -141,8 +141,8 @@ When you have a large collection of datasets and a large collection of metrics t
 >>>
 >>> new_eval = eval.Evaluation(ref_dataset, target_datasets, metrics)
 >>> new_eval.run()
->>> print new_eval.results
->>> print new_eval.unary_results
+>>> print(new_eval.results)
+>>> print(new_eval.unary_results)
 
 First, we load the datasets to process and perform any necessary manipulations (which are omitted for brevity). Then, we load the metrics that we want to run (namely, ``Bias`` and ``TemporalStdDev``). We then load our evaluation object::
 

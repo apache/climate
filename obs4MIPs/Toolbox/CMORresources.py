@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from __future__ import print_function
+
 import netCDF4
 import re
 import pdb
@@ -34,7 +36,7 @@ class CMORTable:
         f=open( inpath + '/' + table, 'r')
 
         if( f == None ):
-            print "Table file %s does  not exist " % (inpath + "/" + table )
+            print("Table file {} does  not exist ".format(inpath + "/" + table))
 
         lines = f.readlines()
 

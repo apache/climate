@@ -19,6 +19,8 @@
 #
 #  Select the right handler depending on the file format
 
+from __future__ import print_function
+
 import os
 import pdb
 import sys
@@ -220,7 +222,7 @@ class HandlerNCAggregate(object):
         for file in self.flist:
             filename=file.strip()
             if( not os.path.exists(filename) ):
-                print "File %s does not exist in filelist" % filename
+                print("File {} does not exist in filelist".format(filename))
 
         # --------------------------------------------------------
         # Extract General information from first file in the list
@@ -252,7 +254,7 @@ class HandlerNCAggregate(object):
         # Concatenate following files
         # ---------------------------
         for filename in self.flist[ 1: ]:
-            print "reading %s" % filename.strip()
+            print("reading {}".format(filename.strip()))
             f = cdms2.open( filename.strip(), 'r' )
             data2 = f(self.vartoread)[:]
             data = numpy.concatenate((data,data2), axis=0)

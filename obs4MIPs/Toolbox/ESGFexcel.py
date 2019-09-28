@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from __future__ import print_function
 
 import pdb
 import xlrd
@@ -39,8 +40,8 @@ class ESGFexcel:
         if( os.path.isfile(self.xcl) ):
                 wb=xlrd.open_workbook(self.xcl)
         else:
-           print "****** Could not find "+self.xcl+" file ****"
-           print "****** Please check excel file name ****"
+           print("****** Could not find {} file ****".format(self.xcl))
+           print("****** Please check excel file name ****")
            raise NameError(self.xcl)
 
         sheet=wb.sheet_by_name('Resources')
@@ -55,7 +56,7 @@ class ESGFexcel:
                                  for i in  arange(sheet.nrows-1) + 1] ] )
         pdb.set_trace()
         self.ReadXCL()
-        print self.resources.keys()
+        print(self.resources.keys())
 
     def ReadXCL(self):
         '''
@@ -64,14 +65,14 @@ class ESGFexcel:
         try:
            import xlrd
         except:
-           print "****** Could not find xlrd Python Package ****"
-           print "****** Please install xlrd package to read excel files ****"
+           print("****** Could not find xlrd Python Package ****")
+           print("****** Please install xlrd package to read excel files ****")
 
         if( os.path.isfile(self.xcl) ):
                 wb=xlrd.open_workbook(self.xcl)
         else:
-           print "****** Could not find "+self.xcl+" file ****"
-           print "****** Please check excel file name ****"
+           print("****** Could not find {} file ****".format(self.xcl))
+           print("****** Please check excel file name ****")
            raise NameError(self.xcl)
 
         sheet=wb.sheet_by_name('Variables')
