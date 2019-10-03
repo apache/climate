@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from __future__ import print_function
 
 import pdb
 import shutil
@@ -83,14 +84,14 @@ class ESGFresources:
         try:
            import xlrd
         except:
-           print "****** Could not find xlrd Python Package ****"
-           print "****** Please install xlrd package to read excel files ****"
+           print("****** Could not find xlrd Python Package ****")
+           print("****** Please install xlrd package to read excel files ****")
 
         if( os.path.isfile(self.xcl) ):
 		wb=xlrd.open_workbook(self.xcl)
         else:
-           print "****** Could not find "+self.xcl+" file ****"
-           print "****** Please check excel file name ****"
+           print("****** Could not find {} file ****".format(self.xcl))
+           print("****** Please check excel file name ****")
            raise NameError(self.xcl)
 
         sheet=wb.sheet_by_name('Variables')
@@ -184,7 +185,7 @@ def movefiles(rc):
             if files.endswith(".nc"):
                 filetimestamp = files.split('_')[-1].strip(".nc")
                 file = os.path.join(r,files)
-                print file
+                print(file)
                 # -----------------
                 # Delete attributes
                 # ------------------
@@ -192,7 +193,7 @@ def movefiles(rc):
                 DelGlbAttributes=eval(rc['DelGlbAttributes'].\
                                       replace('\\','\''))
                 for attribute in DelGlbAttributes:
-                    print "Deleting attribute: %s" % attribute
+                    print("Deleting attribute: {}".format(attribute))
                     Attr.GlbDel(attribute)
                 # -----------------
                 # set attributes
@@ -200,7 +201,7 @@ def movefiles(rc):
                 SetGlbAttributes=eval(rc['SetGlbAttributes'].\
                                       replace('\\','\''))
                 for (attribute,Value) in SetGlbAttributes:
-                    print "Assigning attribute (%s,%s)" % (attribute,Value)
+                    print("Assigning attribute ({},{})".format(attribute, Value))
                     Attr.GlbSet(attribute,Value)
                 Attr.close()
 
@@ -221,8 +222,8 @@ def movefiles(rc):
                 # -----------
                 # Move files
                 # -----------
-                print file
-                print newfilename
+                print(file)
+                print(newfilename)
                 os.rename(file,newfilename)
 
                     

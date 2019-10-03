@@ -17,6 +17,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from __future__ import print_function
+
 import cdms2
 import cdtime
 import cmor
@@ -62,12 +64,12 @@ def process( rc ):
             except:
                 tmplFile = rc['file_template'].format(year)
             if( not os.path.isfile( tmplFile) ) :
-                print "**** Warning %s not found\n" % ( tmplFile )
+                print("**** Warning {} not found\n".format(tmplFile))
                 continue
             files= os.popen( "ls " + tmplFile).readlines()
 
         if( files == [] ):
-            print "No file found: Check your resource file"
+            print("No file found: Check your resource file")
             return -1
         # ------------------------------------------------
         # Get the right handler to manage this file format
@@ -137,13 +139,13 @@ def process( rc ):
                     variable=aVariable[j]
                     Handler.open(fnm, variable=variable)
                     rc['cvrt_original_var']   = aVariable[j]
-                    print "Working on variable %s " % variable
+                    print("Working on variable {} ".format(variable))
                 except:
                     if( aVariable[j] != 'equation' ) :
-                        print "Variable %s can't open" % variable
+                        print("Variable {} can't open".format(variable))
                         continue
                     else:
-                        print "Executing %s " % eval(rc['equation'])[j]
+                        print("Executing {} ".format(eval(rc['equation'])[j]))
                 
 #                pdb.set_trace()
                 rc['cvrt_original_units'] = eval(rc['original_units'])[j]
@@ -405,19 +407,19 @@ def usage(message):
     '''
     Describe program synopsis.
     '''
-    print
-    print "*************************"
-    print message
-    print "*************************"
-    print
-    print
-    print "obs4MIPS_process.py [-h] -r resource"
-    print "   resource:   File containing Global attributes"
-    print ""
-    print "obs4MIPS will convert an input data file into CMIP5 format using "
-    print "CMOR.  A directory path will be creating using CMOR by default or "
-    print "using a template provided in the resource file."
-    print
+    print()
+    print("*************************")
+    print(message)
+    print("*************************")
+    print()
+    print()
+    print("obs4MIPS_process.py [-h] -r resource")
+    print("   resource:   File containing Global attributes")
+    print("")
+    print("obs4MIPS will convert an input data file into CMIP5 format using ")
+    print("CMOR.  A directory path will be creating using CMOR by default or ")
+    print("using a template provided in the resource file.")
+    print()
    
 # ********************************************************************
 #
