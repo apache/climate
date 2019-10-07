@@ -507,7 +507,7 @@ def shapefile_boundary(boundary_type, region_names):
     regions = []
     shapefile_dir = os.sep.join([os.path.dirname(__file__), 'shape'])
     map_read.readshapefile(os.path.join(shapefile_dir, boundary_type),
-                           boundary_type, drawbounds=False)
+                           boundary_type, drawbounds=False, default_encoding='latin-1')
     # Note: The shapefile may contain countries or states with latin letters.
     # Hence, the output of readshapefile can be a mix of ascii and unicode
     # strings. Because python 2 and 3 treat them differently, we must
@@ -524,7 +524,7 @@ def shapefile_boundary(boundary_type, region_names):
         for region_name in region_names:
             region_name = _force_unicode(region_name)
             for iregion, region_info in enumerate(map_read.countries_info):
-                country = _force_unicode(region_info['COUNTRY'], 'latin-1')
+                country = _force_unicode(region_info['NAME_EN'], 'latin-1')
                 if (country.replace(" ", "").lower() ==
                     region_name.replace(" ", "").lower()):
                     regions.append(np.array(map_read.countries[iregion]))
