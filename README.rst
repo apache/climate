@@ -3,8 +3,6 @@ Apache Open Climate Workbench
 
 |BuildStatus|_
 |ImageLink|_
-|requires|_
-|landscape|_
 |pypi|_
 |pythonbadge|_
 |anacondainstaller|_
@@ -68,12 +66,6 @@ You will need to have installed the project dependencies first. Checkout the `Ge
 
 .. |BuildStatus| image:: https://api.travis-ci.org/apache/climate.svg?branch=master
 .. _BuildStatus:  https://travis-ci.org/apache/climate
-
-.. |requires| image:: https://requires.io/github/apache/climate/requirements.svg?branch=master
-.. _requires:  https://requires.io/github/apache/climate/requirements/?branch=master
-
-.. |landscape| image:: https://landscape.io/github/apache/climate/master/landscape.svg?style=flat-square
-.. _landscape: https://landscape.io/github/apache/climate/master
 
 .. |pypi| image:: https://img.shields.io/pypi/v/ocw.svg?maxAge=2592000?style=plastic
 .. _pypi:  https://pypi.python.org/pypi/ocw
